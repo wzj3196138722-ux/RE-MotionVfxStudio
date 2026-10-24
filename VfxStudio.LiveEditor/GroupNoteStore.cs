@@ -14,6 +14,7 @@ internal sealed class GroupNoteStore
     private readonly string path;
     private Dictionary<string, StoredNote> notes = new(StringComparer.Ordinal);
     internal string? Warning { get; private set; }
+    internal long Revision { get; private set; }
 
     internal sealed record Identity(int Index, string NativeName, uint NameHashUtf16, uint NameHashUtf8, int[] Members);
     private sealed record StoredNote(string Key, string ResourceKey, Identity Group, string Note, string UpdatedAtUtc);
@@ -93,6 +94,7 @@ internal sealed class GroupNoteStore
         // If either step fails the in-memory snapshot remains unchanged.
         Host.AtomicJson(path, file);
         notes = candidate;
+        Revision++;
     }
 
     internal static void ValidateNote(string note)

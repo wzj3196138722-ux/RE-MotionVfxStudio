@@ -19,8 +19,16 @@ foreach($file in Get-ChildItem -LiteralPath (Join-Path $project 'game-plugin') -
 foreach($name in @('file-dialog-tests.lua','file-dialog-explorer-tests.lua','d2d-workbench-tests.lua')){
     Run-Lua @((Join-Path $PSScriptRoot $name),$project,$output)
 }
+foreach($name in @('playemitter-ui-tests.lua','ui-performance-tests.lua','ai-transport-performance-tests.lua','capture-refresh-tests.lua')){
+    Run-Lua @((Join-Path $PSScriptRoot $name),$project)
+}
+& (Join-Path $PSScriptRoot 'Run-LiveUiTests.ps1') -LuaRunner $LuaRunner
+Push-Location (Join-Path $project 'game-plugin')
+try { Run-Lua @((Join-Path $project 'game-plugin/tests/action-capture-tests.lua'),(Join-Path $project 'game-plugin/MotionVfxLive/fx_action_capture.lua')) }
+finally { Pop-Location }
+Run-Lua @((Join-Path $PSScriptRoot 'action-bindings-tests.lua'),(Join-Path $project 'game-plugin/MotionVfxLive/fx_action_bindings.lua'))
 # Deliberately omit the optional local MDF-XL source argument. CI uses the
 # portable failure fixture and never needs or redistributes a third-party mod.
 Run-Lua @('-p',(Join-Path $project 'tools/MdfxlCompatibility/MDF-XL-frame-guard.lua'))
 Run-Lua @((Join-Path $PSScriptRoot 'mdfxl-compat-tests.lua'),$project)
-Write-Output 'Offline production Lua syntax, file browser, workbench and portable MDF-XL compatibility checks passed. No game or game assets were used.'
+Write-Output 'Offline Lua syntax, browser, workbench, nested Action, UI performance, reload, AI transport, capture, bindings and portable MDF-XL checks passed. No game or game assets were used.'

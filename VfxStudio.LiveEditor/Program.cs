@@ -29,10 +29,11 @@ namespace VfxStudio.LiveEditor
 
     internal static class Host
     {
-        public const string Version = "0.6.2";
+        public const string Version = "0.6.4";
         internal static readonly JsonSerializerOptions Json = new()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            MaxDepth = 128,
             WriteIndented = false,
             Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
@@ -44,7 +45,8 @@ namespace VfxStudio.LiveEditor
             if (auditIndex >= 0 && auditIndex + 1 < args.Length)
             { actionAudit = args[auditIndex + 1]; args = args.Where((_, i) => i != auditIndex && i != auditIndex + 1).ToArray(); }
             bool precacheTest = args.Contains("--precache-self-test");
-            args = args.Where(a => a != "--precache-self-test").ToArray();
+            bool embeddedTest = args.Contains("--embedded-action-self-test");
+            args = args.Where(a => a != "--precache-self-test" && a != "--embedded-action-self-test").ToArray();
             Options options;
             try { options = Options.Parse(args); }
             catch (Exception ex) { Console.Error.WriteLine(ex.Message); return 2; }
@@ -56,6 +58,7 @@ namespace VfxStudio.LiveEditor
                 Console.SetError(TextWriter.Synchronized(Log("backend.stderr.log")));
             }
             if (precacheTest) return PrecacheTests.RunCommand(options);
+            if (embeddedTest) return EmbeddedActionTests.RunCommand(options);
             if (actionAudit != null) return ActionSlotAudit.Run(options, actionAudit);
             if (options.SelfTest) return SelfTests.Run(options);
             Directory.CreateDirectory(options.Mailbox);

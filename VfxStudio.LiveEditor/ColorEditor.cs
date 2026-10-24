@@ -22,8 +22,11 @@ internal static class ColorEditor
     private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
 
     public static IReadOnlyList<ColorGroupInfo> Inspect(object root, EfxVersion version)
+        => Inspect(root, ContentInspector.Describe(root, version));
+
+    internal static IReadOnlyList<ColorGroupInfo> Inspect(object root, IReadOnlyList<EditableField> describedFields)
     {
-        var fields = ContentInspector.Describe(root, version).ToDictionary(field => field.Description.Path, StringComparer.Ordinal);
+        var fields = describedFields.ToDictionary(field => field.Description.Path, StringComparer.Ordinal);
         var colors = new List<ColorGroupInfo>();
         foreach (var field in fields.Values)
         {

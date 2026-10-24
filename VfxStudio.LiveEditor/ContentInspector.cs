@@ -13,6 +13,7 @@ namespace VfxStudio.LiveEditor;
 internal sealed record FieldDescription(string Path, string Label, string Type, string Value, bool Editable, string? Reason = null, string[]? Choices = null, string? OwnerType = null);
 internal sealed record EditableField(FieldDescription Description, Type ValueType, Action<object?>? Set);
 internal sealed record EditableCurve(string Path, EfxClipData Data);
+internal sealed record InspectionContent(IReadOnlyList<EditableField> Fields, IReadOnlyList<EditableCurve> Curves);
 
 /// <summary>
 /// Enumerates the actual field-backed EFX model, including inherited content, manually written
@@ -27,6 +28,14 @@ internal static class ContentInspector
     private static readonly HashSet<string> CacheNames = ["ParsedClip", "ParsedExpressions", "expressionTree", "parsedClips", "efxFile", "parentFile", "FileHandler", "Strings", "BitNames", "BitNameDict"];
 
     public static IReadOnlyList<EditableField> Describe(object root, EfxVersion version) => Describe(root, version, null);
+
+    // The read-only UI needs fields and curves from the same model state. One walk
+    // preserves the existing limits and serialization conditions for both views.
+    public static InspectionContent Analyze(object root, EfxVersion version)
+    {
+        var curves = new List<EditableCurve>();
+        return new(Describe(root, version, curves), curves);
+    }
 
     public static IReadOnlyList<EditableCurve> Curves(object root, EfxVersion version)
     {
@@ -148,6 +157,8 @@ internal static class ContentInspector
                 if (field.Name == "Version" || (owner == typeof(EFXAttribute) && field.Name is "type" or "UniqueID") ||
                     (instance is EFXEntryBase && field.Name is "index" or "nameHash")) reason = "Structural identity or derived metadata.";
                 if (instance is EfxHeader && field.Name != "dimensionType") reason = "File identity or derived structure count; managed by the serializer.";
+                if (instance is ReeLib.Efx.Structs.Basic.EFXAttributePlayEmitter && field.Name == "efxrSize")
+                    reason = "Embedded EFX byte length; recalculated from its serialized content.";
                 if (field.GetCustomAttributes().Any(a => a is RszArraySizeFieldAttribute or RszStringLengthFieldAttribute or RszByteSizeFieldAttribute))
                     reason = "Derived length/count; the serializer calculates it from content.";
                 if (field.GetCustomAttributes().Any(a => a is RszStringHashAttribute or RszStringUTF8HashAttribute))

@@ -1,6 +1,6 @@
 -- File transport only. The injected host runs every operation through the
 -- editor on its existing REFramework frame thread; this module has no SDK API.
-local M = { version = "1.0.0", protocol = 1 }
+local M = { version = "1.0.1", protocol = 1 }
 local request_path, response_path = "MotionVfxLive/ai-request.json", "MotionVfxLive/ai-response.json"
 local journal_path = "MotionVfxLive/ai-journal.json"
 local function valid_id(id) return type(id) == "string" and #id > 0 and #id <= 128 and id:match("^[%w_%-]+$") ~= nil end
@@ -47,6 +47,20 @@ local function clone(value, seen, depth)
 end
 function M.new(host)
     local self = { ready = true, active = nil, cache = {}, cache_order = {}, entries = {}, by_id = {}, last_read = nil }
+    local last_transport_read
+    local function transport_due()
+        -- Only disk polling is throttled. An active operation's waiter and its
+        -- completion/timeout processing still run on every game frame.
+        if type(host.clock) ~= "function" then return true end
+        local ok, now = pcall(host.clock)
+        if not ok or type(now) ~= "number" or now ~= now or now == math.huge or now == -math.huge then
+            last_transport_read = nil
+            return true
+        end
+        if last_transport_read and now >= last_transport_read and now - last_transport_read < 0.1 then return false end
+        last_transport_read = now
+        return true
+    end
     local function write(path, value)
         local ok, result = pcall(host.write, path, value)
         return ok and result ~= false
@@ -148,6 +162,7 @@ function M.new(host)
             self.active.timeout_reported = true
             emit(failure(self.active.id, "operation_uncertain", "Operation is still pending and was not repeated. Use the in-game editor to inspect or restore; the AI channel remains busy until it settles.", true))
         end
+        if not transport_due() then return end
         local ok, request = pcall(host.read, request_path)
         if not ok or type(request) ~= "table" or not valid_id(request.id) then return end
         local encoded, value = pcall(fingerprint, request)

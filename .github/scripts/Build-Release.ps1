@@ -34,6 +34,8 @@ if ($report.gameTouched -ne $false -or $report.registryTouched -ne $false) { thr
 $release = Get-Content -LiteralPath (Join-Path $output "MotionVfxLive-$Version-win-x64/release.json") -Raw | ConvertFrom-Json
 if ($release.runtime -ne 'self-contained .NET 10.0.8 win-x64' -or $release.version -ne $Version) { throw 'Unexpected payload runtime or version.' }
 $payload = Join-Path $output "MotionVfxLive-$Version-win-x64"
+& (Join-Path $payload 'mcp/VfxStudio.Mcp.exe') --self-test
+if ($LASTEXITCODE -ne 0) { throw 'The packaged MCP failed its isolated protocol/mailbox tests.' }
 $payloadManifest = Get-Content -LiteralPath (Join-Path $payload 'SHA256.json') -Raw | ConvertFrom-Json
 if ($release.mdfxlCompatibilityVersion -ne '1.0.0') { throw 'Expected integrated MDF-XL compatibility component 1.0.0.' }
 foreach ($relative in @(
@@ -64,7 +66,9 @@ $provenance = [ordered]@{
     version = $Version; sourceCommit = $env:GITHUB_SHA; repository = $env:GITHUB_REPOSITORY
     workflowRun = "https://github.com/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
     sdk = $sdk; runtime = $release.runtime; builtAtUtc = [DateTimeOffset]::UtcNow.ToString('o')
-    installerChecks = $report.count; offlineLuaSuites = @('file-dialog', 'file-dialog-explorer', 'd2d-workbench', 'mdfxl-compat-portable'); fixtureTests = $false; legacySixVersionMatrix = $false
+    installerChecks = $report.count
+    offlineLuaSuites = @('file-dialog', 'file-dialog-explorer', 'd2d-workbench', 'playemitter-ui', 'ui-performance', 'ai-transport-performance', 'capture-refresh', 'live-ui-and-reload', 'action-capture', 'action-bindings', 'mdfxl-compat-portable')
+    mcpProtocolAndMailboxChecks = $true; fixtureTests = $false; legacySixVersionMatrix = $false
     mdfxlCompatibilityVersion = $release.mdfxlCompatibilityVersion
     note = 'Fresh source build. Its hashes differ from the prior local binary. No game-content fixtures or live-game tests were run in CI.'
     assets = $assets

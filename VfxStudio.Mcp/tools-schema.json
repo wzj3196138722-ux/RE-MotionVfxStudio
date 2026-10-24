@@ -1,0 +1,646 @@
+{
+  "tools": [
+    {
+      "name": "motionvfx_status",
+      "description": "Read editor, document, resource-application and scene-time state. Start here. A successful apply request does not prove the next character action has created the new effect version.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "MotionVfx status",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "motionvfx_list_effects",
+      "description": "List resources captured from actual character actions, using their full logical paths and ownership evidence. Do not substitute similarly named local files.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "MotionVfx list_effects",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "motionvfx_list_actions",
+      "description": "List observed character/weapon animation segments, including clips with no captured effects. Identifies weapon, bank, layer, MotionID and animation frames; these are not verified localized gameplay move names. Pass actionId to inspect effect events and trigger IDs. direct_motion_request is causal evidence; contemporaneous_only is temporal context and must never be treated as proof that this motion caused an effect. History is bounded and scene-specific.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "actionId": {
+            "type": "string",
+            "description": "Optional exact action id returned by this tool. Omit to list recorded and current animations.",
+            "maxLength": 128
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "MotionVfx list_actions",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "motionvfx_open_effect",
+      "description": "Open a currently confirmed captured resource by its complete game logical path. Unsaved document changes or UI drafts block opening. This reads the enabled game files/PAKs, not native memory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Full captured logical EFX path, for example Art/VFX/EffectEditor/Weapon/it02/11_it02_000.efx.",
+            "maxLength": 4096
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "MotionVfx open_effect",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "motionvfx_inspect",
+      "description": "Inspect a document, effect block, attribute or group. Returns field paths, color groups and curves; use the exact returned paths for edits.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "entry",
+                  "action",
+                  "document",
+                  "group"
+                ]
+              },
+              "index": {
+                "type": "integer",
+                "description": "Zero-based index returned by the editor.",
+                "minimum": 0
+              },
+              "attributeIndex": {
+                "type": "integer",
+                "description": "Optional zero-based attribute index; omit to inspect the owning block.",
+                "minimum": 0
+              },
+              "embeddedPath": {
+                "type": "array",
+                "minItems": 0,
+                "maxItems": 16,
+                "description": "Optional ordered PlayEmitter owners from the document root to the nested EFX. Copy the exact target returned by the editor; do not infer indices from names or native IDs.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "entry",
+                        "action"
+                      ]
+                    },
+                    "index": {
+                      "type": "integer",
+                      "description": "Zero-based owner index.",
+                      "minimum": 0
+                    },
+                    "attributeIndex": {
+                      "type": "integer",
+                      "description": "Zero-based PlayEmitter attribute index.",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "index",
+                    "attributeIndex"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "kind",
+              "index"
+            ],
+            "additionalProperties": false
+          },
+          "expectedRevision": {
+            "type": "integer",
+            "description": "Current document revision from status/inspect. Stale revisions are rejected; re-read before editing.",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "target",
+          "expectedRevision"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "MotionVfx inspect",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "motionvfx_set_field",
+      "description": "Change one inspected editable scalar field. The backend validates serialization and supports Undo. Existing UI drafts block AI mutation.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "entry",
+                  "action",
+                  "document",
+                  "group"
+                ]
+              },
+              "index": {
+                "type": "integer",
+                "description": "Zero-based index returned by the editor.",
+                "minimum": 0
+              },
+              "attributeIndex": {
+                "type": "integer",
+                "description": "Optional zero-based attribute index; omit to inspect the owning block.",
+                "minimum": 0
+              },
+              "embeddedPath": {
+                "type": "array",
+                "minItems": 0,
+                "maxItems": 16,
+                "description": "Optional ordered PlayEmitter owners from the document root to the nested EFX. Copy the exact target returned by the editor; do not infer indices from names or native IDs.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "entry",
+                        "action"
+                      ]
+                    },
+                    "index": {
+                      "type": "integer",
+                      "description": "Zero-based owner index.",
+                      "minimum": 0
+                    },
+                    "attributeIndex": {
+                      "type": "integer",
+                      "description": "Zero-based PlayEmitter attribute index.",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "index",
+                    "attributeIndex"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "kind",
+              "index"
+            ],
+            "additionalProperties": false
+          },
+          "path": {
+            "type": "string",
+            "description": "Exact inspected field path.",
+            "maxLength": 4096
+          },
+          "value": {
+            "type": "string",
+            "description": "New value in the field's textual representation; at most 32768 UTF-8 bytes.",
+            "maxLength": 32768
+          },
+          "expectedRevision": {
+            "type": "integer",
+            "description": "Current document revision from status/inspect. Stale revisions are rejected; re-read before editing.",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "target",
+          "path",
+          "value",
+          "expectedRevision"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "MotionVfx set_field",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "motionvfx_set_color",
+      "description": "Atomically change an explicit rgba8 color group. Values are raw R,G,B,A integers 0..255, not normalized floats. Independent HDR intensity remains untouched; one Undo restores all four channels.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "entry",
+                  "action",
+                  "document",
+                  "group"
+                ]
+              },
+              "index": {
+                "type": "integer",
+                "description": "Zero-based index returned by the editor.",
+                "minimum": 0
+              },
+              "attributeIndex": {
+                "type": "integer",
+                "description": "Optional zero-based attribute index; omit to inspect the owning block.",
+                "minimum": 0
+              },
+              "embeddedPath": {
+                "type": "array",
+                "minItems": 0,
+                "maxItems": 16,
+                "description": "Optional ordered PlayEmitter owners from the document root to the nested EFX. Copy the exact target returned by the editor; do not infer indices from names or native IDs.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "entry",
+                        "action"
+                      ]
+                    },
+                    "index": {
+                      "type": "integer",
+                      "description": "Zero-based owner index.",
+                      "minimum": 0
+                    },
+                    "attributeIndex": {
+                      "type": "integer",
+                      "description": "Zero-based PlayEmitter attribute index.",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "index",
+                    "attributeIndex"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "kind",
+              "index"
+            ],
+            "additionalProperties": false
+          },
+          "path": {
+            "type": "string",
+            "description": "Exact colorGroups path.",
+            "maxLength": 4096
+          },
+          "values": {
+            "type": "array",
+            "minItems": 4,
+            "maxItems": 4,
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255
+            }
+          },
+          "expectedRevision": {
+            "type": "integer",
+            "description": "Current document revision from status/inspect. Stale revisions are rejected; re-read before editing.",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "target",
+          "path",
+          "values",
+          "expectedRevision"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "MotionVfx set_color",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "motionvfx_set_group_note",
+      "description": "设置分组的中文备注，只写独立 JSON。不会修改 EFX 原生组名、名称哈希、成员、文档修订、dirty 或撤销/重做记录。同一备注可用于不同组，空字符串清除；恢复旧备注请再次设置旧值，不要 Undo。",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "description": "Zero-based effect group index.",
+            "minimum": 0
+          },
+          "note": {
+            "type": "string",
+            "description": "Editor-only single-line Unicode note, at most 4096 UTF-8 bytes. Empty string clears; spaces are preserved.",
+            "maxLength": 4096
+          },
+          "expectedRevision": {
+            "type": "integer",
+            "description": "Current document revision from status/inspect. Stale revisions are rejected; re-read before editing.",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "index",
+          "note",
+          "expectedRevision"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "MotionVfx set_group_note",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "motionvfx_rename_group",
+      "description": "兼容旧客户端的备注接口；name 参数现在仅是中文备注。与 set_group_note 完全相同，不会改写 EFX 原生组名或哈希，也不进入 Undo。新客户端请用 set_group_note；空字符串清除，可与其他组使用相同备注。",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "description": "Zero-based effect group index.",
+            "minimum": 0
+          },
+          "name": {
+            "type": "string",
+            "description": "Editor-only single-line Unicode note (legacy parameter name), at most 4096 UTF-8 bytes. Never a native EFX group rename.",
+            "maxLength": 4096
+          },
+          "expectedRevision": {
+            "type": "integer",
+            "description": "Current document revision from status/inspect. Stale revisions are rejected; re-read before editing.",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "index",
+          "name",
+          "expectedRevision"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "MotionVfx rename_group",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "motionvfx_undo",
+      "description": "Undo one EFX document transaction. A grouped RGBA change counts as one transaction. Separate group notes are unaffected; restore notes using set_group_note with their prior value.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "expectedRevision": {
+            "type": "integer",
+            "description": "Current document revision from status/inspect. Stale revisions are rejected; re-read before editing.",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "expectedRevision"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "MotionVfx undo",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "motionvfx_redo",
+      "description": "Redo one document transaction.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "expectedRevision": {
+            "type": "integer",
+            "description": "Current document revision from status/inspect. Stale revisions are rejected; re-read before editing.",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "expectedRevision"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "MotionVfx redo",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "motionvfx_save_copy",
+      "description": "Save the current edited document as a separate file through the editor. Omit path for the editor's managed output folder. This does not overwrite game PAKs or prove visual changes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Optional output file path accepted by the editor.",
+            "maxLength": 4096
+          },
+          "expectedRevision": {
+            "type": "integer",
+            "description": "Current document revision from status/inspect. Stale revisions are rejected; re-read before editing.",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "expectedRevision"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "MotionVfx save_copy",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "motionvfx_apply",
+      "description": "Apply the current document to the captured character resource. Success means the replacement request completed/was accepted; ask the user to perform the relevant action, then check status for actual new-version creation. Never claim visual confirmation without observation.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "expectedRevision": {
+            "type": "integer",
+            "description": "Current document revision from status/inspect. Stale revisions are rejected; re-read before editing.",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "expectedRevision"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "MotionVfx apply",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "motionvfx_restore",
+      "description": "Stop recording/preview and restore resource changes plus scene-time ownership through the editor. Check the resulting restoration status before restarting scripts or changing scenes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "MotionVfx restore",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "motionvfx_scene_time",
+      "description": "Slow down, pause or resume the current scene through the editor's existing controls. Use restore to release time ownership afterwards.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "operation": {
+            "type": "string",
+            "enum": [
+              "speed",
+              "pause",
+              "resume"
+            ]
+          },
+          "speed": {
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 10,
+            "description": "Required for speed, from 0.01 to 10; for example 0.1 or 1."
+          }
+        },
+        "required": [
+          "operation"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "MotionVfx scene_time",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "motionvfx_capture_start",
+      "description": "Begin recording effects triggered by actual character actions. Ask the user to perform the intended action, then call capture_stop and list_effects.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "MotionVfx capture_start",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "motionvfx_capture_stop",
+      "description": "Finish recording the current character-action capture.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "MotionVfx capture_stop",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    }
+  ]
+}

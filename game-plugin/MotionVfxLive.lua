@@ -4,7 +4,7 @@
 -- unique game resource paths; this script never overwrites an original EFX.
 if _G.MotionVfxLive then return _G.MotionVfxLive end
 
-local M = { version = "0.8.6", active = false }
+local M = { version = "0.8.7", active = false }
 local imgui = imgui -- Renderer substitution is local to this editor only.
 local workbench, precache_runtime, action_preview, pfb_preview
 local pfb_preview_generation=0
@@ -116,15 +116,29 @@ local function available_width()
     local cursor = imgui.get_cursor_pos and imgui.get_cursor_pos()
     return math.max(120, dimension(size, "x", 820) - dimension(cursor, "x", 12) - 28)
 end
-local wrap_cache, wrap_count = {}, 0
+local wrap_cache, wrap_order, wrap_next = {}, {}, 1
 local function wrapped(value, limit)
     local width = math.floor(limit or available_width())
     if not imgui.calc_text_size or not utf8 then return value end
-    local key = width .. ":" .. state.font_scale .. ":" .. value
-    if wrap_cache[key] then return wrap_cache[key] end
+    local font_size = imgui.get_default_font_size and imgui.get_default_font_size() or state.font_scale
+    local font_identity=imgui._mvl_wrapped_text==true and imgui.get_text_metrics_identity() or font_size
+    local key = state.font_scale .. ":" .. tostring(imgui) .. ":" .. tostring(font_size) .. ":" .. tostring(font_identity) .. ":" .. value
+    local variants=wrap_cache[key]
+    if variants then for _,variant in ipairs(variants) do
+        if width>=variant.minimum and width<variant.maximum then return variant.text end
+    end end
+    local reliable=true
+    local minimum,maximum=0,math.huge
+    local function measure(line)
+        local result=imgui.calc_text_size(line)
+        if type(result)=="table" and result.reliable==false then reliable=false end
+        return dimension(result,"x",0)
+    end
     local output = {}
     for line in (value .. "\n"):gmatch("(.-)\n") do
-        while line ~= "" and dimension(imgui.calc_text_size(line), "x", 0) > width do
+        local line_width=measure(line)
+        while line ~= "" and line_width > width do
+            maximum=math.min(maximum,line_width)
             local offsets = {}
             local valid = pcall(function() for pos in utf8.codes(line) do offsets[#offsets + 1] = pos end end)
             if not valid then break end
@@ -132,20 +146,38 @@ local function wrapped(value, limit)
             local low, high, fit = 1, #offsets - 1, 1
             while low <= high do
                 local mid = math.floor((low + high) / 2)
-                if dimension(imgui.calc_text_size(line:sub(1, offsets[mid + 1] - 1)), "x", 0) <= width then
+                if measure(line:sub(1, offsets[mid + 1] - 1)) <= width then
                     fit, low = mid, mid + 1
                 else high = mid - 1 end
             end
+            -- This wrap is valid until a further glyph fits. Reuse that exact
+            -- interval during one-pixel resize drags instead of rebuilding all
+            -- long, off-screen parameter labels for every width.
+            if fit>1 then minimum=math.max(minimum,measure(line:sub(1,offsets[fit+1]-1))) end
+            if fit<#offsets-1 then maximum=math.min(maximum,measure(line:sub(1,offsets[fit+2]-1))) end
             output[#output + 1] = line:sub(1, offsets[fit + 1] - 1)
             line = line:sub(offsets[fit + 1])
+            line_width=measure(line)
         end
+        minimum=math.max(minimum,line_width)
         output[#output + 1] = line
     end
-    if wrap_count > 256 then wrap_cache, wrap_count = {}, 0 end
-    wrap_cache[key], wrap_count = table.concat(output, "\n"), wrap_count + 1
-    return wrap_cache[key]
+    local result = table.concat(output, "\n")
+    if reliable and #key <= 8192 then
+        if not variants and #wrap_order < 4096 then wrap_order[#wrap_order + 1] = key
+        elseif not variants then
+            wrap_cache[wrap_order[wrap_next]] = nil
+            wrap_order[wrap_next] = key; wrap_next = wrap_next % 4096 + 1
+        end
+        variants=variants or {}
+        if #variants>=8 then table.remove(variants,1) end
+        variants[#variants+1]={minimum=minimum,maximum=maximum,text=result}
+        wrap_cache[key] = variants
+    end
+    return result
 end
 local function text(v, color)
+    if imgui._mvl_wrapped_text==true then return imgui.draw_wrapped_text(tostring(v or ""),color,wrapped) end
     if color and imgui.push_style_color then imgui.push_style_color(colors.text, color) end
     local ok, err = pcall(function() imgui.text(wrapped(tostring(v or ""))) end)
     if color and imgui.push_style_color then imgui.pop_style_color(1) end
@@ -200,7 +232,25 @@ local function finite(value, label, minimum)
 end
 local function copy_target(target)
     if not target then return nil end
-    return { kind = target.kind, index = target.index, attributeIndex = target.attributeIndex }
+    local copied = { kind = target.kind, index = target.index, attributeIndex = target.attributeIndex }
+    if target.embeddedPath and #target.embeddedPath > 0 then
+        copied.embeddedPath = {}
+        for i, hop in ipairs(target.embeddedPath) do
+            copied.embeddedPath[i] = { kind = hop.kind, index = hop.index, attributeIndex = hop.attributeIndex }
+        end
+    end
+    return copied
+end
+local function embedded_key(target)
+    local parts = {}
+    for _, hop in ipairs(target and target.embeddedPath or {}) do
+        parts[#parts + 1] = tostring(hop.kind) .. "_" .. tostring(hop.index) .. "_" .. tostring(hop.attributeIndex)
+    end
+    return #parts > 0 and ("_in_" .. table.concat(parts, "__")) or ""
+end
+local function same_target(a, b)
+    return a ~= nil and b ~= nil and a.kind == b.kind and a.index == b.index and
+        a.attributeIndex == b.attributeIndex and embedded_key(a) == embedded_key(b)
 end
 local function target_key(target)
     target = target or {}
@@ -208,8 +258,9 @@ local function target_key(target)
     -- Keep ImGui's hidden IDs distinct across files and attributes. Escape the
     -- path so a filename containing ## cannot alter the label/ID separator.
     source = source:gsub("[^%w_%-]", function(c) return string.format("%%%02X", string.byte(c)) end)
-    return source .. "_" .. tostring(target.kind) .. "_" .. tostring(target.index) .. "_" .. tostring(target.attributeIndex)
+    return source .. "_" .. tostring(target.kind) .. "_" .. tostring(target.index) .. "_" .. tostring(target.attributeIndex) .. embedded_key(target)
 end
+M.target_key = target_key
 local function log_warning(message)
     if log and log.warn then log.warn("[MotionVfxLive] " .. tostring(message)) end
 end
@@ -248,6 +299,7 @@ local function update_verification()
             "角色已请求新版本，尚未确认实例创建；请继续观察或重做原动作。"
     end)
 end
+local action_refresh = { frame = 0, full_frame = -1, history_visible = false, in_frame = false }
 local function refresh_action_state()
     for _, item in ipairs({ { capture, "capture_snapshot", "capture_error" }, { bindings, "bindings_snapshot", "bindings_error" } }) do
         if item[1] and type(item[1].snapshot) == "function" then
@@ -256,9 +308,61 @@ local function refresh_action_state()
             else state[item[3]] = tostring(result) end
         end
     end
+    action_refresh.full_frame = action_refresh.frame
     update_verification()
 end
 M.refresh_action_state = refresh_action_state
+local function action_history_visible()
+    if not state.window_open or state.window_hidden then return false end
+    if reframework and type(reframework.is_drawing_ui) == "function" then
+        local ok, visible = pcall(reframework.is_drawing_ui, reframework)
+        if not ok or not visible then return false end
+    end
+    if workbench then
+        return workbench.active and not workbench.top and
+            (workbench.page == "actions" or workbench.page == "effects") or false
+    end
+    return state.active_tab == "actions"
+end
+local function refresh_regular_action_state(due)
+    local visible = action_history_visible()
+    local entered = visible and not action_refresh.history_visible
+    action_refresh.history_visible = visible
+    local current, scene_changed
+    if capture and type(capture.current_snapshot) == "function" then
+        local ok, result = pcall(capture.current_snapshot)
+        if ok and type(result) == "table" then
+            current = result
+            local previous = state.capture_snapshot or {}
+            scene_changed = previous.sceneEpoch ~= nil and current.sceneEpoch ~= nil and previous.sceneEpoch ~= current.sceneEpoch
+            if scene_changed then
+                -- Do not retain old ownership if the subsequent full read fails.
+                previous = {resources = {}, events = {}, actions = {},
+                    actor = {available = false, sceneEpoch = current.sceneEpoch}}
+                state.capture_snapshot = previous
+            end
+            previous.currentActions, previous.actionStatus = current.currentActions or {}, current.actionStatus
+            previous.recording, previous.sceneEpoch = current.recording, current.sceneEpoch
+        else
+            state.capture_error = "当前动作读取失败：" .. tostring(result)
+            state.capture_snapshot.currentActions = {}
+            state.capture_snapshot.actionStatus = state.capture_error
+        end
+    end
+    local waiting = state.verification and state.verification.phase ~= "created"
+    -- Capture hooks collect independently of these UI copies. Only visible
+    -- history and apply verification need frequent full snapshots; hidden/edit
+    -- pages, even while recording, use the two-second diagnostics refresh.
+    -- Explicit operations continue to call refresh_action_state themselves.
+    if entered or scene_changed or (due and (not current or visible or waiting)) then
+        refresh_action_state()
+    elseif due and bindings and type(bindings.snapshot) == "function" then
+        -- Preserve transaction messages/progress on the original refresh cadence.
+        local ok, result = pcall(bindings.snapshot)
+        if ok and type(result) == "table" then state.bindings_snapshot, state.bindings_error = result, nil
+        else state.bindings_error = tostring(result) end
+    end
+end
 local function current_resource_is_local(path)
     -- A selected document records historical identity, not ongoing ownership.
     -- Never authorize from a retained snapshot after a snapshot read failure.
@@ -495,7 +599,7 @@ local function inspect(target, drafts)
     return send("inspect", { target = selected }, function(response)
         if response.ok then
             local previous = state.selected
-            if not previous or previous.kind ~= selected.kind or previous.index ~= selected.index or previous.attributeIndex ~= selected.attributeIndex then
+            if not same_target(previous, selected) then
                 state.field_page = 1
                 state.confirm_delete=false
             end
@@ -1366,6 +1470,7 @@ local function draw_actions()
         for i = math.max(1, #events - 79), #events do text(describe(events[i])) end
     end)
 end
+local tree_match_cache = {}
 local function draw_tree()
     local document = state.document
     if not document then text("先打开一个 EFX 文件。") return end
@@ -1378,12 +1483,29 @@ local function draw_tree()
     end)
     imgui.separator()
     local filter, matched = state.structure_filter:lower(), 0
-    local function matches(node, inherited)
-        local whole = inherited or filter == "" or (tostring(node.index) .. " " .. tostring(node.name or "")):lower():find(filter, 1, true)
-        if whole then return true, true end
-        for _, attribute in ipairs(node.attributes or {}) do
-            if parameter_matches(attribute.type,filter) then return true, false end
+    if tree_match_cache.document ~= document or tree_match_cache.revision ~= document.revision or tree_match_cache.filter ~= filter then
+        tree_match_cache = { document = document, revision = document.revision, filter = filter, nodes = {} }
+    end
+    local matches
+    local function embedded_matches(embedded)
+        if not embedded then return false end
+        for _, kind in ipairs({ "entries", "actions" }) do
+            for _, node in ipairs(embedded[kind] or {}) do if matches(node) then return true end end
         end
+        return false
+    end
+    matches = function(node, inherited)
+        if inherited or filter == "" then return true, true end
+        local cached = tree_match_cache.nodes[node]
+        if cached then return cached[1], cached[2] end
+        local whole = (tostring(node.index) .. " " .. tostring(node.name or "")):lower():find(filter, 1, true)
+        if whole then tree_match_cache.nodes[node] = { true, true }; return true, true end
+        for _, attribute in ipairs(node.attributes or {}) do
+            if parameter_matches(attribute.type,filter) or embedded_matches(attribute.embedded) then
+                tree_match_cache.nodes[node] = { true, false }; return true, false
+            end
+        end
+        tree_match_cache.nodes[node] = { false, false }
         return false, false
     end
     local function reveal_search()
@@ -1395,16 +1517,34 @@ local function draw_tree()
         matched = matched + 1
         reveal_search()
         local suffix = occurrence and ("_member" .. occurrence) or ""
-        section("[" .. tostring(node.index) .. "] " .. tostring(node.name or kind) .. "##mvl_" .. kind .. node.index .. suffix, function()
+        local owner = node.target or { kind = kind, index = node.index }
+        local scope = kind .. node.index .. embedded_key(owner)
+        section("[" .. tostring(node.index) .. "] " .. tostring(node.name or kind) .. "##mvl_" .. scope .. suffix, function()
             local selected=state.selected
-            button("选择并编辑字段##mvl_select_" .. kind .. node.index, function() inspect({ kind = kind, index = node.index }) end,
-                selected and selected.kind==kind and selected.index==node.index and selected.attributeIndex==nil and "selected" or nil)
+            button("选择并编辑字段##mvl_select_" .. scope, function() inspect(owner) end,
+                same_target(selected, owner) and "selected" or nil)
             for _, attribute in ipairs(node.attributes or {}) do
-                if whole or parameter_matches(attribute.type,filter) then
+                local attribute_match = whole or parameter_matches(attribute.type,filter)
+                if attribute_match or embedded_matches(attribute.embedded) then
                     local selected = state.selected
-                    local active = selected and selected.kind == kind and selected.index == node.index and selected.attributeIndex == attribute.index
-                    button("属性 " .. attribute.index .. ": " .. parameter_label(attribute.type) .. "##mvl_attr_" .. kind .. node.index .. "_" .. attribute.index,
-                        function() inspect({ kind = kind, index = node.index, attributeIndex = attribute.index }) end, active and "selected" or nil)
+                    local target = attribute.target or copy_target(owner)
+                    if not attribute.target then target.attributeIndex = attribute.index end
+                    local active = same_target(selected, target)
+                    local attribute_scope = kind .. node.index .. "_" .. attribute.index .. embedded_key(target)
+                    button("属性 " .. attribute.index .. ": " .. parameter_label(attribute.type) .. "##mvl_attr_" .. attribute_scope,
+                        function() inspect(target) end, active and "selected" or nil)
+                    if attribute.embedded then
+                        reveal_search()
+                        section("内嵌特效 · " .. parameter_label(attribute.type) .. "##mvl_embedded_" .. attribute_scope, function()
+                            for _, nested in ipairs(attribute.embedded.entries or {}) do draw_node("entry", nested, attribute_match) end
+                            if #(attribute.embedded.actions or {}) > 0 then
+                                reveal_search()
+                                section("内嵌动作 Actions##mvl_embedded_actions_" .. attribute_scope, function()
+                                    for _, nested in ipairs(attribute.embedded.actions) do draw_node("action", nested, attribute_match) end
+                                end)
+                            end
+                        end)
+                    end
                 end
             end
         end)
@@ -1481,10 +1621,30 @@ local function selected_title(selected)
         end
         return "Group [" .. selected.index .. "]"
     end
-    local nodes = state.document and (selected.kind == "entry" and state.document.entries or state.document.actions) or {}
+    local document, ancestors = state.document, {}
+    for _, hop in ipairs(selected.embeddedPath or {}) do
+        local next_document
+        local nodes = document and (hop.kind == "entry" and document.entries or document.actions) or {}
+        for _, node in ipairs(nodes or {}) do
+            if node.index == hop.index then
+                ancestors[#ancestors + 1] = tostring(node.name or hop.kind) .. " [" .. hop.index .. "]"
+                for _, attribute in ipairs(node.attributes or {}) do
+                    if attribute.index == hop.attributeIndex then
+                        ancestors[#ancestors + 1] = parameter_label(attribute.type)
+                        next_document = attribute.embedded
+                        break
+                    end
+                end
+                break
+            end
+        end
+        document = next_document
+    end
+    local prefix = #ancestors > 0 and (table.concat(ancestors, " / ") .. " / ") or ""
+    local nodes = document and (selected.kind == "entry" and document.entries or document.actions) or {}
     for _, node in ipairs(nodes or {}) do
         if node.index == selected.index then
-            local title = tostring(node.name or selected.kind) .. " [" .. selected.index .. "]"
+            local title = prefix .. tostring(node.name or selected.kind) .. " [" .. selected.index .. "]"
             if selected.attributeIndex ~= nil then
                 for _, attribute in ipairs(node.attributes or {}) do
                     if attribute.index == selected.attributeIndex then return title .. " / " .. parameter_label(attribute.type) .. " [" .. attribute.index .. "]" end
@@ -1493,7 +1653,7 @@ local function selected_title(selected)
             return title
         end
     end
-    return selected.kind .. " [" .. selected.index .. "]" .. (selected.attributeIndex ~= nil and (" / 属性 [" .. selected.attributeIndex .. "]") or "")
+    return prefix .. selected.kind .. " [" .. selected.index .. "]" .. (selected.attributeIndex ~= nil and (" / 属性 [" .. selected.attributeIndex .. "]") or "")
 end
 local function draw_curves()
     if #state.curves == 0 then return end
@@ -1789,6 +1949,7 @@ local function draw_group_note(selected)
     text("可直接使用中文输入法。若游戏内候选窗不便操作，先在记事本输入并复制，再点击「粘贴中文备注」。", palette.muted)
     text("空备注保存后恢复显示游戏原名；相同备注可用于多个分组。", palette.muted)
 end
+local field_group_cache = {}
 local function draw_fields()
     local selected = state.selected
     if not selected then
@@ -1796,11 +1957,25 @@ local function draw_fields()
         text("从结构列表选择特效块或属性。可在结构搜索中输入 RGBCommon 等属性名称。", palette.muted); return
     end
     text("属性编辑 · " .. selected_title(selected), palette.accent)
+    local embedded = selected.embeddedPath and #selected.embeddedPath > 0
+    if selected.attributeIndex ~= nil then
+        button("返回所属 " .. (selected.kind == "entry" and "Entry" or "Action") .. "##mvl_parent_target", function()
+            local owner = copy_target(selected); owner.attributeIndex = nil; inspect(owner)
+        end)
+    elseif embedded then
+        button("返回所属 PlayEmitter##mvl_parent_target", function()
+            local owner = copy_target(selected)
+            local hop = table.remove(owner.embeddedPath)
+            owner.kind, owner.index, owner.attributeIndex = hop.kind, hop.index, hop.attributeIndex
+            if #owner.embeddedPath == 0 then owner.embeddedPath = nil end
+            inspect(owner)
+        end)
+    end
     button("中文##mvl_language_zh",function() M.set_parameter_language("zh") end,state.parameter_language=="zh" and "selected" or nil)
     imgui.same_line()
     button("English##mvl_language_en",function() M.set_parameter_language("en") end,state.parameter_language=="en" and "selected" or nil)
     button("重新读取字段##mvl_inspect", function() inspect(selected) end)
-    if selected.kind=="entry" and state.document and state.document.canRestoreEntry then
+    if not embedded and selected.kind=="entry" and state.document and state.document.canRestoreEntry then
         button("还原当前特效块##mvl_restore_entry",function()
             mutate("restore_entry",{index=selected.index})
         end)
@@ -1811,7 +1986,7 @@ local function draw_fields()
         draw_group_note(selected)
         return
     elseif selected.kind ~= "document" then
-      local can_delete=selected.kind=="entry" or selected.attributeIndex~=nil
+      local can_delete=(not embedded and selected.kind=="entry") or selected.attributeIndex~=nil
       if can_delete then
         local deletion_label=selected.attributeIndex~=nil and "删除当前属性" or "删除当前特效块"
         local changed,confirm=imgui.checkbox("确认"..deletion_label.."##mvl_confirm_delete",state.confirm_delete)
@@ -1826,7 +2001,7 @@ local function draw_fields()
         end
       end
       section("结构操作：添加 / 复制 / 删除##mvl_structure_operations", function()
-        if selected.kind == "entry" and selected.attributeIndex == nil then
+        if not embedded and selected.kind == "entry" and selected.attributeIndex == nil then
             button("复制特效块##mvl_duplicate", function() mutate("duplicate_entry", { index = selected.index }) end)
         end
         input("新增属性类型##mvl_attr_type", "attribute_type")
@@ -1843,7 +2018,8 @@ local function draw_fields()
             end)
         end
         button("添加属性到当前块或动作##mvl_add_attribute", function()
-            mutate("add_attribute", { target = { kind = selected.kind, index = selected.index }, type = state.attribute_type })
+            local owner = copy_target(selected); owner.attributeIndex = nil
+            mutate("add_attribute", { target = owner, type = state.attribute_type })
         end)
       end)
     end
@@ -1856,6 +2032,11 @@ local function draw_fields()
     end
     -- Cache the filtered index list; a full document may contain thousands of
     -- scalar fields, but only 80 controls need to be submitted each frame.
+    if field_group_cache.fields ~= state.fields or field_group_cache.colors ~= state.color_groups then
+        local colors = color_field_groups()
+        field_group_cache = { fields = state.fields, colors = state.color_groups, color_members = colors,
+            parameter_members = parameters and parameters.groups(state.fields, colors) or {} }
+    end
     if state.field_view_source ~= state.fields or state.field_view_colors ~= state.color_groups or state.field_view_filter ~= state.field_filter or
         state.field_view_editable ~= state.field_editable_only or state.field_view_modified ~= state.field_modified_only or state.field_modified_only then
         if state.field_view_filter ~= state.field_filter or state.field_view_editable ~= state.field_editable_only or
@@ -1864,8 +2045,8 @@ local function draw_fields()
         state.field_view_colors = state.color_groups
         state.field_view_editable, state.field_view_modified = state.field_editable_only, state.field_modified_only
         local filter = state.field_filter:lower()
-        local color_members, added_colors = color_field_groups(), {}
-        local parameter_members=parameters and parameters.groups(state.fields,color_members) or {}
+        local color_members, added_colors = field_group_cache.color_members, {}
+        local parameter_members=field_group_cache.parameter_members
         local added_parameters={}
         for _, field in ipairs(state.fields) do
             local color_entry = color_members[field.path]
@@ -1898,6 +2079,7 @@ local function draw_fields()
     if available_width() > 480 then imgui.same_line() end
     text(state.field_page .. " / " .. pages .. " 页 · " .. count .. " / " .. #state.fields .. " 个字段", palette.muted)
     child("属性完整字段##mvl_fields", { 0, math.max(220, dimension(imgui.get_window_size(), "y", 650) - dimension(imgui.get_cursor_pos(), "y", 250) - 16) }, function()
+    local function rows()
     if #state.fields == 0 then text("后台未返回字段；请检查解析结果，不能将空面板视为完成。") end
     if #state.fields > 0 and count == 0 then text("没有匹配字段；清空筛选可查看全部。") end
     for i = (state.field_page - 1) * page_size + 1, math.min(state.field_page * page_size, count) do
@@ -1912,11 +2094,12 @@ local function draw_fields()
             if state.field_show_paths and path ~= label then text(path, palette.muted) end
             if field.editable == true then
                 local current = state.values[path] or ""
+                local scope = embedded and ("_" .. target_key(selected)) or ""
                 if imgui.set_next_item_width then imgui.set_next_item_width(math.max(100, available_width() - 92)) end
-                local changed, value = text_input("##mvl_value_" .. path, current)
+                local changed, value = text_input("##mvl_value_" .. path .. scope, current)
                 if changed then state.values[path] = value end
                 imgui.same_line()
-                button("提交##mvl_set_" .. path, function()
+                button("提交##mvl_set_" .. path .. scope, function()
                     mutate("set", { target = copy_target(selected), path = path, value = state.values[path] or "" }, true)
                 end, field_modified(field) and "primary" or nil, 78)
                 if field.choices and #field.choices > 0 then text("可用值：" .. table.concat(field.choices, ", "), palette.muted) end
@@ -1927,6 +2110,8 @@ local function draw_fields()
             imgui.separator()
         end
     end
+    end
+    if imgui._mvl_input_batch==true then imgui.with_input_batch(rows) else rows() end
     end)
 end
 local function publish_document(apply_to_resource)
@@ -2523,8 +2708,17 @@ local function ai_execute(action, arguments, done)
     local function reject(code, message, uncertain) done(false, { code = code, message = message, uncertain = uncertain }); return nil end
     local function integer(value) return type(value) == "number" and value >= 0 and value < math.huge and value % 1 == 0 end
     local function valid_target(target)
-        return type(target) == "table" and (target.kind == "document" or target.kind == "entry" or target.kind == "action" or target.kind == "group") and
-            integer(target.index or 0) and (target.attributeIndex == nil or integer(target.attributeIndex))
+        if type(target) ~= "table" or not (target.kind == "document" or target.kind == "entry" or target.kind == "action" or target.kind == "group") or
+            not integer(target.index or 0) or not (target.attributeIndex == nil or integer(target.attributeIndex)) then return false end
+        if target.embeddedPath == nil then return true end
+        if type(target.embeddedPath) ~= "table" or #target.embeddedPath > 16 then return false end
+        local count = 0
+        for index, hop in pairs(target.embeddedPath) do
+            if not integer(index) or index < 1 or index > #target.embeddedPath or type(hop) ~= "table" or
+                not (hop.kind == "entry" or hop.kind == "action") or not integer(hop.index) or not integer(hop.attributeIndex) then return false end
+            count = count + 1
+        end
+        return count == #target.embeddedPath and (count == 0 or target.kind == "entry" or target.kind == "action")
     end
     local function wrap_pending(callback)
         local pending = state.pending
@@ -2716,7 +2910,7 @@ local function diagnostics()
     state.last_diagnostic = now
     if not json or not json.dump_file then return end
     local ok, err = pcall(function()
-        refresh_action_state()
+        if not action_refresh.in_frame or action_refresh.full_frame ~= action_refresh.frame then refresh_action_state() end
         local instance = client and client:get_instance("preview")
         local owned = instance ~= nil
         if instance then
@@ -2811,9 +3005,13 @@ local function diagnostics()
 end
 M.diagnostics = diagnostics
 local function frame()
+    action_refresh.frame = action_refresh.frame + 1
+    action_refresh.in_frame = true
     poll()
     state.module_frames = state.module_frames + 1
-    if state.module_frames >= 15 then state.module_frames = 0; refresh_action_state() end
+    local action_refresh_due = state.module_frames >= 15
+    if action_refresh_due then state.module_frames = 0 end
+    refresh_regular_action_state(action_refresh_due)
     if state.restore_after_busy then
         refresh_action_state()
         if not state.apply_requested and not state.bindings_snapshot.busy then
@@ -2839,6 +3037,7 @@ local function frame()
     -- including the first frame of typing. Like buttons, toggles use the queue.
     if debug_hotkeys then debug_hotkeys:tick() end
     diagnostics()
+    action_refresh.in_frame = false
 end
 M.frame = frame
 local function reset(full_script_reset)
@@ -2877,7 +3076,7 @@ local registered, registration_error = pcall(function()
         if M.active then
             apply_effect_commands()
             -- EFX holders must be restored before rebuilding their PFB owners.
-            local b=bindings and bindings.snapshot and bindings.snapshot() or {}
+            local b=bindings and ((bindings.current_status and bindings.current_status()) or (bindings.snapshot and bindings.snapshot())) or {}
             if action_preview and not state.apply_requested and not state.bindings_restore_pending and
                 not b.busy and not b.requiresRestoreBeforeReset and (b.appliedCount or 0)==0 then action_preview:tick() end
             if pfb_preview and not state.apply_requested and not state.bindings_restore_pending and
@@ -2942,7 +3141,7 @@ do
     local factory, err = load_action_module("MotionVfxAiBridge", "MotionVfxLive.fx_ai_bridge", "fx_ai_bridge.lua")
     if factory and type(factory.new) == "function" then
         local ok, result = pcall(factory.new, { read = function(path) return json.load_file(path) end,
-            write = function(path, value) return json.dump_file(path, value) end, now = os.time, start = ai_execute,
+            write = function(path, value) return json.dump_file(path, value) end, now = os.time, clock = os.clock, start = ai_execute,
             exists = function(path)
                 -- REFramework's io.open is restricted to its data directory.
                 -- JSON parsing alone cannot distinguish a missing receipt from

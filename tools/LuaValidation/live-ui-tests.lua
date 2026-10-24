@@ -2210,7 +2210,7 @@ test("all pages expose scene time controls and diagnostics include action eviden
     equal(output.captureResources[1].path, "one.efx"); equal(output.captureRecentEvents[1].unresolved, true)
     equal(output.captureResourcesTruncated, false); equal(output.captureEventsTruncated, false)
     equal(output.captureInstalledHooks, 3); equal(output.captureRequestedHooks, 3)
-    equal(output.ownedPreview, false); equal(output.version, "0.8.5")
+    equal(output.ownedPreview, false); equal(output.version, c.module.version)
     for i = 1, 110 do c.capture_state.resources[i] = { path = "effect/" .. i }; c.capture_state.events[i] = { sequence = i } end
     c.time = c.time + 3; c.module.diagnostics(); output = c.files["MotionVfxLive/ui-status.json"]
     equal(output.captureResourceCount, 110); equal(#output.captureResources, 100); equal(output.captureResourcesTruncated, true)
@@ -2334,7 +2334,7 @@ if reload_source then
             local c = environment(); c.real_reload = true
             local reload = c:reload(); c:frame(); c:lock(); c:frame()
             equal(reload.phase, "complete"); equal(c.module.active, false)
-            equal(c.env.MotionVfxLive.version, "0.8.5"); equal(c.env.MotionVfxLive.active, true)
+            equal(c.env.MotionVfxLive.version, c.module.version); equal(c.env.MotionVfxLive.active, true)
             equal(c.env.fx_preview_runtime_v2, c.runtime)
             equal(c.env.package.loaded.MotionVfxLive, c.env.MotionVfxLive)
             equal(c.env.package.loaded.Unrelated, "keep")

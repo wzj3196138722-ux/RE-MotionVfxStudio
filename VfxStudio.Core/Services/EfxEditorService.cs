@@ -167,7 +167,10 @@ public class EfxEditorService
         int versionNum = (int)efx.Header.Version > 0 ? (int)efx.Header.Version : 5571972;
         string virtualPath = $"output.efx.{versionNum}";
         using var handler = new FileHandler(ms, virtualPath);
-        efx.WriteTo(handler);
+        // The path supplies format/version metadata only. WriteTo defaults to
+        // saving that path on disk, even for a MemoryStream-backed handler.
+        if (!efx.WriteTo(handler, saveFile: false))
+            throw new InvalidDataException("EFX serialization failed; no bytes were committed.");
         return ms.ToArray();
     }
 

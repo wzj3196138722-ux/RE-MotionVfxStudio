@@ -1,6 +1,7 @@
 -- Offline evidence tests. No game, network, hook injection, or native writes.
 -- Run with game-plugin as cwd using tools/LuaValidation/lua-runner.exe.
 local passed, failed, checks = 0, 0, 0
+local capture_source = arg[1] or "MotionVfxLive/fx_action_capture.lua"
 local function check(value, message) checks = checks + 1; assert(value, message or "assertion failed") end
 local function eq(a,b,message) check(a == b, (message or "value") .. ": " .. tostring(a) .. " ~= " .. tostring(b)) end
 local function test(name, fn)
@@ -20,7 +21,8 @@ local SHELL_HIT = "callShellHitMarkEffect(app.HitInfo, via.vec3, via.Quaternion)
 local COMMON = "playEffectCore(System.UInt32, app.EffectID_Common.ID, via.GameObject, app.cEffectOverwriteParams, via.GameObject)"
 local function environment(options)
     options = options or {}
-    local c = {hooks = {}, callbacks = {}, resets = {}, installs = 0, calls = {}, tid = 1, stores = {}, nextAddress = 100, scene = 10}
+    local c = {hooks = {}, callbacks = {}, resets = {}, installs = 0, calls = {}, tid = 1, stores = {}, nextAddress = 100, scene = 10,
+        metrics = {threadIds = 0, sceneTypeLookups = 0, sceneReads = 0}}
     local env = setmetatable({}, {__index = _G}); env._G = env
     local parent_types = {[OEM] = BASE, [OEM2] = BASE, ["via.effect.script.EPVDataElement"] = "via.effect.ProviderData",
         ["app.AppShell"] = "ace.ShellBase"}
@@ -132,11 +134,15 @@ local function environment(options)
     c.manager = c:object(MANAGER)
     c.effectId = c:object("via.effect.script.EffectID", {}, {get_containerID = 42, get_elementID = 9, get_dataContainerIndex = 2})
     env.sdk = {
-        find_type_definition = td, typeof = function(name) return name end,
+        find_type_definition = function(name)
+            if name == "via.SceneManager" then c.metrics.sceneTypeLookups = c.metrics.sceneTypeLookups + 1 end
+            return td(name)
+        end, typeof = function(name) return name end,
         get_managed_singleton = function() return options.no_actor and nil or c.playerManager end,
         get_native_singleton = function() return {} end,
         call_native_func = function(_, _, name)
             eq(name, "get_CurrentScene")
+            c.metrics.sceneReads = c.metrics.sceneReads + 1
             return {get_address = function() return c.scene end}
         end,
         to_managed_object = function(value) return type(value) == "table" and value or nil end,
@@ -149,13 +155,13 @@ local function environment(options)
         end,
         PreHookResult = {CALL_ORIGINAL = 0},
     }
-    env.thread = {get_id = function() return c.tid end,
+    env.thread = {get_id = function() c.metrics.threadIds = c.metrics.threadIds + 1; return c.tid end,
         get_hook_storage = function() local stack = c.stores[c.tid]; return stack[#stack] end}
     if options.no_thread then env.thread = false end
     env.re = {on_frame = function(fn) c.callbacks[#c.callbacks + 1] = fn end,
         on_script_reset = function(fn) c.resets[#c.resets + 1] = fn end}
     c.env = env
-    c.module = assert(loadfile("MotionVfxLive/fx_action_capture.lua", "t", env))()
+    c.module = assert(loadfile(capture_source, "t", env))()
     function c:start() local ok, err = self.module.start(); check(ok, err); return self end
     function c:begin(typ, sig, args, tid)
         self.tid = tid or 1
@@ -188,9 +194,11 @@ local function environment(options)
     return c
 end
 
+if arg[2] == "export-environment" then return environment end
+
 test("load is inert and repeated start installs each hook once", function()
     local c = environment(); eq(c.installs, 0)
-    eq(assert(loadfile("MotionVfxLive/fx_action_capture.lua", "t", c.env))(), c.module)
+    eq(assert(loadfile(capture_source, "t", c.env))(), c.module)
     c:start(); eq(c.installs, 22); c.module.stop(); c:start(); eq(c.installs, 22)
 end)
 test("direct local motion request links every provider resource and actual player", function()
@@ -1012,6 +1020,95 @@ test("inactive animation layers are not reported as read errors", function()
     local s = c.module.snapshot(); eq(#s.actions, 1); eq(s.counters.actionReadErrors, 0)
     c.node2.methods.get_MotionID = nil; c:update()
     eq(c.module.snapshot().counters.actionReadErrors, 1)
+end)
+
+test("stopped hooks preserve accounting and never create captured events", function()
+    local c = environment():start(); c.module.stop()
+    for _ = 1, 100 do c:invoke(OEM, MOTION, {[2] = c.oem, [3] = c.node1}) end
+    local s = c.module.snapshot()
+    eq(#s.events, 0); eq(s.counters.calls, 0); eq(s.counters.contextMismatch, 0)
+    local info
+    for _, item in ipairs(s.hooks) do if item.type == OEM and item.signature == MOTION then info = item end end
+    eq(info.preCalls, 100); eq(info.postCalls, 100); eq(info.recordedCalls, 0)
+end)
+test("recording toggles inside an active hook keep the stopped scope as a causality barrier", function()
+    local c = environment():start()
+    local outer = c:begin(OEM, MOTION, {[2] = c.oem, [3] = c.node1})
+    c.module.stop()
+    local idle = c:begin(OEM, MOTION, {[2] = c.oem, [3] = c.node2})
+    c.module.start(); c:engine({"boundary.efx"}, {c:player("boundary.efx")})
+    c:finish(idle); c:finish(outer)
+    local s = c.module.snapshot()
+    eq(#s.events, 1); eq(s.events[1].motion, nil); eq(s.counters.contextMismatch, 0)
+end)
+test("an idle outer hook can contain a newly started recording without stealing its stack", function()
+    local c = environment():start(); c.module.stop()
+    local idle = c:begin(OEM, MOTION, {[2] = c.oem, [3] = c.node1})
+    c.module.start(); c:engine({"start_boundary.efx"}, {c:player("start_boundary.efx")})
+    c:finish(idle)
+    local s = c.module.snapshot()
+    eq(#s.events, 1); eq(s.events[1].motion, nil); eq(s.counters.contextMismatch, 0)
+end)
+test("stopped native aliases keep receiver-specific pre and post accounting", function()
+    local aliases = {[OEM .. "|" .. REGISTER] = "same-entry", [OEM2 .. "|" .. REGISTER] = "same-entry"}
+    local c = environment({native_aliases = aliases}):start(); c.module.stop()
+    c:invoke(OEM, REGISTER, {[2] = c.oem2})
+    local s = c.module.snapshot()
+    eq(hook_snapshot(s, OEM2, REGISTER).preCalls, 1); eq(hook_snapshot(s, OEM2, REGISTER).postCalls, 1)
+    eq(hook_snapshot(s, OEM, REGISTER).preCalls, 0); eq(hook_snapshot(s, OEM, REGISTER).postCalls, 0)
+    eq(s.counters.contextMismatch, 0); eq(#s.events, 0)
+end)
+test("unavailable scene metadata is retried and live scene changes still invalidate immediately", function()
+    local c = environment():start(); local find = c.env.sdk.find_type_definition
+    c.env.sdk.find_type_definition = function(name)
+        if name == "via.SceneManager" then return nil end
+        return find(name)
+    end
+    c:update(); eq(c.metrics.sceneReads, 0)
+    c.env.sdk.find_type_definition = find
+    c:update(); eq(c.metrics.sceneReads, 1)
+    local epoch = c.module.snapshot().sceneEpoch
+    c.scene = c.scene + 1; c:update()
+    eq(c.metrics.sceneReads, 2); eq(c.module.snapshot().sceneEpoch, epoch + 1)
+end)
+
+-- Keep the same workload available against arg[1], an archived baseline module.
+-- Allocation is measured with GC paused; these are Lua mock costs, not game FPS.
+local function measure(name, c, count, run)
+    collectgarbage("collect"); collectgarbage("stop")
+    local memory, started = collectgarbage("count"), os.clock()
+    local before_thread, before_scene, before_reads = c.metrics.threadIds, c.metrics.sceneTypeLookups, c.metrics.sceneReads
+    local ok, err = pcall(run)
+    local seconds, allocated = os.clock() - started, collectgarbage("count") - memory
+    collectgarbage("restart")
+    check(ok, err)
+    print(("PERF %s iterations=%d lua_seconds=%.6f allocated_kib=%.3f thread_ids=%d scene_type_lookups=%d scene_reads=%d")
+        :format(name, count, seconds, allocated, c.metrics.threadIds-before_thread,
+            c.metrics.sceneTypeLookups-before_scene, c.metrics.sceneReads-before_reads))
+end
+test("runtime performance workload retains all frame observations", function()
+    local c = environment({track_motion = true}):start()
+    local frames = 600
+    measure("recording_frames", c, frames, function()
+        for i = 1, frames do c.node1.methods.get_MotionFrame = i; c:update() end
+    end)
+    local s = c.module.snapshot()
+    eq(c.metrics.sceneReads, frames)
+    -- The first update rewinds the fixture's initial frame, closing its first
+    -- history item. Check the live layer rather than that closed first item.
+    local latest
+    for _, action in ipairs(s.actions) do if action.motion.motionId == 30 then latest = action end end
+    check(latest ~= nil); eq(latest.lastMotionFrame, frames)
+    eq(s.currentActions[1].motion.frame, frames); eq(s.counters.errors, 0)
+end)
+test("runtime performance workload retains stopped-hook pairing", function()
+    local c = environment():start(); c.module.stop()
+    local count, args = 10000, {[2] = c.oem, [3] = c.node1}
+    measure("stopped_hooks", c, count, function()
+        for _ = 1, count do c:invoke(OEM, MOTION, args) end
+    end)
+    local s = c.module.snapshot()
+    eq(#s.events, 0); eq(s.counters.contextMismatch, 0); eq(s.counters.calls, 0)
 end)
 
 print(("RESULT action capture %d passed, %d failed, %d checks"):format(passed, failed, checks))

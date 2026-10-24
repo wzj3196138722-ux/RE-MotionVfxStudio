@@ -12,21 +12,48 @@ local function argb(n)
     n = n & 0xffffffff
     return (n & 0xff00ff00) | ((n & 255)<<16) | ((n>>16)&255)
 end
+local function text_cache()return {values={},order={},next=1}end
+local function cache_text(cache,key,value)
+    if #key>4096 then return value end
+    if cache.values[key]==nil then
+        if #cache.order<4096 then cache.order[#cache.order+1]=key
+        else
+            cache.values[cache.order[cache.next]]=nil
+            cache.order[cache.next]=key;cache.next=cache.next%4096+1
+        end
+    end
+    cache.values[key]=value;return value
+end
 function M.new(real, api)
-    local u = {real=real,api=api,commands={},trees={},clips={},colors={},tree_depth=0,serial=0,scale=1}
+    local u = {real=real,api=api,commands={},trees={},clips={},colors={},tree_depth=0,serial=0,scale=1,
+        measure_cache=text_cache(),fit_cache=text_cache(),line_cache=text_cache()}
     local a = {}
     u.adapter=a
+    local function window_size() return u.input_batch_size or real.get_window_size() end
+    function u:clip()
+        local clip=self.effective_clip
+        local top=self.clips[#self.clips]
+        if self.clip_top~=top or self.clip_depth~=#self.clips then
+            clip=nil
+            for _,bounds in ipairs(self.clips) do
+                if not clip then clip={x=bounds.x,y=bounds.y,w=bounds.w,h=bounds.h}
+                else
+                    local right,bottom=math.min(clip.x+clip.w,bounds.x+bounds.w),math.min(clip.y+clip.h,bounds.y+bounds.h)
+                    clip.x,clip.y=math.max(clip.x,bounds.x),math.max(clip.y,bounds.y)
+                    clip.w,clip.h=right-clip.x,bottom-clip.y
+                end
+            end
+            self.clip_top,self.clip_depth,self.effective_clip=top,#self.clips,clip
+        end
+        return clip
+    end
+    function u:visible(y,height)
+        local clip=self:clip()
+        return not clip or (clip.w>0 and clip.h>0 and y+height>=clip.y and y<=clip.y+clip.h)
+    end
     function u:emit(kind,data)
         data.kind=kind
-        local clip
-        for _,bounds in ipairs(self.clips) do
-            if not clip then clip={x=bounds.x,y=bounds.y,w=bounds.w,h=bounds.h}
-            else
-                local right,bottom=math.min(clip.x+clip.w,bounds.x+bounds.w),math.min(clip.y+clip.h,bounds.y+bounds.h)
-                clip.x,clip.y=math.max(clip.x,bounds.x),math.max(clip.y,bounds.y)
-                clip.w,clip.h=right-clip.x,bottom-clip.y
-            end
-        end
+        local clip=self:clip()
         if clip then
             -- D2D v1.4.1 has no clipping API. Omit partially clipped text/rows;
             -- panel backgrounds stay outside the scroll host.
@@ -39,8 +66,11 @@ function M.new(real, api)
         end
         self.commands[#self.commands+1]=data
     end
-    function u:rect(x,y,w,h,color,r) self:emit("rect",{x=x,y=y,w=w,h=h,color=color or C.panel,r=r or 0}) end
+    function u:rect(x,y,w,h,color,r)
+        if self:visible(y,h) then self:emit("rect",{x=x,y=y,w=w,h=h,color=color or C.panel,r=r or 0}) end
+    end
     function u:label(text,x,y,size,color,w)
+        if not self:visible(y,(size or 15)*1.4) then return end
         self:emit("text",{text=tostring(text or ""),x=x,y=y,size=size or 15,color=color or C.text,maxWidth=w,h=(size or 15)*1.4})
     end
     function u:at(x,y) real.set_cursor_screen_pos({x,y}) end
@@ -48,24 +78,62 @@ function M.new(real, api)
     function u:space(height)
         self.serial=self.serial+1;real.invisible_button("##mvl_d2d_space_"..self.serial,{1,height or 8*self.scale})
     end
-    function u:measure(text,size)
+    function u:measure(text,size,font_override)
         size=size or 15*self.scale
-        local font=self.fonts and self.fonts[math.floor(size+.5)]
+        text=tostring(text or "")
+        local font=font_override or (self.fonts and self.fonts[math.floor(size+.5)])
+        local key=tostring(size)..":"..text
+        local cached=self.measure_cache.values[key]
+        if cached and cached.font==font then return cached.w,cached.h,font~=nil end
         if font then
-            local ok,w,h=pcall(function() return font:measure(tostring(text or "")) end)
-            if ok and type(w)=="number" then return w,type(h)=="number" and h or size*1.4 end
+            local ok,w,h=pcall(function() return font:measure(text) end)
+            if ok and type(w)=="number" and w==w and w>=0 and w<math.huge then
+                h=type(h)=="number" and h==h and h>=0 and h<math.huge and h or size*1.4
+                cache_text(self.measure_cache,key,{font=font,w=w,h=h});return w,h,true
+            end
         end
         local width,line,rows=0,0,1
-        for _,c in utf8.codes(tostring(text or "")) do
+        for _,c in utf8.codes(text) do
             if c==10 then width=math.max(width,line);line=0;rows=rows+1
             else line=line+(c>255 and size or size*.55) end
         end
-        return math.max(width,line),size*1.4*rows
+        local w,h=math.max(width,line),size*1.4*rows
+        -- A temporary native measurement failure must be retried next frame.
+        if not font then cache_text(self.measure_cache,key,{w=w,h=h}) end
+        return w,h,false
+    end
+    function u:fit_text(text,size,maxWidth,font)
+        local key=tostring(size)..":"..tostring(maxWidth)..":"..text
+        local cached=self.fit_cache.values[key]
+        if cached and cached.font==font then return cached.text end
+        local fitted=text
+        local width,_,reliable=self:measure(text,size,font)
+        if width>maxWidth then
+            local offsets={};for pos in utf8.codes(text) do offsets[#offsets+1]=pos end
+            local count=#offsets;offsets[count+1]=#text+1
+            local low,high,best=0,count-1,0
+            -- Measure logarithmically, retaining the same longest fitting UTF-8
+            -- prefix as the old character-by-character trimming loop.
+            while low<=high do
+                local middle=math.floor((low+high)/2)
+                local prefix=text:sub(1,offsets[middle+1]-1)
+                local measured,_,valid=self:measure(prefix.."…",size,font)
+                reliable=reliable and valid
+                if measured<=maxWidth then best=middle;low=middle+1
+                else high=middle-1 end
+            end
+            fitted=text:sub(1,offsets[best+1]-1).."…"
+        end
+        if reliable then cache_text(self.fit_cache,key,{font=font,text=fitted}) end
+        return fitted
     end
     function u:button(id,label,x,y,w,h,kind,enabled)
         enabled=enabled~=false; h=h or 34*self.scale
         if x then self:at(x,y) else x,y=self:pos() end
         local clicked=real.invisible_button(id,{w,h})
+        -- Keep native item submission (navigation/active-ID lifetime) but do not
+        -- build decoration for controls outside the scroll host.
+        if not self:visible(y,h) then return enabled and clicked end
         local hover=real.is_item_hovered and real.is_item_hovered()
         local active=real.is_item_active and real.is_item_active()
         local color=kind=="primary" and C.accent or kind=="selected" and 0xFF423A73 or kind=="warning" and 0xFF694134 or C.raised
@@ -79,14 +147,7 @@ function M.new(real, api)
             enabled and C.text or C.muted,w-padding*2)
         return enabled and clicked
     end
-    function u:textbox(id,value,width,prefix)
-        width=width or self.next_width or 260*self.scale;self.next_width=nil
-        local x,y=self:pos()
-        local h=30*self.scale
-        local lead=prefix and prefix.."  " or ""
-        local lead_width=math.min(self:measure(lead,14*self.scale),math.max(0,width-26*self.scale))
-        self:at(x+lead_width,y)
-        real.set_next_item_width(math.max(1,width-lead_width))
+    function u:push_input_style()
         local style=type(real.ImGuiStyleVar)=="table" and real.ImGuiStyleVar or {}
         real.push_style_var(style.Alpha or 0,1.0)
         real.push_style_var(style.FramePadding or 11,Vector2f.new(9*self.scale,8*self.scale))
@@ -97,20 +158,36 @@ function M.new(real, api)
         real.push_style_color(0,ink>=0x80000000 and ink-0x100000000 or ink)
         for _,color in ipairs({5,6,7,8,9}) do real.push_style_color(color,0) end
         real.push_font_size(14*self.scale)
+    end
+    function u:pop_input_style()
+        real.pop_font_size();real.pop_style_color(6);real.pop_style_var(3)
+    end
+    function u:textbox(id,value,width,prefix)
+        width=width or self.next_width or 260*self.scale;self.next_width=nil
+        local x,y=self:pos()
+        local h=30*self.scale
+        local lead=prefix and prefix.."  " or ""
+        local lead_width=prefix and math.min(self:measure(lead,14*self.scale),math.max(0,width-26*self.scale)) or 0
+        if lead_width~=0 then self:at(x+lead_width,y) end
+        real.set_next_item_width(math.max(1,width-lead_width))
+        if not self.input_batch or not self.input_batch_styled then
+            self:push_input_style()
+            if self.input_batch then self.input_batch_styled=true end
+        end
         -- Do not reconstruct a caret from REFramework's two selection offsets:
         -- they do not contain CursorPos, and CallbackResize can overwrite them
         -- with zero on the same keystroke. The native editor has the full state.
         -- A hidden label also prevents a visible parameter name outside its box.
         local native_id=tostring(id):sub(1,2)=="##" and id or ("##"..tostring(id))
         local ok,changed,next_value=pcall(real.input_text,native_id,tostring(value or ""))
-        real.pop_font_size()
-        real.pop_style_color(6)
-        real.pop_style_var(3)
+        if not self.input_batch then self:pop_input_style() end
         if not ok then error(changed,0) end
         local active=real.is_item_active()
-        self:rect(x,y,width,h,C.input,5*self.scale)
-        self:rect(x,y+h-1,width,1,active and C.accent or C.line)
-        if prefix then self:label(prefix,x+9*self.scale,y+6*self.scale,14*self.scale,C.muted,lead_width) end
+        if self:visible(y,h) then
+            self:rect(x,y,width,h,C.input,5*self.scale)
+            self:rect(x,y+h-1,width,1,active and C.accent or C.line)
+            if prefix then self:label(prefix,x+9*self.scale,y+6*self.scale,14*self.scale,C.muted,lead_width) end
+        end
         if active then
             self.text_active=true
         end
@@ -130,10 +207,10 @@ function M.new(real, api)
     end
     function u:heading(title,subtitle)
         local x,y=self:pos()
-        self:label(title,x,y,22*self.scale,C.text,real.get_window_size().x-24*self.scale)
+        self:label(title,x,y,22*self.scale,C.text,window_size().x-24*self.scale)
         self:space(36*self.scale)
         if subtitle then
-            local x,y=self:pos();self:label(subtitle,x,y,12*self.scale,C.muted,real.get_window_size().x-24)
+            local x,y=self:pos();self:label(subtitle,x,y,12*self.scale,C.muted,window_size().x-24)
             self:space(22*self.scale)
         end
     end
@@ -152,12 +229,7 @@ function M.new(real, api)
                 local key=math.floor(c.size+.5);local font=self.fonts[key] or self.fonts[15]
                 local s=c.text;local max=c.maxWidth
                 if max and max>0 then
-                    local w=font:measure(s)
-                    if w>max then
-                        local offsets={};for p in utf8.codes(s) do offsets[#offsets+1]=p end
-                        while #offsets>0 and font:measure(s.."…")>max do s=s:sub(1,table.remove(offsets)-1) end
-                        s=s.."…"
-                    end
+                    s=self:fit_text(s,c.size,max,font)
                 end
                 if not max or max>4 then api.text(font,s,c.x+0.0,c.y+0.0,c.color) end
             elseif c.kind=="image" then
@@ -170,6 +242,7 @@ function M.new(real, api)
     end
     function u:init()
         self.fonts={};self.images={};self.image_order={}
+        self.measure_cache,self.fit_cache=text_cache(),text_cache()
         for size=6,44 do self.fonts[size]=api.Font.new("Microsoft YaHei UI",size,false,false) end
     end
     function u:image(path)
@@ -188,14 +261,26 @@ function M.new(real, api)
     function u:begin(scale)
         self.commands={};self.serial=0;self.text_active=false;self.scale=scale or 1;self.tree_depth=0
         self.clips={};self.colors={};self.next_width=nil;self.next_button_kind=nil
+        self.clip_top,self.clip_depth,self.effective_clip=nil,0,nil
     end
-    a.get_window_size=real.get_window_size
+    a.get_window_size=window_size
     a.get_window_pos=real.get_window_pos
     a.get_cursor_pos=real.get_cursor_pos
     a.get_cursor_screen_pos=real.get_cursor_screen_pos
     a.get_display_size=real.get_display_size
     a.get_default_font_size=function() return 15*u.scale end
-    a.calc_text_size=function(s) local w,h=u:measure(s,15*u.scale);return {x=w,y=h} end
+    a.calc_text_size=function(s) local w,h,reliable=u:measure(s,15*u.scale);return {x=w,y=h,reliable=reliable} end
+    a.with_input_batch=function(fn)
+        if u.input_batch then return fn() end
+        u.input_batch=true
+        u.input_batch_size=real.get_window_size()
+        u.input_batch_position=real.get_window_pos()
+        local ok,err=pcall(fn)
+        if u.input_batch_styled then u:pop_input_style() end
+        u.input_batch,u.input_batch_styled,u.input_batch_size,u.input_batch_position=nil,nil,nil,nil
+        if not ok then error(err,0) end
+    end
+    a._mvl_input_batch=true
     a.is_item_active=real.is_item_active
     a.get_clipboard=real.get_clipboard
     a.same_line=real.same_line
@@ -203,20 +288,44 @@ function M.new(real, api)
     a.push_style_color=function(id,color) u.colors[#u.colors+1]={id=id,color=argb(color)} end
     a.pop_style_color=function(n) for _=1,n or 1 do table.remove(u.colors) end end
     a.push_font_size=function() end;a.pop_font_size=function() end
-    a.text=function(s)
-        local x,y=u:pos();local size=15*u.scale;local color=C.text
-        for i=#u.colors,1,-1 do if u.colors[i].id==0 then color=u.colors[i].color;break end end
-        local count=0
-        for line in (tostring(s).."\n"):gmatch("(.-)\n") do
-            u:label(line,x,y+count*size*1.45,size,color,real.get_window_size().x-28*u.scale);count=count+1
+    local function text_at(s,x,y,color)
+        s=tostring(s);local size=15*u.scale;local stride=size*1.45
+        local lines=u.line_cache.values[s]
+        if not lines then
+            lines={};for line in (s.."\n"):gmatch("(.-)\n") do lines[#lines+1]=line end
+            cache_text(u.line_cache,s,lines)
         end
-        u:space(math.max(1,count)*size*1.45+3*u.scale)
+        local first,last=1,#lines;local clip=u:clip()
+        if clip then
+            first=math.max(first,math.floor((clip.y-y)/stride)+1)
+            last=math.min(last,math.floor((clip.y+clip.h-y)/stride)+1)
+        end
+        if first<=last then
+            local width=window_size().x-28*u.scale
+            for i=first,last do u:label(lines[i],x,y+(i-1)*stride,size,color,width) end
+        end
+        -- Preserve native content height and keyboard navigation. Only pure
+        -- display work is culled; every editable control is still submitted.
+        u:space(math.max(1,#lines)*stride+3*u.scale)
+    end
+    a.text=function(s)
+        local x,y=u:pos();local color=C.text
+        for i=#u.colors,1,-1 do if u.colors[i].id==0 then color=u.colors[i].color;break end end
+        text_at(s,x,y,color)
+    end
+    a._mvl_wrapped_text=true
+    a.get_text_metrics_identity=function() return u.fonts and u.fonts[math.floor(15*u.scale+.5)] end
+    a.draw_wrapped_text=function(s,color,wrap)
+        local x,y=u:pos()
+        local position=u.input_batch_position or real.get_window_pos()
+        local width=math.max(120,window_size().x-(x-position.x)-28)
+        text_at(wrap(s,width),x,y,color and argb(color) or C.text)
     end
     a.set_button_kind=function(kind) u.next_button_kind=kind end
     a.button=function(label)
         local kind=u.next_button_kind;u.next_button_kind=nil
         local text=caption(label);local w,h=u:measure(text,14*u.scale)
-        return u:button(label,text,nil,nil,math.min(real.get_window_size().x-26*u.scale,math.max(68*u.scale,w+24*u.scale)),math.max(34*u.scale,h+14*u.scale),kind)
+        return u:button(label,text,nil,nil,math.min(window_size().x-26*u.scale,math.max(68*u.scale,w+24*u.scale)),math.max(34*u.scale,h+14*u.scale),kind)
     end
     a.input_text=function(label,value)
         local shown=caption(label)
@@ -225,11 +334,11 @@ function M.new(real, api)
             return u:textbox(label,value,u.next_width or 64*u.scale,shown)
         end
         if shown~="" then a.text(shown) end
-        return u:textbox(label,value,u.next_width or math.min(380*u.scale,real.get_window_size().x-28*u.scale))
+        return u:textbox(label,value,u.next_width or math.min(380*u.scale,window_size().x-28*u.scale))
     end
     a.checkbox=function(label,value)
         local x,y=u:pos();local w=u:measure(caption(label),14*u.scale)
-        local click=real.invisible_button(label,{math.min(w+35*u.scale,real.get_window_size().x-26*u.scale),28*u.scale})
+        local click=real.invisible_button(label,{math.min(w+35*u.scale,window_size().x-26*u.scale),28*u.scale})
         u:rect(x,y+3*u.scale,18*u.scale,18*u.scale,value and C.accent or C.input,4*u.scale)
         if value then u:label("✓",x+3*u.scale,y+2*u.scale,14*u.scale,C.text) end
         u:label(caption(label),x+28*u.scale,y+2*u.scale,14*u.scale,C.text)
@@ -241,7 +350,7 @@ function M.new(real, api)
         local key=label:match("###(.+)$") or label:match("##(.+)$") or label
         if u.next_tree~=nil then u.trees[key]=u.next_tree;u.next_tree=nil end
         local open=u.trees[key]==true;local x,y=u:pos()
-        local click=real.invisible_button(label,{math.max(60,real.get_window_size().x-36*u.scale-u.tree_depth*18*u.scale),32*u.scale})
+        local click=real.invisible_button(label,{math.max(60,window_size().x-36*u.scale-u.tree_depth*18*u.scale),32*u.scale})
         if click then open=not open;u.trees[key]=open end
         u:label(open and "⌄" or "›",x,y+3*u.scale,16*u.scale,C.accent)
         u:label(caption(label),x+20*u.scale,y+5*u.scale,14*u.scale,C.text)
@@ -250,10 +359,10 @@ function M.new(real, api)
     end
     a.tree_pop=function() real.unindent(18*u.scale);u.tree_depth=u.tree_depth-1 end
     a.separator=function()
-        local x,y=u:pos();u:rect(x,y+4*u.scale,real.get_window_size().x-28*u.scale,1,C.line);u:space(13*u.scale)
+        local x,y=u:pos();u:rect(x,y+4*u.scale,window_size().x-28*u.scale,1,C.line);u:space(13*u.scale)
     end
     a.begin_child_window=function(label,size,border)
-        local x,y=u:pos();local w=size[1]>0 and size[1] or real.get_window_size().x-28*u.scale
+        local x,y=u:pos();local w=size[1]>0 and size[1] or window_size().x-28*u.scale
         local h=size[2]>0 and size[2] or 320*u.scale
         local visible=real.begin_child_window(label,{w,h},false)
         u.clips[#u.clips+1]={x=x,y=y,w=w,h=h};return visible

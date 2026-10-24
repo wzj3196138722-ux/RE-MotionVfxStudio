@@ -15,7 +15,18 @@ internal static class ToolCatalog
     {
         ["kind"] = new JsonObject { ["type"] = "string", ["enum"] = new JsonArray("entry", "action", "document", "group") },
         ["index"] = Integer("Zero-based index returned by the editor."),
-        ["attributeIndex"] = Integer("Optional zero-based attribute index; omit to inspect the owning block.")
+        ["attributeIndex"] = Integer("Optional zero-based attribute index; omit to inspect the owning block."),
+        ["embeddedPath"] = new JsonObject
+        {
+            ["type"] = "array", ["minItems"] = 0, ["maxItems"] = 16,
+            ["description"] = "Optional ordered PlayEmitter owners from the document root to the nested EFX. Copy the exact target returned by the editor; do not infer indices from names or native IDs.",
+            ["items"] = Object(new()
+            {
+                ["kind"] = new JsonObject { ["type"] = "string", ["enum"] = new JsonArray("entry", "action") },
+                ["index"] = Integer("Zero-based owner index."),
+                ["attributeIndex"] = Integer("Zero-based PlayEmitter attribute index.")
+            }, "kind", "index", "attributeIndex")
+        }
     }, "kind", "index");
     private static JsonObject Revision() => Integer("Current document revision from status/inspect. Stale revisions are rejected; re-read before editing.");
     private static ToolDefinition Define(string action, string description, JsonObject properties, string[] required, bool readOnly = false, bool idempotent = false)
@@ -73,6 +84,9 @@ internal static class ToolCatalog
     public static void Validate(ToolDefinition tool, JsonObject arguments)
     {
         ValidateValue(tool.Schema, arguments, "arguments");
+        if (arguments["target"] is JsonObject target && target["embeddedPath"] is JsonArray { Count: > 0 } &&
+            target["kind"]!.GetValue<string>() is not ("entry" or "action"))
+            throw new ArgumentException("Embedded paths select nested entries or actions only.");
         if (tool.Action is "set_group_note" or "rename_group")
         {
             string note = arguments[tool.Action == "set_group_note" ? "note" : "name"]!.GetValue<string>();

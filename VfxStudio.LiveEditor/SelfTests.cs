@@ -166,6 +166,7 @@ internal static class SelfTests
             GroupEditingTests.Run(options, output, Check);
             DeletionTests.Run(options, output, Check);
             PlayEfxSerializationTests.Run(options, output, Check);
+            EmbeddedActionTests.Run(options, output, Check);
             GroupNoteTests.Run(options, output, Check);
             ColorEditorTests.Run(options, output, Check);
             ParameterGroupTests.Run(options, output, Check);

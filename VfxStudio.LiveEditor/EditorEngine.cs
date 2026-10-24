@@ -78,6 +78,7 @@ internal sealed partial class EditorEngine : IDisposable
         try
         {
             string action = Text(request, "action").ToLowerInvariant();
+            if (action is "duplicate_entry" or "remove_entry" or "restore_entry" or "add_entry" or "rename_group" or "set_group_note") RejectEmbeddedRootOperation(request);
             if (!action.StartsWith("pfb_", StringComparison.Ordinal) && action is not ("catalog" or "resolve_resource" or "open" or "open_motion" or "open_cached_resource" or "open_game_resource" or "status" or "inspect" or "shutdown" or
                 "cache_list" or "cache_import" or "cache_reload" or "cache_rename" or "cache_materialize" or "desktop_start" or "desktop_stop" or "file_browse" or "file_stat" or "open_action" or "action_effect_groups" or "add_action_slot" or "remove_action_slot" or "reset_action_slots" or "publish_action_preview" or "begin_export" or "prepare_export" or "finish_export")) CheckRevision(request);
             switch (action)
@@ -194,10 +195,7 @@ internal sealed partial class EditorEngine : IDisposable
                         response["target"] = request["target"]?.DeepClone();
                         break;
                     }
-                    response["fields"] = JsonSerializer.SerializeToNode(ContentInspector.Describe(Resolve(target), Require().Header.Version).Select(x => x.Description), Host.Json);
-                    response["curves"] = JsonSerializer.SerializeToNode(ContentInspector.Curves(Resolve(target), Require().Header.Version).Select(CurveEditor.Inspect), Host.Json);
-                    response["expressionCurves"] = JsonSerializer.SerializeToNode(ExpressionInspector.Inspect(Resolve(target)), Host.Json);
-                    response["colorGroups"] = JsonSerializer.SerializeToNode(ColorEditor.Inspect(Resolve(target), Require().Header.Version), Host.Json);
+                    WriteInspectionSnapshot(target, response);
                     response["target"] = request["target"]?.DeepClone();
                     break;
                 }
@@ -211,9 +209,9 @@ internal sealed partial class EditorEngine : IDisposable
                 case "set_color":
                 {
                     var target = Target.From(request);
-                    var plan = ColorEditor.Prepare(Resolve(target), Require().Header.Version, Text(request, "path"),
+                    var plan = ColorEditor.Prepare(Resolve(target), ResolveTargetFile(target).Header.Version, Text(request, "path"),
                         request["values"] as JsonArray ?? throw new ArgumentException("Color values must be a four-channel array."));
-                    Mutate(plan.Apply, reopened => plan.Verify(Resolve(target, reopened), reopened.Header.Version));
+                    Mutate(plan.Apply, reopened => plan.Verify(Resolve(target, reopened), ResolveTargetFile(target, reopened).Header.Version));
                     break;
                 }
                 case "set_fields":
@@ -252,8 +250,9 @@ internal sealed partial class EditorEngine : IDisposable
                         string name = Text(request, "type");
                         if (!Enum.TryParse<EfxAttributeType>(name, ignoreCase: false, out var type) || !Enum.IsDefined(type))
                             throw new ArgumentException("Unknown attribute type: " + name);
-                        var attribute = EFXAttribute.Create(Require().Header.Version, type);
-                        attribute.Version = Require().Header.Version;
+                        var version = ResolveTargetFile(target).Header.Version;
+                        var attribute = EFXAttribute.Create(version, type);
+                        attribute.Version = version;
                         attribute.UniqueID = NextAttributeId();
                         if (!service.AddAttributeToEntry(container, attribute))
                             throw new InvalidOperationException("Attribute cannot be added: it may already exist, require a matching base attribute, or be invalid for this entry kind.");
@@ -285,7 +284,8 @@ internal sealed partial class EditorEngine : IDisposable
             if (ex is CacheSourceException cacheError) response["errorCode"] = cacheError.Code;
         }
         response["revision"] = revision;
-        response["document"] = DocumentInfo();
+        try { response["document"] = DocumentInfo(); }
+        catch (Exception ex) { response["ok"] = false; response["error"] = ex.GetBaseException().Message; }
         processedIds.Add(id);
         responses[id] = (payload, (JsonObject)response.DeepClone());
         if (responses.Count > 512) responses.Remove(responses.Keys.First());
@@ -395,7 +395,7 @@ internal sealed partial class EditorEngine : IDisposable
             baseline = working?.Baseline ?? canonical.ToArray();
             documentSessionKey = key;
             entryIdHighWater = working?.EntryHighWater ?? candidate.Entries.Select(e => e.index).DefaultIfEmpty(-1).Max();
-            attributeIdHighWater = working?.AttributeHighWater ?? candidate.GetAttributesAndActions(true).Select(a => a.UniqueID).DefaultIfEmpty(-1).Max();
+        attributeIdHighWater = working?.AttributeHighWater ?? AllEmbeddedAttributes(candidate).Select(a => a.UniqueID).DefaultIfEmpty(-1).Max();
             revision++;
             undo.Clear(); redo.Clear();
             if (working != null) { undo.AddRange(working.Undo); redo.AddRange(working.Redo); }
@@ -413,14 +413,14 @@ internal sealed partial class EditorEngine : IDisposable
             SetGroupNote(target.Index, text);
             return;
         }
-        var field = ContentInspector.Describe(Resolve(target), Require().Header.Version).SingleOrDefault(f => f.Description.Path == path)
+        var field = ContentInspector.Describe(Resolve(target), ResolveTargetFile(target).Header.Version).SingleOrDefault(f => f.Description.Path == path)
             ?? throw new ArgumentException("Field path is not present in the selected object: " + path);
         if (!field.Description.Editable || field.Set == null) throw new InvalidOperationException(field.Description.Reason ?? "Field is read-only.");
         object? parsed = ContentInspector.Parse(text, field.ValueType);
         string expected = ContentInspector.Format(parsed);
         Mutate(() => field.Set(parsed), reopened =>
         {
-            var readback = ContentInspector.Describe(Resolve(target, reopened), reopened.Header.Version)
+            var readback = ContentInspector.Describe(Resolve(target, reopened), ResolveTargetFile(target, reopened).Header.Version)
                 .SingleOrDefault(f => f.Description.Path == path);
             if (readback == null || readback.Description.Value != expected)
                 throw new InvalidDataException("The serializer did not preserve this value. The change was rolled back; this member may be derived or inactive for the current layout.");
@@ -431,14 +431,16 @@ internal sealed partial class EditorEngine : IDisposable
     {
         if (file.FileHandler.Tell() != file.FileHandler.FileSize())
             throw new InvalidDataException("Deleted content left unread trailing bytes; the operation was rolled back.");
-        if (file.Header.entryCount != file.Entries.Count || file.Header.effectGroupsCount != file.EffectGroups.Count ||
-            file.EffectGroups.Any(g => g.valueCount != (g.efxEntryIndexes?.Length ?? 0) ||
-                (g.efxEntryIndexes ?? []).Any(index => index < 0 || index >= file.Entries.Count)))
+        if (EnumerateEmbeddedFiles(file).Any(local => local.Header.entryCount != local.Entries.Count || local.Header.actionCount != local.Actions.Count || local.Header.effectGroupsCount != local.EffectGroups.Count ||
+            local.EffectGroups.Any(g => g.valueCount != (g.efxEntryIndexes?.Length ?? 0) ||
+                (g.efxEntryIndexes ?? []).Any(index => index < 0 || index >= local.Entries.Count))))
             throw new InvalidDataException("Deleted content left inconsistent group references or counts; rolled back.");
     }
 
     private static string GroupsFingerprint(EfxFile file) => string.Join('|', file.EffectGroups.Select(g =>
         g.groupName + ":" + string.Join(',', g.efxEntryIndexes ?? [])));
+
+    private static string EmbeddedGroupsFingerprint(EfxFile file, EFXAttribute? removed = null) => string.Join("\n", EnumerateEmbeddedFiles(file, removed).Select(GroupsFingerprint));
 
     private void RemoveEntry(int index, JsonObject response)
     {
@@ -466,12 +468,12 @@ internal sealed partial class EditorEngine : IDisposable
         var owner = target with { AttributeIndex = null };
         var container = (EFXEntryBase)Resolve(owner);
         var expected = container.Attributes.Where((_, i) => i != target.AttributeIndex.Value).Select(a => (a.type, a.UniqueID)).ToArray();
-        string groups = GroupsFingerprint(Require());
+        string groups = EmbeddedGroupsFingerprint(Require(), attribute);
         int before = bytes!.Length;
         Mutate(() => { if (!service.RemoveAttributeFromEntry(container, attribute)) throw new InvalidOperationException("Attribute was not found."); }, reopened =>
         {
             VerifyCompact(reopened);
-            if (!((EFXEntryBase)Resolve(owner, reopened)).Attributes.Select(a => (a.type, a.UniqueID)).SequenceEqual(expected) || GroupsFingerprint(reopened) != groups)
+            if (!((EFXEntryBase)Resolve(owner, reopened)).Attributes.Select(a => (a.type, a.UniqueID)).SequenceEqual(expected) || EmbeddedGroupsFingerprint(reopened) != groups)
                 throw new InvalidDataException("Attribute deletion changed unrelated attributes or groups; rolled back.");
         });
         response["deletion"] = new JsonObject { ["kind"] = "attribute", ["bytesBefore"] = before,
@@ -481,7 +483,7 @@ internal sealed partial class EditorEngine : IDisposable
     private void SetFields(Target target, JsonArray edits)
     {
         if (target.Kind == "group" || edits.Count is < 1 or > 64) throw new ArgumentException("A parameter transaction requires 1–64 fields on one EFX object.");
-        var fields = ContentInspector.Describe(Resolve(target), Require().Header.Version).ToDictionary(f => f.Description.Path);
+        var fields = ContentInspector.Describe(Resolve(target), ResolveTargetFile(target).Header.Version).ToDictionary(f => f.Description.Path);
         var plan = new List<(EditableField Field, object? Value, string Expected)>();
         var paths = new HashSet<string>(StringComparer.Ordinal);
         foreach (var item in edits)
@@ -498,7 +500,7 @@ internal sealed partial class EditorEngine : IDisposable
         // revision and serializer verification; any failure restores the whole EFX.
         Mutate(() => { foreach (var edit in plan) edit.Field.Set!(edit.Value); }, reopened =>
         {
-            var actual = ContentInspector.Describe(Resolve(target, reopened), reopened.Header.Version).ToDictionary(f => f.Description.Path);
+            var actual = ContentInspector.Describe(Resolve(target, reopened), ResolveTargetFile(target, reopened).Header.Version).ToDictionary(f => f.Description.Path);
             foreach (var edit in plan)
                 if (!actual.TryGetValue(edit.Field.Description.Path, out var field) || field.Description.Value != edit.Expected)
                     throw new InvalidDataException("Parameter group was not preserved by serialization; all changes were rolled back.");
@@ -527,7 +529,7 @@ internal sealed partial class EditorEngine : IDisposable
 
     private void EditCurve(Target target, string path, JsonObject request)
     {
-        var curves = ContentInspector.Curves(Resolve(target), Require().Header.Version);
+        var curves = ContentInspector.Curves(Resolve(target), ResolveTargetFile(target).Header.Version);
         var curve = curves.SingleOrDefault(c => c.Path == path) ?? throw new ArgumentException("No active curve at this path.");
         Dictionary<string, string>? expected = null;
         Mutate(() =>
@@ -536,7 +538,7 @@ internal sealed partial class EditorEngine : IDisposable
             expected = curves.ToDictionary(c => c.Path, c => CurveEditor.Fingerprint(c.Data));
         }, reopened =>
         {
-            var actual = ContentInspector.Curves(Resolve(target, reopened), reopened.Header.Version)
+            var actual = ContentInspector.Curves(Resolve(target, reopened), ResolveTargetFile(target, reopened).Header.Version)
                 .ToDictionary(c => c.Path, c => CurveEditor.Fingerprint(c.Data));
             if (actual.Count != expected!.Count || expected.Any(e => !actual.TryGetValue(e.Key, out var value) || value != e.Value))
                 throw new InvalidDataException("Curve keys, channel mapping or tangents changed during serialization; the edit was rolled back.");
@@ -580,9 +582,9 @@ internal sealed partial class EditorEngine : IDisposable
         finally { DisposeFile(reopened); }
     }
 
-    private static string Structure(EfxFile file) => (int)file.Header.Version + ":" +
-        string.Join("|", file.Entries.Select(e => e.name + ":" + string.Join(',', e.Attributes.Select(a => a.type)))) + "::" +
-        string.Join("|", file.Actions.Select(e => e.name + ":" + string.Join(',', e.Attributes.Select(a => a.type))));
+    private static string Structure(EfxFile file) => string.Join("\n", EnumerateEmbeddedFiles(file).Select(local => (int)local.Header.Version + ":" +
+        string.Join("|", local.Entries.Select(e => e.name + ":" + string.Join(',', e.Attributes.Select(a => a.type)))) + "::" +
+        string.Join("|", local.Actions.Select(e => e.name + ":" + string.Join(',', e.Attributes.Select(a => a.type))))));
 
     private void RestoreHistory(List<byte[]> from, List<byte[]> to)
     {
@@ -662,10 +664,10 @@ internal sealed partial class EditorEngine : IDisposable
         finally { if (File.Exists(temporary)) File.Delete(temporary); }
     }
 
-    private JsonNode? DocumentInfo()
+    private JsonNode? BuildDocumentInfo()
     {
         if (document == null) return null;
-        object Container(EFXEntryBase e, int i) => new { index = i, name = e.name ?? $"Entry {i}", attributes = e.Attributes.Select((a, j) => new { index = j, type = a.type.ToString(), clrType = a.GetType().FullName }) };
+        var tree = DescribeEmbeddedTree(document);
         var grouped = document.EffectGroups.SelectMany(group => group.efxEntryIndexes ?? []).ToHashSet();
         var noteResource = NoteResourceKey();
         var groups = document.EffectGroups.Select((group, index) =>
@@ -679,7 +681,7 @@ internal sealed partial class EditorEngine : IDisposable
             source, sourceKind, cacheSource, gameSource, name = Path.GetFileName(source), revision, dirty = savedHash != Hash(bytes!), version = (int)document.Header.Version,
             canUndo = undo.Count > 0, canRedo = redo.Count > 0, warning,
             sessionRetained = true, canRestoreEntry = baseline != null,
-            entries = document.Entries.Select(Container), actions = document.Actions.Select(Container),
+            entries = tree.Entries, actions = tree.Actions,
             groups, groupNotesWarning = groupNotes.Warning,
             ungrouped = Enumerable.Range(0, document.Entries.Count).Where(index => !grouped.Contains(index)),
             attributeTypes = EfxAttributeTypeRemapper.GetAllTypes(document.Header.Version).Values.Select(t => t.ToString()).Distinct().OrderBy(x => x),
@@ -697,14 +699,9 @@ internal sealed partial class EditorEngine : IDisposable
 
     private object Resolve(Target target, EfxFile? file = null)
     {
-        file ??= Require();
+        file = ResolveTargetFile(target, file);
         if (target.Kind == "document") return file;
-        EFXEntryBase owner = target.Kind switch
-        {
-            "entry" when target.Index >= 0 && target.Index < file.Entries.Count => file.Entries[target.Index],
-            "action" when target.Index >= 0 && target.Index < file.Actions.Count => file.Actions[target.Index],
-            _ => throw new ArgumentOutOfRangeException("target", "Target kind or index is invalid.")
-        };
+        EFXEntryBase owner = ResolveContainer(file, target.Kind, target.Index);
         if (target.AttributeIndex is not int index) return owner;
         if (index < 0 || index >= owner.Attributes.Count) throw new ArgumentOutOfRangeException("attributeIndex");
         return owner.Attributes[index];
@@ -712,7 +709,7 @@ internal sealed partial class EditorEngine : IDisposable
 
     private EFXEntry Entry(int index) => (EFXEntry)Resolve(new("entry", index, null));
     private EfxFile Require() => document ?? throw new InvalidOperationException("Open an EFX document first.");
-    private int NextAttributeId() => attributeIdHighWater = checked(Math.Max(attributeIdHighWater, Require().GetAttributesAndActions(true).Select(a => a.UniqueID).DefaultIfEmpty(-1).Max()) + 1);
+    private int NextAttributeId() => attributeIdHighWater = checked(Math.Max(attributeIdHighWater, AllEmbeddedAttributes(Require()).Select(a => a.UniqueID).DefaultIfEmpty(-1).Max()) + 1);
     private static string Hash(byte[] data) => Convert.ToHexString(SHA256.HashData(data));
     internal static string Text(JsonObject obj, string key) => obj[key]?.GetValue<string>() ?? throw new ArgumentException("Missing string: " + key);
     private static string? OptionalText(JsonObject obj, string key) => obj[key]?.GetValue<string>();
@@ -720,12 +717,4 @@ internal sealed partial class EditorEngine : IDisposable
     private static void DisposeFile(EfxFile? file) => file?.FileHandler.Dispose();
     public void Dispose() { desktop?.Dispose(); DisposeFile(document); }
 
-    private sealed record Target(string Kind, int Index, int? AttributeIndex)
-    {
-        public static Target From(JsonObject request)
-        {
-            var target = request["target"]?.AsObject() ?? throw new ArgumentException("target is required.");
-            return new(Text(target, "kind"), Int(target, "index"), target["attributeIndex"]?.GetValue<int>());
-        }
-    }
 }

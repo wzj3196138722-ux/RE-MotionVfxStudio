@@ -108,6 +108,12 @@ static int push_color(lua_State* L) {ImGui::PushStyleColor((ImGuiCol)luaL_checki
 static int pop_color(lua_State* L) {ImGui::PopStyleColor((int)luaL_optinteger(L,1,1));return 0;}
 static int scroll_x(lua_State* L) {ImGui::SetScrollX((float)luaL_checknumber(L,1));return 0;}
 static int scroll_y(lua_State* L) {ImGui::SetScrollY((float)luaL_checknumber(L,1));return 0;}
+static int local_cursor(lua_State* L) {return ret(L,ImGui::GetCursorPos());}
+static int same_line(lua_State* L) {ImGui::SameLine();return 0;}
+static int indent(lua_State* L) {ImGui::Indent((float)luaL_checknumber(L,1));return 0;}
+static int unindent(lua_State* L) {ImGui::Unindent((float)luaL_checknumber(L,1));return 0;}
+static int get_scroll_y(lua_State* L) {lua_pushnumber(L,ImGui::GetScrollY());return 1;}
+static int get_scroll_max_y(lua_State* L) {lua_pushnumber(L,ImGui::GetScrollMaxY());return 1;}
 static int style(lua_State* L) {const auto& s=ImGui::GetStyle();lua_pushnumber(L,s.Alpha);lua_pushnumber(L,s.WindowPadding.x);lua_pushnumber(L,s.WindowPadding.y);lua_pushnumber(L,s.WindowMinSize.x);lua_pushnumber(L,s.WindowMinSize.y);lua_pushnumber(L,s.WindowBorderSize);return 6;}
 // File-dialog coverage uses the production REFramework signatures. Keyboard
 // constants come from this ImGui build instead of Win32 virtual-key numbers.
@@ -149,7 +155,8 @@ int main(int argc,char** argv) {
         {"set_cursor_screen_pos",cursor},{"invisible_button",button},{"is_item_active",active},{"is_item_hovered",hover},
         {"get_mouse",mouse},{"get_window_pos",pos},{"get_window_size",size},{"get_display_size",display},{"is_mouse_down",down},
         {"push_style_var",push_var},{"pop_style_var",pop_var},{"push_style_color",push_color},{"pop_style_color",pop_color},
-        {"set_scroll_x",scroll_x},{"set_scroll_y",scroll_y},{nullptr,nullptr}};
+        {"set_scroll_x",scroll_x},{"set_scroll_y",scroll_y},{"get_cursor_pos",local_cursor},{"same_line",same_line},
+        {"indent",indent},{"unindent",unindent},{"get_scroll_y",get_scroll_y},{"get_scroll_max_y",get_scroll_max_y},{nullptr,nullptr}};
     luaL_newlib(L,api);lua_setglobal(L,"native_imgui");
     lua_getglobal(L,"native_imgui");luaL_Reg input_api[]={
         {"text_reset",text_reset},{"input_text",input_text},{"input_snapshot",input_snapshot},{"text_event",text_event},{"key_event",key_event},

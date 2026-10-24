@@ -28,6 +28,7 @@ local alias_count = 0
 local sequence, frame, scene_epoch, scan_cursor, installed_count, generation = 0, 0, 1, 1, 0, 1
 local native_hook_count = 0
 local current_scene, actor, actor_refs, active = nil, {available = false, sceneEpoch = 1}, {}, true
+local scene_manager_type
 local specs = {}
 local action_history, action_slots, current_actions, action_sequence = {}, {}, {}, 0
 local action_context, action_status = nil, "尚未观察角色动画"
@@ -47,10 +48,10 @@ local function safe(fn, ...)
     if ok then return value end
     return nil
 end
+local function invoke(obj, name, ...) return obj:call(name, ...) end
 local function call(obj, name, ...)
     if not obj then return nil end
-    local args = table.pack(...)
-    return safe(function() return obj:call(name, table.unpack(args, 1, args.n)) end)
+    return safe(invoke, obj, name, ...)
 end
 local function field(obj, name) return obj and safe(function() return obj:get_field(name) end) end
 local function identity(obj)
@@ -795,6 +796,14 @@ end
 local function pre(info, args)
     info.preCalls = info.preCalls + 1
     local storage = thread.get_hook_storage()
+    -- Hooks remain installed after recording stops. Reuse a marker while no
+    -- recorded scope is in flight, but preserve real scope barriers if a
+    -- stop/start occurs inside nested callbacks. Keep info for alias counters.
+    if (not active or not M.recording) and next(stacks) == nil then
+        info._idleFrame = info._idleFrame or {info = info, idle = true}
+        storage.MotionVfxActionCapture = info._idleFrame
+        return
+    end
     local tid = tostring(thread.get_id())
     stacks[tid] = stacks[tid] or {}
     local stack = stacks[tid]
@@ -880,6 +889,7 @@ local function post(info, retval)
     local fr = storage.MotionVfxActionCapture
     storage.MotionVfxActionCapture = nil
     if not fr then counters.contextMismatch = counters.contextMismatch + 1; return retval end
+    if fr.idle then return retval end
     local stack = stacks[fr.tid] or {}
     if stack[#stack] == fr then table.remove(stack)
     else
@@ -1017,7 +1027,10 @@ end
 local function update()
     if not active then return end
     frame = frame + 1
-    local td = safe(sdk.find_type_definition, "via.SceneManager")
+    -- Type metadata is stable for this Lua session; the live singleton and
+    -- scene are still read every frame so invalidation is never delayed.
+    scene_manager_type = scene_manager_type or safe(sdk.find_type_definition, "via.SceneManager")
+    local td = scene_manager_type
     local manager = safe(sdk.get_native_singleton, "via.SceneManager")
     local scene = td and manager and safe(sdk.call_native_func, manager, td, "get_CurrentScene")
     local scene_id = identity(scene)

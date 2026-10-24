@@ -55,6 +55,21 @@ local names={
     Play="播放",Stop="停止",Update="更新",EnableUpdate="启用更新",HighPass="高通",LowPass="低通",
 }
 local lower={};for key,value in pairs(names) do lower[key:lower()]=value end
+-- Display strings are immutable. Bound caches independently of open files and
+-- typed values; never cache fields, selection, drafts or search results.
+local label_cache={values={},order={},next=1}
+local search_cache={values={},order={},next=1}
+local function remember(cache,key,value)
+    if #key>4096 then return value end
+    if #cache.order<4096 then cache.order[#cache.order+1]=key
+    else
+        cache.values[cache.order[cache.next]]=nil
+        cache.order[cache.next]=key;cache.next=cache.next%4096+1
+    end
+    cache.values[key]=value;return value
+end
+local bilingual_arguments={["起始值 from"]="from",["结束值 to"]="to",["输入 t"]="t",["输入 value"]="value",
+    ["下限 lo"]="lo",["上限 hi"]="hi",["起点 lo"]="lo",["终点 hi"]="hi"}
 function M.chinese(raw)
     raw=tostring(raw or "")
     if names[raw] or lower[raw:lower()] then return names[raw] or lower[raw:lower()] end
@@ -66,17 +81,23 @@ function M.chinese(raw)
 end
 function M.label(raw,language)
     raw=tostring(raw or "")
+    local key=(language=="en" and "en:" or "zh:")..raw
+    if label_cache.values[key]~=nil then return label_cache.values[key] end
     -- Legacy expression metadata supplies bilingual argument names.
-    for cn,en in pairs({["起始值 from"]="from",["结束值 to"]="to",["输入 t"]="t",["输入 value"]="value",
-        ["下限 lo"]="lo",["上限 hi"]="hi",["起点 lo"]="lo",["终点 hi"]="hi"}) do raw=raw:gsub(cn,en) end
-    if language=="en" then return raw end
+    for cn,en in pairs(bilingual_arguments) do raw=raw:gsub(cn,en) end
+    if language=="en" then return remember(label_cache,key,raw) end
     local cn=M.chinese(raw)
-    return cn~=raw and (cn.."（"..raw.."）") or raw
+    return remember(label_cache,key,cn~=raw and (cn.."（"..raw.."）") or raw)
 end
 function M.search(raw,filter)
+    if filter=="" then return true end
     raw=tostring(raw or "")
-    local words=raw:gsub("[%w_]+",function(word) return M.chinese(word) end)
-    return (raw.." "..M.chinese(raw).." "..words):lower():find(filter,1,true)~=nil
+    local text=search_cache.values[raw]
+    if not text then
+        local words=raw:gsub("[%w_]+",function(word) return M.chinese(word) end)
+        text=remember(search_cache,raw,(raw.." "..M.chinese(raw).." "..words):lower())
+    end
+    return text:find(filter,1,true)~=nil
 end
 local function numeric(field)
     return field and type(field.type)=="string" and field.type:match("^System%.") and

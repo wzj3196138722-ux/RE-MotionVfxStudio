@@ -39,6 +39,7 @@ internal static class SelfTests
         try
         {
             await ProtocolTests();
+            await EmbeddedTargetTests();
             await MailboxTests(temporaryRoot);
             await TransportTests(temporaryRoot);
             Console.WriteLine("PASS: " + checks + " MCP checks; fake Lua mailbox only, no live game access. Fixtures: " + temporaryRoot);
@@ -120,6 +121,43 @@ internal static class SelfTests
         var fallback = new McpServer(new FakeBridge());
         Check((await fallback.Handle(Rpc(1, "initialize", new() { ["protocolVersion"] = "2099-01-01" }).ToJsonString()))!["result"]!["protocolVersion"]!.GetValue<string>() == McpServer.ProtocolVersion,
             "Unknown protocols negotiate an explicitly supported version without claiming modern support");
+    }
+
+    private static async Task EmbeddedTargetTests()
+    {
+        var bridge = new FakeBridge(); var server = new McpServer(bridge); await Initialize(server);
+        JsonObject Hop() => new() { ["kind"] = "action", ["index"] = 0, ["attributeIndex"] = 0 };
+        JsonObject Target() => new() { ["kind"] = "entry", ["index"] = 1, ["attributeIndex"] = 4, ["embeddedPath"] = new JsonArray(Hop()) };
+        int id = 200;
+        foreach (string action in new[] { "inspect", "set_field", "set_color" })
+        {
+            var arguments = new JsonObject { ["target"] = Target(), ["expectedRevision"] = 12 };
+            if (action != "inspect") arguments["path"] = "Color";
+            if (action == "set_field") arguments["value"] = "1";
+            if (action == "set_color") arguments["values"] = new JsonArray(1, 2, 3, 255);
+            var response = await server.Handle(Tool(id++, action, arguments).ToJsonString());
+            Check(response!["result"]!["isError"]!.GetValue<bool>() == false &&
+                JsonNode.DeepEquals(response["result"]!["structuredContent"]!["result"]!["arguments"]!["target"], arguments["target"]),
+                "Embedded target is preserved by " + action);
+        }
+        var invalid = new List<JsonObject>();
+        var missing = Target(); missing["embeddedPath"]![0]!.AsObject().Remove("attributeIndex"); invalid.Add(missing);
+        var negative = Target(); negative["embeddedPath"]![0]!["index"] = -1; invalid.Add(negative);
+        var kind = Target(); kind["embeddedPath"]![0]!["kind"] = "document"; invalid.Add(kind);
+        var extra = Target(); extra["embeddedPath"]![0]!["unknown"] = true; invalid.Add(extra);
+        var shape = Target(); shape["embeddedPath"] = new JsonObject(); invalid.Add(shape);
+        var depth = Target(); depth["embeddedPath"] = new JsonArray(Enumerable.Range(0, 17).Select(_ => (JsonNode)Hop()).ToArray()); invalid.Add(depth);
+        var group = Target(); group["kind"] = "group"; invalid.Add(group);
+        foreach (var target in invalid)
+        {
+            int calls = bridge.Calls;
+            var response = await server.Handle(Tool(id++, "inspect", new() { ["target"] = target, ["expectedRevision"] = 12 }).ToJsonString());
+            Check(response!["error"]!["code"]!.GetValue<int>() == -32602 && bridge.Calls == calls,
+                "Invalid nested target is rejected before touching the bridge: " + id);
+        }
+        var limit = Target(); limit["embeddedPath"] = new JsonArray(Enumerable.Range(0, 16).Select(_ => (JsonNode)Hop()).ToArray());
+        Check((await server.Handle(Tool(id++, "inspect", new() { ["target"] = limit, ["expectedRevision"] = 12 }).ToJsonString()))!["result"]!["isError"]!.GetValue<bool>() == false,
+            "The supported sixteen-level target is accepted");
     }
 
     private static async Task MailboxTests(string temporaryRoot)

@@ -62,6 +62,8 @@ local function load_new()
     package.loaded["MotionVfxLive.fx_debug_hotkeys"] = nil
     package.loaded["MotionVfxLive.fx_d2d_widgets"] = nil
     package.loaded["MotionVfxLive.fx_d2d_workbench"] = nil
+    package.loaded["MotionVfxLive.fx_ai_bridge"] = nil
+    _G.MotionVfxAiBridge = nil
     package.loaded["MotionVfxLive.fx_precache_runtime"] = nil
     package.loaded["MotionVfxLive.fx_parameter_ui"] = nil
     package.loaded["MotionVfxLive.fx_action_sources"] = nil

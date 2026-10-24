@@ -1,7 +1,8 @@
+param([string]$LuaRunner)
 $ErrorActionPreference = 'Stop'
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $workspaceRoot = Split-Path $projectRoot -Parent
-$runner = Join-Path $PSScriptRoot 'lua-runner.exe'
+$runner = if ($LuaRunner) { [IO.Path]::GetFullPath($LuaRunner) } else { Join-Path $PSScriptRoot 'lua-runner.exe' }
 $testScript = Join-Path $PSScriptRoot 'live-ui-tests.lua'
 $mainScript = Join-Path $projectRoot 'game-plugin/MotionVfxLive.lua'
 $reloadSource = Get-Content -LiteralPath (Join-Path $projectRoot 'game-plugin/手动重载MotionVfxLive.lua') -Raw

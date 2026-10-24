@@ -179,7 +179,7 @@ REFRAMEWORK_ROOT to an equivalent API/Lua source checkout.
 '@
 [IO.File]::WriteAllText((Join-Path $stage 'Source/README.md'),$sourceReadme,[Text.UTF8Encoding]::new($false))
 $mcpVersion=& (Join-Path $stage 'mcp/VfxStudio.Mcp.exe') --version
-if($LASTEXITCODE -ne 0 -or $mcpVersion -ne '0.1.2'){throw 'The current UI requires MCP 0.1.2. Rebuild the published cache.'}
+if($LASTEXITCODE -ne 0 -or $mcpVersion -ne '0.1.3'){throw 'The current UI requires MCP 0.1.3. Rebuild the published cache.'}
 $backendSource=[IO.File]::ReadAllText((Join-Path $projectRoot 'VfxStudio.LiveEditor/Program.cs'))
 $backendVersion=[regex]::Match($backendSource,'const string Version = "([^"]+)"').Groups[1].Value
 if(-not $backendVersion){throw 'Cannot identify backend version.'}

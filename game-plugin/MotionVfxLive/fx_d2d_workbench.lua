@@ -977,19 +977,25 @@ function M.new(core,widgets,pfb_factory,file_dialog_factory)
                     -- Keep every existing typed field, expression curve and RGBA transaction.
                     adapter(core.ui_fields)
                     if s.selected then
-                        for _,field in ipairs(s.fields or {}) do
+                        if self.path_fields_source~=s.fields then
+                            self.path_fields_source=s.fields;self.path_fields={}
+                            for _,field in ipairs(s.fields or {}) do
                             if field.editable and (field.type=="System.String") and
                                 (tostring(field.value):match("%.[a-z]+$") or field.path:lower():find("path",1,true)) then
+                                self.path_fields[#self.path_fields+1]=field
+                            end
+                            end
+                        end
+                        for _,field in ipairs(self.path_fields) do
                                 button("usecache"..field.path,"从预缓存选择："..core.parameter_label(field.path),300,function()
                                     self.path_target=field.path;self.top="cache";refresh_cache()
                                 end)
-                            end
                         end
                     end
                 end
                 if narrow then
                     local selected=s.selected
-                    local key=selected and (tostring(selected.kind)..":"..tostring(selected.index)..":"..tostring(selected.attributeIndex))
+                    local key=selected and core.target_key(selected)
                     if key~=self.narrow_selection then self.narrow_selection=key;self.narrow_pane=key and "properties" or "structure" end
                     local pane=self.narrow_pane or "structure"
                     if u:button("##narrow_structure","特效块与属性",px,py,160*k,34*k,pane=="structure" and "selected") then self.narrow_pane="structure";pane="structure" end

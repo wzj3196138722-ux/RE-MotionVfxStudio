@@ -515,6 +515,16 @@ function M.apply(original,generated,callback)
 end
 function M.restore_all(callback) return enqueue("restore",nil,nil,callback) end
 function M.shutdown(callback) return enqueue("shutdown",nil,nil,callback) end
+function M.current_status()
+    -- The per-frame safety gate only needs scalars. Recount the live backup
+    -- tables, including state migrated by RepairBindings, without building
+    -- resource maps or copying detailed transaction/restore diagnostics.
+    counts()
+    return {busy=state.busy,appliedCount=state.appliedCount,
+        requiresRestoreBeforeReset=state.requiresRestoreBeforeReset,
+        requiresRestart=state.requiresRestart,contextInvalid=state.contextInvalid,
+        phase=state.phase,expiredBackupCount=state.expiredBackupCount}
+end
 function M.snapshot()
     counts(); local n=0;for _ in pairs(session_overrides) do n=n+1 end
     state.sessionResourceCount=n

@@ -5,7 +5,7 @@ namespace VfxStudio.Mcp;
 
 internal sealed class McpServer(IEditorBridge bridge)
 {
-    public const string Version = "0.1.2";
+    public const string Version = "0.1.3";
     public const string ProtocolVersion = "2025-11-25";
     private static readonly string[] SupportedVersions = [ProtocolVersion, "2025-06-18", "2024-11-05"];
     private readonly string session = Guid.NewGuid().ToString("N");

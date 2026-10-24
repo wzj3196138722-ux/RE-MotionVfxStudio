@@ -125,6 +125,7 @@ local function setup(inherited_alpha)
     end
     return c
 end
+if arg[3]=="export-environment" then return setup end
 local function fixture(c)
     local s=c.module.state
     s.document={name="11_it02_000.efx",source="fixture/11_it02_000.efx.5571972",revision=8,dirty=false,
@@ -683,5 +684,18 @@ do
     c:click("##mvl_files_submit");c:draw();c:draw()
     local request=c.files["MotionVfxLive/request.json"]
     check(request.action=="finish_export" and #request.destinations==1 and request.destinations[1].key=="pfb" and request.destinations[1].expectedHash=="ABCDEF","Only the selected file exports with the verified existing-file hash")
+end
+do
+    local c=setup();c.module.poll();c.bench.page="edit";c.bench.window_size={w=900,h=650}
+    c.module.state.document=assert(loadfile(project.."/tools/LuaValidation/playemitter-ui-fixture.lua"))()
+    c:draw()
+    local first=c.module.state.document.actions[1].attributes[1].embedded.entries[1].attributes[6].target
+    c.module.inspect(first);c:respond({ok=true,fields={}});c:draw()
+    check(c.bench.narrow_pane=="properties","Embedded attribute selection opens the D2D narrow properties pane")
+    local before=c.bench.narrow_selection
+    c:click("##narrow_structure")
+    local second={kind=first.kind,index=first.index,attributeIndex=first.attributeIndex,embeddedPath={{kind="action",index=1,attributeIndex=0}}}
+    c.module.inspect(second);c:respond({ok=true,fields={}});c:draw()
+    check(c.bench.narrow_pane=="properties" and before~=c.bench.narrow_selection,"Different outer Action with identical inner indices reopens its own D2D properties pane")
 end
 print("RESULT "..passed.." D2D/precache assertions passed; no game calls")

@@ -10,6 +10,23 @@ local ORIGINAL="Art/VFX/EffectEditor/Weapon/it03/test.efx"
 local OTHER="Art/VFX/EffectEditor/Weapon/it03/other.efx"
 local NEW="Art/VFX/EffectEditor/MotionVfxLive/session/rev1.efx"
 local NEW2="Art/VFX/EffectEditor/MotionVfxLive/session/rev2.efx"
+local function status_matches(module)
+    local current=module.current_status();local snapshot=module.snapshot()
+    for _,key in ipairs({"busy","appliedCount","requiresRestoreBeforeReset","requiresRestart","contextInvalid","phase","expiredBackupCount"}) do
+        eq(current[key],snapshot[key],"current status: "..key)
+    end
+    for _,value in pairs(current) do eq(type(value)~="table",true,"status is scalar-only") end
+end
+local function find_upvalue(fn,wanted,seen)
+    seen=seen or {};if seen[fn] then return nil end;seen[fn]=true
+    for i=1,100 do
+        local name,value=debug.getupvalue(fn,i);if not name then break end
+        if name==wanted then return value end
+        if type(value)=="function" and name~="_ENV" then
+            local found=find_upvalue(value,wanted,seen);if found~=nil then return found end
+        end
+    end
+end
 local function env_new()
     local c={nextAddress=1000,sceneId=10,characterId=20,weaponId=30,equip=2,model=4,weaponType=3,
         callbacks={},providers={},components={},captured={},objects={},resources={},raws={},writes={},flagsWrites={},aliases={},clock=100,providerReads=0,sceneScanCount=0}
@@ -203,7 +220,9 @@ local function env_new()
     c.module=assert(loadfile(source,"t",env))(); c.env=env
     assert(c.module.configure({capture=c.capture}))
     function c:tick()
+        status_matches(self.module)
         self.in_callback=true; self.callbacks.LockScene(); self.in_callback=false
+        status_matches(self.module)
     end
     function c:finish()
         for _=1,10 do self:tick(); if not self.module.snapshot().busy then return end end
@@ -764,6 +783,37 @@ test("session override follows newly loaded references after equipment changes a
     eq(c:restore().ok,true);eq(nextProvider.slots[1].resource.path,ORIGINAL);eq(first.slots[1].resource.path,ORIGINAL)
     local later=c:provider({ORIGINAL});c:component({later});for _=1,120 do c:tick() end
     eq(later.slots[1].resource.path,ORIGINAL);eq(c.module.snapshot().sessionResourceCount,0)
+end)
+test("current status observes migrated backup tables immediately and returns independent scalars",function()
+    local c=env_new();status_matches(c.module)
+    local records=assert(find_upvalue(c.module.snapshot,"records"))
+    local retained=assert(find_upvalue(c.module.snapshot,"retained"))
+    local expired=assert(find_upvalue(c.module.snapshot,"expired_records"))
+    records["migrated:0"]={};local s=c.module.current_status()
+    eq(s.appliedCount,1);eq(s.requiresRestoreBeforeReset,true);status_matches(c.module)
+    records["migrated:0"]=nil;retained[1]={};s=c.module.current_status()
+    eq(s.appliedCount,0);eq(s.requiresRestoreBeforeReset,true);status_matches(c.module)
+    retained[1]=nil;expired[1]={};s=c.module.current_status()
+    eq(s.expiredBackupCount,1);eq(s.requiresRestoreBeforeReset,true);status_matches(c.module)
+    expired[1]=nil;s=c.module.current_status();eq(s.requiresRestoreBeforeReset,false)
+    s.appliedCount=100;s.busy=true;eq(c.module.current_status().appliedCount,0);eq(c.module.current_status().busy,false)
+end)
+test("scalar status avoids full session-resource snapshots in the frame safety gate",function()
+    local c=env_new();local resources=assert(find_upvalue(c.module.snapshot,"session_overrides"))
+    local records=assert(find_upvalue(c.module.snapshot,"records"))
+    for i=1,512 do resources["art/vfx/test_"..i..".efx"]={generated=NEW..i};records[i]={} end
+    local function measure(name,read)
+        collectgarbage("collect");collectgarbage("stop")
+        local memory,started=collectgarbage("count"),os.clock()
+        for _=1,600 do local s=read();eq(s.appliedCount,512);eq(s.requiresRestoreBeforeReset,true);eq(s.busy,false) end
+        local seconds,allocated=os.clock()-started,collectgarbage("count")-memory
+        collectgarbage("restart")
+        print(("PERF %s iterations=600 resources=512 lua_seconds=%.6f allocated_kib=%.3f"):format(name,seconds,allocated))
+        return allocated
+    end
+    local full=measure("bindings_snapshot",c.module.snapshot)
+    local current=measure("bindings_current_status",c.module.current_status)
+    eq(current<full/5,true,"scalar read removes most allocation");status_matches(c.module)
 end)
 print(string.format("RESULT action bindings: %d passed, %d failed, %d assertions",passed,failed,assertions))
 if failed>0 then error("action binding regression failed") end
