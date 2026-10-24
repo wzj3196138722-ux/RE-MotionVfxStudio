@@ -56,6 +56,8 @@ These tools informed format research, editing workflows or runtime investigation
 - **[re-engine-mcp](https://github.com/praydog/re-engine-mcp) — praydog**。开发期间的游戏对象和接口观察工具。本项目的 MotionVfx MCP 提供自己的编辑器级工具，不将上游的任意游戏对象操作接口作为本版功能。/ Used for inspecting game objects and APIs during development. MotionVfx MCP exposes its own editor-level tools, not the upstream server's arbitrary game-object operations.
 - **[REE-Content-Editor](https://github.com/kagenocookie/REE-Content-Editor) — shadowcookie / kagenocookie and contributors**。作为 RE Engine 文件编辑参考，并提供本工作区使用的 RE-Engine-Lib 上游来源。/ A reference for RE Engine file editing and the upstream RE-Engine-Lib source available in the development materials.
 
+- **[MDF-XL — SilverEzredes](https://github.com/SilverEzredes/MDF-XL)**：0.8.6 增加与已安装 MDF-XL 1.5.36 的局部帧回调兼容处理。发布包仅包含本项目编写的保护与备份工具，不分发 MDF-XL 原始脚本、配置或材质预设。/ Version 0.8.6 adds a scoped frame-callback compatibility guard for an existing MDF-XL 1.5.36 installation. Only the guard and backup tooling are included; MDF-XL's original script, settings and material presets are not redistributed.
+
 感谢参与实机测试、反馈问题及研究 RE Engine 文件格式的社区成员。游戏和相关资产仍属于各自权利人，不在本项目安装器中分发。
 
 Thanks also to community members who tested the editor, reported problems and researched RE Engine formats. The game and its assets remain the property of their respective rights holders and are not included in this installer.

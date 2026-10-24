@@ -4,7 +4,7 @@
 
 **在《怪物猎人 荒野》中，直接编辑角色动作真正触发的特效。**
 
-[English](README.en.md) · [使用教程](docs/tutorials.zh-CN.md) · [下载 0.8.5 安装器](https://github.com/wzj3196138722-ux/RE-MotionVfxStudio/releases/tag/v0.8.5)
+[English](README.en.md) · [使用教程](docs/tutorials.zh-CN.md) · [下载 0.8.6 安装器](https://github.com/wzj3196138722-ux/RE-MotionVfxStudio/releases/tag/v0.8.6)
 
 MotionVfx Live 是基于 REFramework 与 REFramework D2D 的游戏内特效编辑器。先记录角色动作及特效调用，定位 EFX 文件，再编辑参数、热重载并在原动作中观察变化。预览由游戏自身的引擎完成，适合制作和调整特效 MOD。
 
@@ -30,7 +30,7 @@ MotionVfx Live 是基于 REFramework 与 REFramework D2D 的游戏内特效编�
 
 需要 Windows x64、《怪物猎人 荒野》和适用于当前游戏版本的 [REFramework](https://github.com/praydog/REFramework/releases)。启用 REFramework 的 **Loose File Loader**。
 
-1. 从 [Releases](https://github.com/wzj3196138722-ux/RE-MotionVfxStudio/releases/tag/v0.8.5) 下载 `MotionVfxLive-0.8.5-Setup.exe`。
+1. 从 [Releases](https://github.com/wzj3196138722-ux/RE-MotionVfxStudio/releases/tag/v0.8.6) 下载 `MotionVfxLive-0.8.6-Setup.exe`。
 2. 正常退出游戏，运行安装器，确认包含 `MonsterHunterWilds.exe` 的游戏目录。
 3. 点击「一键安装」或「一键更新」。同版本可选择修复安装。
 4. 安装完成后后台已启动；进入游戏，通过 **REFramework → Script Generated UI → MotionVfx Live** 打开编辑器。

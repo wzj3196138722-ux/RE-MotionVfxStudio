@@ -7,6 +7,9 @@ $OutputRoot=[IO.Path]::GetFullPath($OutputRoot)
 $uiSource=[IO.File]::ReadAllText((Join-Path $projectRoot 'game-plugin/MotionVfxLive.lua'))
 $uiVersion=[regex]::Match($uiSource,'local M = \{ version = "([^"]+)"').Groups[1].Value
 if(-not $uiVersion){throw 'Cannot identify the UI version.'}
+if(Test-Path -LiteralPath (Join-Path $projectRoot 'game-plugin/MotionVfxLive/fx_json_reader.lua')){
+    throw 'The unpublished fx_json_reader.lua draft must not be included in a release source tree.'
+}
 $name='MotionVfxLive-'+$uiVersion+'-win-x64'
 $stage=Join-Path $OutputRoot $name
 $cache=Join-Path $PSScriptRoot 'build-cache'
@@ -58,6 +61,31 @@ foreach($item in $pluginSources){
     }
 }
 foreach($item in $pluginSources){Copy-Prepared $item.source ('plugin/'+$item.target)}
+# The normal installer invokes this compatibility tool when MDF-XL is present.
+# Ship only our guard/tool, never the third-party MDF-XL script or its user data.
+foreach($compatibilityName in @('Apply-MdfxlCompatibility.ps1','MDF-XL-frame-guard.lua')){
+    $source=Join-Path $projectRoot ('tools/MdfxlCompatibility/'+$compatibilityName)
+    Copy-Prepared $source ('compatibility/MDFXL/'+$compatibilityName)
+    Copy-Prepared $source ('Source/tools/MdfxlCompatibility/'+$compatibilityName)
+}
+$compatibilityReadme=@'
+# MDF-XL compatibility / MDF-XL 兼容
+
+MotionVfx Live's normal installer uses this component for a supported existing
+MDF-XL installation. No separate compatibility package needs to be installed.
+It preserves the original MDF-XL.lua bytes and verifies their SHA256 before
+patching or restoring. MDF settings, presets and REFramework are not replaced.
+The Lua guard belongs inside the supported MDF-XL chunk; do not copy it to autorun.
+
+正式安装器会处理已安装且受支持的 MDF-XL，无需另装修复包。
+原始 MDF-XL.lua 按字节备份并通过 SHA256 核对；保留其配置、预设及 REFramework。
+此 Lua 文件是局部保护代码，不是独立的 autorun 脚本，请勿手动放入 autorun。
+
+This package contains only MotionVfx Live's compatibility code, not MDF-XL source.
+Thanks to SilverEzredes for MDF-XL and praydog and contributors for REFramework.
+本包不分发 MDF-XL 原始代码。感谢 MDF-XL 作者 SilverEzredes 及 REFramework 的作者和贡献者。
+'@
+[IO.File]::WriteAllText((Join-Path $stage 'compatibility/MDFXL/README.md'),$compatibilityReadme,[Text.UTF8Encoding]::new($false))
 Copy-Prepared (Join-Path $projectRoot 'third-party/reframework-d2d/package/reframework/plugins/reframework-d2d.dll') 'native/reframework-d2d.dll'
 Copy-Prepared (Join-Path $projectRoot 'third-party/reframework-d2d/package/reframework/autorun/reframework-d2d.lua') 'plugin/reframework-d2d.lua'
 Copy-Prepared (Join-Path $projectRoot 'third-party/reframework-d2d/LICENSE') 'licenses/REFramework-D2D-LICENSE.txt'
@@ -131,6 +159,8 @@ $sourceReadme=@'
 # Source
 
 This directory contains the corresponding C# and native input source. Lua source is in ../plugin.
+The scoped MDF-XL compatibility tool and Lua guard are in tools/MdfxlCompatibility.
+They are integrated into the normal installer; no third-party MDF-XL source is included.
 Build with the .NET SDK: dotnet build VfxStudio.LiveEditor -c Release
 For self-contained binaries, use the .NET 10 SDK and publish with
 --self-contained true -r win-x64 -p:MotionVfxPortable=true.
@@ -153,7 +183,7 @@ if($LASTEXITCODE -ne 0 -or $mcpVersion -ne '0.1.2'){throw 'The current UI requir
 $backendSource=[IO.File]::ReadAllText((Join-Path $projectRoot 'VfxStudio.LiveEditor/Program.cs'))
 $backendVersion=[regex]::Match($backendSource,'const string Version = "([^"]+)"').Groups[1].Value
 if(-not $backendVersion){throw 'Cannot identify backend version.'}
-$release=[ordered]@{name='MotionVfx Live';version=$uiVersion;backendVersion=$backendVersion;mcpVersion=$mcpVersion;debugInputVersion='1.1.0';d2dVersion='1.4.1';aiProtocol=1;runtime='self-contained .NET 10.0.8 win-x64';builtAtUtc=[DateTimeOffset]::UtcNow.ToString('o');prerequisites=@('Monster Hunter Wilds','REFramework with Lua support');containsGameAssets=$false}
+$release=[ordered]@{name='MotionVfx Live';version=$uiVersion;backendVersion=$backendVersion;mcpVersion=$mcpVersion;debugInputVersion='1.1.0';d2dVersion='1.4.1';mdfxlCompatibilityVersion='1.0.0';aiProtocol=1;runtime='self-contained .NET 10.0.8 win-x64';builtAtUtc=[DateTimeOffset]::UtcNow.ToString('o');prerequisites=@('Monster Hunter Wilds','REFramework with Lua support');containsGameAssets=$false}
 [IO.File]::WriteAllText((Join-Path $stage 'release.json'),($release|ConvertTo-Json -Depth 5),[Text.UTF8Encoding]::new($false))
 $schema=& (Join-Path $stage 'mcp/VfxStudio.Mcp.exe') --tools-schema
 if($LASTEXITCODE -ne 0){throw 'Packaged MCP did not start.'}

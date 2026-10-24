@@ -31,6 +31,8 @@ internal static class InstallerTests
             File.WriteAllText(Path.Combine(game, "dinput8.dll"), "Existing REFramework marker, never loaded.");
             string old = InstallEngine.Child(game, "reframework/autorun/MotionVfxLive.lua"); Directory.CreateDirectory(Path.GetDirectoryName(old)!);
             File.WriteAllText(old, "old lua content");
+            string mdfxl = InstallEngine.Child(game, "reframework/autorun/MDF-XL.lua");
+            File.WriteAllText(mdfxl, MdfxlFixtureSource()); string mdfxlOriginalHash = InstallEngine.Hash(mdfxl);
             string note = InstallEngine.Child(game, "reframework/data/MotionVfxLive/group-notes.json"); Directory.CreateDirectory(Path.GetDirectoryName(note)!);
             File.WriteAllText(note, "{\"note\":\"用户中文备注\"}"); string noteHash = InstallEngine.Hash(note);
             var untouched = new Dictionary<string, string>();
@@ -46,8 +48,12 @@ internal static class InstallerTests
             Check(File.ReadAllText(old) == "old lua content", "Partial installation restores overwritten files");
             Check(!File.Exists(InstallEngine.Child(game, "reframework/data/MotionVfxLive/Reload.lua")), "Partial installation removes newly added program files");
             Check(InstallEngine.Hash(note) == noteHash, "Rollback preserves unrelated user notes");
+            Check(InstallEngine.Hash(mdfxl) == mdfxlOriginalHash && !File.Exists(mdfxl + ".motionvfx-compat.bak"), "Failed editor installation does not start third-party compatibility patching");
             result = InstallEngine.Install(game, app, false, (_, _) => { }, register: false);
             Check(result.BackendReady, "Self-contained backend starts from Chinese and space-containing paths");
+            Check(result.MdfxlCompatibility == "applied" && result.CompatibilityWarning == null && InstallEngine.Hash(mdfxl + ".motionvfx-compat.bak") == mdfxlOriginalHash,
+                "Normal installation automatically patches supported MDF-XL and preserves the original backup");
+            CheckMdfxlCompatibility(output, result.Package, Check);
             InstallEngine.ValidatePluginMap(result.Package);
             Check(true, "Every packaged production Lua module is covered by the installer map");
             foreach (var item in InstallEngine.PluginMap())
@@ -77,6 +83,8 @@ internal static class InstallerTests
             File.WriteAllText(old, "second installed lua sentinel");
             result = InstallEngine.Install(game, app, false, (_, _) => { }, register: false);
             Check(result.BackendReady, "Reinstall safely replaces and restarts the installed backend");
+            Check(result.MdfxlCompatibility == "applied" && result.CompatibilityWarning == null && InstallEngine.Hash(mdfxl + ".motionvfx-compat.bak") == mdfxlOriginalHash,
+                "Reinstallation keeps MDF-XL compatible without replacing its original backup");
             if (fixture != null)
             {
                 var restored = Backend.Send(InstallEngine.Child(game, "reframework/data/MotionVfxLive"), new() { ["action"] = "status" });
@@ -96,6 +104,57 @@ internal static class InstallerTests
         }
         catch (Exception ex) { InstallEngine.Atomic(report, new { passed = false, checks, error = ex.ToString() }); return 1; }
         finally { if (result != null) try { InstallEngine.RunScript(result.Package, "Stop-Backend.ps1"); } catch { } }
+    }
+    private static string MdfxlFixtureSource() => """
+        local modName = "MDF-XL"
+        local modAuthor = "SilverEzredes"
+        local modVersion = "v1.5.36"
+        -- isolated installation fixture, never loaded into a game
+        re.on_frame(function() end)
+        """;
+    internal static void CheckMdfxlCompatibility(string output, string package, Action<bool, string> check)
+    {
+        string area = InstallEngine.Child(output, "mdfxl-compatibility"), game = InstallEngine.Child(area, "模拟游戏 $ ' [路径]");
+        Directory.CreateDirectory(game);
+        File.WriteAllText(InstallEngine.Child(game, "MonsterHunterWilds.exe"), "Not an executable; never launched.");
+        var logs = new List<string>();
+        var absent = InstallEngine.ApplyMdfxlCompatibility(package, game, logs.Add);
+        check(absent.Status == "not_present" && !Directory.Exists(InstallEngine.Child(game, "reframework")), "No MDF-XL installation is skipped without creating or changing mod files");
+        check(!InstallEngine.PluginMap().Any(p => p.Target.Contains("MDF-XL", StringComparison.OrdinalIgnoreCase)) &&
+            InstallEngine.PreviousGameTarget("plugin/MDF-XL.lua") == null, "Third-party MDF-XL and its backups never enter the editor-owned cleanup map");
+        string target = InstallEngine.Child(game, "reframework/autorun/MDF-XL.lua");
+        Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+        File.WriteAllText(target, MdfxlFixtureSource().Replace("v1.5.36", "v9.9.9"));
+        string originalHash = InstallEngine.Hash(target);
+        var unknown = InstallEngine.ApplyMdfxlCompatibility(package, game, logs.Add);
+        check(unknown.Status == "not_applied" && unknown.Message.Contains("兼容修复未应用") && InstallEngine.Hash(target) == originalHash && !File.Exists(target + ".motionvfx-compat.bak"),
+            "Unknown MDF-XL versions produce a visible compatibility warning and retain exact user bytes");
+        File.WriteAllText(target, MdfxlFixtureSource()); originalHash = InstallEngine.Hash(target);
+        string settings = InstallEngine.Child(game, "reframework/data/MDF-XL.json"); Directory.CreateDirectory(Path.GetDirectoryName(settings)!);
+        File.WriteAllText(settings, "{\"user_setting\":42}"); string settingsHash = InstallEngine.Hash(settings);
+        var applied = InstallEngine.ApplyMdfxlCompatibility(package, game, logs.Add);
+        check(applied.Status == "applied" && InstallEngine.Hash(target + ".motionvfx-compat.bak") == originalHash &&
+            File.ReadAllText(target).Contains("-- BEGIN MotionVfxLive MDF-XL compatibility v1"), "Installer automatically invokes the verified helper for supported MDF-XL");
+        string installedHash = InstallEngine.Hash(target), metadataHash = InstallEngine.Hash(target + ".motionvfx-compat.json");
+        var repeated = InstallEngine.ApplyMdfxlCompatibility(package, game, logs.Add);
+        check(repeated.Status == "applied" && InstallEngine.Hash(target) == installedHash && InstallEngine.Hash(target + ".motionvfx-compat.json") == metadataHash,
+            "Repeated installer compatibility checks are idempotent");
+        File.AppendAllText(target, "\n-- later user customization\n"); string changedHash = InstallEngine.Hash(target);
+        var changed = InstallEngine.ApplyMdfxlCompatibility(package, game, logs.Add);
+        check(changed.Status == "not_applied" && InstallEngine.Hash(target) == changedHash && InstallEngine.Hash(target + ".motionvfx-compat.bak") == originalHash,
+            "Later user modifications are retained and reported as compatibility not applied");
+        File.WriteAllText(target + ".motionvfx-compat.json", "{ invalid JSON");
+        var corrupt = InstallEngine.ApplyMdfxlCompatibility(package, game, logs.Add);
+        check(corrupt.Status == "not_applied" && InstallEngine.Hash(target) == changedHash && InstallEngine.Hash(target + ".motionvfx-compat.bak") == originalHash,
+            "Damaged compatibility metadata cannot trigger an overwrite or a false success");
+        check(InstallEngine.Hash(settings) == settingsHash, "Installer compatibility checks preserve MDF-XL user settings");
+        string incomplete = InstallEngine.Child(area, "incomplete-package"); Directory.CreateDirectory(incomplete);
+        bool missingBlocked = false;
+        try { InstallEngine.ValidateCompatibilityPackage(incomplete); } catch (IOException ex) { missingBlocked = ex.Message.Contains("兼容组件"); }
+        check(missingBlocked, "Incomplete compatibility payloads fail installation preflight");
+        var missing = InstallEngine.ApplyMdfxlCompatibility(incomplete, game, logs.Add);
+        check(missing.Status == "not_applied" && InstallEngine.Hash(target) == changedHash, "A missing compatibility helper is surfaced without modifying the third-party script");
+        check(logs.Any(s => s.Contains("v1.5.36")) && logs.Any(s => s.Contains("兼容修复未应用")), "Compatibility diagnostics include helper validation details and explicit failure status");
     }
     private static void CheckPowerShellEnvironment(string output, Action<bool, string> check)
     {

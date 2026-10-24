@@ -21,7 +21,7 @@ internal static class Program
                 string game = Value("--game-root") ?? throw new ArgumentException("--game-root is required");
                 var result = InstallEngine.Install(game, Value("--install-root") ?? InstallEngine.DefaultRoot(game), !args.Contains("--no-shortcut"), (_, _) => { });
                 if (Value("--result") is string report) InstallEngine.Atomic(report, result);
-                return result.BackendReady ? 0 : 3;
+                return !result.BackendReady ? 3 : result.CompatibilityWarning != null ? 4 : 0;
             }
             string appRoot = Path.GetDirectoryName(Environment.ProcessPath)!;
             if (args.Contains("--start") || (!args.Contains("--setup") && File.Exists(Path.Combine(appRoot, "installation.json"))))
@@ -120,7 +120,11 @@ internal sealed class SetupWindow : Form
             result = await Task.Run(() => InstallEngine.Install(path, InstallEngine.DefaultRoot(path), createShortcut,
                 (percent, message) => ((IProgress<(int, string)>)observer).Report((percent, message))));
             install.Text = "打开安装目录";
-            status.Text = result.BackendReady ? "安装完成！后台已就绪。之后双击桌面入口即可启动编辑器。" : "文件已安装，后台未就绪。请打开安装目录查看日志。";
+            status.Text = result.CompatibilityWarning != null
+                ? "编辑器已安装，但 MDF-XL 兼容修复未应用。请打开安装目录查看日志。"
+                : result.BackendReady ? "安装完成！后台已就绪。之后双击桌面入口即可启动编辑器。" : "文件已安装，后台未就绪。请打开安装目录查看日志。";
+            if (result.CompatibilityWarning != null)
+                MessageBox.Show(this, result.CompatibilityWarning, "MDF-XL 兼容提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
         catch (Exception ex) { status.Text = "安装未完成，可修正后重试。"; MessageBox.Show(this, ex.GetBaseException().Message, "安装未完成", MessageBoxButtons.OK, MessageBoxIcon.Error); }
         finally { busy = false; install.Enabled = true; if (result == null) browse.Enabled = game.Enabled = shortcut.Enabled = true; }

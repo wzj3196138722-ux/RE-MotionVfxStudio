@@ -4,7 +4,7 @@
 -- unique game resource paths; this script never overwrites an original EFX.
 if _G.MotionVfxLive then return _G.MotionVfxLive end
 
-local M = { version = "0.8.5", active = false }
+local M = { version = "0.8.6", active = false }
 local imgui = imgui -- Renderer substitution is local to this editor only.
 local workbench, precache_runtime, action_preview, pfb_preview
 local pfb_preview_generation=0

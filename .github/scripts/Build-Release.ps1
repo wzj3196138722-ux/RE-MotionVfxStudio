@@ -33,6 +33,26 @@ if ($process.ExitCode -ne 0 -or $report.passed -ne $true) { throw "Isolated inst
 if ($report.gameTouched -ne $false -or $report.registryTouched -ne $false) { throw 'Installer test isolation was not confirmed.' }
 $release = Get-Content -LiteralPath (Join-Path $output "MotionVfxLive-$Version-win-x64/release.json") -Raw | ConvertFrom-Json
 if ($release.runtime -ne 'self-contained .NET 10.0.8 win-x64' -or $release.version -ne $Version) { throw 'Unexpected payload runtime or version.' }
+$payload = Join-Path $output "MotionVfxLive-$Version-win-x64"
+$payloadManifest = Get-Content -LiteralPath (Join-Path $payload 'SHA256.json') -Raw | ConvertFrom-Json
+if ($release.mdfxlCompatibilityVersion -ne '1.0.0') { throw 'Expected integrated MDF-XL compatibility component 1.0.0.' }
+foreach ($relative in @(
+    'compatibility/MDFXL/Apply-MdfxlCompatibility.ps1',
+    'compatibility/MDFXL/MDF-XL-frame-guard.lua',
+    'Source/tools/MdfxlCompatibility/Apply-MdfxlCompatibility.ps1',
+    'Source/tools/MdfxlCompatibility/MDF-XL-frame-guard.lua'
+)) {
+    $entries = @($payloadManifest | Where-Object { $_.path -ceq $relative })
+    if ($entries.Count -ne 1) { throw "Required compatibility file is missing from the package manifest: $relative" }
+    $file = Join-Path $payload $relative
+    if (-not (Test-Path -LiteralPath $file -PathType Leaf) -or
+        (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash -ne $entries[0].sha256) {
+        throw "Packaged compatibility file does not match its manifest: $relative"
+    }
+}
+if (@(Get-ChildItem -LiteralPath $payload -Recurse -File -Filter 'fx_json_reader.lua').Count -gt 0) {
+    throw 'An unpublished fx_json_reader.lua draft was included in the payload.'
+}
 $assets = @()
 foreach ($path in @($installer, $zip)) {
     $hash = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -44,7 +64,8 @@ $provenance = [ordered]@{
     version = $Version; sourceCommit = $env:GITHUB_SHA; repository = $env:GITHUB_REPOSITORY
     workflowRun = "https://github.com/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
     sdk = $sdk; runtime = $release.runtime; builtAtUtc = [DateTimeOffset]::UtcNow.ToString('o')
-    installerChecks = $report.count; offlineLuaSuites = @('file-dialog', 'file-dialog-explorer', 'd2d-workbench'); fixtureTests = $false; legacySixVersionMatrix = $false
+    installerChecks = $report.count; offlineLuaSuites = @('file-dialog', 'file-dialog-explorer', 'd2d-workbench', 'mdfxl-compat-portable'); fixtureTests = $false; legacySixVersionMatrix = $false
+    mdfxlCompatibilityVersion = $release.mdfxlCompatibilityVersion
     note = 'Fresh source build. Its hashes differ from the prior local binary. No game-content fixtures or live-game tests were run in CI.'
     assets = $assets
 }

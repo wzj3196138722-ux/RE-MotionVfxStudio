@@ -10,10 +10,12 @@ using Microsoft.Win32;
 
 namespace MotionVfxSetup;
 
-internal sealed record InstallResult(string GameRoot, string InstallRoot, string Package, string Backup, bool BackendReady);
+internal sealed record InstallResult(string GameRoot, string InstallRoot, string Package, string Backup, bool BackendReady,
+    string MdfxlCompatibility = "not_checked", string? CompatibilityWarning = null);
+internal sealed record MdfxlCompatibilityResult(string Status, string Message);
 internal static class InstallEngine
 {
-    internal const string Version = "0.8.5";
+    internal const string Version = "0.8.6";
     internal static readonly JsonSerializerOptions Json = new() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
     internal static string Key(string game) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(Path.GetFullPath(game).ToLowerInvariant())))[..16];
     internal static string DefaultRoot(string game) => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MotionVfxLive", Key(game));
@@ -216,12 +218,17 @@ internal static class InstallEngine
     internal static void RunScript(string package, string name, Action<string>? log = null)
     {
         if (name == "Start-Backend.ps1") { Backend.Start(package, log); return; }
+        RunPowerShell(package, "scripts/" + name, ["-NonInteractive"], log);
+    }
+    private static void RunPowerShell(string package, string relativeScript, IEnumerable<string> arguments, Action<string>? log)
+    {
         var start = new ProcessStartInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), @"WindowsPowerShell\v1.0\powershell.exe"))
         { UseShellExecute = false, CreateNoWindow = true, WindowStyle = ProcessWindowStyle.Hidden, WorkingDirectory = package, RedirectStandardOutput = true, RedirectStandardError = true };
         // PowerShell 7's inherited module paths can hide Windows PowerShell 5's
         // Get-FileHash and other built-ins. Let this child rebuild its own defaults.
         start.Environment.Remove("PSModulePath");
-        foreach (string a in new[] { "-NoLogo", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", Child(package, "scripts/" + name), "-NonInteractive" }) start.ArgumentList.Add(a);
+        foreach (string a in new[] { "-NoLogo", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", Child(package, relativeScript) }) start.ArgumentList.Add(a);
+        foreach (string argument in arguments) start.ArgumentList.Add(argument);
         using var p = Process.Start(start) ?? throw new IOException("无法启动安装助手。");
         using var cancellation = new CancellationTokenSource();
         var stdout = new StringBuilder(); var stderr = new StringBuilder();
@@ -258,6 +265,33 @@ internal static class InstallEngine
         if (readError != null) throw new IOException("无法读取安装助手的输出。", readError);
         if (error.Length > 0) log?.Invoke(error);
     }
+    internal static void ValidateCompatibilityPackage(string package)
+    {
+        foreach (string name in new[] { "Apply-MdfxlCompatibility.ps1", "MDF-XL-frame-guard.lua" })
+            if (!File.Exists(Child(package, "compatibility/MDFXL/" + name)))
+                throw new IOException("安装包缺少 MDF-XL 兼容组件：" + name + "。未替换旧版本，请使用完整发布包。");
+    }
+    internal static MdfxlCompatibilityResult ApplyMdfxlCompatibility(string package, string game, Action<string> log)
+    {
+        try
+        {
+            // This third-party file is never an editor-owned deployment/cleanup target.
+            // The helper maintains its own immutable original backup and checks hashes.
+            string target = Child(game, "reframework/autorun/MDF-XL.lua");
+            if (!File.Exists(target) && !Directory.Exists(target))
+                return new("not_present", "未检测到 MDF-XL，已跳过兼容处理。");
+            ValidateCompatibilityPackage(package);
+            log("检测到 MDF-XL，正在校验版本与原始备份并自动应用兼容修复…");
+            RunPowerShell(package, "compatibility/MDFXL/Apply-MdfxlCompatibility.ps1", ["-GameDirectory", Path.GetFullPath(game)], log);
+            return new("applied", "MDF-XL 兼容修复已应用；原始脚本备份、设置和预设均已保留。");
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or System.ComponentModel.Win32Exception)
+        {
+            string message = "编辑器已安装，但 MDF-XL 兼容修复未应用。未覆盖无法校验的第三方脚本；请查看安装日志。原因：" + ex.GetBaseException().Message;
+            log(message);
+            return new("not_applied", message);
+        }
+    }
     internal static InstallResult Install(string game, string root, bool shortcut, Action<int, string> progress, int failAfter = -1, bool register = true)
     {
         game = Path.GetFullPath(game.Trim().Trim('"')); root = Path.GetFullPath(root);
@@ -281,6 +315,7 @@ internal static class InstallEngine
         {
             Report(5, "正在校验并解压内置程序…"); ExtractAndVerify(package);
             ValidatePluginMap(package);
+            ValidateCompatibilityPackage(package);
             foreach (var item in PluginMap()) { if (!File.Exists(Child(package, item.Source))) throw new IOException("缺少组件：" + item.Source); Child(game, item.Target); }
             string exports = Child(root, "Exports"), local = Child(root, "LocalFiles");
             Directory.CreateDirectory(exports); Directory.CreateDirectory(local);
@@ -346,6 +381,11 @@ internal static class InstallEngine
             Replace(next, Child(root, "installation.json"), Child(backup, "application/installation.json"));
             Atomic(Child(backup, "manifest.json"), new { version = Version, installedAt = DateTimeOffset.UtcNow, files = changes.Select(c => new { destination = c.Target, backup = c.Backup, removed = !File.Exists(c.Target), sha256 = File.Exists(c.Target) ? Hash(c.Target) : null }) });
             filesCommitted = true;
+            Report(84, "正在检查 MDF-XL 兼容性…");
+            var compatibility = ApplyMdfxlCompatibility(package, game, s => log.AppendLine(s));
+            result = result with { MdfxlCompatibility = compatibility.Status,
+                CompatibilityWarning = compatibility.Status == "not_applied" ? compatibility.Message : null };
+            log.AppendLine(compatibility.Message);
             Report(88, "组件安装完成，正在启动编辑器后台…");
             try
             {
@@ -367,7 +407,8 @@ internal static class InstallEngine
                 if (shortcut) CreateShortcut(root, game);
             }
             catch (Exception ex) { log.AppendLine("快捷方式创建失败；可直接运行安装目录中的 MotionVfxLive.exe：" + ex.Message); }
-            Report(100, result.BackendReady ? "安装完成 · 编辑器后台已就绪。" : "安装完成 · 后台尚未就绪，请查看安装日志。使用桌面入口可以重试。");
+            Report(100, result.CompatibilityWarning != null ? "编辑器安装完成，但 MDF-XL 兼容修复未应用，请查看安装日志。" :
+                result.BackendReady ? "安装完成 · 编辑器后台已就绪。" : "安装完成 · 后台尚未就绪，请查看安装日志。使用桌面入口可以重试。");
             return result;
         }
         catch
