@@ -1,0 +1,617 @@
+using System.Numerics;
+using ReeLib.Common;
+using ReeLib.Mdf;
+using ReeLib.via;
+
+
+namespace ReeLib.Mdf
+{
+    public class MaterialHeader : BaseModel
+    {
+        public string matName = string.Empty;
+        public uint matNameHash; // 2
+        // tdbVersion == 49, RE7
+        public ulong uknRE7;
+        public ulong pragmataUkn;
+
+        public int paramsSize; // 3
+        public int paramCount; // 4
+        public int texCount; // 5
+        // tdbVersion >= 69, RE8+
+        public int gpbfNameCount;
+        public int gpbfDataCount;
+        public ShadingType shaderType; // 6
+        // tdbVersion >= 71, SF6+
+        public uint ukn;
+        public uint alphaFlags; // 7
+        // tdbVersion >= 71, SF6+ {
+        public ulong ukn1;
+        // }
+        internal long paramHeaderOffset; // 8
+        internal long texHeaderOffset; // 9
+        // tdbVersion >= 69, RE8+
+        internal long gpbfOffset;
+        internal long paramsOffset; // 10
+        public string mmtrPath = "";
+        // tdbVersion >= 71, SF6+
+        internal long mmtrIDsOffset;
+
+        public bool isOnimushaVariant;
+
+        public MaterialFlags Flags
+        {
+            get => (MaterialFlags)(alphaFlags & 0xff0003ff);
+            set => alphaFlags = (uint)(((uint)value & 0xff0003ff) | (alphaFlags & ~0xff0003ff));
+        }
+
+        public int Tesselation
+        {
+            get => (int)(((alphaFlags & 0xfc00) >> 10) & 0x3f);
+            set => alphaFlags = (uint)(((value & 0x3f) << 10) + (alphaFlags & ~0xfc00));
+        }
+
+        public int Phong
+        {
+            get => (int)(((alphaFlags & 0xff0000) >> 16) & 0xff);
+            set => alphaFlags = (uint)(((value & 0xff) << 16) + (alphaFlags & ~0xff0000));
+        }
+
+        protected override bool DoRead(FileHandler handler)
+        {
+            var Version = handler.FileVersion;
+            long pos = handler.Tell();
+            matName = handler.ReadOffsetWString();
+            handler.Read(ref matNameHash);
+            if (Version == 6) handler.Read(ref uknRE7);
+            handler.Read(ref paramsSize);
+            handler.Read(ref paramCount);
+
+            if (Version == 51) {
+                // onimusha has a slightly different variant of the 51 format
+                // use the param offset as a reference to pick the right one
+                // the field there otherwise has a 0/1 in it so we can use that
+                // Capcom please.
+                var peekParamOffset = handler.Read<uint>(handler.Tell() + 36, jumpBack: true);
+                isOnimushaVariant = peekParamOffset > 1;
+            }
+            if (Version >= 51 && isOnimushaVariant) pragmataUkn = handler.Read<uint>();
+            handler.Read(ref texCount);
+            if (Version >= 19)
+            {
+                handler.Read(ref gpbfNameCount);
+                handler.Read(ref gpbfDataCount);
+                if (gpbfNameCount != gpbfDataCount)
+                {
+                    throw new Exception("GPBF Count mismatch!");
+                }
+            }
+            handler.Read(ref shaderType);
+            if (Version >= 31) handler.Read(ref ukn);
+            handler.Read(ref alphaFlags);
+            if (Version >= 31) handler.Read(ref ukn1);
+            if (Version >= 51 && !isOnimushaVariant) handler.Read(ref pragmataUkn);
+            handler.Read(ref paramHeaderOffset);
+            handler.Read(ref texHeaderOffset);
+            if (Version >= 19)
+            {
+                handler.Read(ref gpbfOffset);
+            }
+            handler.Read(ref paramsOffset);
+            mmtrPath = handler.ReadOffsetWString();
+            if (Version >= 31) handler.Read(ref mmtrIDsOffset);
+            return true;
+        }
+
+        protected override bool DoWrite(FileHandler handler)
+        {
+            var Version = handler.FileVersion;
+            matNameHash = MurMur3HashUtils.GetHash(matName);
+            handler.WriteOffsetWString(matName);
+            handler.Write(ref matNameHash);
+            if (Version == 6) handler.Write(ref uknRE7);
+            handler.Write(ref paramsSize);
+            handler.Write(ref paramCount);
+            if (Version >= 51 && isOnimushaVariant) handler.Write((uint)pragmataUkn);
+            handler.Write(ref texCount);
+            if (Version >= 19) {
+                handler.Write(ref gpbfNameCount);
+                handler.Write(ref gpbfDataCount);
+            }
+            handler.Write(ref shaderType);
+            if (Version >= 31) handler.Write(ref ukn);
+            handler.Write(ref alphaFlags);
+            if (Version >= 31) handler.Write(ref ukn1);
+            if (Version >= 51 && !isOnimushaVariant) handler.Write(ref pragmataUkn);
+            handler.Write(ref paramHeaderOffset);
+            handler.Write(ref texHeaderOffset);
+            if (Version >= 19)
+            {
+                handler.Write(ref gpbfOffset);
+            }
+            handler.Write(ref paramsOffset);
+            handler.WriteOffsetWString(mmtrPath);
+            if (Version >= 31) handler.Write(ref mmtrIDsOffset);
+            return true;
+        }
+
+        public override MaterialHeader Clone() => (MaterialHeader)base.Clone();
+    }
+
+    [Flags]
+    public enum MaterialFlags : uint {
+        BaseTwoSideEnable = (1 << 0),
+        BaseAlphaTestEnable = (1 << 1),
+        ShadowCastDisable = (1 << 2),
+        VertexShaderUsed = (1 << 3),
+        EmissiveUsed = (1 << 4),
+        TessellationEnable = (1 << 5),
+        EnableIgnoreDepth = (1 << 6),
+        AlphaMaskUsed = (1 << 7),
+        ForcedTwoSideEnable = (1 << 8),
+        TwoSideEnable = (1 << 9),
+
+        RoughTransparentEnable = (1 << 24),
+        ForcedAlphaTestEnable = (1 << 25),
+        AlphaTestEnable = (1 << 26),
+        SSSProfileUsed = (1 << 27),
+        EnableStencilPriority = (1 << 28),
+        RequireDualQuaternion = (1 << 29),
+        PixelDepthOffsetUsed = (1 << 30),
+        NoRayTracing = (1u << 31),
+    }
+
+    public enum ShadingType
+    {
+        Standard = 0,
+        Decal = 1,
+        DecalWithMetallic = 2,
+        DecalNRMR = 3,
+        Transparent = 4,
+        Distortion = 5,
+        PrimitiveMesh = 6,
+        PrimitiveSolidMesh = 7,
+        Water = 8,
+        SpeedTree = 9,
+        GUI = 10,
+        GUIMesh = 11,
+        GUIMeshTransparent = 12,
+        ExpensiveTransparent = 13,
+        Forward = 14,
+        RenderTarget = 15,
+        PostProcess = 16,
+        PrimitiveMaterial = 17,
+        PrimitiveSolidMaterial = 18,
+        SpineMaterial = 19,
+        ReflectiveTransparent = 20,
+    }
+
+    public class TexHeader : BaseModel
+    {
+        public string texType = string.Empty;
+        public uint hash;
+        public uint asciiHash;
+        public string texPath = string.Empty;
+
+        public TexHeader()
+        {
+        }
+
+        public TexHeader(string type, string path)
+        {
+            texType = type;
+            texPath = path;
+        }
+
+        public override TexHeader Clone() => (TexHeader)base.Clone();
+
+        protected override bool DoRead(FileHandler handler)
+        {
+            texType = handler.ReadOffsetWString();
+            handler.Read(ref hash);
+            handler.Read(ref asciiHash);
+            texPath = handler.ReadOffsetWString();
+            if (handler.FileVersion >= 13) handler.Skip(8);
+            return true;
+        }
+
+        protected override bool DoWrite(FileHandler handler)
+        {
+            hash = MurMur3HashUtils.GetHash(texType);
+            asciiHash = MurMur3HashUtils.GetAsciiHash(texType);
+            handler.WriteOffsetWString(texType);
+            handler.Write(ref hash);
+            handler.Write(ref asciiHash);
+            handler.WriteOffsetWString(texPath);
+            if (handler.FileVersion >= 13) handler.Skip(8);
+            return true;
+        }
+
+        public override string ToString() => $"{texType}: {texPath}";
+    }
+
+    public class ParamHeader : BaseModel
+    {
+        public long paramNameOffset;
+        public string paramName = string.Empty;
+        public uint hash;
+        public uint asciiHash;
+        public short componentCount;
+        public short extraValue;
+
+        public Vector4 parameter;
+
+        internal int paramRelOffset;
+        public int prefixGapSize;
+
+        public Color Color => Color.FromVector4(parameter);
+
+        protected override bool DoRead(FileHandler handler)
+        {
+            handler.Read(ref paramNameOffset);
+            handler.Read(ref hash);
+            handler.Read(ref asciiHash);
+            // RE3R+
+            if (handler.FileVersion >= 13)
+            {
+                handler.Read(ref paramRelOffset);
+                handler.Read(ref componentCount);
+                // starting with at least 40, there's a second value here rarely
+                // we can just treat it the same for the previous versions since it's not a structural difference
+                handler.Read(ref extraValue);
+            }
+            else
+            {
+                handler.Read(ref componentCount);
+                handler.Skip(2);
+                handler.Read(ref paramRelOffset);
+            }
+            paramName = handler.ReadWString(paramNameOffset);
+            return true;
+        }
+
+        protected override bool DoWrite(FileHandler handler)
+        {
+            if (paramName != null)
+            {
+                handler.StringTableAdd(paramName);
+                hash = MurMur3HashUtils.GetHash(paramName);
+                asciiHash = MurMur3HashUtils.GetAsciiHash(paramName);
+            }
+            handler.Write(ref paramNameOffset);
+            handler.Write(ref hash);
+            handler.Write(ref asciiHash);
+            if (handler.FileVersion >= 13)
+            {
+                handler.Write(ref paramRelOffset);
+                handler.Write(ref componentCount);
+                handler.Write(ref extraValue);
+            }
+            else
+            {
+                handler.Write(ref componentCount);
+                handler.WriteNull(2);
+                handler.Write(ref paramRelOffset);
+            }
+            return true;
+        }
+
+        public override ParamHeader Clone() => (ParamHeader)base.Clone();
+
+        public override string ToString() => $"{paramName}: {parameter}";
+    }
+
+    public class GpuBufferEntry : BaseModel
+    {
+        public string name = string.Empty;
+        public string path = string.Empty;
+
+        public GpuBufferEntry()
+        {
+        }
+
+        public GpuBufferEntry(string name, string path)
+        {
+            this.name = name;
+            this.path = path;
+        }
+
+        protected override bool DoRead(FileHandler handler)
+        {
+            name = handler.ReadOffsetWString();
+            handler.Read<int>(); // utf16Hash
+            handler.Read<int>(); // asciiHash
+            path = handler.ReadOffsetWString();
+            handler.ReadNull(4);
+            var one = handler.Read<int>();
+            DataInterpretationException.DebugThrowIf(one != 1);
+            return true;
+        }
+
+        protected override bool DoWrite(FileHandler handler)
+        {
+            handler.WriteOffsetWString(name);
+            handler.Write(MurMur3HashUtils.GetHash(name));
+            handler.Write(MurMur3HashUtils.GetAsciiHash(name));
+            handler.WriteOffsetWString(path);
+            handler.Write(0);
+            handler.Write(1);
+            return true;
+        }
+
+        public override string ToString() => $"{name}";
+
+        public int CompareTo(GpuBufferEntry? other) => name.CompareTo(other?.name);
+    }
+
+    public class MaterialData
+    {
+        public MaterialData() { }
+        public MaterialData(MaterialHeader matHeader)
+        {
+            Header = matHeader;
+        }
+
+        public string Name {
+            get => Header.matName;
+            set => Header.matName = value;
+        }
+
+        public string MasterMaterial {
+            get => Header.mmtrPath;
+            set => Header.mmtrPath = value;
+        }
+
+        public MaterialHeader Header = new();
+        public List<TexHeader> Textures = new();
+        public List<ParamHeader> Parameters = new();
+        public List<GpuBufferEntry> GpuBuffers = new();
+        public MaterialIndexData? MaterialIndexLists;
+
+        public override string ToString() => Header.matName + " :  " + Path.GetFileName(Header.mmtrPath);
+
+        public MaterialData Clone()
+        {
+            return new MaterialData(Header.Clone()) {
+                Textures = Textures.Select(tex => tex.Clone()).ToList(),
+                GpuBuffers = GpuBuffers.Select(gpbf => new GpuBufferEntry(gpbf.name, gpbf.path)).ToList(),
+                Parameters = Parameters.Select(tex => tex.Clone()).ToList(),
+            };
+        }
+    }
+
+    public record MaterialTexId(int id, string texturePath);
+
+    public class MaterialIndexList
+    {
+        public List<int> Indices { get; } = new();
+
+        public override string ToString() => $"Material Index List ({Indices.Count})";
+    }
+
+    public class MaterialIndexData : BaseModel
+    {
+        public MaterialIndexList[] Lists = new MaterialIndexList[8];
+
+        protected override bool DoRead(FileHandler handler)
+        {
+            var offsets = handler.ReadArray<long>(8);
+            for (int i = 0; i < 8; i++) {
+                var list = Lists[i] ??= new();
+                list.Indices.Clear();
+
+                handler.Seek(offsets[i]);
+                var count = handler.Read<int>();
+                for (int n = 0; n < count; n++) {
+                    var id = handler.Read<int>();
+                    list.Indices.Add(id);
+                }
+            }
+            return true;
+        }
+
+        protected override bool DoWrite(FileHandler handler)
+        {
+            handler.Skip(8 * 8);
+
+            for (int i = 0; i < 8; i++) {
+                var list = Lists[i];
+                handler.Write(Start + i * 8, handler.Tell());
+                handler.Write(list.Indices.Count);
+                list.Indices.Write(handler);
+            }
+            return true;
+        }
+    }
+}
+
+
+namespace ReeLib
+{
+    public class MdfFile : BaseFile
+    {
+
+        public MdfFile(FileHandler fileHandler) : base(fileHandler)
+        {
+        }
+
+        public short version = 1;
+        public long uknValue;
+        public List<MaterialData> Materials = new();
+
+        public const uint Magic = 0x46444d;
+        public const string Extension = ".mdf2";
+
+        protected override bool DoRead()
+        {
+            Materials.Clear();
+
+            var handler = FileHandler;
+            if (handler.Read<int>() != Magic)
+            {
+                throw new InvalidDataException($"{handler.FilePath} Not a MDF file");
+            }
+            handler.Read(ref version);
+            var matCount = handler.Read<short>();
+            handler.Read(ref uknValue);
+            DataInterpretationException.DebugWarnIf(uknValue > 1);
+
+            for (int i = 0; i < matCount; i++)
+            {
+                MaterialData matData = new();
+                matData.Header.Read(handler);
+                Materials.Add(matData);
+            }
+
+            foreach (var matData in Materials)
+            {
+                handler.Seek(matData.Header.texHeaderOffset);
+                for (int i = 0; i < matData.Header.texCount; i++)
+                {
+                    TexHeader texHeader = new();
+                    texHeader.Read(handler);
+                    matData.Textures.Add(texHeader);
+                }
+            }
+
+            foreach (var matData in Materials)
+            {
+                handler.Seek(matData.Header.paramHeaderOffset);
+                for (int i = 0; i < matData.Header.paramCount; i++)
+                {
+                    ParamHeader paramHeader = new();
+                    paramHeader.Read(handler);
+                    var paramAbsOffset = matData.Header.paramsOffset + paramHeader.paramRelOffset;
+                    if (i == 0)
+                    {
+                        paramHeader.prefixGapSize = 0;
+                    }
+                    else
+                    {
+                        var prevHeader = matData.Parameters[i - 1];
+                        paramHeader.prefixGapSize = (int)(
+                            paramHeader.paramRelOffset - prevHeader.paramRelOffset -
+                            prevHeader.componentCount * 4);
+#if DEBUG
+                        using var _ = handler.SeekJumpBack(paramAbsOffset - paramHeader.prefixGapSize);
+                        handler.ReadNull(paramHeader.prefixGapSize);
+#endif
+                    }
+                    if (paramHeader.componentCount == 4)
+                    {
+                        handler.Read(paramAbsOffset, ref paramHeader.parameter);
+                    }
+                    else
+                    {
+                        handler.Read(paramAbsOffset, ref paramHeader.parameter.X);
+                    }
+                    matData.Parameters.Add(paramHeader);
+                }
+
+                matData.GpuBuffers = new();
+                var tell = handler.Tell();
+                handler.Seek(matData.Header.gpbfOffset);
+                for (int i = 0; i < matData.Header.gpbfNameCount; ++i) {
+                    var gpbf = new GpuBufferEntry();
+                    gpbf.Read(handler);
+                    matData.GpuBuffers.Add(gpbf);
+                }
+                handler.Seek(tell);
+            }
+
+            foreach (var matData in Materials)
+            {
+                if (matData.Header.mmtrIDsOffset == 0) continue;
+
+                handler.Seek(matData.Header.mmtrIDsOffset);
+                matData.MaterialIndexLists = new MaterialIndexData();
+                matData.MaterialIndexLists.Read(handler);
+            }
+
+            return true;
+        }
+
+        protected override bool DoWrite()
+        {
+            FileHandler handler = FileHandler;
+            handler.Clear();
+            handler.Seek(0);
+            handler.Write(Magic);
+            handler.Write((short)version);
+            handler.Write((short)Materials.Count);
+            handler.Write(uknValue);
+
+            foreach (var matData in Materials)
+            {
+                matData.Header.paramCount = matData.Parameters.Count;
+                matData.Header.texCount = matData.Textures.Count;
+                matData.Header.Write(handler);
+            }
+
+            foreach (var matData in Materials)
+            {
+                matData.Header.texHeaderOffset = handler.Tell();
+                matData.Textures.Write(handler);
+            }
+
+            foreach (var matData in Materials)
+            {
+                matData.Header.paramHeaderOffset = handler.Tell();
+                matData.Parameters.Write(handler);
+            }
+
+            handler.Align(8);
+
+            foreach (var matData in Materials)
+            {
+                matData.Header.gpbfOffset = handler.Tell();
+                matData.Header.gpbfNameCount = matData.Header.gpbfDataCount = matData.GpuBuffers.Count;
+                matData.GpuBuffers.Write(handler);
+            }
+
+            handler.StringTableWriteStrings();
+
+            foreach (var matData in Materials)
+            {
+                int size = 0;
+                matData.Header.paramsOffset = handler.Tell();
+                foreach (var paramHeader in matData.Parameters)
+                {
+                    size += paramHeader.componentCount * 4;
+                    handler.WriteNull(paramHeader.prefixGapSize);
+                    paramHeader.paramRelOffset = (int)(handler.Tell() - matData.Header.paramsOffset);
+                    if (paramHeader.componentCount == 4)
+                    {
+                        handler.Write(ref paramHeader.parameter);
+                    }
+                    else
+                    {
+                        handler.Write(ref paramHeader.parameter.X);
+                    }
+                    paramHeader.Rewrite(handler);
+                }
+                size = Utils.Align16(size);
+                matData.Header.paramsSize = size;
+                handler.FillBytes(0, (int)(matData.Header.paramsOffset + matData.Header.paramsSize - handler.Tell()));
+            }
+
+            foreach (var matData in Materials)
+            {
+                if (matData.MaterialIndexLists == null) {
+                    matData.Header.mmtrIDsOffset = 0;
+                    continue;
+                }
+                matData.Header.mmtrIDsOffset = handler.Tell();
+                matData.MaterialIndexLists.Write(handler);
+            }
+
+            foreach (var matData in Materials)
+            {
+                matData.Header.Rewrite(handler);
+            }
+
+            handler.StringTableFlushOffsets();
+
+            return true;
+        }
+    }
+}

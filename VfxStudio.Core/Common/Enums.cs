@@ -1,0 +1,530 @@
+namespace ReeLib
+{
+    public enum RszFieldType : uint
+    {
+        ukn_error = 0,
+        ukn_type,
+        not_init,
+        class_not_found,
+        out_of_range,
+        Undefined,
+        Object,
+        Action,
+        Struct,
+        NativeObject,
+        Resource,
+        UserData,
+        Bool,
+        C8,
+        C16,
+        S8,
+        U8,
+        UByte = U8,
+        S16,
+        U16,
+        S32,
+        U32,
+        S64,
+        U64,
+        F32,
+        F64,
+        String,
+        MBString,
+        Enum,
+        Uint2,
+        Uint3,
+        Uint4,
+        Int2,
+        Int3,
+        Int4,
+        Float2,
+        Float3,
+        Float4,
+        Float3x3,
+        Float3x4,
+        Float4x3,
+        Float4x4,
+        Half2,
+        Half4,
+        Mat3,
+        Mat4,
+        Vec2,
+        Vec3,
+        Vec4,
+        VecU4,
+        Quaternion,
+        Guid,
+        Color,
+        DateTime,
+        AABB,
+        Capsule,
+        TaperedCapsule,
+        Cone,
+        Line,
+        LineSegment,
+        OBB,
+        Plane,
+        PlaneXZ,
+        Point,
+        Range,
+        RangeI,
+        Ray,
+        RayY,
+        Segment,
+        Size,
+        Sphere,
+        Triangle,
+        Cylinder,
+        Ellipsoid,
+        Area,
+        Torus,
+        Rect,
+        Rect3D,
+        Frustum,
+        KeyFrame,
+        Uri,
+        GameObjectRef,
+        RuntimeType,
+        Sfix,
+        Sfix2,
+        Sfix3,
+        Sfix4,
+        Position,
+        F16,
+        End,
+        Data
+    };
+
+    public enum GameName
+    {
+        unknown,
+        re2,
+        re2rt,
+        re3,
+        re3rt,
+        re4,
+        re7,
+        re7rt,
+        re8,
+        re9,
+        dmc5,
+        mhrise,
+        sf6,
+        dd2,
+        gtrick,
+        apollo,
+        drdr,
+        kunitsu,
+        oni2,
+        mhwilds,
+        pragmata,
+        mhsto3,
+        oniws,
+    }
+
+    public enum KnownFileFormats
+    {
+        Unknown,
+        /// <summary>.mesh</summary>
+        Mesh,
+        /// <summary>.tex</summary>
+        Texture,
+        /// <summary>.scn</summary>
+        Scene,
+        /// <summary>.pfb</summary>
+        Prefab,
+        /// <summary>.user</summary>
+        UserData,
+        /// <summary>.mdf2</summary>
+        MeshMaterial,
+        /// <summary>.rcol</summary>
+        RequestSetCollider,
+        /// <summary>.uvar</summary>
+        UserVariables,
+        /// <summary>.mot</summary>
+        Motion,
+        /// <summary>.mottree</summary>
+        MotionTree,
+        /// <summary>.motpack</summary>
+        MotionPack,
+        /// <summary>.motlist</summary>
+        MotionList,
+        /// <summary>.motbank</summary>
+        MotionBank,
+        /// <summary>.maba</summary>
+        MotionAnalyzerBank,
+        /// <summary>.gpumotlist</summary>
+        GpuMotionList,
+        /// <summary>.cfil</summary>
+        CollisionFilter,
+        /// <summary>.cdef</summary>
+        CollisionDefinition,
+        /// <summary>.cmat</summary>
+        CollisionMaterial,
+        /// <summary>.fol</summary>
+        Foliage,
+        /// <summary>.mmtr</summary>
+        MasterMaterial,
+        /// <summary>.gpbf</summary>
+        ByteBuffer,
+        /// <summary>.gpuc, .gclo</summary>
+        GpuCloth,
+        /// <summary>.rtex</summary>
+        RenderTexture,
+        /// <summary>.efx</summary>
+        Effect,
+        /// <summary>.tml</summary>
+        Timeline,
+        /// <summary>.clip</summary>
+        Clip,
+        /// <summary>.uvs</summary>
+        UVSequence,
+        /// <summary>.gui</summary>
+        GUI,
+        /// <summary>.mcol</summary>
+        CollisionMesh,
+        /// <summary>.fsm</summary>
+        Fsm,
+        /// <summary>.fsmv2</summary>
+        Fsm2,
+        /// <summary>.motfsm</summary>
+        MotionFsm,
+        /// <summary>.motfsm2</summary>
+        MotionFsm2,
+        /// <summary>.chain</summary>
+        Chain,
+        /// <summary>.chain2</summary>
+        Chain2,
+        /// <summary>.chain2lod</summary>
+        Chain2Lod,
+        /// <summary>.lprb</summary>
+        LightProbes,
+        /// <summary>.prb</summary>
+        Probes,
+        /// <summary>.aimap, .ainvm, .aivspc, .aiwayp, .aiwaypmgr, .ainvmmgr</summary>
+        AIMap,
+        /// <summary>.hf</summary>
+        HeightField,
+        /// <summary>.chf</summary>
+        CollisionHeightField,
+        /// <summary>.bhvt</summary>
+        BehaviorTree,
+        /// <summary>.msg</summary>
+        Message,
+        /// <summary>.coco</summary>
+        CompositeCollision,
+        /// <summary>.jmap</summary>
+        JointMap,
+        /// <summary>.rdd</summary>
+        Ragdoll,
+        /// <summary>.sdftex</summary>
+        SDFTexture,
+        /// <summary>.rmesh</summary>
+        RigidBodyMesh,
+        /// <summary>.mpci</summary>
+        MaterialPointCloud,
+        /// <summary>.ucurve</summary>
+        UserCurve,
+        /// <summary>.ucurvelist</summary>
+        UserCurveList,
+        /// <summary>.ccbk</summary>
+        CharacterColliderBank,
+        /// <summary>.retargetrig</summary>
+        RetargetRig,
+        /// <summary>.rbs</summary>
+        RigidBodySet,
+        /// <summary>.jcns</summary>
+        JointConstraints,
+        /// <summary>.skeleton</summary>
+        Skeleton,
+        /// <summary>.ikleg2</summary>
+        IkLeg2,
+        /// <summary>.iklookat2</summary>
+        IkLookAt2,
+        /// <summary>.ikls</summary>
+        IkLegSpine,
+        /// <summary>.ikbodyrig</summary>
+        IkBodyRig,
+        /// <summary>.ikhd</summary>
+        IkHand2,
+        /// <summary>.ikmulti</summary>
+        IkMultiBone,
+        /// <summary>.iktrain</summary>
+        IkTrain,
+        /// <summary>.iktrain2</summary>
+        IkTrain2,
+        /// <summary>.ikdamage</summary>
+        IkDamageAction,
+        /// <summary>.iklizard</summary>
+        IkLizard,
+        /// <summary>.ikwagon</summary>
+        IkWagon,
+        /// <summary>.fbik</summary>
+        FullBodyIKRig,
+        /// <summary>.amix</summary>
+        AudioMixer,
+        /// <summary>.vsrc</summary>
+        VibrationSource,
+        /// <summary>.fbxskel</summary>
+        FbxSkeleton,
+        /// <summary>.clsm</summary>
+        CollisionSkinningMesh,
+        /// <summary>.clsp</summary>
+        CollisionShapePreset,
+        /// <summary>.wrap</summary>
+        WrapDeformer,
+        /// <summary>.sfur</summary>
+        ShellFur,
+        /// <summary>.finf</summary>
+        FilterInfo,
+        /// <summary>.def</summary>
+        DynamicsDefinition,
+        /// <summary>.gcp</summary>
+        GUIColorPreset,
+        /// <summary>.gsty</summary>
+        GUIStyleList,
+        /// <summary>.gcf</summary>
+        GUIConfig,
+        /// <summary>.rcf</summary>
+        RebeConfig,
+        RagdollController,
+        /// <summary>.rtmr</summary>
+        RayTraceMaterialRedirect,
+        /// <summary>.sss</summary>
+        SSSProfile,
+        /// <summary>.lod</summary>
+        Lod,
+        /// <summary>.terr</summary>
+        Terrain,
+        /// <summary>.gml</summary>
+        GroundMaterialList,
+        /// <summary>.gtl</summary>
+        GroundTextureList,
+        /// <summary>.grnd</summary>
+        Ground,
+        /// <summary>.stmesh</summary>
+        SpeedTreeMesh,
+        /// <summary>.abcmesh</summary>
+        AlembicMesh,
+        /// <summary>.motcam</summary>
+        MotionCamera,
+        /// <summary>.mcamlist</summary>
+        MotionCameraList,
+        /// <summary>.mcambank</summary>
+        MotionCameraBank,
+        /// <summary>.tmlfsm2</summary>
+        TimelineFsm2,
+        /// <summary>.oft</summary>
+        OutlineFont,
+        /// <summary>.fslt</summary>
+        FontSlot,
+        /// <summary>.ift</summary>
+        IconFont,
+        /// <summary>.ocioc</summary>
+        OpenColorIOConfig,
+        /// <summary>.star</summary>
+        StarCatalogue,
+        /// <summary>.mov</summary>
+        Movie,
+        /// <summary>.aimapattr</summary>
+        AIMapAttribute,
+        /// <summary>.swms</summary>
+        MemorySettings,
+        /// <summary>.sbnk, .bnk</summary>
+        SoundBank,
+        /// <summary>.spck, .pck</summary>
+        SoundPackage,
+        /// <summary>.vsdf</summary>
+        VfxShader,
+        /// <summary>.vsdflist</summary>
+        VfxShaderList,
+        /// <summary>.efcsv</summary>
+        EffectCsv,
+        /// <summary>.lfa</summary>
+        Lensflare,
+        /// <summary>.eem</summary>
+        EffectEmitMask,
+        /// <summary>.ies</summary>
+        IESLight,
+        /// <summary>.tmlbld</summary>
+        TimelineBlend,
+        /// <summary>.jointlodgroup</summary>
+        JointLODGroup,
+        /// <summary>.jntexprgraph</summary>
+        JointExpressionGraph,
+        /// <summary>.vmap</summary>
+        MeshVertexMapping,
+        /// <summary>.ziva</summary>
+        ZivaRT,
+        /// <summary>.zivacomb</summary>
+        ZivaCombiner,
+        /// <summary>.dlg</summary>
+        Dialogue,
+        /// <summary>.dlgcf</summary>
+        DialogueConfig,
+        /// <summary>.dlglist</summary>
+        DialogueList,
+        /// <summary>.dlgtml</summary>
+        DialogueTimeline,
+        DialogueTimelineList,
+        /// <summary>.clrp</summary>
+        ClothResetPose,
+        /// <summary>.cset</summary>
+        ColliderSet,
+        /// <summary>.fpolygon</summary>
+        FreePolygon,
+        /// <summary>.sts</summary>
+        ShaderTimer,
+        /// <summary>.htex</summary>
+        HeightTexture,
+        /// <summary>.ncf</summary>
+        NetworkConfig,
+        /// <summary>.psop</summary>
+        PSOPatch,
+        /// <summary>.sst</summary>
+        SparseShadowTree,
+        /// <summary>.chainwnd</summary>
+        ChainWind,
+        /// <summary>.pog</summary>
+        PointGraph,
+        /// <summary>.poglst</summary>
+        PointGraphList,
+        /// <summary>.csdf</summary>
+        CfxShader,
+        /// <summary>.sdf</summary>
+        Shader,
+        /// <summary>.fxct</summary>
+        EffectCollision,
+        /// <summary>.ord</summary>
+        OodleNetworkRuntimeData,
+        /// <summary>.rcfg</summary>
+        RenderConfigAsset,
+        /// <summary>.wcc, .wcja, .wcjr, .wcv, .wcta, .wcsa, .wcbk, .wcrb, .wcst, .wtot, .wtos, .wcms, .wcmo, .wcp, .wcgp, .wcggp, .wcss, .wcsw, .wcswn, .wcmsw, .wgs, .wms, .wpi, .wss, .wcrd, .wcsf, .wcmts, .wcjm</summary>
+        WwiseAudioRSZ,
+        /// <summary>.refskel</summary>
+        RefSkeleton,
+        /// <summary>.svx</summary>
+        SoundVoxel,
+        /// <summary>.strands</summary>
+        Strands,
+        /// <summary>.stdlod</summary>
+        StrandsLod,
+        /// <summary>.sbd</summary>
+        StrandsBinding,
+        /// <summary>.gpus</summary>
+        GpuStrandsDynamics,
+        /// <summary>.tean</summary>
+        TextAnimation,
+        /// <summary>.svgn</summary>
+        SVG,
+        /// <summary>.svgsq</summary>
+        SVGSequence,
+        /// <summary>.slqg</summary>
+        SoundStreamingLQG,
+        /// <summary>.wel</summary>
+        EventList,
+        /// <summary>.nnfp</summary>
+        NFP,
+        /// <summary>.bnvib</summary>
+        Bnvib,
+        /// <summary>.psow</summary>
+        PSOWhiteList,
+        /// <summary>.auto</summary>
+        AutoPlay,
+        /// <summary>.dblc</summary>
+        DepthBlocker,
+        /// <summary>.wsg</summary>
+        WwiseStreamingGeometry,
+        /// <summary>.vtxa</summary>
+        VertexAttribute,
+        /// <summary>.cfltr</summary>
+        CustomFilter,
+        /// <summary>.ulp</summary>
+        UserLightingPipeline,
+        /// <summary>.nar</summary>
+        AutoSessionRules,
+        /// <summary>.filter</summary>
+        NavigationFilterSetting,
+
+        /// <summary>.ecob</summary>
+        EcotopeBiome, // Guessed from magic bytes
+        /// <summary>.gnpt</summary>
+        GeneratePattern, // Guessed from magic bytes
+
+        TimelineBase, // Timeline or Clip
+        MotionBase, // Motion or MotionTree or MotionList or GpuMotionList or MotionCamera or MotionCameraList
+        DynamicsBase, // RigidBodyMesh or HeightField
+        BehaviorTreeBase, // BehaviorTree or Fsm2
+    }
+
+
+    [Flags]
+    public enum GenericFlagsU64 : ulong
+    {
+        V1 = (1 << 0),
+        V2 = (1 << 1),
+        V3 = (1 << 2),
+        V4 = (1 << 3),
+        V5 = (1 << 4),
+        V6 = (1 << 5),
+        V7 = (1 << 6),
+        V8 = (1 << 7),
+        V9 = (1 << 8),
+        V10 = (1 << 9),
+        V11 = (1 << 10),
+        V12 = (1 << 11),
+        V13 = (1 << 12),
+        V14 = (1 << 13),
+        V15 = (1 << 14),
+        V16 = (1 << 15),
+        V17 = (1 << 16),
+        V18 = (1 << 17),
+        V19 = (1 << 18),
+        V20 = (1 << 19),
+        V21 = (1 << 20),
+        V22 = (1 << 21),
+        V23 = (1 << 22),
+        V24 = (1 << 23),
+        V25 = (1 << 24),
+        V26 = (1 << 25),
+        V27 = (1 << 26),
+        V28 = (1 << 27),
+        V29 = (1 << 28),
+        V30 = (1 << 29),
+        V31 = (1 << 30),
+        V32 = (1u << 31),
+        V33 = (1ul << 32),
+        V34 = (1ul << 33),
+        V35 = (1ul << 34),
+        V36 = (1ul << 35),
+        V37 = (1ul << 36),
+        V38 = (1ul << 37),
+        V39 = (1ul << 38),
+        V40 = (1ul << 39),
+        V41 = (1ul << 40),
+        V42 = (1ul << 41),
+        V43 = (1ul << 42),
+        V44 = (1ul << 43),
+        V45 = (1ul << 44),
+        V46 = (1ul << 45),
+        V47 = (1ul << 46),
+        V48 = (1ul << 47),
+        V49 = (1ul << 48),
+        V50 = (1ul << 49),
+        V51 = (1ul << 50),
+        V52 = (1ul << 51),
+        V53 = (1ul << 52),
+        V54 = (1ul << 53),
+        V55 = (1ul << 54),
+        V56 = (1ul << 55),
+        V57 = (1ul << 56),
+        V58 = (1ul << 57),
+        V59 = (1ul << 58),
+        V60 = (1ul << 59),
+        V61 = (1ul << 60),
+        V62 = (1ul << 61),
+        V63 = (1ul << 62),
+        V64 = (1ul << 63),
+        All = ~0ul
+    };
+}

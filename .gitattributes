@@ -1,0 +1,13 @@
+* text=auto
+*.png binary
+*.dll binary
+*.exe binary
+*.zip binary
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+# Preserve upstream dependency bytes for the checked SHA256 manifest.
+third-party/reframework-sdk/** -text

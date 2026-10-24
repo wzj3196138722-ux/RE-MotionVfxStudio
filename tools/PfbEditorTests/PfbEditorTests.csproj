@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="VfxStudio.Core"><HintPath>../LiveEditor/backend/VfxStudio.Core.dll</HintPath></Reference>
+    <Reference Include="Standart.Hash.xxHash"><HintPath>../LiveEditor/backend/Standart.Hash.xxHash.dll</HintPath></Reference>
+    <Reference Include="ZstdSharp"><HintPath>../LiveEditor/backend/ZstdSharp.dll</HintPath></Reference>
+    <Compile Include="../../VfxStudio.LiveEditor/GameInstallResourceReader.cs" Link="GameInstallResourceReader.cs" />
+    <Compile Include="../../VfxStudio.LiveEditor/PfbWorkspace.cs" Link="PfbWorkspace.cs" />
+    <None Include="../LiveEditor/backend/oo2core*" CopyToOutputDirectory="PreserveNewest" Link="%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="REE-Lib.Generators/REE-Lib.Generators.csproj" />
+  <Project Path="VfxStudio.Core/VfxStudio.Core.csproj" />
+  <Project Path="VfxStudio.Unpacker/VfxStudio.Unpacker.csproj" />
+</Solution>

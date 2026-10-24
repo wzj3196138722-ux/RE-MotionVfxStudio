@@ -1,0 +1,3982 @@
+[
+  {
+    "Name": "_INVALID",
+    "FixedId": 0,
+    "TriggerId": 0
+  },
+  {
+    "Name": "SHELL_COMMON_MAZZLE",
+    "FixedId": 13,
+    "TriggerId": 16842753
+  },
+  {
+    "Name": "SHELL_COMMON_BODY_LOOP",
+    "FixedId": 12,
+    "TriggerId": 16842754
+  },
+  {
+    "Name": "SHELL_COMMON_BODY_SIGNLE",
+    "FixedId": -136147582,
+    "TriggerId": 16842755
+  },
+  {
+    "Name": "SHELL_COMMON_HIT_GROUND",
+    "FixedId": 18,
+    "TriggerId": 16842756
+  },
+  {
+    "Name": "SHELL_COMMON_HIT_WALL",
+    "FixedId": 17,
+    "TriggerId": 16842757
+  },
+  {
+    "Name": "SHELL_COMMON_HIT_CEILING",
+    "FixedId": -59927826,
+    "TriggerId": 16842758
+  },
+  {
+    "Name": "SHELL_COMMON_HIT_CHARA",
+    "FixedId": 16,
+    "TriggerId": 16842759
+  },
+  {
+    "Name": "SHELL_COMMON_HIT_OBJECT",
+    "FixedId": 15,
+    "TriggerId": 16842760
+  },
+  {
+    "Name": "SHELL_COMMON_HIT_WATER_SURFACE",
+    "FixedId": -2083391758,
+    "TriggerId": 16842761
+  },
+  {
+    "Name": "SHELL_COMMON_HIT_WATER_GROUND",
+    "FixedId": 215102914,
+    "TriggerId": 16842762
+  },
+  {
+    "Name": "SHELL_COMMON_DAMAGE_BREAK",
+    "FixedId": 423874224,
+    "TriggerId": 16842763
+  },
+  {
+    "Name": "SHELL_EX_EX_A",
+    "FixedId": 21,
+    "TriggerId": 16908300
+  },
+  {
+    "Name": "SHELL_EX_EX_B",
+    "FixedId": 20,
+    "TriggerId": 16908301
+  },
+  {
+    "Name": "SHELL_EX_EX_C",
+    "FixedId": 19,
+    "TriggerId": 16908302
+  },
+  {
+    "Name": "SHELL_EX_EX_D",
+    "FixedId": 756348031,
+    "TriggerId": 16908303
+  },
+  {
+    "Name": "SHELL_EX_EX_E",
+    "FixedId": -356920054,
+    "TriggerId": 16908304
+  },
+  {
+    "Name": "SHELL_HIT_MARK_KAN",
+    "FixedId": -378922109,
+    "TriggerId": 16973841
+  },
+  {
+    "Name": "SHELL_HIT_MARK_THROUGH",
+    "FixedId": -807660051,
+    "TriggerId": 16973842
+  },
+  {
+    "Name": "SHELL_HIT_MARK_ZAKU",
+    "FixedId": 2133921392,
+    "TriggerId": 16973843
+  },
+  {
+    "Name": "SHELL_HIT_MARK_SHINZAKU",
+    "FixedId": 1712163456,
+    "TriggerId": 16973844
+  },
+  {
+    "Name": "PL_BUF_HEAL_LOOP",
+    "FixedId": 87,
+    "TriggerId": 33816597
+  },
+  {
+    "Name": "PL_BUF_HEAL",
+    "FixedId": 88,
+    "TriggerId": 33816598
+  },
+  {
+    "Name": "PL_BUF_POISON_HEAL",
+    "FixedId": 89,
+    "TriggerId": 33816599
+  },
+  {
+    "Name": "PL_BUF_STAMINA_LOOP",
+    "FixedId": 90,
+    "TriggerId": 33816600
+  },
+  {
+    "Name": "PL_BUF_STAMINA_UP",
+    "FixedId": 91,
+    "TriggerId": 33816601
+  },
+  {
+    "Name": "PL_BUF_ATTACK_LOOP",
+    "FixedId": 92,
+    "TriggerId": 33816602
+  },
+  {
+    "Name": "PL_BUF_ATTACK_UP",
+    "FixedId": 93,
+    "TriggerId": 33816603
+  },
+  {
+    "Name": "PL_BUF_DEFENCE_LOOP",
+    "FixedId": 1690534326,
+    "TriggerId": 33816604
+  },
+  {
+    "Name": "PL_BUF_DEFENCE_UP",
+    "FixedId": 1553206476,
+    "TriggerId": 33816605
+  },
+  {
+    "Name": "PL_BUF_IMMUNIZER_LOOP",
+    "FixedId": -1422189269,
+    "TriggerId": 33816606
+  },
+  {
+    "Name": "PL_BUF_IMMUNIZER_ACTIVATE",
+    "FixedId": 2129476122,
+    "TriggerId": 33816607
+  },
+  {
+    "Name": "PL_BUF_HOT_DRINK_LOOP",
+    "FixedId": 128225530,
+    "TriggerId": 33816608
+  },
+  {
+    "Name": "PL_BUF_HOT_DRINK_ACTIVATE",
+    "FixedId": -86216233,
+    "TriggerId": 33816609
+  },
+  {
+    "Name": "PL_BUF_COOLER_DRINK_LOOP",
+    "FixedId": -430326614,
+    "TriggerId": 33816610
+  },
+  {
+    "Name": "PL_BUF_COOLER_DRINK_ACTIVATE",
+    "FixedId": 595146334,
+    "TriggerId": 33816611
+  },
+  {
+    "Name": "PL_DEBUF_POISON",
+    "FixedId": 64,
+    "TriggerId": 33882148
+  },
+  {
+    "Name": "PL_DEBUF_PARALYZE",
+    "FixedId": 73,
+    "TriggerId": 33882149
+  },
+  {
+    "Name": "PL_DEBUF_HEAT_AREA",
+    "FixedId": 74,
+    "TriggerId": 33882150
+  },
+  {
+    "Name": "PL_DEBUF_COLD_AREA",
+    "FixedId": 423794421,
+    "TriggerId": 33882151
+  },
+  {
+    "Name": "PL_DEBUF_FIRE",
+    "FixedId": 77,
+    "TriggerId": 33882152
+  },
+  {
+    "Name": "PL_DEBUF_FIRE_END",
+    "FixedId": 324789451,
+    "TriggerId": 33882153
+  },
+  {
+    "Name": "PL_DEBUF_WATER",
+    "FixedId": 76,
+    "TriggerId": 33882154
+  },
+  {
+    "Name": "PL_DEBUF_ELEC",
+    "FixedId": 84,
+    "TriggerId": 33882155
+  },
+  {
+    "Name": "PL_DEBUF_ICE",
+    "FixedId": 83,
+    "TriggerId": 33882156
+  },
+  {
+    "Name": "PL_DEBUF_DRAGON",
+    "FixedId": 75,
+    "TriggerId": 33882157
+  },
+  {
+    "Name": "PL_DEBUF_SLEEP",
+    "FixedId": 78,
+    "TriggerId": 33882158
+  },
+  {
+    "Name": "PL_DEBUF_BLAST_SIGN",
+    "FixedId": 79,
+    "TriggerId": 33882159
+  },
+  {
+    "Name": "PL_DEBUF_BLAST",
+    "FixedId": 80,
+    "TriggerId": 33882160
+  },
+  {
+    "Name": "PL_DEBUF_STUN",
+    "FixedId": 81,
+    "TriggerId": 33882161
+  },
+  {
+    "Name": "PL_DEBUF_FLASH_STUN",
+    "FixedId": -1946351245,
+    "TriggerId": 33882162
+  },
+  {
+    "Name": "PL_DEBUF_BLEED",
+    "FixedId": 82,
+    "TriggerId": 33882163
+  },
+  {
+    "Name": "PL_DEBUF_DEFENSE_DOWN",
+    "FixedId": 85,
+    "TriggerId": 33882164
+  },
+  {
+    "Name": "PL_DEBUF_MAGMA_GROUND",
+    "FixedId": 86,
+    "TriggerId": 33882165
+  },
+  {
+    "Name": "PL_DEBUF_STENCH",
+    "FixedId": 399442020,
+    "TriggerId": 33882166
+  },
+  {
+    "Name": "PL_DEBUF_STICKY_SIGN",
+    "FixedId": -749348375,
+    "TriggerId": 33882167
+  },
+  {
+    "Name": "PL_DEBUF_STICKY",
+    "FixedId": 1662740911,
+    "TriggerId": 33882168
+  },
+  {
+    "Name": "PL_DEBUF_FROZEN_SIGN",
+    "FixedId": -1307661776,
+    "TriggerId": 33882169
+  },
+  {
+    "Name": "PL_DEBUF_FROZEN",
+    "FixedId": 2031983999,
+    "TriggerId": 33882170
+  },
+  {
+    "Name": "PL_DEBUF_FRENZY_INFECT",
+    "FixedId": -553124448,
+    "TriggerId": 33882171
+  },
+  {
+    "Name": "PL_DEBUF_FRENZY_OUTBREAK",
+    "FixedId": 1649915227,
+    "TriggerId": 33882172
+  },
+  {
+    "Name": "PL_DEBUF_FRENZY_OVERCOME",
+    "FixedId": -1968848769,
+    "TriggerId": 33882173
+  },
+  {
+    "Name": "PL_DEBUF_FRENZY_ACCUMULATION",
+    "FixedId": -2061236529,
+    "TriggerId": 33882174
+  },
+  {
+    "Name": "PL_DEBUF_FRENZY_ACCUMULATION_ACTIVATION",
+    "FixedId": -1004634239,
+    "TriggerId": 33882175
+  },
+  {
+    "Name": "PL_DEBUF_CONDITION_EX_00_S",
+    "FixedId": 774395717,
+    "TriggerId": 33882176
+  },
+  {
+    "Name": "PL_DEBUF_CONDITION_EX_00_L",
+    "FixedId": -1129624038,
+    "TriggerId": 33882177
+  },
+  {
+    "Name": "PL_WP00_CHARGE_1",
+    "FixedId": 67,
+    "TriggerId": 33947714
+  },
+  {
+    "Name": "PL_WP00_CHARGE_2",
+    "FixedId": 68,
+    "TriggerId": 33947715
+  },
+  {
+    "Name": "PL_WP00_CHARGE_3",
+    "FixedId": 69,
+    "TriggerId": 33947716
+  },
+  {
+    "Name": "PL_WP00_FLY_CHARGE_1",
+    "FixedId": 105,
+    "TriggerId": 33947717
+  },
+  {
+    "Name": "PL_WP00_FLY_CHARGE_2",
+    "FixedId": 106,
+    "TriggerId": 33947718
+  },
+  {
+    "Name": "PL_WP00_FLY_CHARGE_3",
+    "FixedId": 107,
+    "TriggerId": 33947719
+  },
+  {
+    "Name": "PL_WP00_SLIDING_CHARGE_1",
+    "FixedId": 112,
+    "TriggerId": 33947720
+  },
+  {
+    "Name": "PL_WP00_SLIDING_CHARGE_2",
+    "FixedId": 113,
+    "TriggerId": 33947721
+  },
+  {
+    "Name": "PL_WP00_SLIDING_CHARGE_3",
+    "FixedId": 114,
+    "TriggerId": 33947722
+  },
+  {
+    "Name": "PL_WP00_PARRY_CHARGE_1",
+    "FixedId": 123,
+    "TriggerId": 33947723
+  },
+  {
+    "Name": "PL_WP00_PARRY_CHARGE_2",
+    "FixedId": 124,
+    "TriggerId": 33947724
+  },
+  {
+    "Name": "PL_WP00_PARRY_CHARGE_3",
+    "FixedId": 125,
+    "TriggerId": 33947725
+  },
+  {
+    "Name": "PL_WP00_EM_RIDE_CHARGE_1",
+    "FixedId": -365978421,
+    "TriggerId": 33947726
+  },
+  {
+    "Name": "PL_WP00_EM_RIDE_CHARGE_2",
+    "FixedId": -381991339,
+    "TriggerId": 33947727
+  },
+  {
+    "Name": "PL_WP00_EM_RIDE_CHARGE_3",
+    "FixedId": 1007131884,
+    "TriggerId": 33947728
+  },
+  {
+    "Name": "PL_WP00_JUST_TACKLE_CHARGE_1",
+    "FixedId": 589150913,
+    "TriggerId": 33947729
+  },
+  {
+    "Name": "PL_WP00_JUST_TACKLE_CHARGE_2",
+    "FixedId": -222572511,
+    "TriggerId": 33947730
+  },
+  {
+    "Name": "PL_WP00_JUST_TACKLE_CHARGE_3",
+    "FixedId": 1605151618,
+    "TriggerId": 33947731
+  },
+  {
+    "Name": "PL_WP01_IT_0100_0035_WPGM_MAIN",
+    "FixedId": 1374181575,
+    "TriggerId": 34013268
+  },
+  {
+    "Name": "PL_WP01_IT_0100_0035_WPGM_SUB",
+    "FixedId": -592647818,
+    "TriggerId": 34013269
+  },
+  {
+    "Name": "PL_WP02_KIJIN_ON",
+    "FixedId": -175887819,
+    "TriggerId": 34078806
+  },
+  {
+    "Name": "PL_WP02_KIJIN_ENHANCEMENT",
+    "FixedId": 1138528673,
+    "TriggerId": 34078807
+  },
+  {
+    "Name": "PL_WP02_KIJIN_ON_FROM_CHAIN",
+    "FixedId": 434725475,
+    "TriggerId": 34078808
+  },
+  {
+    "Name": "PL_WP02_CHAIN",
+    "FixedId": 1466950072,
+    "TriggerId": 34078809
+  },
+  {
+    "Name": "PL_WP02_RANBU",
+    "FixedId": 1690591959,
+    "TriggerId": 34078810
+  },
+  {
+    "Name": "PL_WP02_CHAIN_TO_RANBU",
+    "FixedId": -1528484938,
+    "TriggerId": 34078811
+  },
+  {
+    "Name": "PL_WP02_RANBU_TO_CHAIN",
+    "FixedId": -1303008729,
+    "TriggerId": 34078812
+  },
+  {
+    "Name": "PL_WP02_JUST_DODGE",
+    "FixedId": 1068030678,
+    "TriggerId": 34078813
+  },
+  {
+    "Name": "PL_WP02_KIJIN_OFF",
+    "FixedId": -56649274,
+    "TriggerId": 34078814
+  },
+  {
+    "Name": "PL_WP02_KIJIN_ON_EM0160",
+    "FixedId": 1996532948,
+    "TriggerId": 34078815
+  },
+  {
+    "Name": "PL_WP02_SKILL_231",
+    "FixedId": -2083776460,
+    "TriggerId": 34078816
+  },
+  {
+    "Name": "PL_WP02_KIJIN_ON_EX_EQUIP31_L",
+    "FixedId": 1516309860,
+    "TriggerId": 34078817
+  },
+  {
+    "Name": "PL_WP02_KIJIN_ON_EX_EQUIP31_R",
+    "FixedId": 831239687,
+    "TriggerId": 34078818
+  },
+  {
+    "Name": "PL_WP03_KIJIN_GAUGE_WHITE",
+    "FixedId": 613788796,
+    "TriggerId": 34144355
+  },
+  {
+    "Name": "PL_WP03_KIJIN_GAUGE_YELLOW",
+    "FixedId": -2008249210,
+    "TriggerId": 34144356
+  },
+  {
+    "Name": "PL_WP03_KIJIN_GAUGE_RED",
+    "FixedId": -674755578,
+    "TriggerId": 34144357
+  },
+  {
+    "Name": "PL_WP03_KABUTOWARI_SLASH",
+    "FixedId": -1276226189,
+    "TriggerId": 34144358
+  },
+  {
+    "Name": "PL_WP03_KIJIN_CHARGE_1",
+    "FixedId": 674523305,
+    "TriggerId": 34144359
+  },
+  {
+    "Name": "PL_WP03_KIJIN_CHARGE_2",
+    "FixedId": -466711442,
+    "TriggerId": 34144360
+  },
+  {
+    "Name": "PL_WP03_KIJIN_CHARGE_3",
+    "FixedId": -1635710426,
+    "TriggerId": 34144361
+  },
+  {
+    "Name": "PL_WP03_AURA_UP_WHITE",
+    "FixedId": -1308134797,
+    "TriggerId": 34144362
+  },
+  {
+    "Name": "PL_WP03_AURA_UP_YELLOW",
+    "FixedId": -1598118902,
+    "TriggerId": 34144363
+  },
+  {
+    "Name": "PL_WP03_AURA_UP_RED",
+    "FixedId": 1424413945,
+    "TriggerId": 34144364
+  },
+  {
+    "Name": "PL_WP03_MIKIRI",
+    "FixedId": 1251733250,
+    "TriggerId": 34144365
+  },
+  {
+    "Name": "PL_WP03_RENKI_RESUME",
+    "FixedId": 10752128,
+    "TriggerId": 34144366
+  },
+  {
+    "Name": "PL_WP03_IAI_KIJIN_SLASH",
+    "FixedId": 1333509173,
+    "TriggerId": 34144367
+  },
+  {
+    "Name": "PL_WP03_MIKIRI_ENABLE",
+    "FixedId": 1775514932,
+    "TriggerId": 34144368
+  },
+  {
+    "Name": "PL_WP03_WEAK_POINT_SLASH_F",
+    "FixedId": 1310828186,
+    "TriggerId": 34144369
+  },
+  {
+    "Name": "PL_WP03_WEAK_POINT_SLASH_R",
+    "FixedId": -206889931,
+    "TriggerId": 34144370
+  },
+  {
+    "Name": "PL_WP03_WEAK_POINT_SLASH_L",
+    "FixedId": 670070437,
+    "TriggerId": 34144371
+  },
+  {
+    "Name": "PL_WP03_WEAK_POINT_SLASH_B",
+    "FixedId": -635338955,
+    "TriggerId": 34144372
+  },
+  {
+    "Name": "PL_WP04_CHARGE_LV1",
+    "FixedId": -803869342,
+    "TriggerId": 34209909
+  },
+  {
+    "Name": "PL_WP04_CHARGE_LV2",
+    "FixedId": 504948297,
+    "TriggerId": 34209910
+  },
+  {
+    "Name": "PL_WP04_CHARGE_LV3",
+    "FixedId": -61317809,
+    "TriggerId": 34209911
+  },
+  {
+    "Name": "PL_WP04_CHARGE_SLOPE_LV1",
+    "FixedId": 2024165326,
+    "TriggerId": 34209912
+  },
+  {
+    "Name": "PL_WP04_CHARGE_SLOPE_LV2",
+    "FixedId": 2100728228,
+    "TriggerId": 34209913
+  },
+  {
+    "Name": "PL_WP04_CHARGE_SLOPE_LV3",
+    "FixedId": -1488565015,
+    "TriggerId": 34209914
+  },
+  {
+    "Name": "PL_WP04_CHARGE_AIR_LV1",
+    "FixedId": -1761065076,
+    "TriggerId": 34209915
+  },
+  {
+    "Name": "PL_WP04_CHARGE_AIR_LV2",
+    "FixedId": -1980945818,
+    "TriggerId": 34209916
+  },
+  {
+    "Name": "PL_WP04_CHARGE_AIR_LV3",
+    "FixedId": 705587233,
+    "TriggerId": 34209917
+  },
+  {
+    "Name": "PL_WP04_SUPER_CHARGE_LV1",
+    "FixedId": 366922721,
+    "TriggerId": 34209918
+  },
+  {
+    "Name": "PL_WP04_SUPER_CHARGE_LV2",
+    "FixedId": 881506208,
+    "TriggerId": 34209919
+  },
+  {
+    "Name": "PL_WP04_SUPER_CHARGE_LV3",
+    "FixedId": 1822263775,
+    "TriggerId": 34209920
+  },
+  {
+    "Name": "PL_WP05_TONE_COLOR_WHITE",
+    "FixedId": 1937542110,
+    "TriggerId": 34275457
+  },
+  {
+    "Name": "PL_WP05_TONE_COLOR_RED",
+    "FixedId": 587805542,
+    "TriggerId": 34275458
+  },
+  {
+    "Name": "PL_WP05_TONE_COLOR_BLUE",
+    "FixedId": 1584186622,
+    "TriggerId": 34275459
+  },
+  {
+    "Name": "PL_WP05_TONE_COLOR_LIGHT_BLUE",
+    "FixedId": 419149154,
+    "TriggerId": 34275460
+  },
+  {
+    "Name": "PL_WP05_TONE_COLOR_GREEN",
+    "FixedId": 1910011348,
+    "TriggerId": 34275461
+  },
+  {
+    "Name": "PL_WP05_TONE_COLOR_YELLOW",
+    "FixedId": -876035149,
+    "TriggerId": 34275462
+  },
+  {
+    "Name": "PL_WP05_TONE_COLOR_ORANGE",
+    "FixedId": 1453370173,
+    "TriggerId": 34275463
+  },
+  {
+    "Name": "PL_WP05_TONE_COLOR_PURPLE",
+    "FixedId": -1592105824,
+    "TriggerId": 34275464
+  },
+  {
+    "Name": "PL_WP05_MUSIC",
+    "FixedId": -1126599690,
+    "TriggerId": 34275465
+  },
+  {
+    "Name": "PL_WP05_SLEF_BUFF",
+    "FixedId": -669742273,
+    "TriggerId": 34275466
+  },
+  {
+    "Name": "PL_WP05_SP_HEAL",
+    "FixedId": -2109968026,
+    "TriggerId": 34275467
+  },
+  {
+    "Name": "PL_WP05_WEAK_NOTES",
+    "FixedId": 1564923898,
+    "TriggerId": 34275468
+  },
+  {
+    "Name": "PL_WP05_WEAK_NOTES_PL_REMOVE",
+    "FixedId": 130169206,
+    "TriggerId": 34275469
+  },
+  {
+    "Name": "PL_WP05_WEAK_NOTES_EM_ADD",
+    "FixedId": 795810315,
+    "TriggerId": 34275470
+  },
+  {
+    "Name": "PL_WP05_WEAK_NOTES_EM_REMOVE",
+    "FixedId": 1238056792,
+    "TriggerId": 34275471
+  },
+  {
+    "Name": "PL_WP05_WEAK_BLAST",
+    "FixedId": -229550769,
+    "TriggerId": 34275472
+  },
+  {
+    "Name": "PL_WP05_JUST_MUSIC_PERFORMANCE",
+    "FixedId": -123816527,
+    "TriggerId": 34275473
+  },
+  {
+    "Name": "PL_WP05_COUNTER",
+    "FixedId": -1997457125,
+    "TriggerId": 34275474
+  },
+  {
+    "Name": "PL_WP06_JUST_GUARD_SUCCESS",
+    "FixedId": -2058415994,
+    "TriggerId": 34341011
+  },
+  {
+    "Name": "PL_WP06_JUST_GUARD_SUCCESS_G",
+    "FixedId": -563478676,
+    "TriggerId": 34341012
+  },
+  {
+    "Name": "PL_WP06_CHARGE_LV1",
+    "FixedId": -850308586,
+    "TriggerId": 34341013
+  },
+  {
+    "Name": "PL_WP06_CHARGE_LV2",
+    "FixedId": -1914872440,
+    "TriggerId": 34341014
+  },
+  {
+    "Name": "PL_WP06_CHARGE_LV3",
+    "FixedId": 1512721979,
+    "TriggerId": 34341015
+  },
+  {
+    "Name": "PL_WP06_GUARD_POINT",
+    "FixedId": -681821643,
+    "TriggerId": 34341016
+  },
+  {
+    "Name": "PL_WP06_POWER_GUARD_HIT_1",
+    "FixedId": 1723323509,
+    "TriggerId": 34341017
+  },
+  {
+    "Name": "PL_WP06_POWER_GUARD_HIT_2",
+    "FixedId": -69380162,
+    "TriggerId": 34341018
+  },
+  {
+    "Name": "PL_WP06_POWER_GUARD_HIT_3",
+    "FixedId": 979435307,
+    "TriggerId": 34341019
+  },
+  {
+    "Name": "PL_WP06_RUSH_ADD",
+    "FixedId": 1097046947,
+    "TriggerId": 34341020
+  },
+  {
+    "Name": "PL_WP06_GUARD",
+    "FixedId": 1040431813,
+    "TriggerId": 34341021
+  },
+  {
+    "Name": "PL_WP06_RIDE_STRONG_ATTACK",
+    "FixedId": -1191034071,
+    "TriggerId": 34341022
+  },
+  {
+    "Name": "PL_WP06_EX_EQUIP_SHIELD_WPON",
+    "FixedId": -624775090,
+    "TriggerId": 34341023
+  },
+  {
+    "Name": "PL_WP06_EX_EQUIP_SHIELD_WPOFF",
+    "FixedId": -1703505287,
+    "TriggerId": 34341024
+  },
+  {
+    "Name": "PL_WP07_RELOAD",
+    "FixedId": 1591168486,
+    "TriggerId": 34406561
+  },
+  {
+    "Name": "PL_WP07_GUARD_POINT",
+    "FixedId": 162199717,
+    "TriggerId": 34406562
+  },
+  {
+    "Name": "PL_WP07_GUARD_POINT_SUCCESS",
+    "FixedId": 881651499,
+    "TriggerId": 34406563
+  },
+  {
+    "Name": "PL_WP07_RIDE_STRONG_ATTACK",
+    "FixedId": -311882016,
+    "TriggerId": 34406564
+  },
+  {
+    "Name": "PL_WP07_CHARGE_SHOT",
+    "FixedId": -309151336,
+    "TriggerId": 34406565
+  },
+  {
+    "Name": "PL_WP07_CHARGE_ADD",
+    "FixedId": 989463546,
+    "TriggerId": 34406566
+  },
+  {
+    "Name": "PL_WP07_CHARGE_RYUUGEKI",
+    "FixedId": 1051763842,
+    "TriggerId": 34406567
+  },
+  {
+    "Name": "PL_WP07_EX_EQUIP_SHIELD_WPON",
+    "FixedId": -465956818,
+    "TriggerId": 34406568
+  },
+  {
+    "Name": "PL_WP07_EX_EQUIP_SHIELD_WPOFF",
+    "FixedId": -681253178,
+    "TriggerId": 34406569
+  },
+  {
+    "Name": "PL_WP07_EX_EQUIP_OUTLET",
+    "FixedId": -519932565,
+    "TriggerId": 34406570
+  },
+  {
+    "Name": "PL_WP08_AXE_ENHANCED",
+    "FixedId": 2020763296,
+    "TriggerId": 34472107
+  },
+  {
+    "Name": "PL_WP08_AWAKE_POWER",
+    "FixedId": 1836687920,
+    "TriggerId": 34472108
+  },
+  {
+    "Name": "PL_WP08_AWAKE_ELEM_FIRE",
+    "FixedId": -18184925,
+    "TriggerId": 34472109
+  },
+  {
+    "Name": "PL_WP08_AWAKE_ELEM_WATER",
+    "FixedId": -652980661,
+    "TriggerId": 34472110
+  },
+  {
+    "Name": "PL_WP08_AWAKE_ELEM_ELEC",
+    "FixedId": 2063922798,
+    "TriggerId": 34472111
+  },
+  {
+    "Name": "PL_WP08_AWAKE_ELEM_ICE",
+    "FixedId": 101606735,
+    "TriggerId": 34472112
+  },
+  {
+    "Name": "PL_WP08_AWAKE_ELEM_DRAGON",
+    "FixedId": -477275215,
+    "TriggerId": 34472113
+  },
+  {
+    "Name": "PL_WP08_AWAKE_DRAGON",
+    "FixedId": -762537548,
+    "TriggerId": 34472114
+  },
+  {
+    "Name": "PL_WP08_AWAKE_STAMINA",
+    "FixedId": -1907835416,
+    "TriggerId": 34472115
+  },
+  {
+    "Name": "PL_WP08_AWAKE_PARALYSE",
+    "FixedId": 1739779383,
+    "TriggerId": 34472116
+  },
+  {
+    "Name": "PL_WP08_AWAKE_POISON",
+    "FixedId": -1350952030,
+    "TriggerId": 34472117
+  },
+  {
+    "Name": "PL_WP08_AWAKE_SLEEP",
+    "FixedId": 697152524,
+    "TriggerId": 34472118
+  },
+  {
+    "Name": "PL_WP08_AWAKE_BLAST",
+    "FixedId": 750925258,
+    "TriggerId": 34472119
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_POWER",
+    "FixedId": 1420077498,
+    "TriggerId": 34472120
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_ELEM_FIRE",
+    "FixedId": 1081539517,
+    "TriggerId": 34472121
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_ELEM_WATER",
+    "FixedId": -1356470326,
+    "TriggerId": 34472122
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_ELEM_ELEC",
+    "FixedId": 1962935834,
+    "TriggerId": 34472123
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_ELEM_ICE",
+    "FixedId": 234679613,
+    "TriggerId": 34472124
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_ELEM_DRAGON",
+    "FixedId": 1198770113,
+    "TriggerId": 34472125
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_DRAGON",
+    "FixedId": -608597346,
+    "TriggerId": 34472126
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_STAMINA",
+    "FixedId": -1036604868,
+    "TriggerId": 34472127
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_PARALYSE",
+    "FixedId": 1313247863,
+    "TriggerId": 34472128
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_POISON",
+    "FixedId": 284502952,
+    "TriggerId": 34472129
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_SLEEP",
+    "FixedId": -1743234804,
+    "TriggerId": 34472130
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_BLAST",
+    "FixedId": 635787936,
+    "TriggerId": 34472131
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_HIT_POWER",
+    "FixedId": 1579211436,
+    "TriggerId": 34472132
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_HIT_ELEM_FIRE",
+    "FixedId": -1341214570,
+    "TriggerId": 34472133
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_HIT_ELEM_WATER",
+    "FixedId": 608276145,
+    "TriggerId": 34472134
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_HIT_ELEM_ELEC",
+    "FixedId": -1415436149,
+    "TriggerId": 34472135
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_HIT_ELEM_ICE",
+    "FixedId": -2021223537,
+    "TriggerId": 34472136
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_HIT_ELEM_DRAGON",
+    "FixedId": 612325307,
+    "TriggerId": 34472137
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_HIT_DRAGON",
+    "FixedId": -652857317,
+    "TriggerId": 34472138
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_HIT_STAMINA",
+    "FixedId": -1462839012,
+    "TriggerId": 34472139
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_HIT_PARALYSE",
+    "FixedId": -1030459310,
+    "TriggerId": 34472140
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_HIT_POISON",
+    "FixedId": -266766822,
+    "TriggerId": 34472141
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_HIT_SLEEP",
+    "FixedId": -326129978,
+    "TriggerId": 34472142
+  },
+  {
+    "Name": "PL_WP08_DISCHARGE_HIT_BLAST",
+    "FixedId": -278954862,
+    "TriggerId": 34472143
+  },
+  {
+    "Name": "PL_WP08_COMPRESS_CHARGE_POWER",
+    "FixedId": -624251488,
+    "TriggerId": 34472144
+  },
+  {
+    "Name": "PL_WP08_COMPRESS_CHARGE_ELEM_FIRE",
+    "FixedId": -331704714,
+    "TriggerId": 34472145
+  },
+  {
+    "Name": "PL_WP08_COMPRESS_CHARGE_ELEM_WATER",
+    "FixedId": -1225220300,
+    "TriggerId": 34472146
+  },
+  {
+    "Name": "PL_WP08_COMPRESS_CHARGE_ELEM_ELEC",
+    "FixedId": -1820032121,
+    "TriggerId": 34472147
+  },
+  {
+    "Name": "PL_WP08_COMPRESS_CHARGE_ELEM_ICE",
+    "FixedId": -1695086463,
+    "TriggerId": 34472148
+  },
+  {
+    "Name": "PL_WP08_COMPRESS_CHARGE_ELEM_DRAGON",
+    "FixedId": 787731517,
+    "TriggerId": 34472149
+  },
+  {
+    "Name": "PL_WP08_COMPRESS_CHARGE_DRAGON",
+    "FixedId": -175015749,
+    "TriggerId": 34472150
+  },
+  {
+    "Name": "PL_WP08_COMPRESS_CHARGE_STAMINA",
+    "FixedId": 1028145987,
+    "TriggerId": 34472151
+  },
+  {
+    "Name": "PL_WP08_COMPRESS_CHARGE_PARALYSE",
+    "FixedId": -1406576567,
+    "TriggerId": 34472152
+  },
+  {
+    "Name": "PL_WP08_COMPRESS_CHARGE_POISON",
+    "FixedId": 835168145,
+    "TriggerId": 34472153
+  },
+  {
+    "Name": "PL_WP08_COMPRESS_CHARGE_SLEEP",
+    "FixedId": 1695507825,
+    "TriggerId": 34472154
+  },
+  {
+    "Name": "PL_WP08_COMPRESS_CHARGE_BLAST",
+    "FixedId": -1915316321,
+    "TriggerId": 34472155
+  },
+  {
+    "Name": "PL_WP09_SHIELD_ENHANCED",
+    "FixedId": 1898588615,
+    "TriggerId": 34537692
+  },
+  {
+    "Name": "PL_WP09_SHIELD_ENHANCED_BEGIN",
+    "FixedId": 1698658240,
+    "TriggerId": 34537693
+  },
+  {
+    "Name": "PL_WP09_SWORD_ENHANCED",
+    "FixedId": 1077810871,
+    "TriggerId": 34537694
+  },
+  {
+    "Name": "PL_WP09_SWORD_ENHANCED_FIRE",
+    "FixedId": 1819558227,
+    "TriggerId": 34537695
+  },
+  {
+    "Name": "PL_WP09_SWORD_ENHANCED_WATER",
+    "FixedId": -1907071116,
+    "TriggerId": 34537696
+  },
+  {
+    "Name": "PL_WP09_SWORD_ENHANCED_ELEC",
+    "FixedId": -165533513,
+    "TriggerId": 34537697
+  },
+  {
+    "Name": "PL_WP09_SWORD_ENHANCED_ICE",
+    "FixedId": 983157141,
+    "TriggerId": 34537698
+  },
+  {
+    "Name": "PL_WP09_SWORD_ENHANCED_DRAGON",
+    "FixedId": -1703383475,
+    "TriggerId": 34537699
+  },
+  {
+    "Name": "PL_WP09_SWORD_CHARGE_S",
+    "FixedId": -2039332337,
+    "TriggerId": 34537700
+  },
+  {
+    "Name": "PL_WP09_SWORD_CHARGE_L",
+    "FixedId": -688020310,
+    "TriggerId": 34537701
+  },
+  {
+    "Name": "PL_WP09_SWORD_OVERHEAT",
+    "FixedId": 844151013,
+    "TriggerId": 34537702
+  },
+  {
+    "Name": "PL_WP09_AXE_ENHANCED",
+    "FixedId": -1612405721,
+    "TriggerId": 34537703
+  },
+  {
+    "Name": "PL_WP09_AXE_SHIELD_ENHANCED",
+    "FixedId": -182919687,
+    "TriggerId": 34537704
+  },
+  {
+    "Name": "PL_WP09_GUARD_POINT_LOOP",
+    "FixedId": 498432549,
+    "TriggerId": 34537705
+  },
+  {
+    "Name": "PL_WP09_GUARD_POINT_SUCCESS",
+    "FixedId": -669624627,
+    "TriggerId": 34537706
+  },
+  {
+    "Name": "PL_WP09_AXE_SAW_ACTIVE",
+    "FixedId": 735464230,
+    "TriggerId": 34537707
+  },
+  {
+    "Name": "PL_WP09_EX_EQUIP25_WEAPON_OFF",
+    "FixedId": 1537417004,
+    "TriggerId": 34537708
+  },
+  {
+    "Name": "PL_WP09_EX_EQUIP25_SWORD",
+    "FixedId": -2093541335,
+    "TriggerId": 34537709
+  },
+  {
+    "Name": "PL_WP09_EX_EQUIP25_AXE",
+    "FixedId": 462222554,
+    "TriggerId": 34537710
+  },
+  {
+    "Name": "PL_WP09_EX_EQUIP25_SHIELD_ENHANCED",
+    "FixedId": -1399103249,
+    "TriggerId": 34537711
+  },
+  {
+    "Name": "PL_WP10_GET_EXTRACT_1",
+    "FixedId": -1590919368,
+    "TriggerId": 34603248
+  },
+  {
+    "Name": "PL_WP10_GET_EXTRACT_2",
+    "FixedId": 1312854015,
+    "TriggerId": 34603249
+  },
+  {
+    "Name": "PL_WP10_GET_EXTRACT_3",
+    "FixedId": -534665898,
+    "TriggerId": 34603250
+  },
+  {
+    "Name": "PL_WP10_EXTRACT_1",
+    "FixedId": 58156470,
+    "TriggerId": 34603251
+  },
+  {
+    "Name": "PL_WP10_EXTRACT_2",
+    "FixedId": 96141169,
+    "TriggerId": 34603252
+  },
+  {
+    "Name": "PL_WP10_EXTRACT_3",
+    "FixedId": 690066603,
+    "TriggerId": 34603253
+  },
+  {
+    "Name": "PL_WP10_INSECT_HIT",
+    "FixedId": 1957158553,
+    "TriggerId": 34603254
+  },
+  {
+    "Name": "PL_WP10_INSECT_EXTRACT_1",
+    "FixedId": -1645214865,
+    "TriggerId": 34603255
+  },
+  {
+    "Name": "PL_WP10_INSECT_EXTRACT_2",
+    "FixedId": -55688102,
+    "TriggerId": 34603256
+  },
+  {
+    "Name": "PL_WP10_INSECT_EXTRACT_3",
+    "FixedId": 131754818,
+    "TriggerId": 34603257
+  },
+  {
+    "Name": "PL_WP10_INSECT_FIGHT_TOGETHER",
+    "FixedId": 1914325731,
+    "TriggerId": 34603258
+  },
+  {
+    "Name": "PL_WP10_CHARGING_PHASE_1",
+    "FixedId": 1687482569,
+    "TriggerId": 34603259
+  },
+  {
+    "Name": "PL_WP10_CHARGING_PHASE_2",
+    "FixedId": -672898602,
+    "TriggerId": 34603260
+  },
+  {
+    "Name": "PL_WP10_CHARGE_KEEP",
+    "FixedId": -1004424966,
+    "TriggerId": 34603261
+  },
+  {
+    "Name": "PL_WP10_CHARGE_KEEP_WP",
+    "FixedId": 738505055,
+    "TriggerId": 34603262
+  },
+  {
+    "Name": "PL_WP10_INSECT_CHARGING",
+    "FixedId": -407292132,
+    "TriggerId": 34603263
+  },
+  {
+    "Name": "PL_WP10_INSECT_CHARGE_KEEP",
+    "FixedId": 56891333,
+    "TriggerId": 34603264
+  },
+  {
+    "Name": "PL_WP10_INSECT_ATTACK_PENETRATE",
+    "FixedId": -1836066677,
+    "TriggerId": 34603265
+  },
+  {
+    "Name": "PL_WP10_INSECT_AIM_ATTACK",
+    "FixedId": 1115926083,
+    "TriggerId": 34603266
+  },
+  {
+    "Name": "PL_WP10_INSECT_FLYING",
+    "FixedId": 1716019782,
+    "TriggerId": 34603267
+  },
+  {
+    "Name": "PL_WP10_IT_1000_0031_WPGM",
+    "FixedId": 1538891673,
+    "TriggerId": 34603268
+  },
+  {
+    "Name": "PL_WP11_SPECIAL_CHARGE",
+    "FixedId": 1801238262,
+    "TriggerId": 34668805
+  },
+  {
+    "Name": "PL_WP11_CHARGE_LV1",
+    "FixedId": -1639743059,
+    "TriggerId": 34668806
+  },
+  {
+    "Name": "PL_WP11_CHARGE_LV2",
+    "FixedId": 1816494438,
+    "TriggerId": 34668807
+  },
+  {
+    "Name": "PL_WP11_CHARGE_LV3",
+    "FixedId": -1295344509,
+    "TriggerId": 34668808
+  },
+  {
+    "Name": "PL_WP11_CHARGE_LV4",
+    "FixedId": 1581944730,
+    "TriggerId": 34668809
+  },
+  {
+    "Name": "PL_WP11_BOTTLE_CLOSE",
+    "FixedId": -75941150,
+    "TriggerId": 34668810
+  },
+  {
+    "Name": "PL_WP11_BOTTLE_STRONG",
+    "FixedId": -1986550454,
+    "TriggerId": 34668811
+  },
+  {
+    "Name": "PL_WP11_BOTTLE_PENETRATE",
+    "FixedId": -89675740,
+    "TriggerId": 34668812
+  },
+  {
+    "Name": "PL_WP11_BOTTLE_PARALYSE",
+    "FixedId": -1668390954,
+    "TriggerId": 34668813
+  },
+  {
+    "Name": "PL_WP11_BOTTLE_POISON",
+    "FixedId": -1039016154,
+    "TriggerId": 34668814
+  },
+  {
+    "Name": "PL_WP11_BOTTLE_SLEEP",
+    "FixedId": -1704043213,
+    "TriggerId": 34668815
+  },
+  {
+    "Name": "PL_WP11_BOTTLE_BLAST",
+    "FixedId": 87604829,
+    "TriggerId": 34668816
+  },
+  {
+    "Name": "PL_WP11_BOTTLE_STAMINA",
+    "FixedId": 2030662485,
+    "TriggerId": 34668817
+  },
+  {
+    "Name": "PL_WP11_MIKIRI",
+    "FixedId": 890886699,
+    "TriggerId": 34668818
+  },
+  {
+    "Name": "PL_WP11_SUPER_MIKIRI",
+    "FixedId": -1447342400,
+    "TriggerId": 34668819
+  },
+  {
+    "Name": "PL_WP11_KYOKUSHA_MARKER",
+    "FixedId": 1059247157,
+    "TriggerId": 34668820
+  },
+  {
+    "Name": "PL_WP11_TSUGIYA_SETTING",
+    "FixedId": -217182043,
+    "TriggerId": 34668821
+  },
+  {
+    "Name": "PL_WP11_MULTI_LOCKON_DERIVATION",
+    "FixedId": -1294399029,
+    "TriggerId": 34668822
+  },
+  {
+    "Name": "PL_WP12_ENERGY_BULLET_CHARGE_WP",
+    "FixedId": -804274067,
+    "TriggerId": 34734359
+  },
+  {
+    "Name": "PL_WP12_ENERGY_BULLET_CHARGE_WP_PARTS",
+    "FixedId": 1820127821,
+    "TriggerId": 34734360
+  },
+  {
+    "Name": "PL_WP12_PARRY_BULLET_CHARGE_PARTS",
+    "FixedId": -1948372335,
+    "TriggerId": 34734361
+  },
+  {
+    "Name": "PL_WP12_PARRY_BULLET_CANCEL_PARTS",
+    "FixedId": -1569234070,
+    "TriggerId": 34734362
+  },
+  {
+    "Name": "PL_WP12_SNIPE_BULLET_CHARGE_WP",
+    "FixedId": -805492087,
+    "TriggerId": 34734363
+  },
+  {
+    "Name": "PL_WP12_SNIPE_BULLET_CHARGE_WP_PARTS",
+    "FixedId": 2106242637,
+    "TriggerId": 34734364
+  },
+  {
+    "Name": "PL_WP12_RYUUGEKI_BULLET_CHARGE_WP",
+    "FixedId": 1297656054,
+    "TriggerId": 34734365
+  },
+  {
+    "Name": "PL_WP13_WEAK_POINT_CHARGE_BODY",
+    "FixedId": 885888843,
+    "TriggerId": 34799902
+  },
+  {
+    "Name": "PL_WP13_WEAK_POINT_CHARGE_WP",
+    "FixedId": -1886349022,
+    "TriggerId": 34799903
+  },
+  {
+    "Name": "PL_WP13_ADD_SHOOT",
+    "FixedId": -61211173,
+    "TriggerId": 34799904
+  },
+  {
+    "Name": "PL_WP13_WEAK_POIMT_REMOVE",
+    "FixedId": 2026364119,
+    "TriggerId": 34799905
+  },
+  {
+    "Name": "PL_WP13_EX_EQUIP26_WEAPON_OFF",
+    "FixedId": -253771652,
+    "TriggerId": 34799906
+  },
+  {
+    "Name": "PL_EQUIP_CHANGE_WEAPON",
+    "FixedId": -2095703636,
+    "TriggerId": 34865443
+  },
+  {
+    "Name": "PL_EQUIP_CHANGE_HELM",
+    "FixedId": -140088862,
+    "TriggerId": 34865444
+  },
+  {
+    "Name": "PL_EQUIP_CHANGE_BODY",
+    "FixedId": -388364606,
+    "TriggerId": 34865445
+  },
+  {
+    "Name": "PL_EQUIP_CHANGE_ARM",
+    "FixedId": 857648325,
+    "TriggerId": 34865446
+  },
+  {
+    "Name": "PL_EQUIP_CHANGE_WAIST",
+    "FixedId": -1540158908,
+    "TriggerId": 34865447
+  },
+  {
+    "Name": "PL_EQUIP_CHANGE_LEG",
+    "FixedId": 290550390,
+    "TriggerId": 34865448
+  },
+  {
+    "Name": "PL_SYSTEM_ATTACK_DETECT",
+    "FixedId": -1143343231,
+    "TriggerId": 34930985
+  },
+  {
+    "Name": "PL_SYSTEM_GUIDE_INSECT_CAGE",
+    "FixedId": 99633124,
+    "TriggerId": 34930986
+  },
+  {
+    "Name": "PL_SYSTEM_MORTAR_BULLET_AIM",
+    "FixedId": -1185912374,
+    "TriggerId": 34930987
+  },
+  {
+    "Name": "PL_SYSTEM_ROPE_HOOK_HIT",
+    "FixedId": 519202574,
+    "TriggerId": 34930988
+  },
+  {
+    "Name": "PL_SYSTEM_CATCH_SLINGER_HIT_TERRAIN",
+    "FixedId": 1083904845,
+    "TriggerId": 34930989
+  },
+  {
+    "Name": "PL_SYSTEM_RAIN_WET",
+    "FixedId": -335453020,
+    "TriggerId": 34930990
+  },
+  {
+    "Name": "PL_SYSTEM_MUDDY_STREAM_SPLASH",
+    "FixedId": -2105016053,
+    "TriggerId": 34930991
+  },
+  {
+    "Name": "PL_SYSTEM_HOSTILE",
+    "FixedId": -1013733034,
+    "TriggerId": 34930992
+  },
+  {
+    "Name": "PL_SYSTEM_CATCH_SLINGER_IN_WATER",
+    "FixedId": -431286616,
+    "TriggerId": 34930993
+  },
+  {
+    "Name": "PL_SYSTEM_GM650_SENSOR_EFFECT",
+    "FixedId": 1159307976,
+    "TriggerId": 34930994
+  },
+  {
+    "Name": "PL_SYSTEM_SLINGER_ACCESSORY",
+    "FixedId": 986298404,
+    "TriggerId": 34930995
+  },
+  {
+    "Name": "PL_SYSTEM_EX_SLINGER_SETUP",
+    "FixedId": 1315693509,
+    "TriggerId": 34930996
+  },
+  {
+    "Name": "PL_SYSTEM_EX_SLINGER_LOOP",
+    "FixedId": 1293214662,
+    "TriggerId": 34930997
+  },
+  {
+    "Name": "PL_SYSTEM_EX_SLINGER_HIT",
+    "FixedId": 1161832816,
+    "TriggerId": 34930998
+  },
+  {
+    "Name": "PL_SYSTEM_EX_EMOTE04_02_RARE_ON",
+    "FixedId": -1972748001,
+    "TriggerId": 34930999
+  },
+  {
+    "Name": "PL_SYSTEM_EX_EMOTE04_02_RARE_OFF",
+    "FixedId": -2121895376,
+    "TriggerId": 34931000
+  },
+  {
+    "Name": "PL_SYSTEM_EX_EMOTE04_02_OFF",
+    "FixedId": -788128473,
+    "TriggerId": 34931001
+  },
+  {
+    "Name": "PL_SYSTEM_IN_BARRIER",
+    "FixedId": -440224229,
+    "TriggerId": 34931002
+  },
+  {
+    "Name": "PL_SYSTEM_EX_GROUND_EFFECT",
+    "FixedId": -483088287,
+    "TriggerId": 34931003
+  },
+  {
+    "Name": "PL_ARMOR_KNIFE",
+    "FixedId": 843531495,
+    "TriggerId": 34996540
+  },
+  {
+    "Name": "PL_ARMOR_HELM",
+    "FixedId": -1985012823,
+    "TriggerId": 34996541
+  },
+  {
+    "Name": "PL_ARMOR_BODY",
+    "FixedId": 2106491349,
+    "TriggerId": 34996542
+  },
+  {
+    "Name": "PL_ARMOR_ARM",
+    "FixedId": 680314959,
+    "TriggerId": 34996543
+  },
+  {
+    "Name": "PL_ARMOR_WAIST",
+    "FixedId": 1616552761,
+    "TriggerId": 34996544
+  },
+  {
+    "Name": "PL_ARMOR_LEG",
+    "FixedId": 1197382004,
+    "TriggerId": 34996545
+  },
+  {
+    "Name": "PL_ARMOR_AMULET",
+    "FixedId": 2024399365,
+    "TriggerId": 34996546
+  },
+  {
+    "Name": "PL_ARMOR_SLINGER",
+    "FixedId": -175139266,
+    "TriggerId": 34996547
+  },
+  {
+    "Name": "PL_ARMOR_SLINGER_TIP",
+    "FixedId": -936639972,
+    "TriggerId": 34996548
+  },
+  {
+    "Name": "PL_ARMOR_EX_SLINGER_SETUP",
+    "FixedId": 1387570566,
+    "TriggerId": 34996549
+  },
+  {
+    "Name": "PL_ARMOR_EX_SLINGER_TIP",
+    "FixedId": -453477188,
+    "TriggerId": 34996550
+  },
+  {
+    "Name": "PL_ARMOR_EX_SLINGER_CATCH",
+    "FixedId": 1240031529,
+    "TriggerId": 34996551
+  },
+  {
+    "Name": "PL_ARMOR_EX_SLINGER_MUZZLE",
+    "FixedId": -1301711631,
+    "TriggerId": 34996552
+  },
+  {
+    "Name": "PL_ARMOR_EX_CATCH_SLINGER_MUZZLE",
+    "FixedId": 2128801409,
+    "TriggerId": 34996553
+  },
+  {
+    "Name": "PL_CLOAK_ACTIVE_SKILL_001_PEEL",
+    "FixedId": -717753538,
+    "TriggerId": 35062090
+  },
+  {
+    "Name": "PL_CLOAK_ACTIVE_SKILL_002_PEEL",
+    "FixedId": 578179377,
+    "TriggerId": 35062091
+  },
+  {
+    "Name": "PL_CLOAK_ACTIVE_SKILL_003_PEEL",
+    "FixedId": 700410738,
+    "TriggerId": 35062092
+  },
+  {
+    "Name": "PL_CLOAK_ACTIVE_SKILL_004_PEEL",
+    "FixedId": -1257847624,
+    "TriggerId": 35062093
+  },
+  {
+    "Name": "PL_CLOAK_ACTIVE_SKILL_005_PEEL",
+    "FixedId": -2038047656,
+    "TriggerId": 35062094
+  },
+  {
+    "Name": "PL_CLOAK_ACTIVE_SKILL_002_DAMAGE",
+    "FixedId": 1694907080,
+    "TriggerId": 35062095
+  },
+  {
+    "Name": "PL_CLOAK_ACTIVE_SKILL_001_BREAK",
+    "FixedId": -143893234,
+    "TriggerId": 35062096
+  },
+  {
+    "Name": "PL_CLOAK_ACTIVE_SKILL_004_JUST_DODGE",
+    "FixedId": 1468877911,
+    "TriggerId": 35062097
+  },
+  {
+    "Name": "PL_CLOAK_ACTIVE_SKILL_005_BUFF_MODE",
+    "FixedId": -1327744744,
+    "TriggerId": 35062098
+  },
+  {
+    "Name": "PL_CHARM_BODY_LOOP",
+    "FixedId": -791970416,
+    "TriggerId": 35127635
+  },
+  {
+    "Name": "PL_CHARM_EX_A",
+    "FixedId": 461163244,
+    "TriggerId": 35127636
+  },
+  {
+    "Name": "PL_CHARM_EX_B",
+    "FixedId": -918155455,
+    "TriggerId": 35127637
+  },
+  {
+    "Name": "PL_CHARM_EX_C",
+    "FixedId": -665142003,
+    "TriggerId": 35127638
+  },
+  {
+    "Name": "PL_SKILL_COMMON",
+    "FixedId": -553195816,
+    "TriggerId": 35193175
+  },
+  {
+    "Name": "PL_SKILL_POWER_AWAKE",
+    "FixedId": 1320263429,
+    "TriggerId": 35193176
+  },
+  {
+    "Name": "PL_SKILL_KAZIBA",
+    "FixedId": 1395323652,
+    "TriggerId": 35193177
+  },
+  {
+    "Name": "PL_SKILL_RESENTMENT",
+    "FixedId": -1163272473,
+    "TriggerId": 35193178
+  },
+  {
+    "Name": "PL_SKILL_CHALLENGER",
+    "FixedId": -1014263116,
+    "TriggerId": 35193179
+  },
+  {
+    "Name": "PL_SKILL_FULL_CHARGE",
+    "FixedId": -527707876,
+    "TriggerId": 35193180
+  },
+  {
+    "Name": "PL_SKILL_KATSU",
+    "FixedId": 680271534,
+    "TriggerId": 35193181
+  },
+  {
+    "Name": "PL_SKILL_BLESS",
+    "FixedId": 475362233,
+    "TriggerId": 35193182
+  },
+  {
+    "Name": "PL_SKILL_GUTS",
+    "FixedId": 2039782883,
+    "TriggerId": 35193183
+  },
+  {
+    "Name": "PL_SKILL_HUNKI",
+    "FixedId": -287726711,
+    "TriggerId": 35193184
+  },
+  {
+    "Name": "PL_SKILL_HUKUTU",
+    "FixedId": -879337319,
+    "TriggerId": 35193185
+  },
+  {
+    "Name": "PL_SKILL_RYUNYU",
+    "FixedId": 2031459515,
+    "TriggerId": 35193186
+  },
+  {
+    "Name": "PL_SKILL_ELEMENT_CONVERT",
+    "FixedId": 179652285,
+    "TriggerId": 35193187
+  },
+  {
+    "Name": "PL_SKILL_ASSAULT_SHOT",
+    "FixedId": 156318718,
+    "TriggerId": 35193188
+  },
+  {
+    "Name": "PL_SKILL_FIRST_SHOT",
+    "FixedId": 1541565075,
+    "TriggerId": 35193189
+  },
+  {
+    "Name": "PL_SKILL_RYUKI_WP00",
+    "FixedId": 207711060,
+    "TriggerId": 35193190
+  },
+  {
+    "Name": "PL_SKILL_KNIGHT",
+    "FixedId": -1634156125,
+    "TriggerId": 35193191
+  },
+  {
+    "Name": "PL_SKILL_SEREGIOS_DODGE",
+    "FixedId": -1575248424,
+    "TriggerId": 35193192
+  },
+  {
+    "Name": "PL_SKILL_SKILL_241_TYPE0",
+    "FixedId": 1801734094,
+    "TriggerId": 35193193
+  },
+  {
+    "Name": "PL_SKILL_SKILL_241_TYPE1",
+    "FixedId": 429331229,
+    "TriggerId": 35193194
+  },
+  {
+    "Name": "PL_SKILL_SKILL_241_CRITICAL",
+    "FixedId": -2092407915,
+    "TriggerId": 35193195
+  },
+  {
+    "Name": "PL_SKILL_SKILL_241_ATTACK",
+    "FixedId": -159332828,
+    "TriggerId": 35193196
+  },
+  {
+    "Name": "PL_SKILL_SKILL_234",
+    "FixedId": -729021200,
+    "TriggerId": 35193197
+  },
+  {
+    "Name": "PL_SKILL_SKILL_235",
+    "FixedId": 670020115,
+    "TriggerId": 35193198
+  },
+  {
+    "Name": "PL_SKILL_SKILL_242_BEGIN",
+    "FixedId": -1512435539,
+    "TriggerId": 35193199
+  },
+  {
+    "Name": "PL_SKILL_SKILL_242_LOOP",
+    "FixedId": -671858322,
+    "TriggerId": 35193200
+  },
+  {
+    "Name": "PL_SKILL_SKILL_242_END",
+    "FixedId": 511866131,
+    "TriggerId": 35193201
+  },
+  {
+    "Name": "PL_SKILL_SKILL_242_DAMAGE",
+    "FixedId": 1891905323,
+    "TriggerId": 35193202
+  },
+  {
+    "Name": "PL_SKILL_RYUKI_WP01",
+    "FixedId": 557458204,
+    "TriggerId": 35193203
+  },
+  {
+    "Name": "PL_SKILL_RYUKI_WP02",
+    "FixedId": -1774019936,
+    "TriggerId": 35193204
+  },
+  {
+    "Name": "PL_SKILL_RYUKI_WP03",
+    "FixedId": -846800990,
+    "TriggerId": 35193205
+  },
+  {
+    "Name": "PL_SKILL_RYUKI_WP04",
+    "FixedId": -505373756,
+    "TriggerId": 35193206
+  },
+  {
+    "Name": "PL_SKILL_RYUKI_WP05",
+    "FixedId": -790185035,
+    "TriggerId": 35193207
+  },
+  {
+    "Name": "PL_SKILL_RYUKI_WP06",
+    "FixedId": -2102455424,
+    "TriggerId": 35193208
+  },
+  {
+    "Name": "PL_SKILL_RYUKI_WP07",
+    "FixedId": 285764605,
+    "TriggerId": 35193209
+  },
+  {
+    "Name": "PL_SKILL_RYUKI_WP08_SWORD",
+    "FixedId": 2004087620,
+    "TriggerId": 35193210
+  },
+  {
+    "Name": "PL_SKILL_RYUKI_WP08_AXE",
+    "FixedId": 1555355147,
+    "TriggerId": 35193211
+  },
+  {
+    "Name": "PL_SKILL_RYUKI_WP09_SWORD",
+    "FixedId": 796651744,
+    "TriggerId": 35193212
+  },
+  {
+    "Name": "PL_SKILL_RYUKI_WP09_AXE",
+    "FixedId": 1614147650,
+    "TriggerId": 35193213
+  },
+  {
+    "Name": "PL_SKILL_RYUKI_WP10",
+    "FixedId": -301020015,
+    "TriggerId": 35193214
+  },
+  {
+    "Name": "PL_SKILL_RYUKI_WP11",
+    "FixedId": -1364471218,
+    "TriggerId": 35193215
+  },
+  {
+    "Name": "PL_SKILL_RYUKI_WP12",
+    "FixedId": 593187793,
+    "TriggerId": 35193216
+  },
+  {
+    "Name": "PL_SKILL_RYUKI_WP13",
+    "FixedId": 1154731020,
+    "TriggerId": 35193217
+  },
+  {
+    "Name": "PL_SKILL_RYUKI_ADD",
+    "FixedId": 802511955,
+    "TriggerId": 35193218
+  },
+  {
+    "Name": "PL_SKILL_RYUKI",
+    "FixedId": -287521045,
+    "TriggerId": 35193219
+  },
+  {
+    "Name": "PL_EX_EMOTE00_EX_EMOTE_0013_HIT_L",
+    "FixedId": 140579990,
+    "TriggerId": 35258756
+  },
+  {
+    "Name": "PL_EX_EMOTE00_EX_EMOTE_0013_HIT_R",
+    "FixedId": -1623621757,
+    "TriggerId": 35258757
+  },
+  {
+    "Name": "PL_EX_EMOTE00_EX_EMOTE_0014_FINISH",
+    "FixedId": -209172902,
+    "TriggerId": 35258758
+  },
+  {
+    "Name": "PL_EX_EMOTE03_EX_EMOTE_03_DAMAGE",
+    "FixedId": 334030239,
+    "TriggerId": 35324295
+  },
+  {
+    "Name": "PL_EX_EMOTE03_EX_EMOTE_03_ATTACK",
+    "FixedId": 2019419361,
+    "TriggerId": 35324296
+  },
+  {
+    "Name": "EM_STATE_ANGRY",
+    "FixedId": 94,
+    "TriggerId": 52167049
+  },
+  {
+    "Name": "EM_STATE_TIRED",
+    "FixedId": 95,
+    "TriggerId": 52167050
+  },
+  {
+    "Name": "EM_STATE_POISON",
+    "FixedId": 96,
+    "TriggerId": 52167051
+  },
+  {
+    "Name": "EM_STATE_PARALYSE",
+    "FixedId": 97,
+    "TriggerId": 52167052
+  },
+  {
+    "Name": "EM_STATE_SLEEP",
+    "FixedId": 98,
+    "TriggerId": 52167053
+  },
+  {
+    "Name": "EM_STATE_STUN",
+    "FixedId": 101,
+    "TriggerId": 52167054
+  },
+  {
+    "Name": "EM_STATE_FLASH",
+    "FixedId": 102,
+    "TriggerId": 52167055
+  },
+  {
+    "Name": "EM_STATE_KOYASHI",
+    "FixedId": -2024198904,
+    "TriggerId": 52167056
+  },
+  {
+    "Name": "EM_STATE_ROTTEN",
+    "FixedId": -1588501672,
+    "TriggerId": 52167057
+  },
+  {
+    "Name": "EM_STATE_PREYED",
+    "FixedId": -1928851848,
+    "TriggerId": 52167058
+  },
+  {
+    "Name": "EM_STATE_LANDING",
+    "FixedId": -816166597,
+    "TriggerId": 52167059
+  },
+  {
+    "Name": "EM_STATE_PARTS_LANDING",
+    "FixedId": -1928988854,
+    "TriggerId": 52167060
+  },
+  {
+    "Name": "EM_STATE_MASHROOM",
+    "FixedId": -847694314,
+    "TriggerId": 52167061
+  },
+  {
+    "Name": "EM_STATE_FRENZY",
+    "FixedId": 254249579,
+    "TriggerId": 52167062
+  },
+  {
+    "Name": "EM_STATE_ROTTENTAIL",
+    "FixedId": -441109894,
+    "TriggerId": 52167063
+  },
+  {
+    "Name": "EM_STATE_TOXIN",
+    "FixedId": 532244655,
+    "TriggerId": 52167064
+  },
+  {
+    "Name": "EM_STATE_CRYSTAL",
+    "FixedId": 1737359430,
+    "TriggerId": 52167065
+  },
+  {
+    "Name": "EM_STATE_EXHAUST",
+    "FixedId": 381070647,
+    "TriggerId": 52167066
+  },
+  {
+    "Name": "EM_STATE_HOSTILE",
+    "FixedId": -960610740,
+    "TriggerId": 52167067
+  },
+  {
+    "Name": "EM_STATE_PAINTBALL",
+    "FixedId": -1883373536,
+    "TriggerId": 52167068
+  },
+  {
+    "Name": "EM_PHASE_PHASE_01",
+    "FixedId": 536147300,
+    "TriggerId": 52232605
+  },
+  {
+    "Name": "EM_PHASE_PHASE_02",
+    "FixedId": -1993217711,
+    "TriggerId": 52232606
+  },
+  {
+    "Name": "EM_PHASE_PHASE_03",
+    "FixedId": 1139018145,
+    "TriggerId": 52232607
+  },
+  {
+    "Name": "EM_PHASE_PHASE_04",
+    "FixedId": 1264728797,
+    "TriggerId": 52232608
+  },
+  {
+    "Name": "EM_PHASE_PHASE_05",
+    "FixedId": 483495940,
+    "TriggerId": 52232609
+  },
+  {
+    "Name": "EM_PHASE_PHASE_06",
+    "FixedId": -473827468,
+    "TriggerId": 52232610
+  },
+  {
+    "Name": "EM_PHASE_PHASE_START_01",
+    "FixedId": -1440321834,
+    "TriggerId": 52232611
+  },
+  {
+    "Name": "EM_PHASE_PHASE_START_02",
+    "FixedId": -62412494,
+    "TriggerId": 52232612
+  },
+  {
+    "Name": "EM_PHASE_PHASE_START_03",
+    "FixedId": 852291098,
+    "TriggerId": 52232613
+  },
+  {
+    "Name": "EM_PHASE_PHASE_START_04",
+    "FixedId": 1850722007,
+    "TriggerId": 52232614
+  },
+  {
+    "Name": "EM_PHASE_PHASE_START_05",
+    "FixedId": -1953685303,
+    "TriggerId": 52232615
+  },
+  {
+    "Name": "EM_PHASE_PHASE_START_06",
+    "FixedId": -202321200,
+    "TriggerId": 52232616
+  },
+  {
+    "Name": "EM_PHASE_PHASE_END_01",
+    "FixedId": -821190041,
+    "TriggerId": 52232617
+  },
+  {
+    "Name": "EM_PHASE_PHASE_END_02",
+    "FixedId": 1714414998,
+    "TriggerId": 52232618
+  },
+  {
+    "Name": "EM_PHASE_PHASE_END_03",
+    "FixedId": -2103448180,
+    "TriggerId": 52232619
+  },
+  {
+    "Name": "EM_PHASE_PHASE_END_04",
+    "FixedId": 1314956587,
+    "TriggerId": 52232620
+  },
+  {
+    "Name": "EM_PHASE_PHASE_END_05",
+    "FixedId": 540147300,
+    "TriggerId": 52232621
+  },
+  {
+    "Name": "EM_PHASE_PHASE_END_06",
+    "FixedId": 44373871,
+    "TriggerId": 52232622
+  },
+  {
+    "Name": "EM_SYSTEM_COLLIDER_1",
+    "FixedId": 1386430585,
+    "TriggerId": 52298159
+  },
+  {
+    "Name": "EM_SYSTEM_COLLIDER_2",
+    "FixedId": 1565638200,
+    "TriggerId": 52298160
+  },
+  {
+    "Name": "EM_SYSTEM_COLLIDER_3",
+    "FixedId": 1824330834,
+    "TriggerId": 52298161
+  },
+  {
+    "Name": "EM_SYSTEM_RAIN_WET",
+    "FixedId": -2067725729,
+    "TriggerId": 52298162
+  },
+  {
+    "Name": "EM_SYSTEM_FLOOD",
+    "FixedId": -342279814,
+    "TriggerId": 52298163
+  },
+  {
+    "Name": "EM_SYSTEM_COLLIDER_4",
+    "FixedId": -748597075,
+    "TriggerId": 52298164
+  },
+  {
+    "Name": "EM_SYSTEM_GM650_SENSOR_EFFECT",
+    "FixedId": 9434401,
+    "TriggerId": 52298165
+  },
+  {
+    "Name": "EM_Em0009_PROJECTION_SPOT_LIGHT",
+    "FixedId": -290598714,
+    "TriggerId": 52363702
+  },
+  {
+    "Name": "EM_Em0070_SPIDER_WEB_CONST",
+    "FixedId": -889538834,
+    "TriggerId": 52429239
+  },
+  {
+    "Name": "EM_Em0070_SPIDER_WEB_GROUND",
+    "FixedId": 463729636,
+    "TriggerId": 52429240
+  },
+  {
+    "Name": "EM_Em0152_BARREL_BOMB_L",
+    "FixedId": 1089967394,
+    "TriggerId": 52494777
+  },
+  {
+    "Name": "EM_Em0152_BARREL_BOMB_L_G",
+    "FixedId": 192961313,
+    "TriggerId": 52494778
+  },
+  {
+    "Name": "EM_Em0156_ABSORB_HIT",
+    "FixedId": -529972502,
+    "TriggerId": 52560315
+  },
+  {
+    "Name": "EM_Em0156_LIGHTNING_HIT",
+    "FixedId": 629074626,
+    "TriggerId": 52560316
+  },
+  {
+    "Name": "EM_Em0156_ABSORB_LEAKAGE_HIT",
+    "FixedId": 2073468954,
+    "TriggerId": 52560317
+  },
+  {
+    "Name": "EM_Em0156_ABSORB_COUNT_HIT",
+    "FixedId": 1206560024,
+    "TriggerId": 52560318
+  },
+  {
+    "Name": "EM_Em0157_VEIL_HEAD_L_BREAK1",
+    "FixedId": 1836612203,
+    "TriggerId": 52625855
+  },
+  {
+    "Name": "EM_Em0157_VEIL_HEAD_L_BREAK2",
+    "FixedId": -1014129800,
+    "TriggerId": 52625856
+  },
+  {
+    "Name": "EM_Em0157_VEIL_HEAD_L_BREAK3",
+    "FixedId": -835286008,
+    "TriggerId": 52625857
+  },
+  {
+    "Name": "EM_Em0157_VEIL_HEAD_R_BREAK1",
+    "FixedId": -1355341576,
+    "TriggerId": 52625858
+  },
+  {
+    "Name": "EM_Em0157_VEIL_HEAD_R_BREAK2",
+    "FixedId": -1934027085,
+    "TriggerId": 52625859
+  },
+  {
+    "Name": "EM_Em0157_VEIL_HEAD_R_BREAK3",
+    "FixedId": -820740164,
+    "TriggerId": 52625860
+  },
+  {
+    "Name": "EM_Em0157_VEIL_BODY_L_BREAK1",
+    "FixedId": -1059666578,
+    "TriggerId": 52625861
+  },
+  {
+    "Name": "EM_Em0157_VEIL_BODY_L_BREAK2",
+    "FixedId": -1984418100,
+    "TriggerId": 52625862
+  },
+  {
+    "Name": "EM_Em0157_VEIL_BODY_L_BREAK3",
+    "FixedId": -1209309869,
+    "TriggerId": 52625863
+  },
+  {
+    "Name": "EM_Em0157_VEIL_BODY_R_BREAK1",
+    "FixedId": -1746482517,
+    "TriggerId": 52625864
+  },
+  {
+    "Name": "EM_Em0157_VEIL_BODY_R_BREAK2",
+    "FixedId": -272398898,
+    "TriggerId": 52625865
+  },
+  {
+    "Name": "EM_Em0157_VEIL_BODY_R_BREAK3",
+    "FixedId": 1043278242,
+    "TriggerId": 52625866
+  },
+  {
+    "Name": "EM_Em0157_VEIL_ARM_L_BREAK1",
+    "FixedId": -896850917,
+    "TriggerId": 52625867
+  },
+  {
+    "Name": "EM_Em0157_VEIL_ARM_L_BREAK2",
+    "FixedId": 941028279,
+    "TriggerId": 52625868
+  },
+  {
+    "Name": "EM_Em0157_VEIL_ARM_R_BREAK1",
+    "FixedId": -99352612,
+    "TriggerId": 52625869
+  },
+  {
+    "Name": "EM_Em0157_VEIL_ARM_R_BREAK2",
+    "FixedId": 1481862498,
+    "TriggerId": 52625870
+  },
+  {
+    "Name": "EM_Em0157_VEIL_TAIL_L_BREAK1",
+    "FixedId": 1018102775,
+    "TriggerId": 52625871
+  },
+  {
+    "Name": "EM_Em0157_VEIL_TAIL_L_BREAK2",
+    "FixedId": -806200808,
+    "TriggerId": 52625872
+  },
+  {
+    "Name": "EM_Em0157_VEIL_TAIL_L_BREAK3",
+    "FixedId": -1309130061,
+    "TriggerId": 52625873
+  },
+  {
+    "Name": "EM_Em0157_VEIL_TAIL_C_BREAK1",
+    "FixedId": 1476622223,
+    "TriggerId": 52625874
+  },
+  {
+    "Name": "EM_Em0157_VEIL_TAIL_C_BREAK2",
+    "FixedId": 33700676,
+    "TriggerId": 52625875
+  },
+  {
+    "Name": "EM_Em0157_VEIL_TAIL_C_BREAK3",
+    "FixedId": 337402408,
+    "TriggerId": 52625876
+  },
+  {
+    "Name": "EM_Em0157_VEIL_TAIL_R_BREAK1",
+    "FixedId": -1244517282,
+    "TriggerId": 52625877
+  },
+  {
+    "Name": "EM_Em0157_VEIL_TAIL_R_BREAK2",
+    "FixedId": -433452450,
+    "TriggerId": 52625878
+  },
+  {
+    "Name": "EM_Em0157_VEIL_TAIL_R_BREAK3",
+    "FixedId": -1566518881,
+    "TriggerId": 52625879
+  },
+  {
+    "Name": "EM_Em0158_LEFT_FRONT_TENTACLE_FIRE",
+    "FixedId": 1882659956,
+    "TriggerId": 52691416
+  },
+  {
+    "Name": "EM_Em0158_LEFT_SIDE_TENTACLE_FIRE",
+    "FixedId": -598502812,
+    "TriggerId": 52691417
+  },
+  {
+    "Name": "EM_Em0158_LEFT_REAR_TENTACLE_FIRE",
+    "FixedId": -646130486,
+    "TriggerId": 52691418
+  },
+  {
+    "Name": "EM_Em0158_RIGHT_FRONT_TENTACLE_FIRE",
+    "FixedId": -1973858175,
+    "TriggerId": 52691419
+  },
+  {
+    "Name": "EM_Em0158_RIGHT_SIDE_TENTACLE_FIRE",
+    "FixedId": -1683933240,
+    "TriggerId": 52691420
+  },
+  {
+    "Name": "EM_Em0158_RIGHT_REAR_TENTACLE_FIRE",
+    "FixedId": -758490745,
+    "TriggerId": 52691421
+  },
+  {
+    "Name": "EM_Em0158_BODY_FIRE",
+    "FixedId": 173101991,
+    "TriggerId": 52691422
+  },
+  {
+    "Name": "EM_Em0158_LEFT_FRONT_TENTACLE_FIRE_LOST",
+    "FixedId": 944792145,
+    "TriggerId": 52691423
+  },
+  {
+    "Name": "EM_Em0158_LEFT_SIDE_TENTACLE_FIRE_LOST",
+    "FixedId": -381839933,
+    "TriggerId": 52691424
+  },
+  {
+    "Name": "EM_Em0158_LEFT_REAR_TENTACLE_FIRE_LOST",
+    "FixedId": 1384297610,
+    "TriggerId": 52691425
+  },
+  {
+    "Name": "EM_Em0158_RIGHT_FRONT_TENTACLE_FIRE_LOST",
+    "FixedId": 1623602984,
+    "TriggerId": 52691426
+  },
+  {
+    "Name": "EM_Em0158_RIGHT_SIDE_TENTACLE_FIRE_LOST",
+    "FixedId": -1376857541,
+    "TriggerId": 52691427
+  },
+  {
+    "Name": "EM_Em0158_RIGHT_REAR_TENTACLE_FIRE_LOST",
+    "FixedId": 1946801984,
+    "TriggerId": 52691428
+  },
+  {
+    "Name": "EM_Em0158_LEFT_FRONT_TENTACLE_OIL",
+    "FixedId": -289832506,
+    "TriggerId": 52691429
+  },
+  {
+    "Name": "EM_Em0158_LEFT_SIDE_TENTACLE_OIL",
+    "FixedId": 767209582,
+    "TriggerId": 52691430
+  },
+  {
+    "Name": "EM_Em0158_LEFT_REAR_TENTACLE_OIL",
+    "FixedId": -1151364294,
+    "TriggerId": 52691431
+  },
+  {
+    "Name": "EM_Em0158_RIGHT_FRONT_TENTACLE_OIL",
+    "FixedId": 214068732,
+    "TriggerId": 52691432
+  },
+  {
+    "Name": "EM_Em0158_RIGHT_SIDE_TENTACLE_OIL",
+    "FixedId": -865009939,
+    "TriggerId": 52691433
+  },
+  {
+    "Name": "EM_Em0158_RIGHT_REAR_TENTACLE_OIL",
+    "FixedId": 68506960,
+    "TriggerId": 52691434
+  },
+  {
+    "Name": "EM_Em0158_BODY_OIL",
+    "FixedId": -1435544669,
+    "TriggerId": 52691435
+  },
+  {
+    "Name": "EM_Em0158_LEFT_FRONT_TENTACLE_OIL_LOST",
+    "FixedId": 1656485732,
+    "TriggerId": 52691436
+  },
+  {
+    "Name": "EM_Em0158_LEFT_SIDE_TENTACLE_OIL_LOST",
+    "FixedId": -351543117,
+    "TriggerId": 52691437
+  },
+  {
+    "Name": "EM_Em0158_LEFT_REAR_TENTACLE_OIL_LOST",
+    "FixedId": -1079089826,
+    "TriggerId": 52691438
+  },
+  {
+    "Name": "EM_Em0158_RIGHT_FRONT_TENTACLE_OIL_LOST",
+    "FixedId": -867737962,
+    "TriggerId": 52691439
+  },
+  {
+    "Name": "EM_Em0158_RIGHT_SIDE_TENTACLE_OIL_LOST",
+    "FixedId": 1159053918,
+    "TriggerId": 52691440
+  },
+  {
+    "Name": "EM_Em0158_RIGHT_REAR_TENTACLE_OIL_LOST",
+    "FixedId": 1119187710,
+    "TriggerId": 52691441
+  },
+  {
+    "Name": "EM_Em0158_BODY_FIRE_SUPER",
+    "FixedId": 529004051,
+    "TriggerId": 52691442
+  },
+  {
+    "Name": "EM_Em0159_ARROW_FLIP",
+    "FixedId": 1714637203,
+    "TriggerId": 52756979
+  },
+  {
+    "Name": "EM_Em0159_BLAZING_KILL_END",
+    "FixedId": -350842085,
+    "TriggerId": 52756980
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_NL",
+    "FixedId": 829901805,
+    "TriggerId": 52822517
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_NR",
+    "FixedId": -52770327,
+    "TriggerId": 52822518
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_RLU",
+    "FixedId": 978411014,
+    "TriggerId": 52822519
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_RLL",
+    "FixedId": -988915413,
+    "TriggerId": 52822520
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_RRU",
+    "FixedId": 654293319,
+    "TriggerId": 52822521
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_RRL",
+    "FixedId": -837085698,
+    "TriggerId": 52822522
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_HIT",
+    "FixedId": 320394106,
+    "TriggerId": 52822523
+  },
+  {
+    "Name": "EM_Em0160_LIMIT_L",
+    "FixedId": 2108735663,
+    "TriggerId": 52822524
+  },
+  {
+    "Name": "EM_Em0160_LIMIT_R",
+    "FixedId": 749248213,
+    "TriggerId": 52822525
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_FIRE_LU",
+    "FixedId": 1032497852,
+    "TriggerId": 52822526
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_FIRE_LL",
+    "FixedId": -555304089,
+    "TriggerId": 52822527
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_FIRE_RU",
+    "FixedId": -736888459,
+    "TriggerId": 52822528
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_FIRE_RL",
+    "FixedId": -1817699899,
+    "TriggerId": 52822529
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_WATER_LU",
+    "FixedId": -1834230923,
+    "TriggerId": 52822530
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_WATER_LL",
+    "FixedId": 62969989,
+    "TriggerId": 52822531
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_WATER_RU",
+    "FixedId": -1303425511,
+    "TriggerId": 52822532
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_WATER_RL",
+    "FixedId": -31818481,
+    "TriggerId": 52822533
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_ICE_LU",
+    "FixedId": -1292148272,
+    "TriggerId": 52822534
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_ICE_LL",
+    "FixedId": 195145965,
+    "TriggerId": 52822535
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_ICE_RU",
+    "FixedId": -918932714,
+    "TriggerId": 52822536
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_ICE_RL",
+    "FixedId": 631532874,
+    "TriggerId": 52822537
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_LIGHTNING_LU",
+    "FixedId": 600790324,
+    "TriggerId": 52822538
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_LIGHTNING_LL",
+    "FixedId": -712528912,
+    "TriggerId": 52822539
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_LIGHTNING_RU",
+    "FixedId": 1323175255,
+    "TriggerId": 52822540
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_LIGHTNING_RL",
+    "FixedId": 373235196,
+    "TriggerId": 52822541
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_DRAGON_LU",
+    "FixedId": 749864895,
+    "TriggerId": 52822542
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_DRAGON_LL",
+    "FixedId": 1078160939,
+    "TriggerId": 52822543
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_DRAGON_RU",
+    "FixedId": -1042456308,
+    "TriggerId": 52822544
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_DRAGON_RL",
+    "FixedId": -788330055,
+    "TriggerId": 52822545
+  },
+  {
+    "Name": "EM_Em0160_LIGHTNING_STRIKE",
+    "FixedId": -1935704182,
+    "TriggerId": 52822546
+  },
+  {
+    "Name": "EM_Em0160_LIGHTNING_STRIKE3_L1R2",
+    "FixedId": -1436788800,
+    "TriggerId": 52822547
+  },
+  {
+    "Name": "EM_Em0160_LIGHTNING_STRIKE3_L2R1",
+    "FixedId": 484465052,
+    "TriggerId": 52822548
+  },
+  {
+    "Name": "EM_Em0160_LIGHTNING_STRIKE4",
+    "FixedId": 1547963818,
+    "TriggerId": 52822549
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_HIT_RECEIVR_LU",
+    "FixedId": -868900269,
+    "TriggerId": 52822550
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_HIT_RECEIVR_LL",
+    "FixedId": 495689341,
+    "TriggerId": 52822551
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_HIT_RECEIVR_RU",
+    "FixedId": 759301753,
+    "TriggerId": 52822552
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_HIT_RECEIVR_RL",
+    "FixedId": 2103478084,
+    "TriggerId": 52822553
+  },
+  {
+    "Name": "EM_Em0160_FULLNESS_ENEGRY_L1",
+    "FixedId": -1205782471,
+    "TriggerId": 52822554
+  },
+  {
+    "Name": "EM_Em0160_FULLNESS_ENEGRY_L2",
+    "FixedId": 258671132,
+    "TriggerId": 52822555
+  },
+  {
+    "Name": "EM_Em0160_FULLNESS_ENEGRY_R1",
+    "FixedId": -947591845,
+    "TriggerId": 52822556
+  },
+  {
+    "Name": "EM_Em0160_FULLNESS_ENEGRY_R2",
+    "FixedId": 1668064857,
+    "TriggerId": 52822557
+  },
+  {
+    "Name": "EM_Em0160_ABSORB_HIT_AT",
+    "FixedId": -2068092051,
+    "TriggerId": 52822558
+  },
+  {
+    "Name": "EM_Em0162_GUIDE_INSECT_HEAD",
+    "FixedId": -1627772812,
+    "TriggerId": 52888095
+  },
+  {
+    "Name": "EM_Em0162_GUIDE_INSECT_BACK",
+    "FixedId": 1709534042,
+    "TriggerId": 52888096
+  },
+  {
+    "Name": "EM_Em0162_GUIDE_INSECT_WAIST",
+    "FixedId": -1764041566,
+    "TriggerId": 52888097
+  },
+  {
+    "Name": "EM_Em0162_GUIDE_INSECT_TAIL",
+    "FixedId": -871645351,
+    "TriggerId": 52888098
+  },
+  {
+    "Name": "EM_Em0162_ICE_NOVA_SLIP_DAMAGE_PL",
+    "FixedId": 2079869536,
+    "TriggerId": 52888099
+  },
+  {
+    "Name": "EM_Em0164_SITUATION_ANGER_FIRE",
+    "FixedId": 762677320,
+    "TriggerId": 52953636
+  },
+  {
+    "Name": "EM_Em0164_CRYSTAL_GENERATE_HEAD",
+    "FixedId": -1874073653,
+    "TriggerId": 52953637
+  },
+  {
+    "Name": "EM_Em0164_CRYSTAL_WING_CANCEL_L",
+    "FixedId": 630221601,
+    "TriggerId": 52953638
+  },
+  {
+    "Name": "EM_Em0164_CRYSTAL_WING_CANCEL_R",
+    "FixedId": -1610041030,
+    "TriggerId": 52953639
+  },
+  {
+    "Name": "EM_Em0164_CRYSTAL_HEAD_CANCEL",
+    "FixedId": -1737381787,
+    "TriggerId": 52953640
+  },
+  {
+    "Name": "EM_Em0164_CRYSTAL_GENERATE_WING_L",
+    "FixedId": 1606137427,
+    "TriggerId": 52953641
+  },
+  {
+    "Name": "EM_Em0164_CRYSTAL_GENERATE_WING_R",
+    "FixedId": 1231734629,
+    "TriggerId": 52953642
+  },
+  {
+    "Name": "EM_Em0164_CRYSTAL_WING_PEELING_BREAK_L",
+    "FixedId": -1832944252,
+    "TriggerId": 52953643
+  },
+  {
+    "Name": "EM_Em0164_CRYSTAL_WING_PEELING_BREAK_R",
+    "FixedId": -1609403977,
+    "TriggerId": 52953644
+  },
+  {
+    "Name": "EM_Em0164_CRYSTAL_HEAD_PEELING_BREAK",
+    "FixedId": -2135606865,
+    "TriggerId": 52953645
+  },
+  {
+    "Name": "EM_Em0164_BRACK_WING_CANCELLATION_L",
+    "FixedId": -1310087683,
+    "TriggerId": 52953646
+  },
+  {
+    "Name": "EM_Em0164_BRACK_WING_CANCELLATION_R",
+    "FixedId": 1162368946,
+    "TriggerId": 52953647
+  },
+  {
+    "Name": "EM_Em0164_BRACK_HEAD_CANCELLATION",
+    "FixedId": 37253590,
+    "TriggerId": 52953648
+  },
+  {
+    "Name": "EM_Em0164_VITAL_POINT_KURO_L",
+    "FixedId": 1690792309,
+    "TriggerId": 52953649
+  },
+  {
+    "Name": "EM_Em0164_VITAL_POINT_KURO_R",
+    "FixedId": -2121717589,
+    "TriggerId": 52953650
+  },
+  {
+    "Name": "EM_Em0164_VITAL_POINT_VRYSTAL_L",
+    "FixedId": 1295447878,
+    "TriggerId": 52953651
+  },
+  {
+    "Name": "EM_Em0164_VITAL_POINT_VRYSTAL_R",
+    "FixedId": -311997747,
+    "TriggerId": 52953652
+  },
+  {
+    "Name": "EM_Em0164_ABUNDANT_BLUE_LIGHT_L",
+    "FixedId": 658430271,
+    "TriggerId": 52953653
+  },
+  {
+    "Name": "EM_Em0164_ABUNDANT_BLUE_LIGHT_R",
+    "FixedId": -1611773022,
+    "TriggerId": 52953654
+  },
+  {
+    "Name": "EM_Em0164_ABUNDANT_RED_LIGHT_L",
+    "FixedId": -1806067769,
+    "TriggerId": 52953655
+  },
+  {
+    "Name": "EM_Em0164_ABUNDANT_RED_LIGHT_R",
+    "FixedId": -2009871125,
+    "TriggerId": 52953656
+  },
+  {
+    "Name": "EM_Em0071_FRENZY_ACCUMULATION",
+    "FixedId": -812856921,
+    "TriggerId": 53019193
+  },
+  {
+    "Name": "EM_Em0160_50_FULLNESS_ENEGRY_L2",
+    "FixedId": 375204164,
+    "TriggerId": 53084730
+  },
+  {
+    "Name": "EM_Em0160_50_FULLNESS_ENEGRY_R2",
+    "FixedId": 1964997000,
+    "TriggerId": 53084731
+  },
+  {
+    "Name": "EM_Em1161_HIT_PARALYSE",
+    "FixedId": -552348671,
+    "TriggerId": 53150268
+  },
+  {
+    "Name": "EM_EmUnique00_UNIQUE_01",
+    "FixedId": -2087258150,
+    "TriggerId": 53215805
+  },
+  {
+    "Name": "EM_EmUnique00_UNIQUE_02",
+    "FixedId": 2142559614,
+    "TriggerId": 53215806
+  },
+  {
+    "Name": "EM_EmUnique00_UNIQUE_03",
+    "FixedId": 138600482,
+    "TriggerId": 53215807
+  },
+  {
+    "Name": "EM_EmUnique00_UNIQUE_04",
+    "FixedId": -1437795686,
+    "TriggerId": 53215808
+  },
+  {
+    "Name": "EM_EmUnique00_UNIQUE_05",
+    "FixedId": 853837441,
+    "TriggerId": 53215809
+  },
+  {
+    "Name": "EM_EmUnique00_UNIQUE_06",
+    "FixedId": -1036311618,
+    "TriggerId": 53215810
+  },
+  {
+    "Name": "EM_EmUnique00_UNIQUE_07",
+    "FixedId": 1121459949,
+    "TriggerId": 53215811
+  },
+  {
+    "Name": "EM_EmUnique00_UNIQUE_08",
+    "FixedId": 427665698,
+    "TriggerId": 53215812
+  },
+  {
+    "Name": "EM_EmUnique00_UNIQUE_09",
+    "FixedId": 486445078,
+    "TriggerId": 53215813
+  },
+  {
+    "Name": "EM_EmUnique00_UNIQUE_10",
+    "FixedId": 1306190630,
+    "TriggerId": 53215814
+  },
+  {
+    "Name": "EM_EmUnique00_UNIQUE_11",
+    "FixedId": -1380976641,
+    "TriggerId": 53215815
+  },
+  {
+    "Name": "EM_EmUnique00_UNIQUE_12",
+    "FixedId": 928591906,
+    "TriggerId": 53215816
+  },
+  {
+    "Name": "EM_EmUnique00_UNIQUE_13",
+    "FixedId": -901052154,
+    "TriggerId": 53215817
+  },
+  {
+    "Name": "EM_EmUnique00_UNIQUE_14",
+    "FixedId": 1144693180,
+    "TriggerId": 53215818
+  },
+  {
+    "Name": "EM_EmUnique00_UNIQUE_15",
+    "FixedId": -1672688231,
+    "TriggerId": 53215819
+  },
+  {
+    "Name": "EM_EmUnique00_UNIQUE_16",
+    "FixedId": -498282494,
+    "TriggerId": 53215820
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_0_LOOP_0",
+    "FixedId": -598013777,
+    "TriggerId": 53281357
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_1_LOOP_1",
+    "FixedId": -798465709,
+    "TriggerId": 53281358
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_1_LOOP_2",
+    "FixedId": 1699876927,
+    "TriggerId": 53281359
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_1_LOOP_3",
+    "FixedId": -2021769482,
+    "TriggerId": 53281360
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_1_LOOP_4",
+    "FixedId": -355673419,
+    "TriggerId": 53281361
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_1_LOOP_5",
+    "FixedId": -842378677,
+    "TriggerId": 53281362
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_1_LOOP_6",
+    "FixedId": 157437725,
+    "TriggerId": 53281363
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_2_LOOP_1",
+    "FixedId": -1444635820,
+    "TriggerId": 53281364
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_2_LOOP_2",
+    "FixedId": -2007811940,
+    "TriggerId": 53281365
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_2_LOOP_3",
+    "FixedId": -1274202047,
+    "TriggerId": 53281366
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_2_LOOP_4",
+    "FixedId": 1056741945,
+    "TriggerId": 53281367
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_2_LOOP_5",
+    "FixedId": 601646011,
+    "TriggerId": 53281368
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_2_LOOP_6",
+    "FixedId": 654037830,
+    "TriggerId": 53281369
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_3_SINGLE_1",
+    "FixedId": 197129937,
+    "TriggerId": 53281370
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_3_SINGLE_2",
+    "FixedId": 1213429562,
+    "TriggerId": 53281371
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_3_SINGLE_3",
+    "FixedId": -1435339918,
+    "TriggerId": 53281372
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_3_SINGLE_4",
+    "FixedId": -1905643349,
+    "TriggerId": 53281373
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_3_SINGLE_5",
+    "FixedId": -2002337375,
+    "TriggerId": 53281374
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_3_SINGLE_6",
+    "FixedId": -1147938530,
+    "TriggerId": 53281375
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_4_SINGLE_1",
+    "FixedId": -1926158300,
+    "TriggerId": 53281376
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_4_SINGLE_2",
+    "FixedId": -1595972777,
+    "TriggerId": 53281377
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_4_SINGLE_3",
+    "FixedId": 827573027,
+    "TriggerId": 53281378
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_4_SINGLE_4",
+    "FixedId": 732283229,
+    "TriggerId": 53281379
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_4_SINGLE_5",
+    "FixedId": -1974689198,
+    "TriggerId": 53281380
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_4_SINGLE_6",
+    "FixedId": 1335721034,
+    "TriggerId": 53281381
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_5_SINGLE_0",
+    "FixedId": 808460197,
+    "TriggerId": 53281382
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_6_SINGLE_0",
+    "FixedId": 404746455,
+    "TriggerId": 53281383
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_7_LOOP_0",
+    "FixedId": 1029359611,
+    "TriggerId": 53281384
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_8_SINGLE_0",
+    "FixedId": 268836029,
+    "TriggerId": 53281385
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_9_SINGLE_1",
+    "FixedId": 265247371,
+    "TriggerId": 53281386
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_9_SINGLE_2",
+    "FixedId": -159669162,
+    "TriggerId": 53281387
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_9_SINGLE_3",
+    "FixedId": -1760718877,
+    "TriggerId": 53281388
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_9_SINGLE_4",
+    "FixedId": -1929748053,
+    "TriggerId": 53281389
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_9_SINGLE_5",
+    "FixedId": -939827204,
+    "TriggerId": 53281390
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_9_SINGLE_6",
+    "FixedId": -481835008,
+    "TriggerId": 53281391
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_10_SINGLE_1",
+    "FixedId": 1337609550,
+    "TriggerId": 53281392
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_10_SINGLE_2",
+    "FixedId": 1031438511,
+    "TriggerId": 53281393
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_10_SINGLE_3",
+    "FixedId": 1971861415,
+    "TriggerId": 53281394
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_10_SINGLE_4",
+    "FixedId": 520342523,
+    "TriggerId": 53281395
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_10_SINGLE_5",
+    "FixedId": 269470422,
+    "TriggerId": 53281396
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_10_SINGLE_6",
+    "FixedId": 1551229699,
+    "TriggerId": 53281397
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_11_SINGLE_0",
+    "FixedId": 1550925633,
+    "TriggerId": 53281398
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_12_SINGLE_1",
+    "FixedId": 53550486,
+    "TriggerId": 53281399
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_12_SINGLE_2",
+    "FixedId": -461544641,
+    "TriggerId": 53281400
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_12_SINGLE_3",
+    "FixedId": 1196566079,
+    "TriggerId": 53281401
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_12_SINGLE_4",
+    "FixedId": 1009755453,
+    "TriggerId": 53281402
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_12_SINGLE_5",
+    "FixedId": 318197230,
+    "TriggerId": 53281403
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_12_SINGLE_6",
+    "FixedId": -2130395038,
+    "TriggerId": 53281404
+  },
+  {
+    "Name": "EM_EmUnique01_UNIQUE_13_SINGLE_0",
+    "FixedId": 179816470,
+    "TriggerId": 53281405
+  },
+  {
+    "Name": "EM_Em1152_HOLD_PL",
+    "FixedId": -530854091,
+    "TriggerId": 53346942
+  },
+  {
+    "Name": "EM_Em1152_HOLD_OTM",
+    "FixedId": -258808955,
+    "TriggerId": 53346943
+  },
+  {
+    "Name": "RAPTOR_COMMON_FUR_BRISTLE",
+    "FixedId": 45,
+    "TriggerId": 70189696
+  },
+  {
+    "Name": "RAPTOR_COMMON_FUR_GLIDE",
+    "FixedId": -1783939547,
+    "TriggerId": 70189697
+  },
+  {
+    "Name": "RAPTOR_COMMON_FUR_DAMAGE_DOWN",
+    "FixedId": 2120865356,
+    "TriggerId": 70189698
+  },
+  {
+    "Name": "RAPTOR_COMMON_GM650_SENSOR_EFFECT",
+    "FixedId": -985648035,
+    "TriggerId": 70189699
+  },
+  {
+    "Name": "RAPTOR_COMMON_EX_GROUND_EFFECT",
+    "FixedId": 614702089,
+    "TriggerId": 70189700
+  },
+  {
+    "Name": "RAPTOR_EQUIP_LOOP",
+    "FixedId": -1558975663,
+    "TriggerId": 70320773
+  },
+  {
+    "Name": "RAPTOR_EQUIP_FUR_BRISTLE",
+    "FixedId": -281513309,
+    "TriggerId": 70320774
+  },
+  {
+    "Name": "RAPTOR_EQUIP_FUR_GLIDE",
+    "FixedId": -360282675,
+    "TriggerId": 70320775
+  },
+  {
+    "Name": "RAPTOR_EQUIP_FUR_DAMAGE_DOWN",
+    "FixedId": 200600938,
+    "TriggerId": 70320776
+  },
+  {
+    "Name": "RAPTOR_EQUIP_GLIDE_LOOP",
+    "FixedId": 509776438,
+    "TriggerId": 70320777
+  },
+  {
+    "Name": "RAPTOR_EQUIP_WEAPON_BAG",
+    "FixedId": 703143778,
+    "TriggerId": 70320778
+  },
+  {
+    "Name": "RAPTOR_EQUIP_ITEM_POUCH",
+    "FixedId": 294505429,
+    "TriggerId": 70320779
+  },
+  {
+    "Name": "RAPTOR_EQUIP_WEAPON_CHANGE",
+    "FixedId": -1910116536,
+    "TriggerId": 70320780
+  },
+  {
+    "Name": "RAPTOR_EQUIP_GLIDE_LOOP_PROFILE",
+    "FixedId": 1156812617,
+    "TriggerId": 70320781
+  },
+  {
+    "Name": "OTOMO_EQUIP_COMMON_01",
+    "FixedId": 405539584,
+    "TriggerId": 87163534
+  },
+  {
+    "Name": "OTOMO_EQUIP_COMMON_02",
+    "FixedId": -1515752353,
+    "TriggerId": 87163535
+  },
+  {
+    "Name": "OTOMO_EQUIP_COMMON_03",
+    "FixedId": -1065133121,
+    "TriggerId": 87163536
+  },
+  {
+    "Name": "OTOMO_EQUIP_COMMON_04",
+    "FixedId": 1262432470,
+    "TriggerId": 87163537
+  },
+  {
+    "Name": "OTOMO_EQUIP_WEAPON_054_WP_OFF",
+    "FixedId": -914798244,
+    "TriggerId": 87163538
+  },
+  {
+    "Name": "OTOMO_EQUIP_WEAPON_054_WP_ON",
+    "FixedId": 683984734,
+    "TriggerId": 87163539
+  },
+  {
+    "Name": "OTOMO_EQUIP_HEAD_054_WP_OFF",
+    "FixedId": 660911806,
+    "TriggerId": 87163540
+  },
+  {
+    "Name": "OTOMO_EQUIP_HEAD_054_WP_ON",
+    "FixedId": -523278093,
+    "TriggerId": 87163541
+  },
+  {
+    "Name": "OTOMO_EQUIP_ARMOR_054_WP_OFF",
+    "FixedId": 1897220412,
+    "TriggerId": 87163542
+  },
+  {
+    "Name": "OTOMO_EQUIP_ARMOR_054_WP_ON",
+    "FixedId": -509955956,
+    "TriggerId": 87163543
+  },
+  {
+    "Name": "OTOMO_EQUIP_PREVIEW",
+    "FixedId": -1854105584,
+    "TriggerId": 87163544
+  },
+  {
+    "Name": "OTOMO_BUF_HEAL_LOOP",
+    "FixedId": -503493206,
+    "TriggerId": 87229081
+  },
+  {
+    "Name": "OTOMO_BUF_HEAL",
+    "FixedId": 1465164617,
+    "TriggerId": 87229082
+  },
+  {
+    "Name": "OTOMO_BUF_POISON_HEAL",
+    "FixedId": -1238327275,
+    "TriggerId": 87229083
+  },
+  {
+    "Name": "OTOMO_BUF_STAMINA_LOOP",
+    "FixedId": 344021457,
+    "TriggerId": 87229084
+  },
+  {
+    "Name": "OTOMO_BUF_STAMINA_UP",
+    "FixedId": -1222460937,
+    "TriggerId": 87229085
+  },
+  {
+    "Name": "OTOMO_BUF_ATTACK_LOOP",
+    "FixedId": -1850682095,
+    "TriggerId": 87229086
+  },
+  {
+    "Name": "OTOMO_BUF_ATTACK_UP",
+    "FixedId": -609110369,
+    "TriggerId": 87229087
+  },
+  {
+    "Name": "OTOMO_BUF_DEFENCE_LOOP",
+    "FixedId": 1321884676,
+    "TriggerId": 87229088
+  },
+  {
+    "Name": "OTOMO_BUF_DEFENCE_UP",
+    "FixedId": 1485461285,
+    "TriggerId": 87229089
+  },
+  {
+    "Name": "OTOMO_DEBUF_POISON",
+    "FixedId": 6393006,
+    "TriggerId": 87294626
+  },
+  {
+    "Name": "OTOMO_DEBUF_PARALYZE",
+    "FixedId": 1949527842,
+    "TriggerId": 87294627
+  },
+  {
+    "Name": "OTOMO_DEBUF_HEAT_AREA",
+    "FixedId": 1465211690,
+    "TriggerId": 87294628
+  },
+  {
+    "Name": "OTOMO_DEBUF_FIRE",
+    "FixedId": 1200089022,
+    "TriggerId": 87294629
+  },
+  {
+    "Name": "OTOMO_DEBUF_FIRE_END",
+    "FixedId": 1184148803,
+    "TriggerId": 87294630
+  },
+  {
+    "Name": "OTOMO_DEBUF_WATER",
+    "FixedId": -154140539,
+    "TriggerId": 87294631
+  },
+  {
+    "Name": "OTOMO_DEBUF_ELEC",
+    "FixedId": 1256198007,
+    "TriggerId": 87294632
+  },
+  {
+    "Name": "OTOMO_DEBUF_ICE",
+    "FixedId": -88227560,
+    "TriggerId": 87294633
+  },
+  {
+    "Name": "OTOMO_DEBUF_DRAGON",
+    "FixedId": -1861587945,
+    "TriggerId": 87294634
+  },
+  {
+    "Name": "OTOMO_DEBUF_SLEEP",
+    "FixedId": 2114025221,
+    "TriggerId": 87294635
+  },
+  {
+    "Name": "OTOMO_DEBUF_BLAST_SIGN",
+    "FixedId": 1717319345,
+    "TriggerId": 87294636
+  },
+  {
+    "Name": "OTOMO_DEBUF_BLAST",
+    "FixedId": 1270008751,
+    "TriggerId": 87294637
+  },
+  {
+    "Name": "OTOMO_DEBUF_STUN",
+    "FixedId": 857404437,
+    "TriggerId": 87294638
+  },
+  {
+    "Name": "OTOMO_DEBUF_BLEED",
+    "FixedId": 1298592043,
+    "TriggerId": 87294639
+  },
+  {
+    "Name": "OTOMO_DEBUF_DEFENSE_DOWN",
+    "FixedId": 1951576614,
+    "TriggerId": 87294640
+  },
+  {
+    "Name": "OTOMO_DEBUF_MAGMA_GROUND",
+    "FixedId": -428424292,
+    "TriggerId": 87294641
+  },
+  {
+    "Name": "OTOMO_DEBUF_STENCH",
+    "FixedId": -957171553,
+    "TriggerId": 87294642
+  },
+  {
+    "Name": "OTOMO_DEBUF_STICKY_SIGN",
+    "FixedId": 1355178248,
+    "TriggerId": 87294643
+  },
+  {
+    "Name": "OTOMO_DEBUF_STICKY",
+    "FixedId": -908607656,
+    "TriggerId": 87294644
+  },
+  {
+    "Name": "OTOMO_DEBUF_FROZEN_SIGN",
+    "FixedId": 655076687,
+    "TriggerId": 87294645
+  },
+  {
+    "Name": "OTOMO_DEBUF_FROZEN",
+    "FixedId": 1396104276,
+    "TriggerId": 87294646
+  },
+  {
+    "Name": "OTOMO_DEBUF_FRENZY_SIGN",
+    "FixedId": -1469512562,
+    "TriggerId": 87294647
+  },
+  {
+    "Name": "OTOMO_DEBUF_FRENZY",
+    "FixedId": 1765965449,
+    "TriggerId": 87294648
+  },
+  {
+    "Name": "OTOMO_DEBUF_DEBUF_CONDITION_EX_00_S",
+    "FixedId": 349798529,
+    "TriggerId": 87294649
+  },
+  {
+    "Name": "OTOMO_DEBUF_DEBUF_CONDITION_EX_00_L",
+    "FixedId": -759810870,
+    "TriggerId": 87294650
+  },
+  {
+    "Name": "OTOMO_EQUIP_CHANGE_WEAPON",
+    "FixedId": -1920080946,
+    "TriggerId": 87360187
+  },
+  {
+    "Name": "OTOMO_EQUIP_CHANGE_HELM",
+    "FixedId": -1116257534,
+    "TriggerId": 87360188
+  },
+  {
+    "Name": "OTOMO_EQUIP_CHANGE_BODY",
+    "FixedId": 85655248,
+    "TriggerId": 87360189
+  },
+  {
+    "Name": "OTOMO_SUPPORT_ACTION_DRAGAIRSHIP_BALLOON_FIRE",
+    "FixedId": -1729386509,
+    "TriggerId": 87425726
+  },
+  {
+    "Name": "OTOMO_SYSTEM_MUDDY_STREAM_SPLASH",
+    "FixedId": -925914179,
+    "TriggerId": 87491263
+  },
+  {
+    "Name": "OTOMO_SYSTEM_GM650_SENSOR_EFFECT",
+    "FixedId": -144285041,
+    "TriggerId": 87491264
+  },
+  {
+    "Name": "OTOMO_SYSTEM_EX00_GROUND_SENSOR",
+    "FixedId": -1667611283,
+    "TriggerId": 87491265
+  },
+  {
+    "Name": "OTOMO_COMMUNICATION_OTOMO_COMMUNICATION_EX00",
+    "FixedId": 217119077,
+    "TriggerId": 87556802
+  },
+  {
+    "Name": "OTOMO_COMMUNICATION_OTOMO_COMMUNICATION_EX01",
+    "FixedId": -1417931730,
+    "TriggerId": 87556803
+  },
+  {
+    "Name": "OTOMO_COMMUNICATION_OTOMO_COMMUNICATION_EX02",
+    "FixedId": -1211340024,
+    "TriggerId": 87556804
+  },
+  {
+    "Name": "OTOMO_COMMUNICATION_OTOMO_COMMUNICATION_EX03",
+    "FixedId": -41044619,
+    "TriggerId": 87556805
+  },
+  {
+    "Name": "OTOMO_COMMUNICATION_EMOTE_EX027_NORMAL_OFF",
+    "FixedId": 639999823,
+    "TriggerId": 87556806
+  },
+  {
+    "Name": "OTOMO_COMMUNICATION_EMOTE_EX027_RARE_OFF",
+    "FixedId": 2088876238,
+    "TriggerId": 87556807
+  },
+  {
+    "Name": "GIMMICK_COMMON_INIT",
+    "FixedId": 32,
+    "TriggerId": 104399560
+  },
+  {
+    "Name": "GIMMICK_COMMON_LOOP",
+    "FixedId": 35,
+    "TriggerId": 104399561
+  },
+  {
+    "Name": "GIMMICK_COMMON_FINISH",
+    "FixedId": 34,
+    "TriggerId": 104399562
+  },
+  {
+    "Name": "GIMMICK_COMMON_EX0",
+    "FixedId": 39,
+    "TriggerId": 104399563
+  },
+  {
+    "Name": "GIMMICK_COMMON_EX1",
+    "FixedId": 38,
+    "TriggerId": 104399564
+  },
+  {
+    "Name": "GIMMICK_COMMON_EX2",
+    "FixedId": 54,
+    "TriggerId": 104399565
+  },
+  {
+    "Name": "GIMMICK_COMMON_EX3",
+    "FixedId": 53,
+    "TriggerId": 104399566
+  },
+  {
+    "Name": "GIMMICK_COMMON_EX4",
+    "FixedId": 52,
+    "TriggerId": 104399567
+  },
+  {
+    "Name": "GIMMICK_COMMON_EX5",
+    "FixedId": 51,
+    "TriggerId": 104399568
+  },
+  {
+    "Name": "GIMMICK_COMMON_EX6",
+    "FixedId": 50,
+    "TriggerId": 104399569
+  },
+  {
+    "Name": "GIMMICK_COMMON_EX7",
+    "FixedId": 49,
+    "TriggerId": 104399570
+  },
+  {
+    "Name": "GIMMICK_COMMON_EX8",
+    "FixedId": 48,
+    "TriggerId": 104399571
+  },
+  {
+    "Name": "GIMMICK_COMMON_EX9",
+    "FixedId": 47,
+    "TriggerId": 104399572
+  },
+  {
+    "Name": "GIMMICK_COMMON_EX10",
+    "FixedId": 1737887496,
+    "TriggerId": 104399573
+  },
+  {
+    "Name": "GIMMICK_COMMON_EX11",
+    "FixedId": 965923183,
+    "TriggerId": 104399574
+  },
+  {
+    "Name": "GIMMICK_COMMON_EX12",
+    "FixedId": 1902562000,
+    "TriggerId": 104399575
+  },
+  {
+    "Name": "GIMMICK_COMMON_EX13",
+    "FixedId": -1831776593,
+    "TriggerId": 104399576
+  },
+  {
+    "Name": "GIMMICK_COMMON_EX14",
+    "FixedId": 972756579,
+    "TriggerId": 104399577
+  },
+  {
+    "Name": "GIMMICK_COMMON_EX15",
+    "FixedId": -148105266,
+    "TriggerId": 104399578
+  },
+  {
+    "Name": "GIMMICK_COMMON_EX16",
+    "FixedId": 954378111,
+    "TriggerId": 104399579
+  },
+  {
+    "Name": "GIMMICK_COMMON_EX17",
+    "FixedId": 1575139739,
+    "TriggerId": 104399580
+  },
+  {
+    "Name": "GIMMICK_COMMON_EX18",
+    "FixedId": -1548613007,
+    "TriggerId": 104399581
+  },
+  {
+    "Name": "GIMMICK_COMMON_EX19",
+    "FixedId": -1722936505,
+    "TriggerId": 104399582
+  },
+  {
+    "Name": "GIMMICK_EX_INIT",
+    "FixedId": 40,
+    "TriggerId": 104465119
+  },
+  {
+    "Name": "GIMMICK_EX_LOOP",
+    "FixedId": 41,
+    "TriggerId": 104465120
+  },
+  {
+    "Name": "GIMMICK_EX_FINISH",
+    "FixedId": 42,
+    "TriggerId": 104465121
+  },
+  {
+    "Name": "GIMMICK_EX_EX0",
+    "FixedId": 43,
+    "TriggerId": 104465122
+  },
+  {
+    "Name": "GIMMICK_EX_EX1",
+    "FixedId": 44,
+    "TriggerId": 104465123
+  },
+  {
+    "Name": "GIMMICK_EX_EX2",
+    "FixedId": 63,
+    "TriggerId": 104465124
+  },
+  {
+    "Name": "GIMMICK_EX_EX3",
+    "FixedId": 62,
+    "TriggerId": 104465125
+  },
+  {
+    "Name": "GIMMICK_EX_EX4",
+    "FixedId": 61,
+    "TriggerId": 104465126
+  },
+  {
+    "Name": "GIMMICK_EX_EX5",
+    "FixedId": 60,
+    "TriggerId": 104465127
+  },
+  {
+    "Name": "GIMMICK_EX_EX6",
+    "FixedId": 59,
+    "TriggerId": 104465128
+  },
+  {
+    "Name": "GIMMICK_EX_EX7",
+    "FixedId": 58,
+    "TriggerId": 104465129
+  },
+  {
+    "Name": "GIMMICK_EX_EX8",
+    "FixedId": 57,
+    "TriggerId": 104465130
+  },
+  {
+    "Name": "GIMMICK_EX_EX9",
+    "FixedId": 56,
+    "TriggerId": 104465131
+  },
+  {
+    "Name": "GIMMICK_SYSTEM_BURN_IGNITION",
+    "FixedId": -2068002366,
+    "TriggerId": 104530668
+  },
+  {
+    "Name": "GIMMICK_SYSTEM_BURN_BURNOUT",
+    "FixedId": -402530523,
+    "TriggerId": 104530669
+  },
+  {
+    "Name": "NPC_COMMON_FRENZY",
+    "FixedId": -771425073,
+    "TriggerId": 121373422
+  },
+  {
+    "Name": "NPC_COMMON_EQUIP_1",
+    "FixedId": -1505970269,
+    "TriggerId": 121373423
+  },
+  {
+    "Name": "NPC_COMMON_EQUIP_2",
+    "FixedId": -1018442124,
+    "TriggerId": 121373424
+  },
+  {
+    "Name": "NPC_COMMON_EQUIP_3",
+    "FixedId": -1463944523,
+    "TriggerId": 121373425
+  },
+  {
+    "Name": "NPC_COMMON_EQUIP_4",
+    "FixedId": 319395152,
+    "TriggerId": 121373426
+  },
+  {
+    "Name": "NPC_COMMON_ACTION_1",
+    "FixedId": -2062333883,
+    "TriggerId": 121373427
+  },
+  {
+    "Name": "NPC_COMMON_ACTION_2",
+    "FixedId": -2062961111,
+    "TriggerId": 121373428
+  },
+  {
+    "Name": "NPC_COMMON_ACTION_3",
+    "FixedId": 379838961,
+    "TriggerId": 121373429
+  },
+  {
+    "Name": "NPC_COMMON_ACTION_4",
+    "FixedId": 1745618370,
+    "TriggerId": 121373430
+  },
+  {
+    "Name": "NPC_PUGEE_BIKKURI",
+    "FixedId": 576439836,
+    "TriggerId": 121438967
+  },
+  {
+    "Name": "GUIDE_INSECT_COMMON_ROUTE_MAIN",
+    "FixedId": 120,
+    "TriggerId": 138281720
+  },
+  {
+    "Name": "GUIDE_INSECT_COMMON_ROUTE_START",
+    "FixedId": 1696733430,
+    "TriggerId": 138281721
+  },
+  {
+    "Name": "GUIDE_INSECT_COMMON_ROUTE_UNSTAY",
+    "FixedId": 1019028303,
+    "TriggerId": 138281722
+  },
+  {
+    "Name": "GUIDE_INSECT_COMMON_ROUTE_ALL",
+    "FixedId": 481429876,
+    "TriggerId": 138281723
+  },
+  {
+    "Name": "GUIDE_INSECT_COMMON_ROUTE_GOAL",
+    "FixedId": 870557893,
+    "TriggerId": 138281724
+  },
+  {
+    "Name": "GUIDE_INSECT_COMMON_ROUTE_GOAL_PL",
+    "FixedId": 799183327,
+    "TriggerId": 138281725
+  },
+  {
+    "Name": "GUIDE_INSECT_COMMON_CANCEL_PL",
+    "FixedId": -422102056,
+    "TriggerId": 138281726
+  },
+  {
+    "Name": "GUIDE_INSECT_FOCUS_HIGHLIGHT_WEAK",
+    "FixedId": -1315295936,
+    "TriggerId": 138347263
+  },
+  {
+    "Name": "GUIDE_INSECT_FOCUS_HIGHLIGHT_OLD_SCAR",
+    "FixedId": -1554429651,
+    "TriggerId": 138347264
+  },
+  {
+    "Name": "GUIDE_INSECT_FOCUS_HIGHLIGHT_WEAK_BLUR",
+    "FixedId": 705410367,
+    "TriggerId": 138347265
+  },
+  {
+    "Name": "GUIDE_INSECT_FOCUS_HIGHLIGHT_WEAK_MIDDLE",
+    "FixedId": -1612466354,
+    "TriggerId": 138347266
+  },
+  {
+    "Name": "GUIDE_INSECT_FOCUS_HIGHLIGHT_WEAK_SPOT",
+    "FixedId": 1691191615,
+    "TriggerId": 138347267
+  },
+  {
+    "Name": "GUIDE_INSECT_FOCUS_HIGHLIGHT_WEAK_LARGE",
+    "FixedId": 213308282,
+    "TriggerId": 138347268
+  },
+  {
+    "Name": "GUIDE_INSECT_ACCESS_POP_HIGHLIGHT",
+    "FixedId": 997187064,
+    "TriggerId": 138412805
+  },
+  {
+    "Name": "GUIDE_INSECT_ACCESS_POP_ROUTE",
+    "FixedId": 2144824631,
+    "TriggerId": 138412806
+  },
+  {
+    "Name": "GUIDE_INSECT_ACCESS_EM_HIGHLIGHT",
+    "FixedId": 1102286440,
+    "TriggerId": 138412807
+  },
+  {
+    "Name": "GUIDE_INSECT_ACCESS_EMS_HIGHLIGHT",
+    "FixedId": -959413364,
+    "TriggerId": 138412808
+  },
+  {
+    "Name": "GUIDE_INSECT_ACCESS_PL_START",
+    "FixedId": -671492957,
+    "TriggerId": 138412809
+  },
+  {
+    "Name": "GUIDE_INSECT_ACCESS_POP_HIGHLIGHT_ONLY",
+    "FixedId": 1544862187,
+    "TriggerId": 138412810
+  },
+  {
+    "Name": "GUIDE_INSECT_BATTLE_RIDE_FINISH_SCAR",
+    "FixedId": 957314772,
+    "TriggerId": 138478347
+  },
+  {
+    "Name": "GUIDE_INSECT_BATTLE_RIDE_FINISH_ATTACK",
+    "FixedId": 209656613,
+    "TriggerId": 138478348
+  },
+  {
+    "Name": "GUIDE_INSECT_BATTLE_RIDE_FINISH_WALL",
+    "FixedId": -843557396,
+    "TriggerId": 138478349
+  },
+  {
+    "Name": "EC_COMMON_INIT",
+    "FixedId": 1895733977,
+    "TriggerId": 155321102
+  },
+  {
+    "Name": "EC_COMMON_LOOP",
+    "FixedId": 880818249,
+    "TriggerId": 155321103
+  },
+  {
+    "Name": "EC_COMMON_FINISH",
+    "FixedId": 1866466081,
+    "TriggerId": 155321104
+  },
+  {
+    "Name": "EC_COMMON_EX0",
+    "FixedId": 992690064,
+    "TriggerId": 155321105
+  },
+  {
+    "Name": "EC_COMMON_EX1",
+    "FixedId": -848594102,
+    "TriggerId": 155321106
+  },
+  {
+    "Name": "EC_COMMON_EX2",
+    "FixedId": -1324537662,
+    "TriggerId": 155321107
+  },
+  {
+    "Name": "EC_COMMON_EX3",
+    "FixedId": -1619237086,
+    "TriggerId": 155321108
+  },
+  {
+    "Name": "EC_COMMON_EX4",
+    "FixedId": 51401561,
+    "TriggerId": 155321109
+  },
+  {
+    "Name": "COMMON_BURNING_FIRE",
+    "FixedId": 2102622549,
+    "TriggerId": 172163862
+  },
+  {
+    "Name": "COMMON_BURNING_SMOKE",
+    "FixedId": 428985775,
+    "TriggerId": 172163863
+  },
+  {
+    "Name": "COMMON_BURNING_FIRE_OIL",
+    "FixedId": 1684191801,
+    "TriggerId": 172163864
+  },
+  {
+    "Name": "COMMON_BURNING_SMOKE_OIL",
+    "FixedId": -1346743590,
+    "TriggerId": 172163865
+  },
+  {
+    "Name": "COMMON_FLUID_WATER",
+    "FixedId": -1003164830,
+    "TriggerId": 172229402
+  },
+  {
+    "Name": "_MAX",
+    "FixedId": -1,
+    "TriggerId": 189072155
+  }
+]

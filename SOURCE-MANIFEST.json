@@ -1,0 +1,2687 @@
+[
+  {
+    "path": ".gitattributes",
+    "size": 285,
+    "sha256": "660cd120ea0a2397945f85483320a0d3f1d76a879191d19917c580bc4e18614f"
+  },
+  {
+    "path": ".github/README_BUILD_RELEASE.md",
+    "size": 5959,
+    "sha256": "fd5c4d536909f4a9e04d7513396423565684d99525547eff60f5b0e2a9e140a4"
+  },
+  {
+    "path": ".github/release-notes/0.8.5.md",
+    "size": 5086,
+    "sha256": "a5f0cfd2911648092a6db7e82cc3c0e8177f0b234f58cbd72c1ba78094003e35"
+  },
+  {
+    "path": ".github/scripts/Build-Release.ps1",
+    "size": 4101,
+    "sha256": "2c398e3dc02909ba5a21e702f2d4bd10253da490016b0614e930a676be071442"
+  },
+  {
+    "path": ".github/scripts/Check-Release.ps1",
+    "size": 994,
+    "sha256": "fb77be8d5a2a529f84b1fd0bae04454495016e0a3da101ffb2416c22db32dcda"
+  },
+  {
+    "path": ".github/scripts/Publish-Release.ps1",
+    "size": 2407,
+    "sha256": "ef1ea3ad1f4aafb05e87c6cc40233cea4e95e9eb89c48a3bdc5066ab48887488"
+  },
+  {
+    "path": ".github/scripts/Release-Common.ps1",
+    "size": 2008,
+    "sha256": "4601d624c2a1668d763294ad05e11b368c72da37f2cb6a27eeeaef973ddcdc05"
+  },
+  {
+    "path": ".github/workflows/release.yml",
+    "size": 2172,
+    "sha256": "336be286d3951e9b4fae0da54ad5d4e35364dd6c6d442c0717b0ae2644e05728"
+  },
+  {
+    "path": ".gitignore",
+    "size": 528,
+    "sha256": "80fef7d65bf90e9830cba177f85e26cad817a5ee96c75fe31d25cb3cf040e307"
+  },
+  {
+    "path": "Assets/Lists/effect_id_common_fixed_map.json",
+    "size": 84618,
+    "sha256": "059f0c3bb5222143816d24f235de2c0e94146c69de1247f8b7fc74884331c61f"
+  },
+  {
+    "path": "Assets/Lists/rsz_pfb_classes.json",
+    "size": 1767034,
+    "sha256": "c62976999a2247d6258577928cb22d516fdcbde9fcc8a15f63604534adcaf887"
+  },
+  {
+    "path": "Assets/UI/asset-sources.csv",
+    "size": 20478,
+    "sha256": "7c0d1ac69f8461f4e149ac566767a6677cb5c140350f0eb406a109851721eb73"
+  },
+  {
+    "path": "Assets/UI/Icons/bone.png",
+    "size": 2021,
+    "sha256": "32f40b0801fe51747a4e7a24c0e8015f8d76d508f4b2159f4f96d6315c226461"
+  },
+  {
+    "path": "Assets/UI/Icons/bone.svg",
+    "size": 416,
+    "sha256": "2b764aae2e7b53409dbe9c4cd784f37f236a573258bb98e7903b1aa195b323f5"
+  },
+  {
+    "path": "Assets/UI/Icons/chevron-down.png",
+    "size": 525,
+    "sha256": "24796b05e99916e06834c02dd171d503e553e3e66358582a99a0574ecbcbb98b"
+  },
+  {
+    "path": "Assets/UI/Icons/chevron-down.svg",
+    "size": 236,
+    "sha256": "66ea878e72ed3488bb3b464c39dfdccee8d1f78e560dccea40e5e12da0e87e87"
+  },
+  {
+    "path": "Assets/UI/Icons/chevron-left.png",
+    "size": 515,
+    "sha256": "9d1e2c37a99312d3630d4d034391b23769a2b13805e93f236ff7da35663cfb08"
+  },
+  {
+    "path": "Assets/UI/Icons/chevron-left.svg",
+    "size": 238,
+    "sha256": "83b0681aa38bf55e9d52a1e4b4cced624abe1fe7678ecafda133a574f1161d93"
+  },
+  {
+    "path": "Assets/UI/Icons/chevron-right.png",
+    "size": 514,
+    "sha256": "4434f2b9b782128c88d040779656264920f9d079a8e43c0899325990bf478f9f"
+  },
+  {
+    "path": "Assets/UI/Icons/chevron-right.svg",
+    "size": 237,
+    "sha256": "2758143d7b2434e4aa7307dfd34405c87909ff4052f21b5f3f40d45224b4f19b"
+  },
+  {
+    "path": "Assets/UI/Icons/crosshair.png",
+    "size": 2477,
+    "sha256": "c88a581d509d3fe67844d565bbf10fc33d72cf4b58f715b9e32ac664c8ca51ad"
+  },
+  {
+    "path": "Assets/UI/Icons/crosshair.svg",
+    "size": 412,
+    "sha256": "ae9ed8583286ea03bffae85bb69aee5227540e588b0370cf185f2141ebe25e8d"
+  },
+  {
+    "path": "Assets/UI/Icons/download.png",
+    "size": 1188,
+    "sha256": "e8ee0bccb2da956bff7d91565bca8ce3be122a5873d9278a8a9eee1decaac975"
+  },
+  {
+    "path": "Assets/UI/Icons/download.svg",
+    "size": 318,
+    "sha256": "3daeee13ded5a3afa2198b1bb4e2262d163922f97d96ac6ff9953e8ed4fe039d"
+  },
+  {
+    "path": "Assets/UI/Icons/eye.png",
+    "size": 2368,
+    "sha256": "0fc93e178c32eefcde4bb9744c7939c0995e70331e85b49647431c156946d245"
+  },
+  {
+    "path": "Assets/UI/Icons/eye.svg",
+    "size": 360,
+    "sha256": "5bf90197dd7629cad64a2e48d1186a71559deb6121207d10e3dc5b19ebaffdcf"
+  },
+  {
+    "path": "Assets/UI/Icons/film.png",
+    "size": 1096,
+    "sha256": "9bebdac79ba6b0f46dcc852b1cd9a12555b409fbcd71b9212aa2b1bc3ed4c0eb"
+  },
+  {
+    "path": "Assets/UI/Icons/film.svg",
+    "size": 432,
+    "sha256": "85cfa80821b34f512bd401a1249957c9f2f612497602ecc31dff39517823ee52"
+  },
+  {
+    "path": "Assets/UI/Icons/focus.png",
+    "size": 1689,
+    "sha256": "642bbf086d88358bc2210a67fe47a41089ab5c1f656c39e85c1d74772af479b6"
+  },
+  {
+    "path": "Assets/UI/Icons/focus.svg",
+    "size": 401,
+    "sha256": "d52fde05ccbd7bf629e05daeb8eadf824c85333aeca78e674db01493bc8b1f10"
+  },
+  {
+    "path": "Assets/UI/Icons/folder.png",
+    "size": 1030,
+    "sha256": "a1ee8e05f502da1f912c7b1a4cd2fddda031b9cde2e4c3e5bc1967cbf7a86569"
+  },
+  {
+    "path": "Assets/UI/Icons/folder.svg",
+    "size": 342,
+    "sha256": "f0d92b94b797a8ab7d4c4ae33c3236c47f64068351b4e14bdb5014ee42898a39"
+  },
+  {
+    "path": "Assets/UI/Icons/hand.png",
+    "size": 2348,
+    "sha256": "81faab2c3b43bce021c629e7a3382bcbed7a87916f0eb3a74921ee60378e9c4b"
+  },
+  {
+    "path": "Assets/UI/Icons/hand.svg",
+    "size": 483,
+    "sha256": "fe3771fa2f0a9a3c7736164c9a855beefacc02548084ac1d6fc8da8a8a9180b0"
+  },
+  {
+    "path": "Assets/UI/Icons/house.png",
+    "size": 1546,
+    "sha256": "46a6774824d87b373bfba70b187172820efbde4b4fea346de68f0e7988810d74"
+  },
+  {
+    "path": "Assets/UI/Icons/house.svg",
+    "size": 383,
+    "sha256": "28216c479005731ef5e382e7d8627eda2b129b019eb1f3d9de9f5915576d448e"
+  },
+  {
+    "path": "Assets/UI/Icons/info.png",
+    "size": 2425,
+    "sha256": "adaff0b7f40fc458b6d21cb3c8532b999c67cb5aa7bb9c6cf7e47b2463d78454"
+  },
+  {
+    "path": "Assets/UI/Icons/info.svg",
+    "size": 294,
+    "sha256": "bc977a64eb96f3e9c1041ffd09a3fceb70e3e65c02b571f76064062ed31f3cb9"
+  },
+  {
+    "path": "Assets/UI/Icons/layers.png",
+    "size": 2922,
+    "sha256": "8b0e48b33d47eaec044818ebac0d033304b1f8b09171ecba52d4c513c30ac94c"
+  },
+  {
+    "path": "Assets/UI/Icons/layers.svg",
+    "size": 510,
+    "sha256": "ce16d0a955e3581cda17f6b2fd5c5bc2034b405f9cecc31c8ebb8495b4afc1bb"
+  },
+  {
+    "path": "Assets/UI/Icons/list-filter.png",
+    "size": 540,
+    "sha256": "1d5cb139f02d947f54a36c659d21681810debcff2b57a206c1d9d9739aa24da1"
+  },
+  {
+    "path": "Assets/UI/Icons/list-filter.svg",
+    "size": 278,
+    "sha256": "36b94082bd7f161244c06a27cdeea647cb99ee5b805183cbeaf7ac3155a7103b"
+  },
+  {
+    "path": "Assets/UI/Icons/maximize.png",
+    "size": 1080,
+    "sha256": "1c592b7962b7d6ddedb690ab8da37b23bdfc684cfa9b0dbbc303037ac9e78f2d"
+  },
+  {
+    "path": "Assets/UI/Icons/maximize.svg",
+    "size": 366,
+    "sha256": "1f790856b0de805ab62e871609f1990b89d227d472022e57a11fde015aad4826"
+  },
+  {
+    "path": "Assets/UI/Icons/mouse-pointer.png",
+    "size": 2133,
+    "sha256": "9550730b43c9189ae5d4ca00cbb464716cd80774ccdc7d51cac66cdf8dae3ca9"
+  },
+  {
+    "path": "Assets/UI/Icons/mouse-pointer.svg",
+    "size": 400,
+    "sha256": "9541b5c7cbf62f65801a1e6206db1290f077556ea9a9abb87a1ae497980eaf8e"
+  },
+  {
+    "path": "Assets/UI/Icons/move.png",
+    "size": 1527,
+    "sha256": "ce9e10e351c6aa5ebbeb541f1d6e434660d04467157c0821edf47aa30678f926"
+  },
+  {
+    "path": "Assets/UI/Icons/move.svg",
+    "size": 371,
+    "sha256": "915074a1292f72d59165339b8b93f8d440c8d55b7116b52fca240b9ded5af74d"
+  },
+  {
+    "path": "Assets/UI/Icons/package.png",
+    "size": 2599,
+    "sha256": "24b7bfe58b4c00ef4b0e49a421c916ac1b9ea51817ad6518ecd281ce10a04c03"
+  },
+  {
+    "path": "Assets/UI/Icons/package.svg",
+    "size": 446,
+    "sha256": "69d6bc7650d26c4d24dd55eb22791607b982ce7637073944c256f1f61575509d"
+  },
+  {
+    "path": "Assets/UI/Icons/pause.png",
+    "size": 592,
+    "sha256": "723614ddab91d38b128876877a3488aed275482ba863fd0f64d0aff2296cf739"
+  },
+  {
+    "path": "Assets/UI/Icons/pause.svg",
+    "size": 313,
+    "sha256": "f122ec4ea7f5693a0b1baafa9c708b53980dc87b4aacb297c6e6f71c1a4c115c"
+  },
+  {
+    "path": "Assets/UI/Icons/play.png",
+    "size": 1816,
+    "sha256": "30e8e10719f6e255f7f639307c8ad67308e213ce872aa57724d7e373735d6711"
+  },
+  {
+    "path": "Assets/UI/Icons/play.svg",
+    "size": 306,
+    "sha256": "d7c34786135922a92b6896f6c2384ceeb0346afbf6041dc79982011411409833"
+  },
+  {
+    "path": "Assets/UI/Icons/rotate-3d.png",
+    "size": 2541,
+    "sha256": "96aa87bd8ff6d115d6c327dbcd7b85564bb320a35276f638da3af047f314e190"
+  },
+  {
+    "path": "Assets/UI/Icons/rotate-3d.svg",
+    "size": 371,
+    "sha256": "ce65f2ca79f71638ff69f382c27cefba4b72be10f708927695e63a55b4dd5b6f"
+  },
+  {
+    "path": "Assets/UI/Icons/scan.png",
+    "size": 1084,
+    "sha256": "6fd4239e9e330a1a39b034743820a6ea86687c140e0459392c46162398821bbc"
+  },
+  {
+    "path": "Assets/UI/Icons/scan.svg",
+    "size": 366,
+    "sha256": "c77f0e634b2451a14a262a59b61d75bbcea3994b16eeba1f5753e86b33282a4d"
+  },
+  {
+    "path": "Assets/UI/Icons/search.png",
+    "size": 2025,
+    "sha256": "32ff04c241eda9905a053bb8352a973bb3d98eda14336f76f0b65932b39a005a"
+  },
+  {
+    "path": "Assets/UI/Icons/search.svg",
+    "size": 275,
+    "sha256": "283d371c2e433817bb9c0c8310caa6c77fa4177c0f4f1168d9c83b97af7389dc"
+  },
+  {
+    "path": "Assets/UI/Icons/settings.png",
+    "size": 2881,
+    "sha256": "5b76a09dd7726b27358a36c3493fbc7087c65733569e5fb1586d9f9d93c77965"
+  },
+  {
+    "path": "Assets/UI/Icons/settings.svg",
+    "size": 586,
+    "sha256": "0ae27fd0f81999229e3127ac96c5b32edfea448e291d509e76212b917551d66b"
+  },
+  {
+    "path": "Assets/UI/Icons/skip-back.png",
+    "size": 1418,
+    "sha256": "047788754bc729bced9a11b29f248d0e7b7f3be3305f42fcd9cbd2e2ab0a49b2"
+  },
+  {
+    "path": "Assets/UI/Icons/skip-back.svg",
+    "size": 335,
+    "sha256": "901579624a7d28036a39b3b8bd9e6da0e8cf771a79c67836d8a52b3e2287c031"
+  },
+  {
+    "path": "Assets/UI/Icons/skip-forward.png",
+    "size": 1403,
+    "sha256": "9836adbb3df6559054641836b053e05db134720e45e79fe556f8ccb5bc58de34"
+  },
+  {
+    "path": "Assets/UI/Icons/skip-forward.svg",
+    "size": 333,
+    "sha256": "f6bdc4b8d453332bafcf1366a48d5ece4bd4f15eced97c85c3676bd22c5cadf9"
+  },
+  {
+    "path": "Assets/UI/Icons/sliders-horizontal.png",
+    "size": 1140,
+    "sha256": "9d79c6cc62988d55d4a2e6b28c1b745587b3c366b7849569fa8be2aae3726115"
+  },
+  {
+    "path": "Assets/UI/Icons/sliders-horizontal.svg",
+    "size": 422,
+    "sha256": "e43a00e5eb684e6cbb61083bed2528d7a3fa5f265693eb2b5f314cd432aa65f4"
+  },
+  {
+    "path": "Assets/UI/Icons/sparkles.png",
+    "size": 2723,
+    "sha256": "2a226bdcfa580e0fde41b1d6020aa60a4fe5a1b188c1adff91c1825b690d9143"
+  },
+  {
+    "path": "Assets/UI/Icons/sparkles.svg",
+    "size": 567,
+    "sha256": "f5499f33f09d7158151e9bd2ec0faf79ff8fb57292f84fdd7286d96d0f0424d8"
+  },
+  {
+    "path": "Assets/UI/Icons/star.png",
+    "size": 2309,
+    "sha256": "967079f6dde89895afc370683bc5181376564f2128bbe6e1e20d9c238cfa28b3"
+  },
+  {
+    "path": "Assets/UI/Icons/star.svg",
+    "size": 588,
+    "sha256": "c59da86b889569387db28e69ad00a89f96af22863ad9eea9aa12c4876a14338c"
+  },
+  {
+    "path": "Assets/UI/Icons/sword.png",
+    "size": 1561,
+    "sha256": "e9e62a54801429511c3227613fd8447014ec4527a1bea49a2fcb6339cbbada7a"
+  },
+  {
+    "path": "Assets/UI/Icons/sword.svg",
+    "size": 376,
+    "sha256": "0649799fe0d04e803d0fc1b861f4adec694f8afbcc0946b8ec87bb18447efa3c"
+  },
+  {
+    "path": "Assets/UI/Icons/upload.png",
+    "size": 1197,
+    "sha256": "4b178c486c6044849d69f1b3cd1957b9a9094a44d8718a764dc2d051237999dc"
+  },
+  {
+    "path": "Assets/UI/Icons/upload.svg",
+    "size": 318,
+    "sha256": "42816ee1fa0e9d3b82272a97615c1e562b0e9de64780ebf21963bc1db0ceffd1"
+  },
+  {
+    "path": "Assets/UI/LUCIDE-LICENSE.txt",
+    "size": 3208,
+    "sha256": "b495047bd93a9b06913511076f504daba17d5bbeb3e0650f3bb53a4220329c57"
+  },
+  {
+    "path": "CREDITS.md",
+    "size": 10262,
+    "sha256": "f53a3272bdc30d6d2d47cc2376e4b020d4d5c0e82e19897fa7b1bdcd6e993dd5"
+  },
+  {
+    "path": "distribution/AI修改特效教程.md",
+    "size": 10829,
+    "sha256": "64ff1444191c6f2729c91b72d62c57640ea6cb048ab107c64ff43ed6e25e4f27"
+  },
+  {
+    "path": "distribution/Build-Package.ps1",
+    "size": 14004,
+    "sha256": "104e251ad517e97e601b94f08eb88e652bbc0f426cda1a657284195ba2255fe5"
+  },
+  {
+    "path": "distribution/licenses/REasy-LICENSE.txt",
+    "size": 1067,
+    "sha256": "36aed4da71d44fba52f7ad2bc93ed8d49077b3dfe369b34c13ca03cb0905bac1"
+  },
+  {
+    "path": "distribution/licenses/ReeLib-MIT.txt",
+    "size": 1069,
+    "sha256": "0f8cbb11b28c6e823e84074a280725b40f4a2bd25d62f3d1346a41452c91a4bb"
+  },
+  {
+    "path": "distribution/licenses/xxHash-MIT.txt",
+    "size": 1073,
+    "sha256": "07a14e966fdb2000386d398e718b22b789412096b803117cd7b67a5f90ec2b6e"
+  },
+  {
+    "path": "distribution/licenses/ZstdSharp-MIT.txt",
+    "size": 1074,
+    "sha256": "9a6a7216e532c4ee4f78881d31fb641c27148eb01b2d0e8e3235ffe9a70a662c"
+  },
+  {
+    "path": "distribution/scripts/Common.ps1",
+    "size": 3727,
+    "sha256": "4967fe4809804b328b3b9d21acaa6a224d5055174e8e8fb0911f57abff1974ad"
+  },
+  {
+    "path": "distribution/scripts/Install.ps1",
+    "size": 5786,
+    "sha256": "94067e29521b37c4557569fe5309a2a5c7bd39f4f442ecd787511215bf0dbd71"
+  },
+  {
+    "path": "distribution/scripts/Mcp-Config.ps1",
+    "size": 865,
+    "sha256": "ee5525e92793bdcff5b6062018edc774561f6447cad7d13044683e916177678f"
+  },
+  {
+    "path": "distribution/scripts/Start-Backend.ps1",
+    "size": 4372,
+    "sha256": "791f80a577d6a5a57f7fa3c85eaa30d557a017a70e2b9a71ff9a69aca4c3bd80"
+  },
+  {
+    "path": "distribution/scripts/Stop-Backend.ps1",
+    "size": 1511,
+    "sha256": "dded04f55432d517979d7d33867054abdac31754fbee2f0e50e30daf44b0d19d"
+  },
+  {
+    "path": "distribution/Test-Package.ps1",
+    "size": 11550,
+    "sha256": "db02339e1bffc66fdfa57c72b97e31a06b96e3a01f06e94487cdae7c3f109a1d"
+  },
+  {
+    "path": "distribution/第三方说明.md",
+    "size": 2248,
+    "sha256": "c6975c43324be259fe45e25dd68c303d18000be493665674186b86356de87f5b"
+  },
+  {
+    "path": "docs/development/BUILD.en.md",
+    "size": 6355,
+    "sha256": "80c9b2ea0df2f475891efae1571ac114900713655966615cdf9e3f30bdc55345"
+  },
+  {
+    "path": "docs/development/BUILD.zh-CN.md",
+    "size": 5881,
+    "sha256": "4c1f4810b18b59403f4e8d11289ba42959d8fc453682ef08752d7c76f482e7a7"
+  },
+  {
+    "path": "docs/tutorials.en.md",
+    "size": 19357,
+    "sha256": "07d7536883c454fffbf543eea7b7d66af23f316a78a41e15b8a3ebf9350154d2"
+  },
+  {
+    "path": "docs/tutorials.zh-CN.md",
+    "size": 16512,
+    "sha256": "7c8a470f83010af04af85520c4f932304bd9b41f817622a1af67105b814688f0"
+  },
+  {
+    "path": "game-plugin/images/MotionVfxLive/author-logo.png",
+    "size": 1123394,
+    "sha256": "88b891c91e90cc39f5dddccf936e5861754799b8447bf3c5157d14b7f34d56d4"
+  },
+  {
+    "path": "game-plugin/images/MotionVfxLive/logo.png",
+    "size": 796516,
+    "sha256": "e1edb3c6ce1fcb979d1b14c07c87674abfd48c83583f174582cfe42827dce07f"
+  },
+  {
+    "path": "game-plugin/MotionVfxCacheDiagnostics.cs",
+    "size": 96396,
+    "sha256": "a93c84a11fe9297ce1d7381d9cb970dabc27ce46143ad623b01fdc212dd60fac"
+  },
+  {
+    "path": "game-plugin/MotionVfxLive/fx_action_bindings.lua",
+    "size": 31460,
+    "sha256": "3debe0af1d62c0a97afafef050196b48e0844521a53759735caabace8f3b1b61"
+  },
+  {
+    "path": "game-plugin/MotionVfxLive/fx_action_capture.lua",
+    "size": 66518,
+    "sha256": "7f1fa40b8f0cd0477596bb11e7d58f28ca9d7b06b2e8ad1661e7db213aa2b4f5"
+  },
+  {
+    "path": "game-plugin/MotionVfxLive/fx_action_preview_runtime.lua",
+    "size": 12105,
+    "sha256": "bf0daf0a264884a657de02b39bf2dca15ca6cd7eec91bd3f2c3eacb737fd8792"
+  },
+  {
+    "path": "game-plugin/MotionVfxLive/fx_action_preview_transaction.lua",
+    "size": 8150,
+    "sha256": "bc77f18c2ad415a6f841faae484b68579f066fd71784542501faf36ebba44841"
+  },
+  {
+    "path": "game-plugin/MotionVfxLive/fx_action_sources.lua",
+    "size": 5583,
+    "sha256": "42fb485dc993a6a009a721d0255091f71d7a8bdece64d7f35ff98d5e00396b99"
+  },
+  {
+    "path": "game-plugin/MotionVfxLive/fx_ai_bridge.lua",
+    "size": 12791,
+    "sha256": "03a7ddb91df905cf0808695fd6a1102ef1b912a9c6f0b2a9c9776618acc70a00"
+  },
+  {
+    "path": "game-plugin/MotionVfxLive/fx_attachment_targets.lua",
+    "size": 6045,
+    "sha256": "b3e1cba621ccf82b7f3f707676f086e7eb084757501f6ad9553d1ffa483349b7"
+  },
+  {
+    "path": "game-plugin/MotionVfxLive/fx_d2d_widgets.lua",
+    "size": 17780,
+    "sha256": "a0c0db5428ae7e4b0467fad85cae4695d8f8f0e592b3749f3fc64da8e4154a16"
+  },
+  {
+    "path": "game-plugin/MotionVfxLive/fx_d2d_workbench.lua",
+    "size": 76329,
+    "sha256": "de6f246ed52fac3f3a5958bdcf1ad463c062818846b1332cc849ef7aef2b03a6"
+  },
+  {
+    "path": "game-plugin/MotionVfxLive/fx_debug_hotkeys.lua",
+    "size": 9436,
+    "sha256": "001fcb8026ecdae6fef70148322141b009a7c1256642b08ed1e7a7b8932bed45"
+  },
+  {
+    "path": "game-plugin/MotionVfxLive/fx_equipment_pfb_preview_runtime.lua",
+    "size": 20552,
+    "sha256": "5ab77dcca494aceb8e6099514e41aad15cddd578f91583f45dd3e9eeba25b6aa"
+  },
+  {
+    "path": "game-plugin/MotionVfxLive/fx_equipment_sources.lua",
+    "size": 6216,
+    "sha256": "6f2f4245fc6f11cd584f53ade3324be39ca4d863c03f41b6ac9cce3f5e300282"
+  },
+  {
+    "path": "game-plugin/MotionVfxLive/fx_file_dialog.lua",
+    "size": 25104,
+    "sha256": "16ffb654aea62ef4416c4d032bb120e1f3f5d9ccd371ef4c9ad3c8b40416d99e"
+  },
+  {
+    "path": "game-plugin/MotionVfxLive/fx_parameter_ui.lua",
+    "size": 12673,
+    "sha256": "b709b26a8acbd36937b83c3a3ae0d1c1fb549940cd090b3906bbb7b409e4435d"
+  },
+  {
+    "path": "game-plugin/MotionVfxLive/fx_pfb_page.lua",
+    "size": 7238,
+    "sha256": "897699a73a748f0c461aa6f5d57acdbeee5d3d09d5c411e4f66548a6b7b940eb"
+  },
+  {
+    "path": "game-plugin/MotionVfxLive/fx_pfb_preview_runtime.lua",
+    "size": 16062,
+    "sha256": "02acbc55beba20ed82c4e962fe12be5f991956de955efc03bfbf238fe5cd4482"
+  },
+  {
+    "path": "game-plugin/MotionVfxLive/fx_precache_runtime.lua",
+    "size": 3572,
+    "sha256": "200af009ca94668b087fa3a4229d26dd0a311b2ea32999aea47968f8c864af3f"
+  },
+  {
+    "path": "game-plugin/MotionVfxLive/fx_preview_runtime.lua",
+    "size": 23829,
+    "sha256": "5073f912ab6bf07fff28f93ea4f2079821aff758a8563043efe5f354ad9d1282"
+  },
+  {
+    "path": "game-plugin/MotionVfxLive.lua",
+    "size": 192478,
+    "sha256": "1906945ddbbe62ae924ef1ab47ee94e85620c929d4a54920324ce9ebaf2ff60e"
+  },
+  {
+    "path": "game-plugin/tests/action-capture-tests.lua",
+    "size": 64276,
+    "sha256": "0e53c350a7a9ed8db3ef56c3424339d5834e19e729a96b609f31534a2b01e84a"
+  },
+  {
+    "path": "game-plugin/修复MotionVfxLive资源还原.lua",
+    "size": 14013,
+    "sha256": "a93a22727c7865d37ebcf6666b6f67484bd76ba6846ba46e15ddc9e55a4379eb"
+  },
+  {
+    "path": "game-plugin/刷新MotionVfxLive输入框.lua",
+    "size": 1117,
+    "sha256": "b7e0b75ecaeb3aa2bfa1779c052ed08feea8258148a289254cafc6db19a5d3f0"
+  },
+  {
+    "path": "game-plugin/手动重载MotionVfxLive.lua",
+    "size": 12477,
+    "sha256": "1f5e59f38ba41b802d11bac0c79bc9d413831be3e9723aa74a4c2acc9cce06f6"
+  },
+  {
+    "path": "global.json",
+    "size": 105,
+    "sha256": "26d6e94e250c350e48994e1e99bbed5d0e12f7b556840dde18e2b8fae7fc792c"
+  },
+  {
+    "path": "LICENSE",
+    "size": 1068,
+    "sha256": "1bd2fe459ac4601cbb78d26aa45c71358cd8b0521b8bd60c8ac5ef6a84eb4abb"
+  },
+  {
+    "path": "RE-MotionVfxStudio.sln",
+    "size": 5163,
+    "sha256": "f5bf0b27cca1d9986c6b31889130f69627ec6e401c23ed8a31b170e820974d43"
+  },
+  {
+    "path": "RE-MotionVfxStudio.slnx",
+    "size": 218,
+    "sha256": "c6ae363b4fe77ff525a9f507c788cf9d97a860278ab996bd822b28e802ef106d"
+  },
+  {
+    "path": "README.en.md",
+    "size": 9546,
+    "sha256": "967c330eaee15bd6d94197c8a2199b93c85836061e868ee4f69995fe1058b49e"
+  },
+  {
+    "path": "README.md",
+    "size": 8761,
+    "sha256": "1a42faab8f9074880a3c7b6b18c6581d39774caf48c69337ecacfd13a25509ad"
+  },
+  {
+    "path": "REE-Lib.Generators/Diagnostics.cs",
+    "size": 1278,
+    "sha256": "d0124a7a36a2783163f04752b57e405321acf2ff8ff0bbed259c22708c2a12f6"
+  },
+  {
+    "path": "REE-Lib.Generators/REE-Lib.Generators.csproj",
+    "size": 733,
+    "sha256": "ea7c6c34e1c2f721bc632cac963b63469c2b879c1de1a023ebb6c25d5213b072"
+  },
+  {
+    "path": "REE-Lib.Generators/ReeLibGenerator.cs",
+    "size": 37344,
+    "sha256": "f932cec6888d2807f23bd1ed23cbe0e5969cc462c34d6a8d4ae37f03026cde0c"
+  },
+  {
+    "path": "REE-Lib.Generators/SyntaxHelpers.cs",
+    "size": 5817,
+    "sha256": "98822957c3e0af673b436d4f6f5a7019ce54935ab007e881a319d563851f71db"
+  },
+  {
+    "path": "third-party/reframework-d2d/LICENSE",
+    "size": 1063,
+    "sha256": "27c905480d9d5f236b4b5a350c3a776791834ac64fa8f3b16825db40667503c4"
+  },
+  {
+    "path": "third-party/reframework-d2d/package/reframework/autorun/reframework-d2d.lua",
+    "size": 936,
+    "sha256": "e12acac7928b63c4849a2f5ca3e788be99814d5aac93c7bb5a73385b03909e43"
+  },
+  {
+    "path": "third-party/reframework-d2d/package/reframework/plugins/reframework-d2d.dll",
+    "size": 311808,
+    "sha256": "0b64586c8e7903eb9cabd4b5c30c0544b528e3898aed9e44cb8f37e14246aa94"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/README",
+    "size": 151,
+    "sha256": "6a3993c9dc39c2b8df006a944bf67d4a20408b533363466dd17b32c958c4e285"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lapi.c",
+    "size": 35558,
+    "sha256": "5c4ccf79cb5f0903697d3e4d3bebba8207f69f66f8721ed87b42e42f5b1fd484"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lapi.h",
+    "size": 1395,
+    "sha256": "c2ab2c3b26351d53f2e66d4de1a3e5dcb43e61659f4aeef36d410c5d9a5387fb"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lauxlib.c",
+    "size": 32746,
+    "sha256": "280c189a7a5784a41a7fa1e64e185500de1ed720f5665e12ce9b3cc7c2af9016"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lauxlib.h",
+    "size": 9105,
+    "sha256": "69945b415f38ad223e4acd593caf9f9a7fbb44d9936bfa71bc4a925eb5dc320a"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lbaselib.c",
+    "size": 14902,
+    "sha256": "2d23a23a5eaa9f74669ff1f2c16ead8af8f1fe4da990ebf70094c2bdc736d3d7"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lcode.c",
+    "size": 51130,
+    "sha256": "cc261cbbc631017b1899fe6d57e027266b4b77805c0ad38a7e908e9d716bd68b"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lcode.h",
+    "size": 3801,
+    "sha256": "40f6a6453461aef8f31b61a4a6698862578b74f8b11a084708336923d7808e18"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lcorolib.c",
+    "size": 4836,
+    "sha256": "23fe9d98359c6acacc1bd12b66bf37e165308d8616d4a3e979ecbec40eabe9b0"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lctype.c",
+    "size": 2461,
+    "sha256": "3e21ae6a8faab3ed470ae0de19360da6b4e21a0a0f8572f502f7e13d590186f8"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lctype.h",
+    "size": 2115,
+    "sha256": "c800311872ecba642f6d013b290eda83ba6cd8df8061e25cdca1dd4adcbed8b5"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/ldblib.c",
+    "size": 13356,
+    "sha256": "349afd63c8be2cb8a522e4a04e9f444b65ed1fc7f4dabba5b4b61fd8c11d0c42"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/ldebug.c",
+    "size": 26701,
+    "sha256": "8c2d248ce19a7df066c2cc0d80a3c55d13dcd4f227fb0810dd2b7f0d2d905646"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/ldebug.h",
+    "size": 2168,
+    "sha256": "527f6a7d3849738a6e7548f8035b551dc52101a685ab3ac2979e1dd1fc8b884f"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/ldo.c",
+    "size": 32454,
+    "sha256": "8fadc626905d1d497c57b5711e175096a50655a12228a64da62a78d07e1a08e4"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/ldo.h",
+    "size": 2926,
+    "sha256": "ad1809850005b277b0f5522bdf95fa9a8228c9de6dc5fc1206384c00eb1bae8c"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/ldump.c",
+    "size": 4771,
+    "sha256": "7e9df2823a5a3fa00f4a508968c2e3387aeda59310c192d63cf7dc2d18ab7949"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lfunc.c",
+    "size": 8367,
+    "sha256": "d5529bd218826190de1a9f555cae92941d01f7a3b08daa02f05279e1a1256a46"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lfunc.h",
+    "size": 1703,
+    "sha256": "6d0ae4071a10feac2b7d0b67b0249f6859d793425d7035bbbb5876c5a856a8ac"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lgc.c",
+    "size": 56086,
+    "sha256": "f41e519c37cb0d554223e0b053c20bb63804deba7694494107e525dee3f62e35"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lgc.h",
+    "size": 6008,
+    "sha256": "37d857b56070fecbd509699b2f92d3de366bce24d47f3f401a45f9ded6283664"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/linit.c",
+    "size": 1621,
+    "sha256": "3578568e27b9c1e2f4a7f9a53fdb4bc8ac095db75cc86e966bb1deec2792158e"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/liolib.c",
+    "size": 22058,
+    "sha256": "27d22bb674fe615e67670eab21b02cc4dfd811d6021dddf79db358e4746b679b"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/ljumptab.h",
+    "size": 1663,
+    "sha256": "6c3e9858b9dad03ccd61445ab0bff0eb6ddfa5e731e044f93350fe6c6b2ad8d5"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/llex.c",
+    "size": 17095,
+    "sha256": "bce9bdf18e2d124463d54319dcaedc615171c87b11db969d2dbfc86f2f3b4a9c"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/llex.h",
+    "size": 2402,
+    "sha256": "5ce0302528260ed6a40ec3ebf5e27d3bc108242d9dca57e8cdbe80fe34e13410"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/llimits.h",
+    "size": 8639,
+    "sha256": "90f005ca65553782369d38788229565f95364564648b230f1e397a64743be30a"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lmathlib.c",
+    "size": 18884,
+    "sha256": "c2d445536a8cc39b03ac60a05092047955ea0c017e34ca30243b33e397838462"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lmem.c",
+    "size": 5894,
+    "sha256": "c773fabfe40d73b8ca14714a9ece898e253c256371156961f08cd21abb96ba24"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lmem.h",
+    "size": 3368,
+    "sha256": "8318a170a1d4bf21c3cb4deb1f8661f1dc7cf4eb688e4ec9a1e7ea16bfc3b5cf"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/loadlib.c",
+    "size": 23030,
+    "sha256": "4b0ef1be7e60fc3c9a31a7d5a1489e5ad00935e85afa1578bbc370c658f71d32"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lobject.c",
+    "size": 18890,
+    "sha256": "b9b78532662ffcd1b319d1eb1a590b0700c1f21991b260150d311bbb1f34e85a"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lobject.h",
+    "size": 22392,
+    "sha256": "3797990a028f5fb49371cb06ce6fb572893c9a3fafba75f156c095bd9433042c"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lopcodes.c",
+    "size": 4126,
+    "sha256": "bdc9d39fd8bf1a350c0249f726c5f61bef64b122b93a0fbc172b0328dc01f594"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lopcodes.h",
+    "size": 12716,
+    "sha256": "dcc99017b9b40b4b363e97a3bd4f381d1b07a894d5ad6d9869a7587872d1af9a"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lopnames.h",
+    "size": 1143,
+    "sha256": "fbdbebc96b136efc6165cba1ac2b311b0c52413aaef59ae9ec750748f13c9e9a"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/loslib.c",
+    "size": 11859,
+    "sha256": "9a9377ca3fbbca810ee9d6813348dd4209071caaf8620d330f326b30f18b00fd"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lparser.c",
+    "size": 56053,
+    "sha256": "29222434afe2cae98ae47b7f062240f1fdc8797811b453e42bdd4904f2ea79b1"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lparser.h",
+    "size": 5927,
+    "sha256": "68c34ef2d6e5a227f7cff18436a42c6739b1470ce12f059f168d9bb69fc8d49c"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lprefix.h",
+    "size": 828,
+    "sha256": "626785d4eda75e9435f0ac21a780ae3b11f8b27dc36934e637a5c2305f906531"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lstate.c",
+    "size": 11150,
+    "sha256": "4747ce0eceda59593e4a5d66923d016837b7e8b0c33b674f2017acea5c1b64f1"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lstate.h",
+    "size": 15199,
+    "sha256": "b03b119ea65c7f11eac9e7efc27ae3b05f96da2e9c3ff98fe59226d1f2d229dd"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lstring.c",
+    "size": 7499,
+    "sha256": "f853579f77a11272de2f7883123b3c37b22d5f783abd096aac85db137267d94d"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lstring.h",
+    "size": 1603,
+    "sha256": "a8cb0d737276f6a41071a0776ee1d8aa13cf02fa7c79ea096d202b14ea792e31"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lstrlib.c",
+    "size": 54654,
+    "sha256": "bfe539eb44af52705489c21230f849b6e17685144974e9fecea4c79c09b01e16"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/ltable.c",
+    "size": 31459,
+    "sha256": "c68b16e7180827e65817579bb3edbe878de101b512ac697703060b3ee54bae1e"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/ltable.h",
+    "size": 2236,
+    "sha256": "5f9db4c200195331ce64993c16a9049f860d79b9b5df280f5155770102116fdd"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/ltablib.c",
+    "size": 13191,
+    "sha256": "c3e4c52daeb3ce81068a72b4a2856ace08ea5dd32b3605562208df469c1e794b"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/ltm.c",
+    "size": 8218,
+    "sha256": "2433b2756d747f795ef5c84214e95ca15429e619ca3442e63fb295e2208bd8f5"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/ltm.h",
+    "size": 2907,
+    "sha256": "5b2f6e59951edeef6e71bebe5ac4351f4b3602ee0461729308b80dcee8cea910"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lua.h",
+    "size": 15818,
+    "sha256": "c5f20b2c2840ef5f1fda6b87e81eacf3dd9eb5730dacc20987e7725e776646fc"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lua.hpp",
+    "size": 191,
+    "sha256": "fd83f7e823cfbb03ac2da937ec83f01b4a6ddaac220a4fa1ffd6c6c3842c5890"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/luaconf.h",
+    "size": 21511,
+    "sha256": "8a302b96f9e5d81f9c8566ad99abfb2c82d8fab4f6ae29a40d5aeb390675e95f"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lualib.h",
+    "size": 1116,
+    "sha256": "4ea0f67d3e467f5d6a327616e22a3c2da8e03d47a3c3660916275f2842f521ea"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lundump.c",
+    "size": 7865,
+    "sha256": "f8094a85d7bc9de819fdde667937b8076fc7bca39c329eeb0091345f00519d04"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lundump.h",
+    "size": 863,
+    "sha256": "746551630d8678ae31a999bf9318003d9329388b7cd9d3fa1cdc725ffc9dc2ee"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lutf8lib.c",
+    "size": 8093,
+    "sha256": "ba322d5dfbe84308226659e25169c97f027c4cc6c5284ae1bc3a747946b7d382"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lvm.c",
+    "size": 57435,
+    "sha256": "473266f7d6149719c8434de3de9a1affdd45858158b669603f34dcefe2059705"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lvm.h",
+    "size": 4429,
+    "sha256": "aa40b399f811f5cbf6c2fb792d8bb932db6488541201525cda075371e100b332"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lzio.c",
+    "size": 1322,
+    "sha256": "fba61ceeeb257a3fe5f63310f21e14fc26c4be647583dcf8e74cbc7fb7e43e8a"
+  },
+  {
+    "path": "third-party/reframework-sdk/dependencies/lua/src/lzio.h",
+    "size": 1438,
+    "sha256": "9673f62eac2d0fe3010f9d23148be7b8113319fdf4c4490015cd9feae2ecaad4"
+  },
+  {
+    "path": "third-party/reframework-sdk/include/reframework/API.h",
+    "size": 20191,
+    "sha256": "73da3d6e1c81d066d97ac638f91c715e3561d00dba1e4585bc22ae4442f88946"
+  },
+  {
+    "path": "third-party/reframework-sdk/include/reframework/API.hpp",
+    "size": 35508,
+    "sha256": "6180e34871c82bb2f0df11bb0b8f3f834f600e2c4e1149c3efadfbd33ac28357"
+  },
+  {
+    "path": "third-party/reframework-sdk/LICENSE-Lua.txt",
+    "size": 1262,
+    "sha256": "60737b1a4e3a44fa00c2bd3434d841f320f20b9066db6b97a8769ec0ba1d50c6"
+  },
+  {
+    "path": "third-party/reframework-sdk/LICENSE-REFramework.txt",
+    "size": 1064,
+    "sha256": "7124c298a1fe76b169db561ee640101f88f573f21d1f269b34817b9538321f5f"
+  },
+  {
+    "path": "third-party/reframework-sdk/README.md",
+    "size": 1453,
+    "sha256": "e1d517f5ff0e10605748a8e2a86693dd5ba70c1b4cab41d4a9db5c7c6409da72"
+  },
+  {
+    "path": "third-party/reframework-sdk/SHA256.json",
+    "size": 8990,
+    "sha256": "19d33f29bc952552450ae13606a7a3f01739e2f7a7ca2f8f886392d5754dd9b8"
+  },
+  {
+    "path": "tools/ActionPreviewInspect/ActionPreviewInspect.csproj",
+    "size": 313,
+    "sha256": "16ec58532ae94a1563f397ee8944d23c7fe2e8e59db1ea5b52cc7898df2bded3"
+  },
+  {
+    "path": "tools/ActionPreviewInspect/Program.cs",
+    "size": 3650,
+    "sha256": "3c3913900dceb329cdd805e923d1f70f50d41b754742b802fc19664067921d28"
+  },
+  {
+    "path": "tools/BlenderParity/capture_reference.py",
+    "size": 5501,
+    "sha256": "ed1d153df70b82c046553fb164661c5599e2a5f4f4e4923267f1622f3daa2286"
+  },
+  {
+    "path": "tools/build_runtime_motion_events.ps1",
+    "size": 2232,
+    "sha256": "faa8a89a8b29b91fd49a8558148d5c15c06b495dfdd6439c19ab11f3b63ffd82"
+  },
+  {
+    "path": "tools/build_runtime_resource_coverage.ps1",
+    "size": 2534,
+    "sha256": "79c425348b375c50178229c504ca855812cb5604f49344ce68adbec621b0c9a3"
+  },
+  {
+    "path": "tools/build_runtime_weapon_coverage.ps1",
+    "size": 7686,
+    "sha256": "7ccfb175a4c01b46df290fd714b77cfb56ebe986c48d684e645fd6102550eb9e"
+  },
+  {
+    "path": "tools/build_weapon_trigger_map.ps1",
+    "size": 1595,
+    "sha256": "21fa24048759f27fe3b3bca730b8445e26bf11283763449023ce930e63e54278"
+  },
+  {
+    "path": "tools/CodexHookProbe.cs",
+    "size": 3718,
+    "sha256": "643d2526659452fdaacf7350bd4ba4367039efbd87f144840b04f054ef85cc41"
+  },
+  {
+    "path": "tools/CodexWeaponResourceSurvey.cs",
+    "size": 10078,
+    "sha256": "09568875e05645066943f073dd6064b203a3e1783b82db4d8cc4c003ae347de5"
+  },
+  {
+    "path": "tools/CodexWeaponStandardResourceSurvey.cs",
+    "size": 5006,
+    "sha256": "7d22475c3f414334a93726813287eb2616ffa5bfb6a0fa54bdf33affbe92452f"
+  },
+  {
+    "path": "tools/CodexWeaponStateSurvey.cs",
+    "size": 6681,
+    "sha256": "7eacb93e9b3e014aa634819928a722efcef8ce50dece7406e9bff7ada092e281"
+  },
+  {
+    "path": "tools/CodexWeaponVfxTrace.cs",
+    "size": 5647,
+    "sha256": "165dd49981e67c830815e9700ee52ba3e802e29670bdf0c722471c54ebd15b62"
+  },
+  {
+    "path": "tools/correlate_motion_resource_requests.ps1",
+    "size": 3933,
+    "sha256": "caef74ec73d4142383a88571f3e1c6988674714d08a3a05493da0788f26ce3bc"
+  },
+  {
+    "path": "tools/correlate_motion_state_calls.ps1",
+    "size": 4084,
+    "sha256": "40b276eaf0b3371389dfa9311731b7cd62376a50531fa7702392e6d86c00aaaa"
+  },
+  {
+    "path": "tools/DebugInput/Build.ps1",
+    "size": 3146,
+    "sha256": "6bc7e592977268e4e82281675b2db65c9d0a879f198978db21651bdc3d661ea7"
+  },
+  {
+    "path": "tools/DebugInput/ImportHook.hpp",
+    "size": 3410,
+    "sha256": "854f6624b27fb878f1ccaf8dbc73e4bdc4c87b188822afe34fccabff2fa7c773"
+  },
+  {
+    "path": "tools/DebugInput/InputState.hpp",
+    "size": 4709,
+    "sha256": "ce739651bf18cb3f1fa5f4b8907a6ebeb144255b3f70326db5d760fcdc8b57b9"
+  },
+  {
+    "path": "tools/DebugInput/Plugin.cpp",
+    "size": 6369,
+    "sha256": "982e13e8ba9a9ef69b2c63ec94c28bc37f840d884eca890e27f3ba353ee7d580"
+  },
+  {
+    "path": "tools/DebugInput/PluginTests.cpp",
+    "size": 2675,
+    "sha256": "3f40df11760f0d58fcde886b42fd1d27c22a235d96f237c1d72b6cc22357f840"
+  },
+  {
+    "path": "tools/DebugInput/PollingInput.hpp",
+    "size": 9284,
+    "sha256": "480f54b5f3c531ccb9214585818d19f56f10d97c520e6e214f8228e7d927d5a7"
+  },
+  {
+    "path": "tools/DebugInput/PollingTests.cpp",
+    "size": 5342,
+    "sha256": "484ceb182d00685a21539734354ef19fad7b49545462ce766344b9bc23cb6e66"
+  },
+  {
+    "path": "tools/DebugInput/Tests.cpp",
+    "size": 3462,
+    "sha256": "bca5d18affbd32fbb467deaf302e7cb0419e4bb1118725dd5d8f476c26bc770a"
+  },
+  {
+    "path": "tools/DebugInput/THIRD-PARTY.txt",
+    "size": 2236,
+    "sha256": "8c018764318ab729e21e79eaef0418c14b82626e889cede832427a6771ab8cb4"
+  },
+  {
+    "path": "tools/DesktopBridge/AuthorLinks.cs",
+    "size": 505,
+    "sha256": "f6f12b17d2a9636b88aa4a11b9dbd4e867cef642dd296e95b8595ee7c2edb2d1"
+  },
+  {
+    "path": "tools/DesktopBridge/DialogHost.cs",
+    "size": 3022,
+    "sha256": "07a266fb40e205002ddf54e1e57225df4b652688b2ce7be18758be8da6fa1f73"
+  },
+  {
+    "path": "tools/DesktopBridge/GameCaptureWindow.cs",
+    "size": 4946,
+    "sha256": "2766cfcc624f00a39006baf57d2d3c5f246f6f0b1ede70ec7d3f6eef71f86ddd"
+  },
+  {
+    "path": "tools/DesktopBridge/MotionVfxDesktop.csproj",
+    "size": 466,
+    "sha256": "6e94238719badc67545a3d4a6aa18e98203661c7e6fb6f1097c9146d6581debb"
+  },
+  {
+    "path": "tools/DesktopBridge/Program.cs",
+    "size": 10986,
+    "sha256": "62dac6539fbee35c8c5a8f32e522439a202b3a3af0f9d76a8a621cbc704b3e87"
+  },
+  {
+    "path": "tools/DesktopBridge/ReplayManifest.cs",
+    "size": 1448,
+    "sha256": "be6ac2bd4a0675b2c0f9aa5a7e9a28ef4b941149facc287109323c6aa009717c"
+  },
+  {
+    "path": "tools/DesktopBridgeTests/DesktopBridgeTests.csproj",
+    "size": 535,
+    "sha256": "096b1ec26f9ad25325861806ee59de7c849602ba6e22df9e1a11407af959a014"
+  },
+  {
+    "path": "tools/DesktopBridgeTests/Program.cs",
+    "size": 9221,
+    "sha256": "45443d86615463ddb6441338f80785a04be1a4c3e9efbe8ccab7293c712dfada"
+  },
+  {
+    "path": "tools/EfxAudit/EfxAudit.csproj",
+    "size": 344,
+    "sha256": "f4b4376d32bbf0962bbfb45b9f873e909e33a11e670dd5bf750bef757021770f"
+  },
+  {
+    "path": "tools/EfxAudit/Program.cs",
+    "size": 9612,
+    "sha256": "508366cd5e4b852c7b74285a4725da0b306ef033530fc94aa1d74eb7ddbb21fb"
+  },
+  {
+    "path": "tools/export_ree_mcp_effect_ids.ps1",
+    "size": 2364,
+    "sha256": "f61697b0c2bfbb44c229eac35ee3879b5083ce9b8473dbdd9d694c4c280fa3e6"
+  },
+  {
+    "path": "tools/GameCaptureTests/GameCaptureTests.csproj",
+    "size": 453,
+    "sha256": "d89cd7efc24ade1f71ef39cf5897dd4a51242c2f658257b199361df45bd460dd"
+  },
+  {
+    "path": "tools/GameCaptureTests/Program.cs",
+    "size": 4721,
+    "sha256": "c4e9dc0459f8cc924de5761c623442339326b58e0c589e2cb86cc338fd6af480"
+  },
+  {
+    "path": "tools/IconRasterizer/IconRasterizer.csproj",
+    "size": 326,
+    "sha256": "730c9f69032f2cd1554ffbd6664d10c59e612a60cc055cb36b30ad57f82b2862"
+  },
+  {
+    "path": "tools/IconRasterizer/Program.cs",
+    "size": 756,
+    "sha256": "77d7576df932ca46ab5acd7540006a1495d93897f660b20c91baa25fbae2a79a"
+  },
+  {
+    "path": "tools/Installer/Backend.cs",
+    "size": 5979,
+    "sha256": "bf0363e39567cb78004b4ac12141b6d2518f46c695753730085910761003cf8a"
+  },
+  {
+    "path": "tools/Installer/Build.ps1",
+    "size": 1550,
+    "sha256": "62111715e9027fcd9d22991f1a7dd654e465fab65d10cc1b1b3e0a80e9f67858"
+  },
+  {
+    "path": "tools/Installer/InstallEngine.cs",
+    "size": 29383,
+    "sha256": "3597fefc5f336f5263cc2d6e727b1d76a6d60662eb95917e1d312e375f48a304"
+  },
+  {
+    "path": "tools/Installer/InstallerTests.cs",
+    "size": 25291,
+    "sha256": "bfc0cca23b8d291ff0efb8e49bdf21dde745272959cf585fa158a176cbd62c0d"
+  },
+  {
+    "path": "tools/Installer/MotionVfxSetup.csproj",
+    "size": 945,
+    "sha256": "d2a4bdcbf153049b35ef0bb51568a55c7bfda4bd230171b443c7bb9ceca57cba"
+  },
+  {
+    "path": "tools/Installer/Program.cs",
+    "size": 9030,
+    "sha256": "af14d0f47fff97fa08d234dcff856a7c6ef35df039e150b55b8f0f1274587716"
+  },
+  {
+    "path": "tools/LiveEditor/CacheDiagnostics/Build-CacheDiagnosticsPlugin.ps1",
+    "size": 2316,
+    "sha256": "1e9befe89c19535e0308315bdc6a868159ea63f035a441bac25c8945a41c0ea4"
+  },
+  {
+    "path": "tools/LiveEditor/CacheDiagnostics/CacheProbeMailbox.cs",
+    "size": 29851,
+    "sha256": "3e30d43ae702753c5a8a5519cd3ae9dbffeed24b7e3f8bb1e98810ab96f2bec0"
+  },
+  {
+    "path": "tools/LiveEditor/CacheDiagnostics/EfxBufferValidator.cs",
+    "size": 12529,
+    "sha256": "bbbfb3059f255ba44a983ddb89d3b6941f1d3b579592b8e56cc4f8fe3a416294"
+  },
+  {
+    "path": "tools/LiveEditor/CacheDiagnostics/ExecutablePropertyCodeReader.cs",
+    "size": 17766,
+    "sha256": "c56ee2a4efecb991bcaa51c95083c9e15a7302445b4703b93f7c2277b0c72e5c"
+  },
+  {
+    "path": "tools/LiveEditor/CacheDiagnostics/Invoke-InGameCacheProbe.ps1",
+    "size": 4055,
+    "sha256": "eaf222a0975ea1184bff4c7a0ba70152a71a6f3eb717a6e3bf9c6b05ad95b04f"
+  },
+  {
+    "path": "tools/LiveEditor/CacheDiagnostics/Invoke-ReframeworkReadOnlyPipe.ps1",
+    "size": 1196,
+    "sha256": "cb5489768b3a006b0c5a78357a64d4671b56d80fece174b6a58e6bb9cf28264c"
+  },
+  {
+    "path": "tools/LiveEditor/CacheDiagnostics/NativeTypeMetadataFixture/NativeTypeMetadataFixture.csproj",
+    "size": 525,
+    "sha256": "be4e8f3de3e7c0dfe69c718fba55a719c81dd422977c63f51a61666e53488a9e"
+  },
+  {
+    "path": "tools/LiveEditor/CacheDiagnostics/NativeTypeMetadataFixture/Program.cs",
+    "size": 17419,
+    "sha256": "2297da6ff3b188476912a38e3bed61d033e9fde18283ba378df92f16acdfe69c"
+  },
+  {
+    "path": "tools/LiveEditor/CacheDiagnostics/NativeTypeMetadataProbe.cs",
+    "size": 25611,
+    "sha256": "4b26080ce763eced02c7cab73f080be89d3fbb738cc16cca768e65df8e237a66"
+  },
+  {
+    "path": "tools/LiveEditor/CacheDiagnostics/PluginFixture/GeneratedNamespaceFixture.cs",
+    "size": 305,
+    "sha256": "062582537e29918bafcb1f98f657b7f9895ff27c9b08e2cd563bc0a4e49e8ef2"
+  },
+  {
+    "path": "tools/LiveEditor/CacheDiagnostics/PluginFixture/PluginFixture.csproj",
+    "size": 540,
+    "sha256": "023385492d22950cb7b7ab1d6de57418353cca7b3ce25dccccba02ad74fe2ff3"
+  },
+  {
+    "path": "tools/LiveEditor/CacheDiagnostics/PluginFixture/Program.cs",
+    "size": 19391,
+    "sha256": "72da81f30f97057464f57c07bd5331d35a9e53434f53ce93f8a8263ae8d1d7c8"
+  },
+  {
+    "path": "tools/LiveEditor/CacheDiagnostics/Read-CachedResourceProbe.ps1",
+    "size": 16651,
+    "sha256": "7a73a27a821458eefaa6aa8c56752149e82c04ec577071a7eaf3641dde231f00"
+  },
+  {
+    "path": "tools/LiveEditor/CacheDiagnostics/Read-ExecutablePropertyCode.ps1",
+    "size": 1749,
+    "sha256": "b113ba09c7c774664a11d4a47bd36b23d1c03a3906a227f7ae5e54a36f41a6ca"
+  },
+  {
+    "path": "tools/LiveEditor/CacheDiagnostics/ReadOnlyResourceProbe.cs",
+    "size": 27934,
+    "sha256": "69c275a79206ac23592542f4fe04daad78960d92fb0127b37a3a22e5ddc5ebbc"
+  },
+  {
+    "path": "tools/LiveEditor/CacheDiagnostics/Test-EfxBufferValidator.ps1",
+    "size": 5250,
+    "sha256": "ed7d420043189c90ec95143d454563a1bd5236874de11049c97fa12e51f0c08f"
+  },
+  {
+    "path": "tools/LiveEditor/Capture-GameWindow.ps1",
+    "size": 3754,
+    "sha256": "e89128f967c99af5b1a40f5d923595df1616135a0b56a442e203203a40039882"
+  },
+  {
+    "path": "tools/LiveEditor/Close-EndedNetworkNotice080.lua",
+    "size": 1503,
+    "sha256": "7d6924866e7508eedfadbe4a947e580fe02347cf710e257b4c8d5126c442ed59"
+  },
+  {
+    "path": "tools/LiveEditor/Close-ValidationGame.ps1",
+    "size": 451,
+    "sha256": "57397b2e5e83307db5c9ae310a15f664531e58a29617e4a3bf6707e12b4351f2"
+  },
+  {
+    "path": "tools/LiveEditor/Close-ValidationGame080.lua",
+    "size": 2210,
+    "sha256": "fd6a492887fa78d373b956ce23392fb9621da6539cf7cf38a699eaa85899229b"
+  },
+  {
+    "path": "tools/LiveEditor/Confirm-NetworkNotice080.lua",
+    "size": 4168,
+    "sha256": "15c47d3377f27660d499581e81743941bc6e0d08c921a88696120c4167312f11"
+  },
+  {
+    "path": "tools/LiveEditor/Confirm-StartupNotice080.lua",
+    "size": 4285,
+    "sha256": "767adc023fe9002f275ae67f2b51ebd0dd18c0bd5bed8fd16ac5a5231a984b56"
+  },
+  {
+    "path": "tools/LiveEditor/Create-Preview-Baselines.ps1",
+    "size": 8516,
+    "sha256": "4048b575945ee5f299aac6eacb794104f72c8ce021091323c4caeef06d9b79a5"
+  },
+  {
+    "path": "tools/LiveEditor/GameWindowSelection.ps1",
+    "size": 3857,
+    "sha256": "1f24e1c0bdb9d3ba16244f132a044fae466f0dc65c9e643a4ec5a260efec09fe"
+  },
+  {
+    "path": "tools/LiveEditor/Input-GameWindow.ps1",
+    "size": 4944,
+    "sha256": "469c0e59104a02f0f9f016401ca6d73bca8b63fd2ffcc2944d609a5b3b951df0"
+  },
+  {
+    "path": "tools/LiveEditor/Inspect-ActionPreviewApi.ps1",
+    "size": 1085,
+    "sha256": "3407fbbc71f67c58534402b0248fb660c6be76ee9c3c10b70d0d8f5d87326d7c"
+  },
+  {
+    "path": "tools/LiveEditor/Inspect-ActionRestore.lua",
+    "size": 3333,
+    "sha256": "c712b0ffc0382ecca650162e63d2d316f328129d9a3f69fdb4e04d227be1f462"
+  },
+  {
+    "path": "tools/LiveEditor/Inspect-NativeFunction.ps1",
+    "size": 2412,
+    "sha256": "30c35caa0127dc9ce7f88deb37cf07ce6b12642cdd73e25ecc6b6e143afb5c91"
+  },
+  {
+    "path": "tools/LiveEditor/Inspect-RecordedActions.mjs",
+    "size": 3222,
+    "sha256": "21480376937a1cff6e607fa3401531ad6fa4bb46b7e8a6050e6ab99b06ee7c6c"
+  },
+  {
+    "path": "tools/LiveEditor/Inspect-Samples.ps1",
+    "size": 3630,
+    "sha256": "2a8e0ea49ded3c443d70abad48454f6be0b7296ee56432c1ceead308b11f51f7"
+  },
+  {
+    "path": "tools/LiveEditor/Install-ActionPreviewUpdate.ps1",
+    "size": 3912,
+    "sha256": "65d8f4a38200066f2e19a89bd4dd339b9645961196361d638f6bf2bd4c627bd7"
+  },
+  {
+    "path": "tools/LiveEditor/Install-GamePlugin.ps1",
+    "size": 9752,
+    "sha256": "a86c1fc7ea8c7f4832f1330ce651f4883a8307e4043e16c192a7382e195c8efa"
+  },
+  {
+    "path": "tools/LiveEditor/Install-Workbench.ps1",
+    "size": 1237,
+    "sha256": "b8d8ae78a9a5a604c6a890f326b1b051976c046313364acf48c4b929cc056965"
+  },
+  {
+    "path": "tools/LiveEditor/Prepare-Workbench.ps1",
+    "size": 1615,
+    "sha256": "12c1a105244a2d328c3f9b32bd3ac9b27ed9c5f4d73afa2962b96fbe13e32cf7"
+  },
+  {
+    "path": "tools/LiveEditor/Probe-ActionPreview.lua",
+    "size": 3306,
+    "sha256": "999377fb97c8901386dd4a3988eb3f371a93b00315a9bcc831e4eee62b918c34"
+  },
+  {
+    "path": "tools/LiveEditor/Probe-Attachments.lua",
+    "size": 2660,
+    "sha256": "d9d23227943c8b53b05fe16afc96b513c769c09b52d9931deeb2d8b0a7770a26"
+  },
+  {
+    "path": "tools/LiveEditor/Probe-EquipmentPrefabs.lua",
+    "size": 4373,
+    "sha256": "c853c096425474233a339d97b54bf21c7e5328edcf9ce17f21f01a047810fc05"
+  },
+  {
+    "path": "tools/LiveEditor/Probe-PfbLoad-080.lua",
+    "size": 4469,
+    "sha256": "73b4415928c05d3e86b4b5b260ce0272fc4b3902761932c16c93b845d2121b2a"
+  },
+  {
+    "path": "tools/LiveEditor/Probe-WalkingTracks.lua",
+    "size": 4737,
+    "sha256": "ad6ffcbfa3d5ad45e30e9904a9c52dfef62c521c7defe9f9822e43423250520e"
+  },
+  {
+    "path": "tools/LiveEditor/Repair-ActionRestore.lua",
+    "size": 7906,
+    "sha256": "5fe0b4c555549f354c0d521c5ca83cd361171eb187785ba6445a041eebebcf5a"
+  },
+  {
+    "path": "tools/LiveEditor/Resume-WalkingPreview.lua",
+    "size": 1883,
+    "sha256": "60b6a8bb5fe3f01feac13a220849a2f51bf3f85e78cb88acb86ec8dbf1374825"
+  },
+  {
+    "path": "tools/LiveEditor/Retry-WalkingSlot.lua",
+    "size": 4725,
+    "sha256": "9d30ae83157a3581742a3317f213e1058e66d78d3fc753ef13690b73a95ddfa3"
+  },
+  {
+    "path": "tools/LiveEditor/Start-Backend.ps1",
+    "size": 5538,
+    "sha256": "673d4a1b7d391e4e380116e753c199e61903902a62e06c5278ef0e041e254ba6"
+  },
+  {
+    "path": "tools/LiveEditor/Test-ActionPfbOpen.ps1",
+    "size": 4183,
+    "sha256": "58f688a70a5468dfbcad9f3cee855b9707d51115de85ec2bc05675b6857efe3a"
+  },
+  {
+    "path": "tools/LiveEditor/Test-DesktopFileDialogs.ps1",
+    "size": 7214,
+    "sha256": "a1f41b8de614966d0b9a178b1ca7e1be422c6ce64dd83215cbfa502a9b76a52f"
+  },
+  {
+    "path": "tools/LiveEditor/Test-GameInstallSource.ps1",
+    "size": 5149,
+    "sha256": "f8963d6d326dd4ce1893ef56434f18df9a8e45d9fda9238b6178e6e57d4e5c47"
+  },
+  {
+    "path": "tools/LiveEditor/Test-GameWindowSelection.ps1",
+    "size": 3349,
+    "sha256": "77fdbc799132f46b48abf472e1e2bbf98145c69b6f1d954ee92ab77b0f850e4c"
+  },
+  {
+    "path": "tools/LiveEditor/Test-HostReliability.ps1",
+    "size": 6244,
+    "sha256": "cbcac236730175142b7f2a3a7d15eaffbc7a1fa19db51029476c3af2b0aa3dc5"
+  },
+  {
+    "path": "tools/LiveEditor/Test-InGameFileBrowser.ps1",
+    "size": 9774,
+    "sha256": "86ed314b24b37f92e568aa671156765d9c3c335d705bf6c0f577c9d847e82128"
+  },
+  {
+    "path": "tools/LiveEditor/Test-Launcher.ps1",
+    "size": 4664,
+    "sha256": "d87f5edb8d96a20678ed9cdc692d5e6613b7fdb68d92ce4519b06a78fa175333"
+  },
+  {
+    "path": "tools/LiveEditor/Test-Mailbox.ps1",
+    "size": 6360,
+    "sha256": "ed2ba4922b468305c44e3b8c87e233ffbd12c54dfcd83bf2c50aa81e63fce8e5"
+  },
+  {
+    "path": "tools/LiveEditor/Test-McpLive.mjs",
+    "size": 18315,
+    "sha256": "75ccd21a2797dace6adcac00a6a05f7ec667d7662e23d250f69573851c3213c5"
+  },
+  {
+    "path": "tools/LiveEditor/Test-McpLive.Tests.mjs",
+    "size": 4341,
+    "sha256": "efd0ae17798bec13549060e1ef1c1fe1e3540f8a4889ad55c4eb14ff323e1b6f"
+  },
+  {
+    "path": "tools/LiveEditor/Test-PfbEditorApi.ps1",
+    "size": 6375,
+    "sha256": "32de188f9fd9ff2cb996e19949171b6140426df2b31892ce8bb1967092dd29ed"
+  },
+  {
+    "path": "tools/LiveEditor/Test-SlotRecapture.ps1",
+    "size": 3507,
+    "sha256": "1acd402bd160a806228a27393d1e2d172c4b1b051d6d634e71fd9528018aeb06"
+  },
+  {
+    "path": "tools/LiveEditor/Test-StartupActive080.lua",
+    "size": 5167,
+    "sha256": "bd4205cabba22a655d4a04179c8e9fd6e938741649d6c64f5239bc074dfa5e38"
+  },
+  {
+    "path": "tools/LiveEditor/UiPreview/Program.cs",
+    "size": 17328,
+    "sha256": "ef4b48cbcd575e08e2babbd1a2f4db92606debfbb7f6df4da700cca92975866f"
+  },
+  {
+    "path": "tools/LiveEditor/UiPreview/UiPreview.csproj",
+    "size": 477,
+    "sha256": "0229c5103a5acdff87ae107833da7d7bf0e7519686d2d517710f35d86f490a30"
+  },
+  {
+    "path": "tools/LiveEditor/Update-Backend.ps1",
+    "size": 9677,
+    "sha256": "64161da148e02b77483253725130942d454f46bab3b5f8df5e562d4da50e3169"
+  },
+  {
+    "path": "tools/LiveEditor/Validate-Editor-080.lua",
+    "size": 12487,
+    "sha256": "7c56401bb55297c83db235a427d61b21f69f68ef96420c997ee40ad26fbd2d92"
+  },
+  {
+    "path": "tools/LiveEditor/ValidationDriver-080.lua",
+    "size": 1528,
+    "sha256": "c87a80f28d345cfc9a0281e3dc757848ae48b6ace350a47a03464666957a0eb5"
+  },
+  {
+    "path": "tools/LuaValidation/action-bindings-tests.lua",
+    "size": 48202,
+    "sha256": "dceb0d6d9a6961ca212bbb89b670887e561e32c2102585db229a91da198ea167"
+  },
+  {
+    "path": "tools/LuaValidation/action-preview-runtime-tests.lua",
+    "size": 10300,
+    "sha256": "52eba8e30f4abd4fa491b3b5eb417922200c474a2f8907030c80cdb957267b75"
+  },
+  {
+    "path": "tools/LuaValidation/action-preview-transaction-tests.lua",
+    "size": 5241,
+    "sha256": "ebf79065425c866c3872284c8de572278fae0e8b0124bf100e53e2933531cdcd"
+  },
+  {
+    "path": "tools/LuaValidation/action-preview-ui-tests.lua",
+    "size": 6452,
+    "sha256": "e23c7976792f37e530aa013c3358679ccde3f22c701da7cbf44c4564ed0ae820"
+  },
+  {
+    "path": "tools/LuaValidation/action-restore-repair-tests.lua",
+    "size": 3468,
+    "sha256": "0cc195f217f3ed1bffe01543893c07f6ad1962564a858595bc4800effdc661f3"
+  },
+  {
+    "path": "tools/LuaValidation/action-source-tests.lua",
+    "size": 5047,
+    "sha256": "1649ef6f366cacb3fe73875da0a7af264903da2b4a5839fbd0373fcec4ff9935"
+  },
+  {
+    "path": "tools/LuaValidation/attachment-target-tests.lua",
+    "size": 4739,
+    "sha256": "9572d3f7e7174dad30f07dca375d593e60d5b62df09ff589b7fa7abf9cf17bc2"
+  },
+  {
+    "path": "tools/LuaValidation/build.ps1",
+    "size": 1636,
+    "sha256": "2df97cb98a0550d2322f919845ec5511cd4de4b6f156365565690f4aea8738e3"
+  },
+  {
+    "path": "tools/LuaValidation/d2d-file-dialog-native-tests.lua",
+    "size": 9172,
+    "sha256": "eb87905edfdd8b04eb44a35d4dd009faa5e1745b30d8de1a76ce0c93d352e45d"
+  },
+  {
+    "path": "tools/LuaValidation/d2d-input-native-tests.lua",
+    "size": 6871,
+    "sha256": "5291f8ede88c9df255ca2a128fddaf94a54894bf2d4344b47a698dbd0553876b"
+  },
+  {
+    "path": "tools/LuaValidation/d2d-orb-native-tests.lua",
+    "size": 4038,
+    "sha256": "8ce922c22704f6b6dd762d7d9769dcb482c4ed91ce6a2c863f0dbeb6221e8fc5"
+  },
+  {
+    "path": "tools/LuaValidation/d2d-workbench-tests.lua",
+    "size": 55071,
+    "sha256": "046901dd8d81c8c4b2a00ba04b83d660f908653746418c64bd1a3a3b2262f67d"
+  },
+  {
+    "path": "tools/LuaValidation/debug-hotkey-tests.lua",
+    "size": 3933,
+    "sha256": "1a59bbb7a2f121d576ccb35c85932a5fd070af09f928da42ea86d173d72082b1"
+  },
+  {
+    "path": "tools/LuaValidation/editor-live-validation-tests.lua",
+    "size": 4778,
+    "sha256": "437435501bcfb2cb2832a59872f0c464be540961552a7dff53f36142e362a9a7"
+  },
+  {
+    "path": "tools/LuaValidation/equipment-preview-runtime-tests.lua",
+    "size": 14863,
+    "sha256": "1cb189fb94bd5d5b32d8805b93ed1688a8df3164ec0a9f1e0fbe77713f697d23"
+  },
+  {
+    "path": "tools/LuaValidation/equipment-source-tests.lua",
+    "size": 4539,
+    "sha256": "c0f7ca50da71835478cf574008fd3cf1384398259dd2ccd23ed4254d7baeef54"
+  },
+  {
+    "path": "tools/LuaValidation/file-dialog-explorer-tests.lua",
+    "size": 18889,
+    "sha256": "3d7a3c7d3995378ccf8229652a8ad1d1bdc79909fa7bf93dbb0c491209be914b"
+  },
+  {
+    "path": "tools/LuaValidation/file-dialog-tests.lua",
+    "size": 8362,
+    "sha256": "2d192a2ea934759660f45526a67fa706281ed4ebf0d2872e9fa8cb81348a77a0"
+  },
+  {
+    "path": "tools/LuaValidation/hook-tests.lua",
+    "size": 14791,
+    "sha256": "ce37801603cbf70313e8e294ef5fc20444b4d1456498633b901dd466ff96a332"
+  },
+  {
+    "path": "tools/LuaValidation/live-ui-tests.lua",
+    "size": 211815,
+    "sha256": "7f9f81ee56ffbc62475ffdf5abd362feaf2d71f42ae19399320fdc66b2ba5eb1"
+  },
+  {
+    "path": "tools/LuaValidation/native-imgui/Build.ps1",
+    "size": 1983,
+    "sha256": "62a9be683d7bbf54155af9fb65c383046a266e8520ca839c309b2f81e3c703c9"
+  },
+  {
+    "path": "tools/LuaValidation/native-imgui/imgui-1.92.4/imconfig.h",
+    "size": 11987,
+    "sha256": "b265fa9c4f6cb5d33885a6b2039a4714ae1274643eca53d9348aae5ff050bd0f"
+  },
+  {
+    "path": "tools/LuaValidation/native-imgui/imgui-1.92.4/imgui.cpp",
+    "size": 934948,
+    "sha256": "49e88f8a54242abb5f92732f70f6b0b224f285960e51c275844b0837bddef404"
+  },
+  {
+    "path": "tools/LuaValidation/native-imgui/imgui-1.92.4/imgui.h",
+    "size": 414931,
+    "sha256": "0b2eff08ab2c207abecfcc22ce9793d757c6a4d67f6c861fd40eb3c398bdbcfd"
+  },
+  {
+    "path": "tools/LuaValidation/native-imgui/imgui-1.92.4/imgui_draw.cpp",
+    "size": 322924,
+    "sha256": "d50e75c07fc763e529056c88eb4b0b07a7cffc36ba7daa7a6a66a467ca240e93"
+  },
+  {
+    "path": "tools/LuaValidation/native-imgui/imgui-1.92.4/imgui_internal.h",
+    "size": 296266,
+    "sha256": "784540143210b2e50c4007d94a2884e019897b335cfb1b89e0658b9b8fa6f923"
+  },
+  {
+    "path": "tools/LuaValidation/native-imgui/imgui-1.92.4/imgui_tables.cpp",
+    "size": 249201,
+    "sha256": "a518d221c3ddf9fe78ab82a14447a69502dac0bb6b0cc31b4f3a14743b4898d1"
+  },
+  {
+    "path": "tools/LuaValidation/native-imgui/imgui-1.92.4/imgui_widgets.cpp",
+    "size": 535263,
+    "sha256": "83e135e98ae9cf8451f1431114fc196ecec15782042b1ac5b3f66eaf784fd276"
+  },
+  {
+    "path": "tools/LuaValidation/native-imgui/imgui-1.92.4/imstb_rectpack.h",
+    "size": 20344,
+    "sha256": "2efa3d5f7d003c19743b15155dad9f46d9f9fc783a18893d703b431d3c990972"
+  },
+  {
+    "path": "tools/LuaValidation/native-imgui/imgui-1.92.4/imstb_textedit.h",
+    "size": 59643,
+    "sha256": "61942af90f12b49e1f4db3ff3bde842937883caba0b340172927b5157b3fbdc6"
+  },
+  {
+    "path": "tools/LuaValidation/native-imgui/imgui-1.92.4/imstb_truetype.h",
+    "size": 199503,
+    "sha256": "88f0a25e27f5eefd6ec50c42fc5fe3026aa8170603efa08aa18d622db8660923"
+  },
+  {
+    "path": "tools/LuaValidation/native-imgui/imgui-1.92.4/LICENSE.txt",
+    "size": 1083,
+    "sha256": "c80c5789748d955c4a650562baa0d750494e2c7128c2ca66aaebe2e3c4e198bf"
+  },
+  {
+    "path": "tools/LuaValidation/native-imgui/OrbRunner.cpp",
+    "size": 13272,
+    "sha256": "6ca44bef4197820e04ff671681233ae6283bfbdfea220e7f8f307b34803cf1bd"
+  },
+  {
+    "path": "tools/LuaValidation/network-notice-confirm-tests.lua",
+    "size": 3390,
+    "sha256": "c88559313f639dabc8e5315fae1b57d8387fba6183b3b85d8c5ad405b181eb3e"
+  },
+  {
+    "path": "tools/LuaValidation/pfb-load-probe-tests.lua",
+    "size": 3026,
+    "sha256": "cf2782a5629cf19e6887d7d20434622264fb407875c89e23efe481746c7eac8c"
+  },
+  {
+    "path": "tools/LuaValidation/pfb-preview-runtime-tests.lua",
+    "size": 6999,
+    "sha256": "d963cc703e0368f2d7536b34b2278a9802072262504f1602fc9e0c71fe36420d"
+  },
+  {
+    "path": "tools/LuaValidation/playback-tests.lua",
+    "size": 13018,
+    "sha256": "7bc940c23cb620beb6b57efd945b815dedf0eeea5257eef86982d3347be11741"
+  },
+  {
+    "path": "tools/LuaValidation/pointcloud-tests.lua",
+    "size": 15217,
+    "sha256": "aaf259c91be8fff2080942a6d67f3454c3227adc4d8cdaa5a5eef17e05ee6c83"
+  },
+  {
+    "path": "tools/LuaValidation/Render-D2DPreview.ps1",
+    "size": 4536,
+    "sha256": "739e9bfdcd10a2a7ee33bbe8e687a4a0d7315bd8a558b67f1eceaa8805e6d965"
+  },
+  {
+    "path": "tools/LuaValidation/repair-bindings-tests.lua",
+    "size": 16257,
+    "sha256": "3e529fcc731a88fd812eae4a789ea7715c48adedd079a236ebb3f8831a5d6eb8"
+  },
+  {
+    "path": "tools/LuaValidation/Run-ActionTests.ps1",
+    "size": 1212,
+    "sha256": "b08b925da2ac6586e5b584ff6a9f16eea4598191f19ddcf8c00cb7dbb55d34f6"
+  },
+  {
+    "path": "tools/LuaValidation/Run-LiveUiTests.ps1",
+    "size": 1970,
+    "sha256": "51063e868819f679ac51425d2d0ed4abc087b5a69285602c114c7b9968c389d9"
+  },
+  {
+    "path": "tools/LuaValidation/Run-OfflineTests.ps1",
+    "size": 1247,
+    "sha256": "f15bcce3f50aecdff7056d38b47946dab513c752b9cd3ee152941e91c0423928"
+  },
+  {
+    "path": "tools/LuaValidation/run-tests.ps1",
+    "size": 2585,
+    "sha256": "66734228e85e01f49156390fa411a28136cafca4c590a31ba7ff505fb7e21049"
+  },
+  {
+    "path": "tools/LuaValidation/runner.c",
+    "size": 2065,
+    "sha256": "fb067e8e312d6321f021673c4f2be75c13461dab20576ff2b5d4faa84f872741"
+  },
+  {
+    "path": "tools/LuaValidation/startup-active-tests.lua",
+    "size": 3436,
+    "sha256": "c4bcdb03cf47d3ee2a6de4dd2edc463cf6ebb189a381a9d9237abd2faf7a85ce"
+  },
+  {
+    "path": "tools/LuaValidation/startup-notice-confirm-tests.lua",
+    "size": 3893,
+    "sha256": "9b2bffd0ab1d1e40900357757f4e4b9dd20f299e70ca55b46eb22d225466e6a5"
+  },
+  {
+    "path": "tools/LuaValidation/startup-tests.lua",
+    "size": 4076,
+    "sha256": "85d4472ef638bf09d033887195105808ed34152ebba37b5d5950e9f1646d019f"
+  },
+  {
+    "path": "tools/LuaValidation/ui-playback-tests.lua",
+    "size": 16099,
+    "sha256": "75301d00b839f125ebd22286d831c2446b920804a946069d4e2fcf02117d9992"
+  },
+  {
+    "path": "tools/LuaValidation/utility-tests.lua",
+    "size": 18488,
+    "sha256": "5da8221191b18939402a141681c15da9d095f18a6483f66eba6e3e6d1486238c"
+  },
+  {
+    "path": "tools/LuaValidation/walking-retry-tests.lua",
+    "size": 2375,
+    "sha256": "e607bed8731bb3672fdf022d5d57525a52001c4b2a72af7400dedc631020cdf3"
+  },
+  {
+    "path": "tools/MotAudit/MotAudit.csproj",
+    "size": 344,
+    "sha256": "f4b4376d32bbf0962bbfb45b9f873e909e33a11e670dd5bf750bef757021770f"
+  },
+  {
+    "path": "tools/MotAudit/Program.cs",
+    "size": 11420,
+    "sha256": "7e635dd3a71b0f41bad775b1d527c96461eb6abd68a5ad96022235906dfdbbfa"
+  },
+  {
+    "path": "tools/MotionResolutionTests/MotionResolutionTests.csproj",
+    "size": 336,
+    "sha256": "ba5c7671f18c9146c185577564b41de38ceb956e57a54617a7501785e85cde03"
+  },
+  {
+    "path": "tools/MotionResolutionTests/Program.cs",
+    "size": 2158,
+    "sha256": "743a15a99947e2a2cb1eb27727efcb7edd986fefe8c1070334bce816dfc7cef8"
+  },
+  {
+    "path": "tools/PfbEditorTests/Build-Schema.mjs",
+    "size": 2288,
+    "sha256": "12c38bbbf11e688e89d04f1e0798660104f790292dbb0c82c6cb334c77216053"
+  },
+  {
+    "path": "tools/PfbEditorTests/PfbEditorTests.csproj",
+    "size": 935,
+    "sha256": "41558e5202ddb540dcc4a34a5231d93edfaddef386aedf2b78ab4a070f340127"
+  },
+  {
+    "path": "tools/PfbEditorTests/Program.cs",
+    "size": 16113,
+    "sha256": "48b41e6290fac03c34aa3f5473a9d05bf75dcd69cfb95d80d732fd735b776579"
+  },
+  {
+    "path": "tools/PfbLoadProbe/PfbLoadProbe.csproj",
+    "size": 922,
+    "sha256": "109b6cfd38793dcf57c50b37f18aecef746b055d924e8c330dd2467aa14ddd7e"
+  },
+  {
+    "path": "tools/PfbLoadProbe/Program.cs",
+    "size": 6004,
+    "sha256": "21bbba1104fcd06ffe3d6df0c7d81bb69469145ef32125e93479e53c5c50dc50"
+  },
+  {
+    "path": "tools/PreviewBindingAudit/PreviewBindingAudit.csproj",
+    "size": 442,
+    "sha256": "99b0f3c4497d67210c9067ce1f84d254155ac8553eb9196a4f0f91d0042b1a4c"
+  },
+  {
+    "path": "tools/PreviewBindingAudit/Program.cs",
+    "size": 9561,
+    "sha256": "5c844e1c05b011acb765e7d26fb4ea066b26fad5e34ec5e4de3bc2a3e95caff3"
+  },
+  {
+    "path": "tools/repair_ree_mcp.ps1",
+    "size": 2236,
+    "sha256": "e71e588051aa47dcdc1ac000946ec561bd573b9901d99c1a3acb75ae203e191a"
+  },
+  {
+    "path": "tools/watch_weapon_motion.ps1",
+    "size": 3124,
+    "sha256": "3c6bacffbf4b5261c58fb2f6ded041948990a2875bf634cbeb67026d646bc640"
+  },
+  {
+    "path": "tools/watch_weapon_session.ps1",
+    "size": 1818,
+    "sha256": "a80d4805e24ffc60bac387b4632bc15d1a37d0888e35bf1caf1bf09eb6dccddf"
+  },
+  {
+    "path": "VfxStudio.App/Camera/OrbitCamera.cs",
+    "size": 3867,
+    "sha256": "dae71bf454940d8e24dad74e1da58fbd7ecc064be4b0c46161afbe26ec77c762"
+  },
+  {
+    "path": "VfxStudio.App/ImGui/ImGuiController.cs",
+    "size": 22088,
+    "sha256": "bb7a2a150000a6bc52a665c26282bd75748e5259973a6b4cd174b0fafc7fb449"
+  },
+  {
+    "path": "VfxStudio.App/Program.cs",
+    "size": 37549,
+    "sha256": "a1f34602feb659bceac06ce9606411a98bd38dc1bf1e4822858fd9040eb55498"
+  },
+  {
+    "path": "VfxStudio.App/UI/EfxContentSchema.cs",
+    "size": 4040,
+    "sha256": "8091e4f407942b0b33a41a18764a81a34f01ba18fb9ccadb853b39e52744fb3f"
+  },
+  {
+    "path": "VfxStudio.App/UI/MainWindow.cs",
+    "size": 201264,
+    "sha256": "13a93227af6c457644896bf949ef12d8a6819e7adbd9c618ffd175295fc1faa0"
+  },
+  {
+    "path": "VfxStudio.App/UI/MainWindow.PreviewTracks.cs",
+    "size": 19352,
+    "sha256": "fb6763f2c6273fedaa11f817f7b97effda8f3b882c01d3c7c397684701e10c11"
+  },
+  {
+    "path": "VfxStudio.App/UI/NativeFileDialog.cs",
+    "size": 4787,
+    "sha256": "c6ce39340c51df3b4e24bd7e262b936961874172e2602931403d0b8b80cfa7bb"
+  },
+  {
+    "path": "VfxStudio.App/UI/PreviewDebugStore.cs",
+    "size": 13867,
+    "sha256": "dcead775df28ff120f745c46b7ad2c08dae06ca4c92090ed75b627ceaefc1a26"
+  },
+  {
+    "path": "VfxStudio.App/UI/StudioTheme.cs",
+    "size": 15975,
+    "sha256": "9aa3afeea51e8cbb068f845ae868628aecc882757fa609f9ada3a11795ab52a4"
+  },
+  {
+    "path": "VfxStudio.App/UI/UiIconTextures.cs",
+    "size": 2273,
+    "sha256": "dd047b17c6c7eb121ca1048cae5aa307fb726e81f521bc05310b404ebfda1e0f"
+  },
+  {
+    "path": "VfxStudio.App/UI/ViewportGridRenderer.cs",
+    "size": 2841,
+    "sha256": "e2413b28c1a0625846f1c6d7d6bf6eb2506e51a876c2787b5ca745d8e8782e24"
+  },
+  {
+    "path": "VfxStudio.App/VfxStudio.App.csproj",
+    "size": 2943,
+    "sha256": "aa13e84c1958b2f2c04563bfed7aa7ac8cc435977fa57dc8eeb883f96076e09c"
+  },
+  {
+    "path": "VfxStudio.Core/Common/CloneUtils.cs",
+    "size": 5095,
+    "sha256": "5182c2563eda13bfa1c42d0bab7cf2e4b4df284dcf239dae4d3ed18eff1c30a4"
+  },
+  {
+    "path": "VfxStudio.Core/Common/DataInterpretationException.cs",
+    "size": 4359,
+    "sha256": "0594f2d1e808a709789567c74d7670c5501cd8aeb274868e886c744d1b4cbd2c"
+  },
+  {
+    "path": "VfxStudio.Core/Common/Enums.cs",
+    "size": 13847,
+    "sha256": "19976912835abeac80d99a90eb70594daa529f0af1e49889bf03d557decbcf59"
+  },
+  {
+    "path": "VfxStudio.Core/Common/Extensions.cs",
+    "size": 714,
+    "sha256": "51d5d655324b422c1d3debf4462086b899435045cee61963956a780b30c1056a"
+  },
+  {
+    "path": "VfxStudio.Core/Common/FileHandler.cs",
+    "size": 50444,
+    "sha256": "478c5b1eead6cf19774628047603cc6e1b54fe301f71b124e2db79fd7581d288"
+  },
+  {
+    "path": "VfxStudio.Core/Common/GameIdentifier.cs",
+    "size": 1404,
+    "sha256": "c5ef6f30abfed6536c712ed4d3a32ce8162c3328c452d3290715fc8dd6108022"
+  },
+  {
+    "path": "VfxStudio.Core/Common/HashUtils.cs",
+    "size": 5860,
+    "sha256": "1564d3bc5fc36c56639cde0a75933fccfbb7af030fab2cf96eca998cf14377d9"
+  },
+  {
+    "path": "VfxStudio.Core/Common/ListFileWrapper.cs",
+    "size": 13360,
+    "sha256": "3e96668f765f3aba64dd5d7731c36d06b8e8bcd39cb32133dd283779bede8d46"
+  },
+  {
+    "path": "VfxStudio.Core/Common/Log.cs",
+    "size": 4022,
+    "sha256": "ab61035a735115025e6df2bc2deeeb70fb317797b1ed15656d928d200b5235d1"
+  },
+  {
+    "path": "VfxStudio.Core/Common/MemoryUtils.cs",
+    "size": 2367,
+    "sha256": "a944a154b721d43cbc2bfab441031707936f3b22e4fb827addc2097a897bae13"
+  },
+  {
+    "path": "VfxStudio.Core/Common/Models.cs",
+    "size": 6080,
+    "sha256": "fa926bc22860b559f51b51cc95b57079e7111eac99ced9637c7656278d27d041"
+  },
+  {
+    "path": "VfxStudio.Core/Common/MurMur3HashUtils.cs",
+    "size": 3263,
+    "sha256": "ace1a277e387767b4986ac3560990cad4327082233bc03648da17af6b1e8dd3f"
+  },
+  {
+    "path": "VfxStudio.Core/Common/PathUtils.cs",
+    "size": 10656,
+    "sha256": "b22ce3914eb99c6d18044ceaa2fecc5f4e5619b460488e9af88ebbd76a354e33"
+  },
+  {
+    "path": "VfxStudio.Core/Common/PlatformIdentifier.cs",
+    "size": 4918,
+    "sha256": "056d8d4e9ee91a54917f61ce2562277e811f76956b03e7b14660653b9dddaf44"
+  },
+  {
+    "path": "VfxStudio.Core/Common/RszGeneratorAttributes.cs",
+    "size": 12437,
+    "sha256": "556c239d621d089111ef7c5ee784e73945fa910be57016f03f58085dda2a9f51"
+  },
+  {
+    "path": "VfxStudio.Core/Common/Sunday.cs",
+    "size": 3636,
+    "sha256": "2aa119eeacbe7092926983836b4b21d6c8279339d844adb2bcb0b852b34195de"
+  },
+  {
+    "path": "VfxStudio.Core/Common/Utils.cs",
+    "size": 6280,
+    "sha256": "4a765d5895d4a87fbbac215b07193e9d44c7f5d0294b8b6a6aaa3ea4516a2237"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/BaseFile.cs",
+    "size": 3301,
+    "sha256": "3e4488f3746e5fdc37df10298f5327806860c1ccb7cabff82384d619e8378a5a"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/BaseRszFile.cs",
+    "size": 1174,
+    "sha256": "27e85bb59edfbdd0f7344ec9285ec472f4137260ea6ee5436f03b21074860ad0"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/BvhData.cs",
+    "size": 19173,
+    "sha256": "1b4b21d6839cd36671e0523644fcde2bb8f8a68fec0581cdf32b7671a23dcb71"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/BvhTree.cs",
+    "size": 7054,
+    "sha256": "8431fef03bf1a70510a9a48c93c0722110e682598becc12fed09e99d6e46e35a"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/ClipFile.cs",
+    "size": 69287,
+    "sha256": "04eec44015989490948347ce80ded658c622934192589443078e316542ec8069"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/DDSFile.cs",
+    "size": 16350,
+    "sha256": "7763ad9c03e6800c68ad8e305b7874069a01b13e3a444d97ab3804b5f22bab75"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/BitSet.cs",
+    "size": 3897,
+    "sha256": "9a14a26e81478591c700a00de803de9d55e8f4bb78d4236ceb78eb24020517d8"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/ClipSubstructs.cs",
+    "size": 13779,
+    "sha256": "bfb8f823e70e7876da6beafac4ea04aa8c8207d61a98b303318535628eeff264"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxAttributeTypes.cs",
+    "size": 134516,
+    "sha256": "bd4ca0d8e66cc5dd70fcc5bd8b0b446dc977fb1e3c17c2a79319a3f6509f736b"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxBasics.cs",
+    "size": 21749,
+    "sha256": "08cd3ca179960ab79002ec4e9f4da5625c755ee86f908ec2493017d258e625c9"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxCommon.cs",
+    "size": 7739,
+    "sha256": "30ee33a89e982379398454bec0c8bbe8fb6d30af998392856e874c0debb97087"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxEmitter.cs",
+    "size": 14163,
+    "sha256": "aa0c8f558c20a9323a32923116006f2143a6a688c7fd5a43a43db42b8ad03f32"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EFXEnums.cs",
+    "size": 23305,
+    "sha256": "ca13925cbed18ff4975033e3d017d2167fd0694d2359cafdd6a1388269e3fbdd"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxExpressionParser.cs",
+    "size": 21923,
+    "sha256": "19fe47126860de0b6a78e7bf5535315df2e70fa47d8adade1d716d69b1be248e"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxFade.cs",
+    "size": 4276,
+    "sha256": "dfe46c371b6f79ff93b857087a07bb4f16d20be6460e81f6a7346bf0ea5bfc44"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxFieldTypes.cs",
+    "size": 3962,
+    "sha256": "1724000109a16f8ec79e5d5ce0aa8252f6c44d326aadd98768b18c92ea66892c"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxFluid.cs",
+    "size": 8949,
+    "sha256": "7b30b24a52a9813a934cfbd83f67bae3cebe03915f66d5a221f167c865f92101"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxMiscStructs.cs",
+    "size": 32671,
+    "sha256": "00d9a215ccb762bd9587279d687cb87fd786fd49066de861bd4de04739de6a4d"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxParsedClip.cs",
+    "size": 1334,
+    "sha256": "663c60982672079093997eddeaab2ad6938023242a8c3cd570b876d343b9adae"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxPtBehavior.cs",
+    "size": 19120,
+    "sha256": "adebc47a8ef01831000eaa4c7fd8595a12c4186302f17a1ed42020e79b4c7a24"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxStructInfo.cs",
+    "size": 5592,
+    "sha256": "8b974a16fc8ef80d81e86fb4f2da038aac6486bfeec4ca1e74fd1ac00ae9e07d"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxTools.cs",
+    "size": 14372,
+    "sha256": "0fd61e09ccd792fccf4523fffa4813e12b4db7a584ea5ca5f50e55bd9d3fc7c4"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxTransform.cs",
+    "size": 16501,
+    "sha256": "25e50b07d5c524d94a204f36103b3cb049912e3ed440b2f8ac698578182f98cd"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxTypeBillboard.cs",
+    "size": 17057,
+    "sha256": "1a143955d4449671c098ab32a51bf5d0068f160d2716842cc8037eb755a80268"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxTypeGeneralStructs.cs",
+    "size": 4371,
+    "sha256": "b4b4435094f48d40eb68152c3852a3596d3154423abe2b5933bdd1b9f1bc78f5"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxTypeLightning.cs",
+    "size": 19064,
+    "sha256": "5869a92d84da1b3f701298d78e0d11d23b8d9dd827935e40697b17684e98b428"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxTypeMesh.cs",
+    "size": 27657,
+    "sha256": "db3bf11a402eb8e09d22935142f9cb21564ac4c8fd1e8a01ddb16a3ba0d284e7"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxTypePolygon.cs",
+    "size": 10202,
+    "sha256": "feb0e7165898d13ed8b2bae35c6f45fea2930d73e28a06e5638b0e28cfadbdd2"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxTypeRibbon.cs",
+    "size": 43332,
+    "sha256": "4a354d52ad6610239ae6bc391cb180623fc3ca0d5f0e4d292b009e4cf0d2288d"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxTypeStrain.cs",
+    "size": 16559,
+    "sha256": "9b21e3bedb737ae2a38e8e58d742c660c2202e49cb7704062bc8df877dff0563"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxUnknowns.cs",
+    "size": 1543,
+    "sha256": "6d4a5627d7b3a16b9c4fb550e349960aa1c32e12dbcba4266395a04fa9edb305"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxVelocity.cs",
+    "size": 12597,
+    "sha256": "112fcecf5c01689c0e1b37d2dce0c0061101bcfb2e78e9c260cc935d098c4f57"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/EfxVortexel.cs",
+    "size": 6360,
+    "sha256": "df915c594984766dbf93eafe31eeec2060b2c8ce3073d3d2eaf2d7a1894890ea"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/ExpressionData.cs",
+    "size": 10812,
+    "sha256": "f4776c61aa9385c1373dd57a7dc2a5873a104cb852fd04e8547c067103fc1819"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EFX/ExpressionTree.cs",
+    "size": 6639,
+    "sha256": "6c4d3b57dec04401d28fa8541cd6c9b7f1cbf8f75bcf1bb052b8675d6f0cb51b"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EfxFile.cs",
+    "size": 63359,
+    "sha256": "122a9a64d6e511a7bd8d77ebef861922f2196d140bd11fd685e912152a0017ea"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/EnumParser.cs",
+    "size": 2078,
+    "sha256": "ae2c0d695f56de34480bfe961bbcefcba32f40146f47c4d4d29100fa893975ef"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/MdfFile.cs",
+    "size": 20694,
+    "sha256": "f549cda6e6c9d53bafc445579f8680bbfc58e6c83c42e60694ff82b4166907ad"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/MeshFile.cs",
+    "size": 85706,
+    "sha256": "560f013087b53a41c2bf90062f00682100a386695663573c273cebc1ebaed2cd"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/MotbankFile.cs",
+    "size": 3908,
+    "sha256": "ce3e8bf1db38238b9b047c433ac93f68f6e4c9b8193f64b9752e70360a7bf7e2"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/MotFile.cs",
+    "size": 152748,
+    "sha256": "c5f8039b6ae3541933259cfb1767ff59fb9a4a94b6edbfda7e87f52054dbb71d"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/MotlistFile.cs",
+    "size": 19507,
+    "sha256": "693fb6c78ab4a87322608f3d2a47bc8190f9ce54c5db1f4cff56c3b7de876c02"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/MotTreeFile.cs",
+    "size": 63744,
+    "sha256": "ef6e5ab1493080914ceec3da79139b34751fe25717e3ed85106cf6832a1bc640"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/MplyMeshFile.cs",
+    "size": 35373,
+    "sha256": "e8170f7c4a307465ab914a8c17bc21bb04ef2f0e0cf30e9e2ce1beffd2730a17"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/PfbFile.cs",
+    "size": 11349,
+    "sha256": "e9d470ab9d40c51a34b0df700f6589d2c52a0d4e9b2751537dc79944bd4f03c5"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/RszException.cs",
+    "size": 109,
+    "sha256": "4bfcb1e9e9c2e105ee5697c41bbf96597206ec6271e54bc0cf400dc767ea30f8"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/RSZFile.cs",
+    "size": 24853,
+    "sha256": "69f21ae55f41bf42e636b387b18f0ed39b9d1925ae503f8b916f4860c18b6a9e"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/RszFileOption.cs",
+    "size": 310,
+    "sha256": "e125b1a654042f5374e88200e76bb7aa3c2892640f159e45dc8435b15cc12b07"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/RszInstance.cs",
+    "size": 38701,
+    "sha256": "a90fcc8be819c6cdf963e2c89b9dbfbb38581a48949a4677ac552b564db45527"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/RszModels.cs",
+    "size": 2360,
+    "sha256": "00f3eecab6a6e91fe3390ed05c9fbbaae92fa075abb7b0edf9df0c57c00c1aaa"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/RszParser.cs",
+    "size": 14478,
+    "sha256": "dde99c5d4858fe68d909b0357df561a1924bdd8a9607864e854caed62cd7cf55"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/RszUtils.cs",
+    "size": 4388,
+    "sha256": "f1d57b4f6d0264f62deb76e762d79236440017b9c5544be081b336f6216c3170"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/RszValueType.cs",
+    "size": 34075,
+    "sha256": "bedb458dc604840b933a9b08b786229f7a68d4d9cca606a2694380f0730fb899"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/TexFile.cs",
+    "size": 29218,
+    "sha256": "d28ff2f0d554b597d5f9e27d92756871fe6d822048aede4921f63a2807f62027"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/TmlFile.cs",
+    "size": 21060,
+    "sha256": "480af1632e7da4203a0f8ca0842c514a54060909b4508a01488358173ee94592"
+  },
+  {
+    "path": "VfxStudio.Core/Formats/UvsFile.cs",
+    "size": 6000,
+    "sha256": "09b13b453c94bb67c89bafdd09353d2fb4a7559cc183ce52d48e07ac64a71caa"
+  },
+  {
+    "path": "VfxStudio.Core/Models/BoneConstants.cs",
+    "size": 869,
+    "sha256": "5d269cf5a22189c9dc1048f6757fe3af0bcbb8cac3c33421c2a2be3f70b4a518"
+  },
+  {
+    "path": "VfxStudio.Core/Models/BoneHashRegistry.cs",
+    "size": 4457,
+    "sha256": "1bbac32d220069f95e6431c0d404af77bac7261846665dfa38930fbc4e9e864e"
+  },
+  {
+    "path": "VfxStudio.Core/Models/MotionDictionary.cs",
+    "size": 1689,
+    "sha256": "17625d490093a337867e62c23286e6ce30e9d954f7c89143fb319ce8ea444369"
+  },
+  {
+    "path": "VfxStudio.Core/Models/VfxSlot.cs",
+    "size": 2759,
+    "sha256": "0243bf56e64ce7721d6f0e53f298808d9e01557295af3945c0fe39d6257e6e75"
+  },
+  {
+    "path": "VfxStudio.Core/Models/WeaponGrip.cs",
+    "size": 1059,
+    "sha256": "e1a19532f5583fb2ce7ff097819aae865edb2a3f11a95f71a093e0d71b6c9f8e"
+  },
+  {
+    "path": "VfxStudio.Core/Models/WeaponMountPreset.cs",
+    "size": 13027,
+    "sha256": "cca1103fa840b5af97a89373a371de6da09179785e4cb62bcf6c574294e7b5e1"
+  },
+  {
+    "path": "VfxStudio.Core/Models/WeaponType.cs",
+    "size": 7191,
+    "sha256": "f80abce5d775b641daf6533d9515bb7b741072b748c13fd548b7abb3ce8bd849"
+  },
+  {
+    "path": "VfxStudio.Core/Pak/PakFile.cs",
+    "size": 21219,
+    "sha256": "463ed1964800a07075138a95313a8b5cc3a39a5968a13687d2952675953ba960"
+  },
+  {
+    "path": "VfxStudio.Core/Pak/PakReader.cs",
+    "size": 14502,
+    "sha256": "eac91dfe372a278771f42ff40220f0fc4efa946919fc40e32274fb6281da56af"
+  },
+  {
+    "path": "VfxStudio.Core/Pak/PakUtils.cs",
+    "size": 5566,
+    "sha256": "cae00e2e071918bf95bc7834d1395d160478eb5fa42abf2e6484883392c5ee91"
+  },
+  {
+    "path": "VfxStudio.Core/Pak/PakWriter.cs",
+    "size": 3166,
+    "sha256": "46b3d65e732bd7061790a27762620b627d73bd824f60d9b6aa2bb3baea0f38ed"
+  },
+  {
+    "path": "VfxStudio.Core/Services/EfxEditorService.cs",
+    "size": 23436,
+    "sha256": "e2f16fc9b119a2f6e83ffecec0577117c1abbf55ec5a28ee74dd58028344aae3"
+  },
+  {
+    "path": "VfxStudio.Core/Services/MotionVfxSlotManager.cs",
+    "size": 22176,
+    "sha256": "a605c9a9a03f72675b5dba8a06dee731fcb8604d98b110b94c9d7072c33cce27"
+  },
+  {
+    "path": "VfxStudio.Core/Services/PfbEpvService.cs",
+    "size": 18821,
+    "sha256": "3e18326fea7e7d7ffe7a087a6860f9367552081c625aebff0489d790d271a235"
+  },
+  {
+    "path": "VfxStudio.Core/Services/Phase2VerificationService.cs",
+    "size": 22381,
+    "sha256": "69816e8ea5c7ff676186d6e3eab876b55b0b7ed0b16af67af4f473d207bbae33"
+  },
+  {
+    "path": "VfxStudio.Core/Services/UndoRedoManager.cs",
+    "size": 5972,
+    "sha256": "3c67e3e82e0e027d7082a2ebd6c543ecc8c4c380c756a548997730ff9ff2f57f"
+  },
+  {
+    "path": "VfxStudio.Core/Services/WeaponBaseExtractor.cs",
+    "size": 34793,
+    "sha256": "978550c784b091c747dd31dd40369cc09cd8c3d30e3df5e4213192d40b103baa"
+  },
+  {
+    "path": "VfxStudio.Core/VfxStudio.Core.csproj",
+    "size": 725,
+    "sha256": "70761dfc2ebf892943bddadb066919556e0142b971fcf62c20d8688aed2ae3cd"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/ActionEffectChoices.cs",
+    "size": 902,
+    "sha256": "00a242f0a161dd6789ab6b4749c198f687374b40432f2aa4bee12e66241218a3"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/ActionPreviewPublisher.cs",
+    "size": 2717,
+    "sha256": "c219c6f5397868108086f4fb4ee0ff5fbbf77128acf8fea091129b67eae2bcce"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/ActionSlotAudit.cs",
+    "size": 19707,
+    "sha256": "17a4a7565f55eb09824536aa81ac6c90381373ec31a466e3a72244028c76da02"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/ActionSlotWorkspace.cs",
+    "size": 33798,
+    "sha256": "038d9e6c48bd04d2d3066f8eaaf9ac2010a06ee539ac30e663ab2a7dfb6cbbf7"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/ActionSourceVerification.cs",
+    "size": 2112,
+    "sha256": "2c16d52474150829825403a383896a73fa363148e2e0df8112287fdb21d20e8c"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/CacheSource.cs",
+    "size": 5353,
+    "sha256": "67d81eef10998e59db415812f8486301aa14697a2b2755f97e95b31b680f77ba"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/CacheSourceTests.cs",
+    "size": 15013,
+    "sha256": "4fa77e13d9389a9a4bd3b7aacdf012d7d6b8309b2b9cedf3691ac6a366fd279c"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/ColorEditor.cs",
+    "size": 7632,
+    "sha256": "2ed998457cfcee6ffe5d9a6cedb49e972fba25ccc4fa8f5c74d52082ee7de060"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/ColorEditorTests.cs",
+    "size": 11691,
+    "sha256": "9e179927108a8e4bc96d791872d3094b27996f652f45734c454b09b25efb79d6"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/ContentInspector.cs",
+    "size": 22985,
+    "sha256": "13aeccf94f84c48e6952ee43ffe367a4a1eb4f9bd90050fac57daa132f433c96"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/CurveEditor.cs",
+    "size": 9031,
+    "sha256": "6d27fb3991acb936f4bca341ad410b70b4ae4f1982fb20de4dc07789e7d0d58c"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/CurveTests.cs",
+    "size": 8319,
+    "sha256": "d6dd231b31736dfae823458cd361e6ce47a734b2b936664c5d0879594e16c894"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/DeletionTests.cs",
+    "size": 4014,
+    "sha256": "9f42e4c7c169a97aff2e62e9475896eac241d7aa779a64d8c75da900a1864ded"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/DesktopBridge.cs",
+    "size": 8719,
+    "sha256": "43257f85b0f8213528cfbb4c37a13bcd5d9f5068facd81b2d064996b60634e4c"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/DesktopStatus.cs",
+    "size": 2720,
+    "sha256": "bfd40b56d809eb894a94b2d9568ac183648b7142b6399686b48673f7295edb16"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/DocumentExport.cs",
+    "size": 5889,
+    "sha256": "447d6336a9d249190b67c3efc114137ecc73160b88e20b14bae331309c23ac86"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/EditorEngine.cs",
+    "size": 46380,
+    "sha256": "1350a04bce7552f2795dfcf79a67d486581a4db58c1f3e0b9f3a26b602839edc"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/EntryStructureTests.cs",
+    "size": 6035,
+    "sha256": "4d0995a3a672618d9ee0848610a78fbf4e0a6e3a1ee80e0cc62b0168d116f35b"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/ExpressionInspector.cs",
+    "size": 9751,
+    "sha256": "ee7107666bfe3423eaff10b26dd674027c8ebd6897f4accc71c307317c324fc4"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/ExpressionInspectorTests.cs",
+    "size": 6139,
+    "sha256": "adf8055adc3de4914e84e85daa2b25df85e90652ea280ad215ff900933137fd6"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/FileBrowser.cs",
+    "size": 7546,
+    "sha256": "6ab321b94204c1517e01b3b24b7eab3522859b695ba40a56e810e82b6e6a87a9"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/GameInstallResourceReader.cs",
+    "size": 11325,
+    "sha256": "43bbe54cd44418b575f8681be74e419cb7989d0db0e596dcf4918025dae0aa7b"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/GameInstallSourceTests.cs",
+    "size": 15606,
+    "sha256": "4a853f957ab82fc3aebba780bf2aea99cdd048f080ff355d6d420b1bef715ff7"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/GroupEditingTests.cs",
+    "size": 7686,
+    "sha256": "0dda0466a4455d1032bd7a184d59e97c7237d59b34569e82de5d84f620c792a2"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/GroupNoteStore.cs",
+    "size": 6491,
+    "sha256": "2d559de75d6d3fc202eea65d62d9b727327c73cafc6b8765841e14a7a3c3c638"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/GroupNoteTests.cs",
+    "size": 19530,
+    "sha256": "ad1712ef85c39965bb83aeabaffa2f72ece2bdb1409e78078098aa64fe517fd2"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/LocalFileTests.cs",
+    "size": 4858,
+    "sha256": "36f446a0be2dc0a673cd22e3a4f8e448a5abe10c0ffde112cb4600c75c1b3aa7"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/LocalMotionReader.cs",
+    "size": 4220,
+    "sha256": "63d23ac411c729c3304f43e2530407fbd5acaa59d2e45a47bc74994cb8efc7e3"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/ParameterGroupTests.cs",
+    "size": 5466,
+    "sha256": "2bdc3ec20054b97eb35aae51ace1b9f28d8bb561d5b8db01c01ef022e84d04e3"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/PfbWorkspace.cs",
+    "size": 28721,
+    "sha256": "9c094c441ef37b6bb61d1a1c92d9c2c8b50090dc500d0e65a96810a26b206c63"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/PlayEfxSerializationTests.cs",
+    "size": 4696,
+    "sha256": "9653317733287fc134a0d557520cc75e6e2b789b59fe635403fe92530ab35ab8"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/PrecacheStore.cs",
+    "size": 19896,
+    "sha256": "296ee67895e71a01718a4c05efc751baeb38fd881e41d7a4d70096a375bfe331"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/PrecacheTests.cs",
+    "size": 10788,
+    "sha256": "fdc24df651a00505372222f97d899cdbab414f5888410e7073dd59b31a115075"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/PrefabEditing.cs",
+    "size": 5845,
+    "sha256": "c35c54860695d8831c72021889a2c74856f6adf2bca9fe12145a987b13bdd437"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/Program.cs",
+    "size": 9373,
+    "sha256": "657907945c4ee5266c68858c39681e8c52dc45e703bb5c6c844d2bd336192869"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/ResourceResolver.cs",
+    "size": 3908,
+    "sha256": "3b3b8626da9acf2cd050f1669f47d4ca89ce60221a5d3214f9ad7264dbb71eff"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/SelfTests.cs",
+    "size": 22568,
+    "sha256": "b882bdd5ce6a78e9e82ada09788ebbad77827f0ad0101bc24e552f55dd810549"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/SessionDocuments.cs",
+    "size": 4289,
+    "sha256": "533fb722990779d824185575035c71531276d2e7ba9e270631f1e7ca5c877bfd"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/SessionDocumentTests.cs",
+    "size": 3221,
+    "sha256": "4e9cff64f05fb3d57da014fc1cea57fb4a7ed62c7a785823ad4b234c283ba4a0"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/ShutdownTests.cs",
+    "size": 3365,
+    "sha256": "272abe97953dd811174cbfdd141698e9856ae0ad0813108fa402876b4b856930"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/VfxStudio.LiveEditor.csproj",
+    "size": 519,
+    "sha256": "f88a8a236a58e13b17411adc294e7768a5458df121fb5dd19906046feb36cb36"
+  },
+  {
+    "path": "VfxStudio.Mcp/MailboxBridge.cs",
+    "size": 9865,
+    "sha256": "24cb989903dba54ff218bd6b9ddb7ee7409e8ff7457981f79b6b094920661a70"
+  },
+  {
+    "path": "VfxStudio.Mcp/McpServer.cs",
+    "size": 9697,
+    "sha256": "a2133826455d19b37886535378673a600771e870b5686412d434b56ff650b721"
+  },
+  {
+    "path": "VfxStudio.Mcp/Program.cs",
+    "size": 4253,
+    "sha256": "0f70e866cc0d0a8a4c886402994b31c39b84396c9fa478f1e40d0492103b0cb9"
+  },
+  {
+    "path": "VfxStudio.Mcp/SelfTests.cs",
+    "size": 24017,
+    "sha256": "4b30298d29ae60d2759fd369d19f72df4e1baee24294385c8a74564a3ac0790f"
+  },
+  {
+    "path": "VfxStudio.Mcp/ToolCatalog.cs",
+    "size": 12849,
+    "sha256": "8b94e8a4e14abc38e4106ffbdefedc264a6c0c8f9419c952d58fd39553024811"
+  },
+  {
+    "path": "VfxStudio.Mcp/VfxStudio.Mcp.csproj",
+    "size": 364,
+    "sha256": "ade560c408cd85ec8ec4fe49d16c30fe5d78d57ed57469a2441e521bc08a2bf2"
+  },
+  {
+    "path": "VfxStudio.Renderer/Animation/BoneAnimationEvaluator.cs",
+    "size": 14986,
+    "sha256": "0a8474b9d5b965c7f04fec1187a0a929b277a2785db088e13286e79991ad78f8"
+  },
+  {
+    "path": "VfxStudio.Renderer/Framebuffer/HdrBloomPipeline.cs",
+    "size": 13449,
+    "sha256": "9e72409886cd63b0d607e57c149020c3c73f3d240dd2b300128d42d5a8682b3c"
+  },
+  {
+    "path": "VfxStudio.Renderer/GpuConfig.cs",
+    "size": 1303,
+    "sha256": "5377d56d8fad21d8002d7ae9517d78502980217ddf6f1b7dac883cedad328306"
+  },
+  {
+    "path": "VfxStudio.Renderer/Meshes/FbxHunterModel.cs",
+    "size": 9814,
+    "sha256": "c676d997e734d7068ee01da36396e51cd0c240b47512f289e51274fb8cd53227"
+  },
+  {
+    "path": "VfxStudio.Renderer/Meshes/GpuMesh.cs",
+    "size": 9843,
+    "sha256": "2861adeae9e99fc2ef2e7a9a7f2aea63ee8ee0787be2dcc023fb1a6a9e60dfee"
+  },
+  {
+    "path": "VfxStudio.Renderer/Shaders/Shader.cs",
+    "size": 3570,
+    "sha256": "ef8132fdca164c6697335ee011b4f1c88ecf1b56d149d3da80c09ac6ea7a25c3"
+  },
+  {
+    "path": "VfxStudio.Renderer/Shaders/ShaderSources.cs",
+    "size": 8668,
+    "sha256": "eea9a5da9b8c2dd68ed6b465c57e55af8c99c071a6ea75b72182afd1d8c7213a"
+  },
+  {
+    "path": "VfxStudio.Renderer/Textures/GpuTexture.cs",
+    "size": 17750,
+    "sha256": "075c1db7b6e8d7deeb27f2a6aa6ff676da30280e18981a4b153cdc898d97a1ca"
+  },
+  {
+    "path": "VfxStudio.Renderer/Verification/Phase3GpuVerifier.cs",
+    "size": 10580,
+    "sha256": "7049a486e6289608453deedf3ebedd519bd1abb7f1a17c16db9745c7617a335e"
+  },
+  {
+    "path": "VfxStudio.Renderer/Vfx/EfxSimulator.cs",
+    "size": 64599,
+    "sha256": "3030ff18cc50fc1ee804f259e756a7f5d49c2ae5eae336a3d93b8483519d74ee"
+  },
+  {
+    "path": "VfxStudio.Renderer/Vfx/VfxAssetCache.cs",
+    "size": 22458,
+    "sha256": "683066c154013f2010ead3ee62c9e5aa3088f0647d974a5e0f8b4ad7d45a5399"
+  },
+  {
+    "path": "VfxStudio.Renderer/Vfx/VfxProxyRenderer.cs",
+    "size": 34248,
+    "sha256": "b6bad92e463a262e8decd01709f2b442414209acbe8bb861da119d8ee642d677"
+  },
+  {
+    "path": "VfxStudio.Renderer/VfxStudio.Renderer.csproj",
+    "size": 1035,
+    "sha256": "060aec6935b95d2e04a6f90e3252c1dbc01a1a6a7261fc796de979535a6139ea"
+  },
+  {
+    "path": "VfxStudio.Renderer/Weapons/WeaponAttachmentManager.cs",
+    "size": 15778,
+    "sha256": "624625ff48f45e4ce9b2e380c3bc8e41b7780dc8213db0701c48f7e73a7c6411"
+  },
+  {
+    "path": "VfxStudio.Unpacker/Program.cs",
+    "size": 15204,
+    "sha256": "f5d51de2501a559b62ba4509eb9813424cd7048ce28cf45ef7d039fd87fc9911"
+  },
+  {
+    "path": "VfxStudio.Unpacker/VfxStudio.Unpacker.csproj",
+    "size": 567,
+    "sha256": "9f7455710759396d61fafa6d7d8bde54f848b42cd554362b6da170d28396589d"
+  }
+]

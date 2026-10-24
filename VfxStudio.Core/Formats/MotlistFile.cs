@@ -1,0 +1,536 @@
+using ReeLib.Clip;
+using ReeLib.Common;
+using ReeLib.Mot;
+using ReeLib.Motlist;
+using ReeLib.MotTree;
+
+namespace ReeLib.Motlist
+{
+    public enum MotlistVersion
+    {
+        RE7 = 60,
+        RE2_DMC5 = 85,
+        RE3 = 99,
+        MHR_DEMO = 484,
+        RE8 = 486,
+        RE_RT = 524,
+        MHR = 528,
+        SF6 = 653,
+        RE4 = 663,
+        DD2 = 751,
+        MHWILDS = 992,
+        MHStories3 = 1004,
+        OniWS = 1036,
+        RE9 = 1047,
+        Pragmata = 1057,
+    }
+
+    [Flags]
+    public enum MotListElementFlags : byte
+    {
+        Mirror = 1,
+        LocalTree = 2,
+        Reverse = 4,
+        RefPath = 8,
+        SeqOnly = 128,
+    }
+
+    public static class MotlistExtensions
+    {
+        public static MotVersion GetMotVersion(this MotlistVersion motlist) => motlist switch {
+            MotlistVersion.RE7 => MotVersion.RE7,
+            MotlistVersion.RE2_DMC5 => MotVersion.RE2_DMC5,
+            MotlistVersion.RE3 => MotVersion.RE3,
+            MotlistVersion.MHR_DEMO => MotVersion.MHR_DEMO,
+            MotlistVersion.RE8 => MotVersion.RE8,
+            MotlistVersion.RE_RT => MotVersion.RE_RT,
+            MotlistVersion.MHR => MotVersion.MHR,
+            MotlistVersion.SF6 => MotVersion.SF6,
+            MotlistVersion.RE4 => MotVersion.RE4,
+            MotlistVersion.DD2 => MotVersion.DD2,
+            MotlistVersion.MHWILDS => MotVersion.MHWILDS,
+            MotlistVersion.MHStories3 => MotVersion.MHStories3,
+            MotlistVersion.OniWS => MotVersion.OniWS,
+            MotlistVersion.Pragmata => MotVersion.Pragmata,
+            MotlistVersion.RE9 => MotVersion.RE9,
+            _ => MotVersion.Pragmata,
+        };
+
+        public static MotTreeVersion GetMotTreeVersion(this MotlistVersion motlist) => motlist switch {
+            MotlistVersion.RE7 => MotTreeVersion.RE2,
+            MotlistVersion.RE2_DMC5 => MotTreeVersion.RE2,
+            MotlistVersion.RE3 => MotTreeVersion.RE3,
+            MotlistVersion.MHR_DEMO => MotTreeVersion.RE8,
+            MotlistVersion.RE8 => MotTreeVersion.RE8,
+            MotlistVersion.RE_RT => MotTreeVersion.RE_RT,
+            MotlistVersion.MHR => MotTreeVersion.MHR,
+            MotlistVersion.SF6 => MotTreeVersion.RE4,
+            MotlistVersion.RE4 => MotTreeVersion.RE4,
+            MotlistVersion.DD2 => MotTreeVersion.DD2,
+            MotlistVersion.MHWILDS => MotTreeVersion.DD2,
+            MotlistVersion.MHStories3 => MotTreeVersion.DD2,
+            MotlistVersion.OniWS => MotTreeVersion.OniWS,
+            MotlistVersion.RE9 => MotTreeVersion.Pragmata,
+            MotlistVersion.Pragmata => MotTreeVersion.Pragmata,
+            _ => MotTreeVersion.Pragmata,
+        };
+
+        public static ClipVersion GetClipVersion(this MotVersion ver) => ver switch {
+            MotVersion.RE7 => ClipVersion.RE7,
+            MotVersion.RE2_DMC5 => ClipVersion.RE2_DMC5,
+            MotVersion.RE3 => ClipVersion.RE3,
+            MotVersion.MHR_DEMO => ClipVersion.RE8,
+            MotVersion.RE8 => ClipVersion.RE8,
+            MotVersion.RE_RT => ClipVersion.RE_RT,
+            MotVersion.MHR => ClipVersion.RE_RT,
+            MotVersion.SF6 => ClipVersion.SF6,
+            MotVersion.RE4 => ClipVersion.RE4,
+            MotVersion.DD2 => ClipVersion.DD2,
+            MotVersion.MHWILDS => ClipVersion.MHWilds,
+            MotVersion.MHStories3 => ClipVersion.MHStories3,
+            MotVersion.OniWS => ClipVersion.RE9,
+            MotVersion.RE9 => ClipVersion.RE9,
+            MotVersion.Pragmata => ClipVersion.Pragmata,
+            _ => ClipVersion.Pragmata,
+        };
+    }
+
+    public class Header : BaseModel
+    {
+        public MotlistVersion version;
+        public uint magic = MotlistFile.Magic;
+        public int uknValue; // dmc5
+        public long pointersOffset;
+        public long motionIndicesOffset;
+        public string? motpackFilepath;
+        public int numMots;
+        public short uknNum;
+
+        public string MotListName { get; set; } = string.Empty;
+        public string? BaseMotListPath { get; set; }
+
+        protected override bool DoRead(FileHandler handler)
+        {
+            handler.Read(ref version);
+            handler.Read(ref magic);
+            handler.Read(ref uknValue);
+            handler.ReadNull(4);
+            handler.Read(ref pointersOffset);
+            handler.Read(ref motionIndicesOffset);
+            MotListName = handler.ReadOffsetWString();
+            if (version > MotlistVersion.RE7)
+            {
+                var offset = handler.Read<long>();
+                BaseMotListPath = offset > 0 ? handler.ReadWString(offset) : null;
+            }
+            if (version >= MotlistVersion.OniWS)
+            {
+                var motpackOffsetOffset = handler.Read<long>();
+                if (motpackOffsetOffset > 0)
+                {
+                    using var _ = handler.SeekJumpBack(motpackOffsetOffset);
+                    motpackFilepath = handler.ReadOffsetWStringNullable();
+                }
+            }
+            handler.Read(ref numMots);
+            if (version >= MotlistVersion.MHR)
+            {
+                handler.Read(ref uknNum);
+            }
+            return true;
+        }
+
+        protected override bool DoWrite(FileHandler handler)
+        {
+            handler.Write(ref version);
+            handler.Write(ref magic);
+            handler.Write(ref uknValue);
+            handler.WriteNull(4);
+            handler.Write(ref pointersOffset);
+            handler.Write(ref motionIndicesOffset);
+            handler.WriteOffsetWString(MotListName);
+            if (version > MotlistVersion.RE7)
+            {
+                if (!string.IsNullOrEmpty(BaseMotListPath))
+                {
+                    handler.WriteOffsetWString(BaseMotListPath);
+                }
+                else
+                {
+                    handler.WriteNull(8);
+                }
+            }
+            var motpackPathOffsetOffset = 0L;
+            if (version >= MotlistVersion.OniWS)
+            {
+                if (string.IsNullOrEmpty(motpackFilepath)) {
+                    handler.WriteNull(8);
+                } else {
+                    motpackPathOffsetOffset = handler.Tell();
+                    handler.Skip(8);
+                }
+            }
+            handler.Write(ref numMots);
+            if (version >= MotlistVersion.MHR)
+            {
+                handler.Write(ref uknNum);
+            }
+            handler.StringTableFlush();
+            if (motpackPathOffsetOffset != 0 && !string.IsNullOrEmpty(motpackFilepath))
+            {
+                handler.Align(8);
+                handler.Write(motpackPathOffsetOffset, handler.Tell());
+                handler.Write(handler.Tell() + 8);
+                handler.WriteWString(motpackFilepath);
+            }
+            return true;
+        }
+    }
+
+
+    public class MotIndex : BaseModel
+    {
+        internal long overrideClipOffset;
+        public ushort motNumber;
+        public ushort Switch;
+
+        public uint jointMaskId;
+        public uint tagHash;
+        public byte type = 1; // seems to be 1 for most of the files, setting it as default for now
+        public MotListElementFlags flags;
+        public byte physicsFlags;
+        internal byte overrideClipCount;
+        public uint[] data;
+
+        public MotFileBase? MotFile { get; set; }
+        public List<MotClip> OverrideClips { get; set; } = new (0);
+
+        public MotlistVersion Version { get; set; }
+
+        private int UnknownDataCount => Version switch {
+            > MotlistVersion.RE8 => 12,
+            MotlistVersion.RE8 => 0,
+            MotlistVersion.RE7 => 0,
+            _ => 3,
+        };
+
+        public MotIndex(MotlistVersion version)
+        {
+            Version = version;
+            data = new uint[UnknownDataCount];
+        }
+
+        protected override bool DoRead(FileHandler handler)
+        {
+            if (Version > MotlistVersion.RE7) handler.Read(ref overrideClipOffset);
+            handler.Read(ref motNumber);
+            handler.Read(ref Switch);
+            if (Version >= MotlistVersion.RE8)
+            {
+                handler.Read(ref jointMaskId);
+                handler.Read(ref tagHash);
+                handler.Read(ref type);
+                handler.Read(ref flags);
+                handler.Read(ref physicsFlags);
+                handler.Read(ref overrideClipCount);
+                data = handler.ReadArray<uint>(UnknownDataCount);
+            }
+            else if (Version > MotlistVersion.RE7)
+            {
+                data = handler.ReadArray<uint>(UnknownDataCount);
+                overrideClipCount = (byte)(overrideClipOffset > 0 ? 1 : 0);
+            }
+            return true;
+        }
+
+        protected override bool DoWrite(FileHandler handler)
+        {
+            if (Version > MotlistVersion.RE7) handler.Write(ref overrideClipOffset);
+            handler.Write(ref motNumber);
+            handler.Write(ref Switch);
+            if (Version >= MotlistVersion.RE8)
+            {
+                handler.Write(ref jointMaskId);
+                handler.Write(ref tagHash);
+                handler.Write(ref type);
+                handler.Write(ref flags);
+                handler.Write(ref physicsFlags);
+                handler.Write(ref overrideClipCount);
+                handler.WriteArray(data);
+            }
+            else if (Version > MotlistVersion.RE7)
+            {
+                handler.WriteArray(data);
+            }
+            return true;
+        }
+
+        public override string ToString() => $"[MotID {motNumber}] [Motion: {MotFile?.ToString() ?? "-- "}] {(OverrideClips.Count == 0 ? "" : $"[ExtraClips: {OverrideClips.Count}]")}";
+    }
+
+    public class MotFileLink(FileHandler handler) : MotFileBase(handler)
+    {
+        public override KnownFileFormats MotType => throw new NotImplementedException();
+
+        public override string Name { get => Path; set => Path = value; }
+
+        public string Path { get; set; } = "";
+
+        public override string ToString() => Path;
+
+        protected override bool DoRead()
+        {
+            var num = FileHandler.Read<int>();
+            DataInterpretationException.ThrowIf(num != 1);
+            Path = FileHandler.ReadWString();
+            return true;
+        }
+
+        protected override bool DoWrite()
+        {
+            FileHandler.Write<int>(1);
+            FileHandler.WriteWString(Path);
+            return true;
+        }
+    }
+}
+
+
+namespace ReeLib
+{
+    public abstract class MotlistFileBase(FileHandler fileHandler) : BaseFile(fileHandler)
+    {
+        public abstract string Name { get; set; }
+        public List<MotFileBase> MotFiles { get; } = new();
+    }
+
+    public class MotlistFile(FileHandler fileHandler) : MotlistFileBase(fileHandler)
+    {
+        public const uint Magic = 0x74736C6D;
+
+        public Header Header { get; } = new();
+        public override string Name { get => Header.MotListName; set => Header.MotListName = value; }
+        public List<MotIndex> Motions { get; } = new();
+
+        public MotFileBase? Find(string motName)
+        {
+            foreach (var mot in MotFiles)
+            {
+                if (mot.Name == motName) return mot;
+            }
+            return null;
+        }
+
+        public MotFileBase[] FindDanglingMotFiles()
+        {
+            var set = MotFiles.ToHashSet();
+            foreach (var mot in Motions)
+            {
+                if (mot.MotFile != null) set.Remove(mot.MotFile);
+            }
+
+            return set.ToArray();
+        }
+
+        protected override bool DoRead()
+        {
+            MotFiles.Clear();
+            Motions.Clear();
+            var handler = FileHandler;
+            var header = Header;
+            if (!header.Read(handler)) return false;
+            if (header.magic != Magic)
+            {
+                throw new InvalidDataException($"{handler.FilePath} Not a motlist file");
+            }
+            handler.Seek(header.pointersOffset);
+            long[] motOffsets = handler.ReadArray<long>(header.numMots);
+
+            Dictionary<long, MotFileBase> motions = new();
+            MotFile? headerMot = null;
+            for (int i = 0; i < motOffsets.Length; i++)
+            {
+                if (motOffsets[i] == 0)
+                {
+                    continue;
+                }
+                if (motions.ContainsKey(motOffsets[i])) continue;
+
+                var fileHandler = handler.WithOffset(motOffsets[i]);
+                var version = fileHandler.ReadInt(0);
+                if (version == 1) {
+                    var f = new MotFileLink(fileHandler);
+                    f.Read();
+                    MotFiles.Add(f);
+                    motions[motOffsets[i]] = f;
+                    continue;
+                }
+                var magic = fileHandler.ReadInt(4);
+                if (magic == MotFile.Magic) {
+                    MotFile motFile = new(fileHandler);
+                    motFile.Embedded = true;
+                    motFile.Read();
+                    motFile.ReadBones(headerMot);
+                    headerMot ??= motFile;
+                    MotFiles.Add(motFile);
+                    motions[motOffsets[i]] = motFile;
+                } else if (magic == MotTreeFile.Magic) {
+                    MotTreeFile tree = new MotTreeFile(fileHandler);
+                    tree.Embedded = true;
+                    tree.Read();
+                    MotFiles.Add(tree);
+                    motions[motOffsets[i]] = tree;
+                }
+                // NOTE: MotionFacial also exists, haven't seen it in motlists yet though
+            }
+
+            handler.Seek(header.motionIndicesOffset);
+            for (int i = 0; i < motOffsets.Length; i++)
+            {
+                MotIndex motIndex = new(header.version);
+                motIndex.Read(handler);
+                Motions.Add(motIndex);
+                var motOffset = motOffsets[i];
+                if (motOffset != 0)
+                {
+                    motIndex.MotFile = motions[motOffset];
+                }
+            }
+
+            foreach (var motIndex in Motions)
+            {
+                if (motIndex.overrideClipOffset > 0 && motIndex.overrideClipCount > 0)
+                {
+                    handler.Seek(motIndex.overrideClipOffset);
+                    var headerOffsets = handler.ReadArray<long>(motIndex.overrideClipCount);
+                    foreach (var off in headerOffsets)
+                    {
+                        handler.Seek(off);
+                        var motclipHandler = handler;
+                        if (Header.version >= MotlistVersion.MHWILDS)
+                        {
+                            motclipHandler = handler.WithOffset(handler.Tell());
+                        }
+                        var clip = new MotClip();
+                        clip.Read(motclipHandler);
+                        motIndex.OverrideClips.Add(clip);
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public static bool HasSharedBoneList(MotVersion version) => version >= MotVersion.RE3;
+        public static bool HasSharedBoneList(MotlistVersion version) => version >= MotlistVersion.RE3;
+
+        protected override bool DoWrite()
+        {
+            var handler = FileHandler;
+            var header = Header;
+            header.Write(handler);
+            handler.Align(16);
+            header.pointersOffset = handler.Tell();
+            header.numMots = Motions.Count;
+            handler.Skip(header.numMots * sizeof(long));
+            handler.Align(16);
+
+            var motFileDict = new Dictionary<MotFileBase, long>();
+            var foundMotFile = false;
+            foreach (var motion in Motions)
+            {
+                var mot = motion.MotFile;
+                if (mot == null || motFileDict.ContainsKey(mot)) continue;
+
+                var motOffset = handler.Tell();
+                motFileDict[mot] = motOffset;
+                mot.FileHandler = handler.WithOffset(motOffset);
+                mot.Write();
+                // "we only need one bone list header per motlist even if some mots use different bones" - capcom dev, apparently
+                var skipBoneList = header.version >= MotlistVersion.RE3 && foundMotFile;
+                if (mot is MotFile motFile && !skipBoneList)
+                {
+                    motFile.WriteBones();
+                    motFile.Header.motSize = 0;
+                    motFile.FileHandler.Write(12, 0);
+                    foundMotFile = true;
+                }
+                handler.Align(16);
+            }
+
+            handler.Write(24, header.motionIndicesOffset = handler.Tell());
+            for (int i = 0; i < Motions.Count; i++)
+            {
+                var motion = Motions[i];
+                if (motion.OverrideClips.Count > byte.MaxValue) throw new InvalidDataException("Too many MOTLIST override clips.");
+                motion.overrideClipCount = (byte)motion.OverrideClips.Count;
+                motion.overrideClipOffset = 0;
+                if (motion.MotFile == null)
+                {
+                    handler.Write(header.pointersOffset + i * sizeof(long), 0L);
+                    motion.Write(handler);
+                    continue;
+                }
+
+                if (motFileDict.TryGetValue(motion.MotFile, out var motOffset))
+                {
+                    handler.Write(header.pointersOffset + i * sizeof(long), motOffset);
+                }
+                else
+                {
+                    throw new Exception($"Mot file for motion ID {motion.motNumber} not found");
+                }
+
+                motion.Write(handler);
+            }
+
+            handler.Align(16);
+
+            foreach (var motIndex in Motions)
+            {
+                if (motIndex.OverrideClips.Count != 0)
+                {
+                    handler.Align(8);
+                    motIndex.overrideClipCount = (byte)motIndex.OverrideClips.Count;
+                    motIndex.overrideClipOffset = handler.Tell();
+                    handler.Skip(motIndex.overrideClipCount * 8);
+                    handler.Align(16);
+                    for (int i = 0; i < motIndex.OverrideClips.Count; ++i)
+                    {
+                        handler.Write(motIndex.overrideClipOffset + i * 8, handler.Tell());
+                        var motclipHandler = handler;
+                        if (header.version >= MotlistVersion.MHWILDS)
+                        {
+                            motclipHandler = handler.WithOffset(handler.Tell());
+                        }
+                        motIndex.OverrideClips[i].Write(motclipHandler);
+                    }
+
+                    handler.Write(motIndex.Start, motIndex.overrideClipOffset);
+                    motIndex.Rewrite(handler);
+                }
+            }
+            header.Write(handler, 0);
+
+            return true;
+        }
+
+        public bool ReplaceMotFile(MotFileBase replacedFile, MotFileBase newFile)
+        {
+            var motIndex = MotFiles.IndexOf(replacedFile);
+            if (motIndex == -1)
+            {
+                Log.Error($"Mot {replacedFile} not found in motlist");
+                return false;
+            }
+
+            MotFiles[motIndex] = newFile;
+            foreach (var mots in Motions) {
+                if (mots.MotFile == replacedFile) {
+                    mots.MotFile = newFile;
+                }
+            }
+            return true;
+        }
+    }
+}

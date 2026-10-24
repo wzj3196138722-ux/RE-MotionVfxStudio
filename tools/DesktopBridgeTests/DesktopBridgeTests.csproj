@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../VfxStudio.LiveEditor/DesktopBridge.cs" Link="DesktopBridge.cs" />
+    <Compile Include="../../VfxStudio.LiveEditor/DesktopStatus.cs" Link="DesktopStatus.cs" />
+    <Compile Include="../DesktopBridge/AuthorLinks.cs" Link="AuthorLinks.cs" />
+  </ItemGroup>
+</Project>

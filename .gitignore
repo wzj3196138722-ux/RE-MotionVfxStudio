@@ -1,0 +1,37 @@
+# Local build and validation products
+**/bin/
+**/obj/
+**/build/
+**/build-cache/
+**/published/
+**/test-output/
+**/fixtures/
+**/live-ui-fixtures/
+**/node_modules/
+**/__pycache__/
+.vs/
+.idea/
+artifacts/
+publish/
+releases/
+tools/LuaValidation/lua-runner.exe
+tools/LuaValidation/*.obj
+tools/LuaValidation/*.rsp
+
+# Local game files, personal configuration and sessions
+natives/
+mod-work/
+**/runtime/
+**/captures/
+**/sessions/
+*.user
+*.suo
+*.log
+*.pak
+runtime-config.json
+mcp-config.json
+group-notes.json
+last-replay.json
+.env
+.env.*
+

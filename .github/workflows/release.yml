@@ -1,0 +1,68 @@
+name: Build and publish Windows installer
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: motionvfx-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.repository == 'wzj3196138722-ux/RE-MotionVfxStudio' && github.ref == 'refs/heads/main'
+    runs-on: windows-2022
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: '1'
+      REFRAMEWORK_ROOT: ${{ github.workspace }}/third-party/reframework-sdk
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Check version and preserve existing releases
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./.github/scripts/Check-Release.ps1
+
+      - name: Install pinned .NET SDK
+        if: steps.release.outputs.publish == 'true'
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.300'
+
+      - name: Build and test self-contained package
+        if: steps.release.outputs.publish == 'true'
+        run: ./.github/scripts/Build-Release.ps1 -Version '${{ steps.release.outputs.version }}'
+
+      - name: Keep build products and test evidence
+        if: always() && steps.release.outputs.publish == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: MotionVfxLive-${{ steps.release.outputs.version }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            artifacts/release/*.exe
+            artifacts/release/*.zip
+            artifacts/release/*.sha256
+            artifacts/release/*-checks.json
+            artifacts/release/*-build.json
+            artifacts/installer-self-test/installer-tests.json
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 14
+
+      - name: Publish a new tag and release without overwriting anything
+        if: success() && steps.release.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./.github/scripts/Publish-Release.ps1 -Version '${{ steps.release.outputs.version }}'

@@ -1,0 +1,262 @@
+[
+  {
+    "path": "dependencies/lua/README",
+    "sha256": "6a3993c9dc39c2b8df006a944bf67d4a20408b533363466dd17b32c958c4e285"
+  },
+  {
+    "path": "dependencies/lua/src/lapi.c",
+    "sha256": "5c4ccf79cb5f0903697d3e4d3bebba8207f69f66f8721ed87b42e42f5b1fd484"
+  },
+  {
+    "path": "dependencies/lua/src/lapi.h",
+    "sha256": "c2ab2c3b26351d53f2e66d4de1a3e5dcb43e61659f4aeef36d410c5d9a5387fb"
+  },
+  {
+    "path": "dependencies/lua/src/lauxlib.c",
+    "sha256": "280c189a7a5784a41a7fa1e64e185500de1ed720f5665e12ce9b3cc7c2af9016"
+  },
+  {
+    "path": "dependencies/lua/src/lauxlib.h",
+    "sha256": "69945b415f38ad223e4acd593caf9f9a7fbb44d9936bfa71bc4a925eb5dc320a"
+  },
+  {
+    "path": "dependencies/lua/src/lbaselib.c",
+    "sha256": "2d23a23a5eaa9f74669ff1f2c16ead8af8f1fe4da990ebf70094c2bdc736d3d7"
+  },
+  {
+    "path": "dependencies/lua/src/lcode.c",
+    "sha256": "cc261cbbc631017b1899fe6d57e027266b4b77805c0ad38a7e908e9d716bd68b"
+  },
+  {
+    "path": "dependencies/lua/src/lcode.h",
+    "sha256": "40f6a6453461aef8f31b61a4a6698862578b74f8b11a084708336923d7808e18"
+  },
+  {
+    "path": "dependencies/lua/src/lcorolib.c",
+    "sha256": "23fe9d98359c6acacc1bd12b66bf37e165308d8616d4a3e979ecbec40eabe9b0"
+  },
+  {
+    "path": "dependencies/lua/src/lctype.c",
+    "sha256": "3e21ae6a8faab3ed470ae0de19360da6b4e21a0a0f8572f502f7e13d590186f8"
+  },
+  {
+    "path": "dependencies/lua/src/lctype.h",
+    "sha256": "c800311872ecba642f6d013b290eda83ba6cd8df8061e25cdca1dd4adcbed8b5"
+  },
+  {
+    "path": "dependencies/lua/src/ldblib.c",
+    "sha256": "349afd63c8be2cb8a522e4a04e9f444b65ed1fc7f4dabba5b4b61fd8c11d0c42"
+  },
+  {
+    "path": "dependencies/lua/src/ldebug.c",
+    "sha256": "8c2d248ce19a7df066c2cc0d80a3c55d13dcd4f227fb0810dd2b7f0d2d905646"
+  },
+  {
+    "path": "dependencies/lua/src/ldebug.h",
+    "sha256": "527f6a7d3849738a6e7548f8035b551dc52101a685ab3ac2979e1dd1fc8b884f"
+  },
+  {
+    "path": "dependencies/lua/src/ldo.c",
+    "sha256": "8fadc626905d1d497c57b5711e175096a50655a12228a64da62a78d07e1a08e4"
+  },
+  {
+    "path": "dependencies/lua/src/ldo.h",
+    "sha256": "ad1809850005b277b0f5522bdf95fa9a8228c9de6dc5fc1206384c00eb1bae8c"
+  },
+  {
+    "path": "dependencies/lua/src/ldump.c",
+    "sha256": "7e9df2823a5a3fa00f4a508968c2e3387aeda59310c192d63cf7dc2d18ab7949"
+  },
+  {
+    "path": "dependencies/lua/src/lfunc.c",
+    "sha256": "d5529bd218826190de1a9f555cae92941d01f7a3b08daa02f05279e1a1256a46"
+  },
+  {
+    "path": "dependencies/lua/src/lfunc.h",
+    "sha256": "6d0ae4071a10feac2b7d0b67b0249f6859d793425d7035bbbb5876c5a856a8ac"
+  },
+  {
+    "path": "dependencies/lua/src/lgc.c",
+    "sha256": "f41e519c37cb0d554223e0b053c20bb63804deba7694494107e525dee3f62e35"
+  },
+  {
+    "path": "dependencies/lua/src/lgc.h",
+    "sha256": "37d857b56070fecbd509699b2f92d3de366bce24d47f3f401a45f9ded6283664"
+  },
+  {
+    "path": "dependencies/lua/src/linit.c",
+    "sha256": "3578568e27b9c1e2f4a7f9a53fdb4bc8ac095db75cc86e966bb1deec2792158e"
+  },
+  {
+    "path": "dependencies/lua/src/liolib.c",
+    "sha256": "27d22bb674fe615e67670eab21b02cc4dfd811d6021dddf79db358e4746b679b"
+  },
+  {
+    "path": "dependencies/lua/src/ljumptab.h",
+    "sha256": "6c3e9858b9dad03ccd61445ab0bff0eb6ddfa5e731e044f93350fe6c6b2ad8d5"
+  },
+  {
+    "path": "dependencies/lua/src/llex.c",
+    "sha256": "bce9bdf18e2d124463d54319dcaedc615171c87b11db969d2dbfc86f2f3b4a9c"
+  },
+  {
+    "path": "dependencies/lua/src/llex.h",
+    "sha256": "5ce0302528260ed6a40ec3ebf5e27d3bc108242d9dca57e8cdbe80fe34e13410"
+  },
+  {
+    "path": "dependencies/lua/src/llimits.h",
+    "sha256": "90f005ca65553782369d38788229565f95364564648b230f1e397a64743be30a"
+  },
+  {
+    "path": "dependencies/lua/src/lmathlib.c",
+    "sha256": "c2d445536a8cc39b03ac60a05092047955ea0c017e34ca30243b33e397838462"
+  },
+  {
+    "path": "dependencies/lua/src/lmem.c",
+    "sha256": "c773fabfe40d73b8ca14714a9ece898e253c256371156961f08cd21abb96ba24"
+  },
+  {
+    "path": "dependencies/lua/src/lmem.h",
+    "sha256": "8318a170a1d4bf21c3cb4deb1f8661f1dc7cf4eb688e4ec9a1e7ea16bfc3b5cf"
+  },
+  {
+    "path": "dependencies/lua/src/loadlib.c",
+    "sha256": "4b0ef1be7e60fc3c9a31a7d5a1489e5ad00935e85afa1578bbc370c658f71d32"
+  },
+  {
+    "path": "dependencies/lua/src/lobject.c",
+    "sha256": "b9b78532662ffcd1b319d1eb1a590b0700c1f21991b260150d311bbb1f34e85a"
+  },
+  {
+    "path": "dependencies/lua/src/lobject.h",
+    "sha256": "3797990a028f5fb49371cb06ce6fb572893c9a3fafba75f156c095bd9433042c"
+  },
+  {
+    "path": "dependencies/lua/src/lopcodes.c",
+    "sha256": "bdc9d39fd8bf1a350c0249f726c5f61bef64b122b93a0fbc172b0328dc01f594"
+  },
+  {
+    "path": "dependencies/lua/src/lopcodes.h",
+    "sha256": "dcc99017b9b40b4b363e97a3bd4f381d1b07a894d5ad6d9869a7587872d1af9a"
+  },
+  {
+    "path": "dependencies/lua/src/lopnames.h",
+    "sha256": "fbdbebc96b136efc6165cba1ac2b311b0c52413aaef59ae9ec750748f13c9e9a"
+  },
+  {
+    "path": "dependencies/lua/src/loslib.c",
+    "sha256": "9a9377ca3fbbca810ee9d6813348dd4209071caaf8620d330f326b30f18b00fd"
+  },
+  {
+    "path": "dependencies/lua/src/lparser.c",
+    "sha256": "29222434afe2cae98ae47b7f062240f1fdc8797811b453e42bdd4904f2ea79b1"
+  },
+  {
+    "path": "dependencies/lua/src/lparser.h",
+    "sha256": "68c34ef2d6e5a227f7cff18436a42c6739b1470ce12f059f168d9bb69fc8d49c"
+  },
+  {
+    "path": "dependencies/lua/src/lprefix.h",
+    "sha256": "626785d4eda75e9435f0ac21a780ae3b11f8b27dc36934e637a5c2305f906531"
+  },
+  {
+    "path": "dependencies/lua/src/lstate.c",
+    "sha256": "4747ce0eceda59593e4a5d66923d016837b7e8b0c33b674f2017acea5c1b64f1"
+  },
+  {
+    "path": "dependencies/lua/src/lstate.h",
+    "sha256": "b03b119ea65c7f11eac9e7efc27ae3b05f96da2e9c3ff98fe59226d1f2d229dd"
+  },
+  {
+    "path": "dependencies/lua/src/lstring.c",
+    "sha256": "f853579f77a11272de2f7883123b3c37b22d5f783abd096aac85db137267d94d"
+  },
+  {
+    "path": "dependencies/lua/src/lstring.h",
+    "sha256": "a8cb0d737276f6a41071a0776ee1d8aa13cf02fa7c79ea096d202b14ea792e31"
+  },
+  {
+    "path": "dependencies/lua/src/lstrlib.c",
+    "sha256": "bfe539eb44af52705489c21230f849b6e17685144974e9fecea4c79c09b01e16"
+  },
+  {
+    "path": "dependencies/lua/src/ltable.c",
+    "sha256": "c68b16e7180827e65817579bb3edbe878de101b512ac697703060b3ee54bae1e"
+  },
+  {
+    "path": "dependencies/lua/src/ltable.h",
+    "sha256": "5f9db4c200195331ce64993c16a9049f860d79b9b5df280f5155770102116fdd"
+  },
+  {
+    "path": "dependencies/lua/src/ltablib.c",
+    "sha256": "c3e4c52daeb3ce81068a72b4a2856ace08ea5dd32b3605562208df469c1e794b"
+  },
+  {
+    "path": "dependencies/lua/src/ltm.c",
+    "sha256": "2433b2756d747f795ef5c84214e95ca15429e619ca3442e63fb295e2208bd8f5"
+  },
+  {
+    "path": "dependencies/lua/src/ltm.h",
+    "sha256": "5b2f6e59951edeef6e71bebe5ac4351f4b3602ee0461729308b80dcee8cea910"
+  },
+  {
+    "path": "dependencies/lua/src/lua.h",
+    "sha256": "c5f20b2c2840ef5f1fda6b87e81eacf3dd9eb5730dacc20987e7725e776646fc"
+  },
+  {
+    "path": "dependencies/lua/src/lua.hpp",
+    "sha256": "fd83f7e823cfbb03ac2da937ec83f01b4a6ddaac220a4fa1ffd6c6c3842c5890"
+  },
+  {
+    "path": "dependencies/lua/src/luaconf.h",
+    "sha256": "8a302b96f9e5d81f9c8566ad99abfb2c82d8fab4f6ae29a40d5aeb390675e95f"
+  },
+  {
+    "path": "dependencies/lua/src/lualib.h",
+    "sha256": "4ea0f67d3e467f5d6a327616e22a3c2da8e03d47a3c3660916275f2842f521ea"
+  },
+  {
+    "path": "dependencies/lua/src/lundump.c",
+    "sha256": "f8094a85d7bc9de819fdde667937b8076fc7bca39c329eeb0091345f00519d04"
+  },
+  {
+    "path": "dependencies/lua/src/lundump.h",
+    "sha256": "746551630d8678ae31a999bf9318003d9329388b7cd9d3fa1cdc725ffc9dc2ee"
+  },
+  {
+    "path": "dependencies/lua/src/lutf8lib.c",
+    "sha256": "ba322d5dfbe84308226659e25169c97f027c4cc6c5284ae1bc3a747946b7d382"
+  },
+  {
+    "path": "dependencies/lua/src/lvm.c",
+    "sha256": "473266f7d6149719c8434de3de9a1affdd45858158b669603f34dcefe2059705"
+  },
+  {
+    "path": "dependencies/lua/src/lvm.h",
+    "sha256": "aa40b399f811f5cbf6c2fb792d8bb932db6488541201525cda075371e100b332"
+  },
+  {
+    "path": "dependencies/lua/src/lzio.c",
+    "sha256": "fba61ceeeb257a3fe5f63310f21e14fc26c4be647583dcf8e74cbc7fb7e43e8a"
+  },
+  {
+    "path": "dependencies/lua/src/lzio.h",
+    "sha256": "9673f62eac2d0fe3010f9d23148be7b8113319fdf4c4490015cd9feae2ecaad4"
+  },
+  {
+    "path": "include/reframework/API.h",
+    "sha256": "73da3d6e1c81d066d97ac638f91c715e3561d00dba1e4585bc22ae4442f88946"
+  },
+  {
+    "path": "include/reframework/API.hpp",
+    "sha256": "6180e34871c82bb2f0df11bb0b8f3f834f600e2c4e1149c3efadfbd33ac28357"
+  },
+  {
+    "path": "LICENSE-Lua.txt",
+    "sha256": "60737b1a4e3a44fa00c2bd3434d841f320f20b9066db6b97a8769ec0ba1d50c6"
+  },
+  {
+    "path": "LICENSE-REFramework.txt",
+    "sha256": "7124c298a1fe76b169db561ee640101f88f573f21d1f269b34817b9538321f5f"
+  }
+]
