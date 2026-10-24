@@ -21,6 +21,23 @@ $cpp+=$luaFiles | ForEach-Object {$_.BaseName+'.obj'}
 [IO.File]::WriteAllLines((Join-Path $build 'runner.rsp'),$cpp,[Text.Encoding]::ASCII)
 Push-Location $build
 try {
-    & cmd /c ('""{0}" >nul && cl @lua.rsp && cl @runner.rsp"' -f $setup)
-    if($LASTEXITCODE -ne 0){throw 'Native ImGui test build failed.'}
+    $start=[Diagnostics.ProcessStartInfo]::new()
+    $start.FileName=$env:ComSpec
+    $start.Arguments='/d /s /c ""{0}" >nul && cl @lua.rsp && cl @runner.rsp"' -f $setup
+    $start.WorkingDirectory=$build
+    $start.UseShellExecute=$false
+    $start.CreateNoWindow=$true
+    $start.RedirectStandardOutput=$true
+    $start.RedirectStandardError=$true
+    $compiler=[Diagnostics.Process]::Start($start)
+    try {
+        $outputTask=$compiler.StandardOutput.ReadToEndAsync()
+        $errorTask=$compiler.StandardError.ReadToEndAsync()
+        $compiler.WaitForExit()
+        $compilerOutput=$outputTask.GetAwaiter().GetResult()
+        $compilerError=$errorTask.GetAwaiter().GetResult()
+        if($compilerOutput){Write-Host $compilerOutput}
+        if($compilerError){Write-Host $compilerError}
+        if($compiler.ExitCode -ne 0){throw ('Native ImGui test build failed with exit code '+$compiler.ExitCode+'.')}
+    } finally {$compiler.Dispose()}
 } finally {Pop-Location}

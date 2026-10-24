@@ -1076,8 +1076,8 @@
   },
   {
     "path": "tools/DebugInput/Build.ps1",
-    "size": 3146,
-    "sha256": "6bc7e592977268e4e82281675b2db65c9d0a879f198978db21651bdc3d661ea7"
+    "size": 4142,
+    "sha256": "c107494b6e52f7e7055718382b27639a187f24420d93982dd292c639a2008084"
   },
   {
     "path": "tools/DebugInput/ImportHook.hpp",
@@ -1566,8 +1566,8 @@
   },
   {
     "path": "tools/LuaValidation/build.ps1",
-    "size": 1636,
-    "sha256": "2df97cb98a0550d2322f919845ec5511cd4de4b6f156365565690f4aea8738e3"
+    "size": 2635,
+    "sha256": "455989a7fa2a61692f60eec807c304e21f47d1d4be963a9ec26d48d6bfc51d9a"
   },
   {
     "path": "tools/LuaValidation/d2d-file-dialog-native-tests.lua",
@@ -1631,8 +1631,8 @@
   },
   {
     "path": "tools/LuaValidation/native-imgui/Build.ps1",
-    "size": 1983,
-    "sha256": "62a9be683d7bbf54155af9fb65c383046a266e8520ca839c309b2f81e3c703c9"
+    "size": 2790,
+    "sha256": "0374c35f2aa4162121e8bcf50ffa71063ed4ad3ac3a5fdcc9a2ac5d2a86c1951"
   },
   {
     "path": "tools/LuaValidation/native-imgui/imgui-1.92.4/imconfig.h",

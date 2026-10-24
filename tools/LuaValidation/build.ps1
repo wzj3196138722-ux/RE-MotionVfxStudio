@@ -15,6 +15,25 @@ $response += Get-ChildItem -LiteralPath $luaSource -Filter '*.c' | Where-Object 
 $response | Set-Content -LiteralPath (Join-Path $PSScriptRoot 'build.rsp') -Encoding ascii
 Push-Location $PSScriptRoot
 try {
-    & cmd /c ('""{0}" >nul && cl @build.rsp"' -f $setupPath)
-    if ($LASTEXITCODE -ne 0) { throw 'Lua test runner compilation failed.' }
+    # Give cmd its exact command line instead of letting PowerShell 7 rewrite
+    # nested quotes around a Visual Studio path containing spaces.
+    $start = [Diagnostics.ProcessStartInfo]::new()
+    $start.FileName = $env:ComSpec
+    $start.Arguments = '/d /s /c ""{0}" >nul && cl @build.rsp"' -f $setupPath
+    $start.WorkingDirectory = $PSScriptRoot
+    $start.UseShellExecute = $false
+    $start.CreateNoWindow = $true
+    $start.RedirectStandardOutput = $true
+    $start.RedirectStandardError = $true
+    $compiler = [Diagnostics.Process]::Start($start)
+    try {
+        $outputTask = $compiler.StandardOutput.ReadToEndAsync()
+        $errorTask = $compiler.StandardError.ReadToEndAsync()
+        $compiler.WaitForExit()
+        $compilerOutput = $outputTask.GetAwaiter().GetResult()
+        $compilerError = $errorTask.GetAwaiter().GetResult()
+        if ($compilerOutput) { Write-Host $compilerOutput }
+        if ($compilerError) { Write-Host $compilerError }
+        if ($compiler.ExitCode -ne 0) { throw ('Lua test runner compilation failed with exit code ' + $compiler.ExitCode + '.') }
+    } finally { $compiler.Dispose() }
 } finally { Pop-Location }

@@ -30,8 +30,27 @@ $fixture += 'user32.lib'
 [IO.File]::WriteAllLines((Join-Path $build 'fixture.rsp'), $fixture, [Text.Encoding]::ASCII)
 Push-Location $build
 try {
-    & cmd /c ('""{0}" >nul && cl @lua.rsp && cl @plugin.rsp && cl /nologo /std:c++17 /EHsc /MT /Fe:InputTests.exe ../Tests.cpp && cl /nologo /std:c++17 /EHsc /MT /Fe:PollingTests.exe ../PollingTests.cpp user32.lib dxguid.lib && cl @fixture.rsp"' -f $setup)
-    if ($LASTEXITCODE -ne 0) { throw 'Native input build failed.' }
+    # Preserve cmd's nested quotes independently of PowerShell native argument
+    # modes; Visual Studio is commonly installed under Program Files.
+    $start = [Diagnostics.ProcessStartInfo]::new()
+    $start.FileName = $env:ComSpec
+    $start.Arguments = '/d /s /c ""{0}" >nul && cl @lua.rsp && cl @plugin.rsp && cl /nologo /std:c++17 /EHsc /MT /Fe:InputTests.exe ../Tests.cpp && cl /nologo /std:c++17 /EHsc /MT /Fe:PollingTests.exe ../PollingTests.cpp user32.lib dxguid.lib && cl @fixture.rsp"' -f $setup
+    $start.WorkingDirectory = $build
+    $start.UseShellExecute = $false
+    $start.CreateNoWindow = $true
+    $start.RedirectStandardOutput = $true
+    $start.RedirectStandardError = $true
+    $compiler = [Diagnostics.Process]::Start($start)
+    try {
+        $outputTask = $compiler.StandardOutput.ReadToEndAsync()
+        $errorTask = $compiler.StandardError.ReadToEndAsync()
+        $compiler.WaitForExit()
+        $compilerOutput = $outputTask.GetAwaiter().GetResult()
+        $compilerError = $errorTask.GetAwaiter().GetResult()
+        if ($compilerOutput) { Write-Host $compilerOutput }
+        if ($compilerError) { Write-Host $compilerError }
+        if ($compiler.ExitCode -ne 0) { throw ('Native input build failed with exit code ' + $compiler.ExitCode + '.') }
+    } finally { $compiler.Dispose() }
     & ./InputTests.exe
     if ($LASTEXITCODE -ne 0) { throw 'Native input tests failed.' }
     & ./PollingTests.exe
