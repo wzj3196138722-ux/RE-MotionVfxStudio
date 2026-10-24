@@ -4,7 +4,7 @@
 
 **Edit the effects triggered by your character's actions, inside Monster Hunter Wilds.**
 
-[简体中文](README.md) · [Tutorials](docs/tutorials.en.md) · [Download the 0.8.5 installer](https://github.com/wzj3196138722-ux/RE-MotionVfxStudio/releases/tag/v0.8.6)
+[简体中文](README.md) · [Tutorials](docs/tutorials.en.md) · [Download the 0.8.6 installer](https://github.com/wzj3196138722-ux/RE-MotionVfxStudio/releases/tag/v0.8.6)
 
 MotionVfx Live is an in-game VFX editor built on REFramework and REFramework D2D. Record character actions and effect calls, identify the relevant EFX resource, edit its parameters, and reload it to inspect the result during the original action. The game itself renders the preview.
 
