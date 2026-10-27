@@ -156,7 +156,7 @@ internal static class InstallEngine
             ("licenses/REFramework-D2D-LICENSE.txt", "reframework/plugins/reframework-d2d-LICENSE.txt"),
             ("licenses/MotionVfxDebugInput-THIRD-PARTY.txt", "reframework/plugins/MotionVfxDebugInput-LICENSE.txt")
         };
-        foreach (string module in new[] { "fx_action_capture", "fx_action_bindings", "fx_action_sources", "fx_attachment_targets", "fx_action_preview_transaction", "fx_action_preview_runtime", "fx_preview_runtime", "fx_ai_bridge", "fx_debug_hotkeys", "fx_d2d_widgets", "fx_d2d_workbench", "fx_parameter_ui", "fx_precache_runtime", "fx_pfb_page", "fx_pfb_preview_runtime", "fx_equipment_sources", "fx_equipment_pfb_preview_runtime", "fx_file_dialog" })
+        foreach (string module in new[] { "fx_action_capture", "fx_action_bindings", "fx_action_sources", "fx_attachment_targets", "fx_action_preview_transaction", "fx_action_preview_runtime", "fx_preview_runtime", "fx_ai_bridge", "fx_debug_hotkeys", "fx_d2d_widgets", "fx_d2d_workbench", "fx_parameter_ui", "fx_efx_clipboard", "fx_precache_runtime", "fx_pfb_page", "fx_pfb_preview_runtime", "fx_equipment_sources", "fx_equipment_pfb_preview_runtime", "fx_file_dialog" })
             map.Add(($"plugin/MotionVfxLive/{module}.lua", $"reframework/autorun/MotionVfxLive/{module}.lua"));
         foreach (string logo in new[] { "logo", "author-logo" }) map.Add(($"images/MotionVfxLive/{logo}.png", $"reframework/images/MotionVfxLive/{logo}.png"));
         return map.ToArray();

@@ -41,10 +41,10 @@ internal static class InstallerTests
                 string path = InstallEngine.Child(game, relative); Directory.CreateDirectory(Path.GetDirectoryName(path)!);
                 File.WriteAllText(path, "用户文件必须保留：" + relative); untouched[path] = InstallEngine.Hash(path);
             }
-            bool failure = false;
+            bool failure = false; string? installError = null;
             try { InstallEngine.Install(game, app, false, (_, _) => { }, failAfter: 2, register: false); }
-            catch (IOException ex) { failure = ex.Message.Contains("Injected"); }
-            Check(failure, "Injected mid-copy failure is reported");
+            catch (IOException ex) { failure = ex.Message.Contains("Injected"); installError = ex.Message; }
+            Check(failure, "Injected mid-copy failure is reported" + (failure ? "" : ": " + (installError ?? "no failure")));
             Check(File.ReadAllText(old) == "old lua content", "Partial installation restores overwritten files");
             Check(!File.Exists(InstallEngine.Child(game, "reframework/data/MotionVfxLive/Reload.lua")), "Partial installation removes newly added program files");
             Check(InstallEngine.Hash(note) == noteHash, "Rollback preserves unrelated user notes");
