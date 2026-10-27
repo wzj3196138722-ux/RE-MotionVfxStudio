@@ -20,7 +20,7 @@ function Rounded([Drawing.Graphics]$Graphics,[Drawing.Brush]$Brush,[float]$X,[fl
         $Graphics.FillPath($Brush,$path)
     } finally { $path.Dispose() }
 }
-foreach ($name in @('actions','editor','precache','time','parameters','hidden','xy','settings','deletion','resized','local-motion','files','file-browser','file-save','file-browser-small')) {
+foreach ($name in @('actions','editor','precache','time','parameters','hidden','xy','settings','deletion','resized','local-motion','files','file-browser','file-save','file-browser-small','clipboard-entry','clipboard-attribute')) {
     if (-not (Test-Path -LiteralPath (Join-Path $InputDirectory ($name+'.json')))) { continue }
     $layout=Get-Content -LiteralPath (Join-Path $InputDirectory ($name+'.json')) -Raw -Encoding utf8 | ConvertFrom-Json
     $bitmap=[Drawing.Bitmap]::new([int]$layout.width,[int]$layout.height)

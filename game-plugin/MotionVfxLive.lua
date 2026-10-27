@@ -4,9 +4,9 @@
 -- unique game resource paths; this script never overwrites an original EFX.
 if _G.MotionVfxLive then return _G.MotionVfxLive end
 
-local M = { version = "0.8.7", active = false }
+local M = { version = "0.8.8", active = false }
 local imgui = imgui -- Renderer substitution is local to this editor only.
-local workbench, precache_runtime, action_preview, pfb_preview
+local workbench, precache_runtime, action_preview, pfb_preview, efx_clipboard_ui
 local pfb_preview_generation=0
 local function pfb_preview_status()return pfb_preview and pfb_preview:snapshot() or {phase="unavailable",message="PFB 热重载模块未就绪"}end
 M.pfb_preview_status=pfb_preview_status
@@ -828,6 +828,7 @@ local function poll()
     if response and response.id == pending.id then
         state.pending = nil
         if response.document then state.document = response.document end
+        state.copy_buffer = response.copyBuffer
         if response.ok and response.desktop and response.desktop.id and response.desktop.statusFile and workbench then
             workbench.desktop_jobs=workbench.desktop_jobs or {}
             workbench.desktop_jobs[response.desktop.id]=response.desktop
@@ -1229,7 +1230,7 @@ local function button(label, fn, kind, width)
     local ok, clicked = pcall(imgui.button, display .. suffix, { width or 0, math.max(32, 28 * state.font_scale * (breaks + 1)) })
     if tint and imgui.push_style_color then imgui.pop_style_color(1) end
     if not ok then error(clicked, 0) end
-    if clicked then fn() end
+    if clicked and kind ~= "disabled" then fn() end
 end
 local function button_row(items)
     local width, used = available_width(), 0
@@ -1509,7 +1510,7 @@ local function draw_tree()
         return false, false
     end
     local function reveal_search()
-        if filter ~= "" and imgui.set_next_item_open then imgui.set_next_item_open(true) end
+        if (filter ~= "" or state.copy_reveal) and imgui.set_next_item_open then imgui.set_next_item_open(true) end
     end
     local function draw_node(kind, node, inherited, occurrence)
         local visible, whole = matches(node, inherited)
@@ -1574,7 +1575,7 @@ local function draw_tree()
                     local caption = group.note and group.note ~= "" and (group.note .. "（原名：" .. native_name .. "）") or native_name
                     -- Notes are display text, never ImGui ID syntax or native group identifiers.
                     section("Group [" .. group.index .. "] " .. caption:gsub("#", "＃") .. " · " .. #(group.entries or {}) .. " 个块###mvl_group_" .. group.index, function()
-                        button("编辑分组备注##mvl_group_rename_" .. group.index, function() inspect({ kind = "group", index = group.index }) end)
+                        button("选择分组 / 编辑备注##mvl_group_rename_" .. group.index, function() inspect({ kind = "group", index = group.index }) end)
                         if #(group.entries or {}) == 0 then text("空分组", palette.muted) end
                         for member, index in ipairs(group.entries or {}) do
                             if entries[index] then draw_node("entry", entries[index], group_match, member) end
@@ -1606,6 +1607,7 @@ local function draw_tree()
         end
     end)
     if filter ~= "" and matched == 0 then text("没有匹配的分组、块或属性。", palette.muted) end
+    state.copy_reveal = false
 end
 local function field_modified(field)
     return field.editable == true and state.values[field.path] ~= nil and state.values[field.path] ~= tostring(field.value or "")
@@ -1953,10 +1955,12 @@ local field_group_cache = {}
 local function draw_fields()
     local selected = state.selected
     if not selected then
+        if efx_clipboard_ui then efx_clipboard_ui:draw() end
         text("属性编辑", palette.accent)
         text("从结构列表选择特效块或属性。可在结构搜索中输入 RGBCommon 等属性名称。", palette.muted); return
     end
     text("属性编辑 · " .. selected_title(selected), palette.accent)
+    if efx_clipboard_ui then efx_clipboard_ui:draw() end
     local embedded = selected.embeddedPath and #selected.embeddedPath > 0
     if selected.attributeIndex ~= nil then
         button("返回所属 " .. (selected.kind == "entry" and "Entry" or "Action") .. "##mvl_parent_target", function()
@@ -2000,10 +2004,7 @@ local function draw_fields()
             button("取消删除##mvl_cancel_remove",function() state.confirm_delete=false end)
         end
       end
-      section("结构操作：添加 / 复制 / 删除##mvl_structure_operations", function()
-        if not embedded and selected.kind == "entry" and selected.attributeIndex == nil then
-            button("复制特效块##mvl_duplicate", function() mutate("duplicate_entry", { index = selected.index }) end)
-        end
+      section("添加属性##mvl_structure_operations", function()
         input("新增属性类型##mvl_attr_type", "attribute_type")
         local types = state.document and state.document.attributeTypes or {}
         if #types > 0 then
@@ -3165,5 +3166,13 @@ do
             busy = function(busy, id, action) state.ai_busy, state.ai_request_id, state.ai_action = busy, id, action end })
         if ok then ai_bridge = result else ai_error = tostring(result) end
     else ai_error = tostring(err or "AI bridge module is unavailable") end
+end
+do
+    local factory, err = load_action_module("MotionVfxEfxClipboard", "MotionVfxLive.fx_efx_clipboard", "fx_efx_clipboard.lua")
+    if factory and type(factory.new) == "function" then
+        efx_clipboard_ui = factory.new({state=state,send=send,inspect=inspect,has_drafts=has_drafts,
+            copy_target=copy_target,same_target=same_target,title=selected_title,text=text,button=button,row=button_row,
+            palette=palette,ui=function()return imgui end})
+    else log_warning("复制 / 粘贴界面未加载："..tostring(err)) end
 end
 return M

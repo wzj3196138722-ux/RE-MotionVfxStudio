@@ -25,9 +25,14 @@
     "sha256": "dbf6e189a306709c22ecae595d68fcd58a361514bbd04d50f3d86704162abf6d"
   },
   {
+    "path": ".github/release-notes/0.8.8.md",
+    "size": 2977,
+    "sha256": "098b2a1bb75b945994b1b56551e4adc799a0527034271a925fc86b3442e92b8a"
+  },
+  {
     "path": ".github/scripts/Build-Release.ps1",
-    "size": 5753,
-    "sha256": "e43b756898e7a289abc700af5c92e2a7da9d30cfc5f75204f975521ca5994ff6"
+    "size": 6190,
+    "sha256": "b91db4bc1ee59320cf0bfcbd7118f4450a0d2a029efe7cb0e344f1e06ded825c"
   },
   {
     "path": ".github/scripts/Check-Release.ps1",
@@ -46,8 +51,8 @@
   },
   {
     "path": ".github/workflows/release.yml",
-    "size": 2172,
-    "sha256": "336be286d3951e9b4fae0da54ad5d4e35364dd6c6d442c0717b0ae2644e05728"
+    "size": 2237,
+    "sha256": "9ee8b9e5271da8a5be6cea6325935832d1d8440790d97eb9e249939febd2f371"
   },
   {
     "path": ".gitignore",
@@ -491,18 +496,18 @@
   },
   {
     "path": "docs/tutorials.en.md",
-    "size": 19357,
-    "sha256": "07d7536883c454fffbf543eea7b7d66af23f316a78a41e15b8a3ebf9350154d2"
+    "size": 21220,
+    "sha256": "c4a13a3dc624cfcb97ca82803a0572f7660a4bc952c6528d392edeaeac86763f"
   },
   {
     "path": "docs/tutorials.zh-CN.md",
-    "size": 16512,
-    "sha256": "7c8a470f83010af04af85520c4f932304bd9b41f817622a1af67105b814688f0"
+    "size": 18090,
+    "sha256": "863af67835a769eb3ca9dcf2c54f56ec9b44b0bc605bdf64b15f6b7ab2e9ae98"
   },
   {
     "path": "game-plugin/手动重载MotionVfxLive.lua",
-    "size": 12563,
-    "sha256": "de5e59000dec76bbf93b2902eb3675f548ada69d92c2dc54ff6c13608c1dc6b7"
+    "size": 12657,
+    "sha256": "e00a530e092e3aa6aff67594fd7df5cd06d3e4465618678ebe03690730e9d86c"
   },
   {
     "path": "game-plugin/刷新MotionVfxLive输入框.lua",
@@ -531,8 +536,8 @@
   },
   {
     "path": "game-plugin/MotionVfxLive.lua",
-    "size": 203481,
-    "sha256": "7c3e114c02b5f7f3a465db5d637f1569da441748de4a2da4c6762b739d8b8022"
+    "size": 204044,
+    "sha256": "3fdf0f01d16753a56e8faf39393fe42fa0667b753e750712c9d52ffdb9fc43af"
   },
   {
     "path": "game-plugin/MotionVfxLive/fx_action_bindings.lua",
@@ -571,8 +576,8 @@
   },
   {
     "path": "game-plugin/MotionVfxLive/fx_d2d_widgets.lua",
-    "size": 22882,
-    "sha256": "eed726c31466150b88769fb9f1bb325c9e61aeee0713779856061165590e5489"
+    "size": 22899,
+    "sha256": "f08e333bda40719d57629f2f3a3272298fde2fccd5f61b52ab616cde3e05fb93"
   },
   {
     "path": "game-plugin/MotionVfxLive/fx_d2d_workbench.lua",
@@ -583,6 +588,11 @@
     "path": "game-plugin/MotionVfxLive/fx_debug_hotkeys.lua",
     "size": 9436,
     "sha256": "001fcb8026ecdae6fef70148322141b009a7c1256642b08ed1e7a7b8932bed45"
+  },
+  {
+    "path": "game-plugin/MotionVfxLive/fx_efx_clipboard.lua",
+    "size": 7546,
+    "sha256": "5c1175d434461e876dc0106bb39b0bc066d55fc37344add98c4157ce983c77e7"
   },
   {
     "path": "game-plugin/MotionVfxLive/fx_equipment_pfb_preview_runtime.lua",
@@ -651,13 +661,13 @@
   },
   {
     "path": "README.en.md",
-    "size": 9568,
-    "sha256": "b8316414f54254b8fc072b97b363fb5ae4c40df1bd3002e80265ab772515fe23"
+    "size": 9584,
+    "sha256": "b80c49b2d5b7fc2c53fd3dd2d35d4e1862f970a93be1b579a81508a55e765b44"
   },
   {
     "path": "README.md",
-    "size": 8230,
-    "sha256": "74035f6c982f1321c97902eb796df5f0e2eea78ae312e78e6cea8ef807a441b5"
+    "size": 8248,
+    "sha256": "da0bdc240e954290a14726db6049b0deaa1d50e930413ce2b2e299aa7a8f85c5"
   },
   {
     "path": "REE-Lib.Generators/Diagnostics.cs",
@@ -1232,7 +1242,7 @@
   {
     "path": "tools/Installer/InstallEngine.cs",
     "size": 32247,
-    "sha256": "ac6adf664134849dd5a53dfbbb1d40495c6e0c64614c1ed40036e631d458dae9"
+    "sha256": "b622db76281af8ec4c5ca58c2761b0ba0e3f9960b7b452ac8b03323f8bd749f8"
   },
   {
     "path": "tools/Installer/InstallerTests.cs",
@@ -1242,7 +1252,7 @@
   {
     "path": "tools/Installer/MotionVfxSetup.csproj",
     "size": 945,
-    "sha256": "5b42414e9b2b463e8940b57ad740efa62d9edebc0bc226eb1155fdfee2afb398"
+    "sha256": "8e5b871c0b6b701ac8e8df3de3ae5131097b371d9c8f07f5aeffec0b189a1e8c"
   },
   {
     "path": "tools/Installer/Program.cs",
@@ -1610,6 +1620,16 @@
     "sha256": "42791104e9d5c44d22b497b88e2b7ba7ab5bc9e039b509ba57421e5493193811"
   },
   {
+    "path": "tools/LuaValidation/clipboard-layout-tests.lua",
+    "size": 1902,
+    "sha256": "3552de717ff0650b0fad5df9c34aa22b03a7baba26241fbfde1d7d79da40abce"
+  },
+  {
+    "path": "tools/LuaValidation/clipboard-ui-tests.lua",
+    "size": 5905,
+    "sha256": "1c20d11787285990fc5ad0acbac551353d2ce051d283134a71862c3846373cb8"
+  },
+  {
     "path": "tools/LuaValidation/d2d-file-dialog-native-tests.lua",
     "size": 9172,
     "sha256": "eb87905edfdd8b04eb44a35d4dd009faa5e1745b30d8de1a76ce0c93d352e45d"
@@ -1681,8 +1701,8 @@
   },
   {
     "path": "tools/LuaValidation/live-ui-tests.lua",
-    "size": 211833,
-    "sha256": "24920e77a7f67a8ccc81bc06a30a8540fe68a142dd8ca59e946ffef1c1d3e4d9"
+    "size": 211865,
+    "sha256": "bec7ce3ab63b83371dd491aefb7cdfffb4ceee7be8b129767594db84ad623e76"
   },
   {
     "path": "tools/LuaValidation/mdfxl-compat-tests.lua",
@@ -1796,8 +1816,8 @@
   },
   {
     "path": "tools/LuaValidation/Render-D2DPreview.ps1",
-    "size": 4536,
-    "sha256": "739e9bfdcd10a2a7ee33bbe8e687a4a0d7315bd8a558b67f1eceaa8805e6d965"
+    "size": 4576,
+    "sha256": "b52ab486cfcf5a99c67cccac8d91aedec9fee08647f3aea0d67d87a859252384"
   },
   {
     "path": "tools/LuaValidation/repair-bindings-tests.lua",
@@ -1811,13 +1831,13 @@
   },
   {
     "path": "tools/LuaValidation/Run-LiveUiTests.ps1",
-    "size": 2060,
-    "sha256": "6507b8e0a1f272e6335e76468d186e6eff9d92a9e8cce8109dbc30ed16b74a3f"
+    "size": 2079,
+    "sha256": "dd9767f7ccef619f2dea7b00f51af3af800768466bb560a250c8f44b749a5b0e"
   },
   {
     "path": "tools/LuaValidation/Run-OfflineTests.ps1",
-    "size": 2270,
-    "sha256": "abbb2be61d8036abac061434994c29232cb8780910f79133d20033bb92529adc"
+    "size": 2324,
+    "sha256": "736a95b2bc3d7d8397617cc25da7ef72f259b16ee3b13cb8791d20e3c2237367"
   },
   {
     "path": "tools/LuaValidation/run-tests.ps1",
@@ -1851,8 +1871,8 @@
   },
   {
     "path": "tools/LuaValidation/ui-performance-tests.lua",
-    "size": 10844,
-    "sha256": "d926d9d183f01c55dedc63b4a1783f99fb35af134a7951df69f958b9e8f2c1af"
+    "size": 10859,
+    "sha256": "f4c78613af702b4f35753522220a22e552169cd7cc5441812541f3ee437d7f5b"
   },
   {
     "path": "tools/LuaValidation/ui-playback-tests.lua",
@@ -2515,6 +2535,11 @@
     "sha256": "4fa77e13d9389a9a4bd3b7aacdf012d7d6b8309b2b9cedf3691ac6a366fd279c"
   },
   {
+    "path": "VfxStudio.LiveEditor/ClipboardTests.cs",
+    "size": 10283,
+    "sha256": "69c4387bcd90b10a12fd2eb9aa0559633fa523c29006a0c26334ae46574ec23b"
+  },
+  {
     "path": "VfxStudio.LiveEditor/ColorEditor.cs",
     "size": 7793,
     "sha256": "ea4c5637a53acc32402c62fa0a53a042caf370251d8199787dba1e30014a894c"
@@ -2561,13 +2586,18 @@
   },
   {
     "path": "VfxStudio.LiveEditor/EditorEngine.cs",
-    "size": 45769,
-    "sha256": "3bd3d02e6f9e1f89626d123e6c7fab2000667cc5886a3455ae539a0133988a89"
+    "size": 46097,
+    "sha256": "55f7301e287a9f0b8a0a325d3978c7fcafa310f14f100a98a75739943ed30444"
   },
   {
     "path": "VfxStudio.LiveEditor/EditorReadSnapshots.cs",
     "size": 4338,
     "sha256": "3d1806f9c80aeb034e740c4837f02b8b256fffe50505f090a335c075b5928a2a"
+  },
+  {
+    "path": "VfxStudio.LiveEditor/EfxClipboard.cs",
+    "size": 10426,
+    "sha256": "35568a4438d89169ec65381951352ccec1e189958bea37becc1a9be0d811b3f5"
   },
   {
     "path": "VfxStudio.LiveEditor/EmbeddedActionTests.cs",
@@ -2671,8 +2701,8 @@
   },
   {
     "path": "VfxStudio.LiveEditor/Program.cs",
-    "size": 9595,
-    "sha256": "f2c15610da2de8cccdbd695bc77d67d9fc8b07d00a307cd71e9e9fd095e6e6a9"
+    "size": 9774,
+    "sha256": "49e7d9ac24939788d768387fbc37f132c9d28ffe716019fc6ff975913fb842a2"
   },
   {
     "path": "VfxStudio.LiveEditor/ResourceResolver.cs",
@@ -2681,13 +2711,13 @@
   },
   {
     "path": "VfxStudio.LiveEditor/SelfTests.cs",
-    "size": 22629,
-    "sha256": "f97f28ff05863bf509e2de5968288346900f36d2f29d653a978496c459e8b08d"
+    "size": 22685,
+    "sha256": "2e7ed86e353e0461fd1dadd60463fa7936ae1ae9cd8b1d6c7ff9dba55a0d2ecc"
   },
   {
     "path": "VfxStudio.LiveEditor/SessionDocuments.cs",
-    "size": 4289,
-    "sha256": "533fb722990779d824185575035c71531276d2e7ba9e270631f1e7ca5c877bfd"
+    "size": 4322,
+    "sha256": "cab3e084c21ce51829b4d24c5f0b4b15191ed0790c18da37d624bf3bb1fa3279"
   },
   {
     "path": "VfxStudio.LiveEditor/SessionDocumentTests.cs",

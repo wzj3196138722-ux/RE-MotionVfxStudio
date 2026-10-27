@@ -117,7 +117,7 @@ local adapter={_mvl_wrapped_text=true,
     get_default_font_size=function()return 15 end,
     get_text_metrics_identity=function()return identity end,
     calc_text_size=function(text)metrics=metrics+1;return {x=width_of(text),y=15,reliable=reliable}end}
-s.selected=nil;c.module.with_ui(adapter,c.module.ui_fields)
+s.selected=nil;s.document=nil;c.module.with_ui(adapter,c.module.ui_fields)
 local function wrapped_at(text,width)
     c.module.with_ui(adapter,function()rendered=wrap(text,width)end);return rendered
 end

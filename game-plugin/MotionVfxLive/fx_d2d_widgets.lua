@@ -325,7 +325,7 @@ function M.new(real, api)
     a.button=function(label)
         local kind=u.next_button_kind;u.next_button_kind=nil
         local text=caption(label);local w,h=u:measure(text,14*u.scale)
-        return u:button(label,text,nil,nil,math.min(window_size().x-26*u.scale,math.max(68*u.scale,w+24*u.scale)),math.max(34*u.scale,h+14*u.scale),kind)
+        return u:button(label,text,nil,nil,math.min(window_size().x-26*u.scale,math.max(68*u.scale,w+24*u.scale)),math.max(34*u.scale,h+14*u.scale),kind,kind~="disabled")
     end
     a.input_text=function(label,value)
         local shown=caption(label)

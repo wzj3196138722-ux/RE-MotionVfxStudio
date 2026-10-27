@@ -274,7 +274,7 @@ local function environment(initial_files, debug_native)
     env.MotionVfxActionCapture, env.MotionVfxActionBindings = c.capture, c.bindings
     env.MotionVfxDebugInput = debug_native
     env.require = function(name)
-        if name == "MotionVfxLive.fx_ai_bridge" or name == "MotionVfxLive.fx_debug_hotkeys" or name == "MotionVfxLive.fx_precache_runtime" or name == "MotionVfxLive.fx_parameter_ui" then
+        if name == "MotionVfxLive.fx_ai_bridge" or name == "MotionVfxLive.fx_debug_hotkeys" or name == "MotionVfxLive.fx_precache_runtime" or name == "MotionVfxLive.fx_parameter_ui" or name == "MotionVfxLive.fx_efx_clipboard" then
             return assert(loadfile(script_path:match("^(.*)[/\\]") .. "/MotionVfxLive/" .. name:match("[^.]+$") .. ".lua", "t", env))()
         end
         equal(name, "MotionVfxLive.fx_preview_runtime")
@@ -767,7 +767,7 @@ end)
 test("structural edit invalidates old selection after success", function()
     local c = environment(); c.module.state.document = { revision = 1 }
     c.module.state.selected = { kind = "entry", index = 0 }
-    c.buttons["复制特效块##mvl_duplicate"] = true; c:draw()
+    c.module.ui_mutate("duplicate_entry", {index=0})
     equal(c.files["MotionVfxLive/request.json"].index, 0)
     c:respond({ ok = true, document = { revision = 2 } })
     equal(c.module.state.selected, nil); equal(#c.module.state.fields, 0)

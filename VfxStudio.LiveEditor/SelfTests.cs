@@ -160,6 +160,7 @@ internal static class SelfTests
 
             CurveTests.Run(options, output, Check);
             EntryStructureTests.Run(options, Check);
+            ClipboardTests.Run(options, output, Check);
             ExpressionInspectorTests.Run(options, output, Check);
             CacheSourceTests.Run(options, output, Check);
             GameInstallSourceTests.Run(options, output, Check);

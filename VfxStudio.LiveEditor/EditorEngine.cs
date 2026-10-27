@@ -232,6 +232,9 @@ internal sealed partial class EditorEngine : IDisposable
                         foreach (var attribute in clone.Attributes) attribute.UniqueID = checked(nextId++);
                     });
                     break;
+                case "copy_efx": CopyEfx(Target.From(request)); response["message"] = "已复制，请选择目标后粘贴。"; break;
+                case "paste_efx": PasteEfx(request, response); break;
+                case "clear_efx_clipboard": efxClipboard = null; break;
                 case "remove_entry":
                     RemoveEntry(Int(request, "index"), response);
                     break;
@@ -284,6 +287,7 @@ internal sealed partial class EditorEngine : IDisposable
             if (ex is CacheSourceException cacheError) response["errorCode"] = cacheError.Code;
         }
         response["revision"] = revision;
+        response["copyBuffer"] = ClipboardInfo();
         try { response["document"] = DocumentInfo(); }
         catch (Exception ex) { response["ok"] = false; response["error"] = ex.GetBaseException().Message; }
         processedIds.Add(id);

@@ -13,7 +13,7 @@ Copy-Item -LiteralPath $mainScript -Destination (Join-Path $autorun 'MotionVfxLi
 Copy-Item -LiteralPath (Join-Path $projectRoot 'game-plugin/MotionVfxLive/fx_preview_runtime.lua') -Destination (Join-Path $autorun 'MotionVfxLive/fx_preview_runtime.lua')
 Copy-Item -LiteralPath (Join-Path $projectRoot 'game-plugin/MotionVfxLive/fx_ai_bridge.lua') -Destination (Join-Path $autorun 'MotionVfxLive/fx_ai_bridge.lua')
 Copy-Item -LiteralPath (Join-Path $projectRoot 'game-plugin/MotionVfxLive/fx_debug_hotkeys.lua') -Destination (Join-Path $autorun 'MotionVfxLive/fx_debug_hotkeys.lua')
-foreach ($module in @('fx_precache_runtime','fx_d2d_widgets','fx_d2d_workbench','fx_parameter_ui','fx_action_sources','fx_attachment_targets','fx_action_preview_runtime','fx_action_preview_transaction','fx_pfb_page','fx_file_dialog','fx_pfb_preview_runtime','fx_equipment_sources','fx_equipment_pfb_preview_runtime')) {
+foreach ($module in @('fx_efx_clipboard','fx_precache_runtime','fx_d2d_widgets','fx_d2d_workbench','fx_parameter_ui','fx_action_sources','fx_attachment_targets','fx_action_preview_runtime','fx_action_preview_transaction','fx_pfb_page','fx_file_dialog','fx_pfb_preview_runtime','fx_equipment_sources','fx_equipment_pfb_preview_runtime')) {
     Copy-Item -LiteralPath (Join-Path $projectRoot ('game-plugin/MotionVfxLive/'+$module+'.lua')) -Destination (Join-Path $autorun ('MotionVfxLive/'+$module+'.lua'))
 }
 Push-Location $fixture

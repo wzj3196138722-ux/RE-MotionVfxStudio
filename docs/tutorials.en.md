@@ -45,9 +45,21 @@ Use the color area's commit button to submit all four channels as one transactio
 
 Do not copy another file's Entry index or assumed initial values. Mods and game versions change these. If nothing changes visually, check whether the Group/Entry was triggered and whether the edited channel affects it. Increasing values repeatedly is not a substitute for identifying the right field. Arbitrary restructuring of every complex expression graph is not supported.
 
+### Copy and paste entries or attributes
+
+The **复制 / 粘贴** (Copy / Paste) section is always available at the top of the parameter panel. It shows the copied item, its source file and the current destination.
+
+**Whole entry:** select the source entry → **复制特效块** (Copy entry) → select the destination Group using **选择分组 / 编辑备注** (Select Group / Edit note), or select a destination entry → **粘贴为新特效块** (Paste as new entry). Selecting an entry uses that entry's Group memberships. Selecting the file properties creates an ungrouped entry. The new entry gets a unique `_copy` name and is selected automatically.
+
+**One attribute:** select the source attribute → **复制此属性** (Copy this attribute) → select the receiving entry or Action → **粘贴属性到此块** (Paste attribute here). If the same type already exists, use **替换同类型属性…** (Replace same-type attribute) and then **确认替换属性** (Confirm replacement). If multiple attributes share that type, first select the exact one to replace. Attributes inside Action / PlayEmitter entries are supported; a whole Action cannot be copied as an entry.
+
+You can copy and then open another EFX. The clipboard holds a snapshot of the committed content; later edits to the source do not change it. Commit or revert input drafts first. The clipboard lasts for the current session and can be cleared with **清空已复制内容** (Clear copied content).
+
+Use **编辑 → 撤销** (Edit → Undo) to undo a paste. Apply effect parameters to update the game's resource. Texture and mesh reference paths are retained; dependency files are not copied automatically. Incompatible EFX versions or file-level expression/variable tables are rejected with an explanation while preserving the current document.
+
 ### Notes, deletion and restoring one entry
 
-- **编辑分组备注** (Edit Group note) changes an editor label only. Native Group names remain unchanged and are used for action calls. Notes are saved separately; EFX undo does not undo them.
+- The note in **选择分组 / 编辑备注** (Select Group / Edit note) changes an editor label only. Native Group names remain unchanged and are used for action calls. Notes are saved separately; EFX undo does not undo them.
 - Select an entry or attribute, then use **删除当前特效块** (Delete current entry) or **删除当前属性** (Delete current attribute). Use these structural operations rather than manually altering binary counts. Reopen an exported copy to inspect its structure when needed.
 - **还原当前特效块** (Restore current entry) restores that entry's original state for this editing session, preserving other entries. A new entry with no original state is removed. The operation can be undone.
 - Document editing and game reference replacement are separate. Apply document changes to preview them. Stop and restore returns the game's references, rather than undoing every committed field.

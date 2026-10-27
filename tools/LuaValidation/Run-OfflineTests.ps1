@@ -16,10 +16,10 @@ function Run-Lua([string[]]$Arguments){
 foreach($file in Get-ChildItem -LiteralPath (Join-Path $project 'game-plugin') -Recurse -File -Filter '*.lua'){
     Run-Lua @('-p',$file.FullName)
 }
-foreach($name in @('file-dialog-tests.lua','file-dialog-explorer-tests.lua','d2d-workbench-tests.lua')){
+foreach($name in @('file-dialog-tests.lua','file-dialog-explorer-tests.lua','d2d-workbench-tests.lua','clipboard-layout-tests.lua')){
     Run-Lua @((Join-Path $PSScriptRoot $name),$project,$output)
 }
-foreach($name in @('playemitter-ui-tests.lua','ui-performance-tests.lua','ai-transport-performance-tests.lua','capture-refresh-tests.lua')){
+foreach($name in @('playemitter-ui-tests.lua','clipboard-ui-tests.lua','ui-performance-tests.lua','ai-transport-performance-tests.lua','capture-refresh-tests.lua')){
     Run-Lua @((Join-Path $PSScriptRoot $name),$project)
 }
 & (Join-Path $PSScriptRoot 'Run-LiveUiTests.ps1') -LuaRunner $LuaRunner

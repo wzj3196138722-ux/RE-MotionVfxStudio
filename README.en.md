@@ -4,7 +4,7 @@
 
 **Edit the effects triggered by your character's actions, inside Monster Hunter Wilds.**
 
-[简体中文](README.md) · [Tutorials](docs/tutorials.en.md) · [Download the 0.8.7 installer](https://github.com/wzj3196138722-ux/RE-MotionVfxStudio/releases/tag/v0.8.7)
+[简体中文](README.md) · [Tutorials](docs/tutorials.en.md) · [Download the 0.8.8 installer](https://github.com/wzj3196138722-ux/RE-MotionVfxStudio/releases/tag/v0.8.8)
 
 MotionVfx Live is an in-game VFX editor built on REFramework and REFramework D2D. Record character actions and effect calls, identify the relevant EFX resource, edit its parameters, and reload it to inspect the result during the original action. The game itself renders the preview.
 
@@ -15,7 +15,7 @@ This repository grew out of RE-MotionVfxStudio. **The current release is the Mot
 | Task | Available tools |
 |---|---|
 | Find an effect | Capture character actions, motion IDs and effect calls; verify action/PFB relationships from actual game references |
-| Edit EFX files | Browse files, Groups, entries, nested Action blocks and attributes; edit supported fields, colors and curve values; delete entries/attributes; undo, redo and restore individual entries |
+| Edit EFX files | Browse files, Groups, entries, nested Action blocks and attributes; edit supported fields, colors and curve values; copy, paste and delete entries/attributes; undo, redo and restore individual entries |
 | Read parameters | Chinese/English parameter labels; grouped RGBA, XY/XYZ and base/random inputs; separate Group notes |
 | Preview in game | Apply resource edits, then trigger the action again; slow down, pause and resume; configure a debug pause key chord |
 | Add effects to actions | Use a verified PFB, existing slot template, EFX Group and character/weapon attachment; set trigger frames and lifetime, then hot reload |
@@ -30,7 +30,7 @@ The editor can be moved, resized or hidden as a docked logo orb. The in-game fil
 
 You need Windows x64, Monster Hunter Wilds, and a compatible [REFramework](https://github.com/praydog/REFramework/releases) installation. Enable REFramework's **Loose File Loader**.
 
-1. Download `MotionVfxLive-0.8.7-Setup.exe` from [Releases](https://github.com/wzj3196138722-ux/RE-MotionVfxStudio/releases/tag/v0.8.7).
+1. Download `MotionVfxLive-0.8.8-Setup.exe` from [Releases](https://github.com/wzj3196138722-ux/RE-MotionVfxStudio/releases/tag/v0.8.8).
 2. Exit the game normally. Run the installer and confirm the folder containing `MonsterHunterWilds.exe`.
 3. Select **一键安装** (Install) or **一键更新** (Update). Installing the same version offers repair.
 4. The installer starts the backend. Launch the game and open **REFramework → Script Generated UI → MotionVfx Live**.

@@ -66,6 +66,8 @@ local function load_new()
     _G.MotionVfxAiBridge = nil
     package.loaded["MotionVfxLive.fx_precache_runtime"] = nil
     package.loaded["MotionVfxLive.fx_parameter_ui"] = nil
+    package.loaded["MotionVfxLive.fx_efx_clipboard"] = nil
+    _G.MotionVfxEfxClipboard = nil
     package.loaded["MotionVfxLive.fx_action_sources"] = nil
     package.loaded["MotionVfxLive.fx_attachment_targets"] = nil
     package.loaded["MotionVfxLive.fx_pfb_page"] = nil

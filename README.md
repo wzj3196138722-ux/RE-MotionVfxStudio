@@ -4,7 +4,7 @@
 
 **在《怪物猎人 荒野》中，直接编辑角色动作真正触发的特效。**
 
-[English](README.en.md) · [使用教程](docs/tutorials.zh-CN.md) · [下载 0.8.7 安装器](https://github.com/wzj3196138722-ux/RE-MotionVfxStudio/releases/tag/v0.8.7)
+[English](README.en.md) · [使用教程](docs/tutorials.zh-CN.md) · [下载 0.8.8 安装器](https://github.com/wzj3196138722-ux/RE-MotionVfxStudio/releases/tag/v0.8.8)
 
 MotionVfx Live 是基于 REFramework 与 REFramework D2D 的游戏内特效编辑器。先记录角色动作及特效调用，定位 EFX 文件，再编辑参数、热重载并在原动作中观察变化。预览由游戏自身的引擎完成，适合制作和调整特效 MOD。
 
@@ -15,7 +15,7 @@ MotionVfx Live 是基于 REFramework 与 REFramework D2D 的游戏内特效编�
 | 工作 | 支持内容 |
 |---|---|
 | 找到目标特效 | 记录角色动作、动作编号和特效调用；根据实际来源核实动作与 PFB 的关联 |
-| 修改 EFX | 按文件、Group、特效块、Action 内嵌块和属性浏览；修改可解析字段、颜色和曲线数值；删除块与属性；撤销、重做、单块还原 |
+| 修改 EFX | 按文件、Group、特效块、Action 内嵌块和属性浏览；修改可解析字段、颜色和曲线数值；复制、粘贴及删除块与属性；撤销、重做、单块还原 |
 | 看清参数 | 属性和参数名称中英切换；RGBA、XY/XYZ、普通值与随机值组合显示；Group 中文备注 |
 | 游戏内验证 | 应用真实资源并重新触发动作；慢放、暂停、继续；自定义调试暂停组合键 |
 | 为动作加特效 | 选择真实 PFB、原有槽位模板、EFX Group 和人物/武器挂点，设置触发帧与寿命，再热重载 |
@@ -30,7 +30,7 @@ MotionVfx Live 是基于 REFramework 与 REFramework D2D 的游戏内特效编�
 
 需要 Windows x64、《怪物猎人 荒野》和适用于当前游戏版本的 [REFramework](https://github.com/praydog/REFramework/releases)。启用 REFramework 的 **Loose File Loader**。
 
-1. 从 [Releases](https://github.com/wzj3196138722-ux/RE-MotionVfxStudio/releases/tag/v0.8.7) 下载 `MotionVfxLive-0.8.7-Setup.exe`。
+1. 从 [Releases](https://github.com/wzj3196138722-ux/RE-MotionVfxStudio/releases/tag/v0.8.8) 下载 `MotionVfxLive-0.8.8-Setup.exe`。
 2. 正常退出游戏，运行安装器，确认包含 `MonsterHunterWilds.exe` 的游戏目录。
 3. 点击「一键安装」或「一键更新」。同版本可选择修复安装。
 4. 安装完成后后台已启动；进入游戏，通过 **REFramework → Script Generated UI → MotionVfx Live** 打开编辑器。

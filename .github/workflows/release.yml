@@ -57,6 +57,7 @@ jobs:
             artifacts/release/*-checks.json
             artifacts/release/*-build.json
             artifacts/installer-self-test/installer-tests.json
+            artifacts/clipboard-self-test/clipboard-results.json
           if-no-files-found: warn
           compression-level: 0
           retention-days: 14

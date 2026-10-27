@@ -15,7 +15,7 @@ internal sealed record InstallResult(string GameRoot, string InstallRoot, string
 internal sealed record MdfxlCompatibilityResult(string Status, string Message);
 internal static class InstallEngine
 {
-    internal const string Version = "0.8.7";
+    internal const string Version = "0.8.8";
     internal static readonly JsonSerializerOptions Json = new() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
     internal static string Key(string game) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(Path.GetFullPath(game).ToLowerInvariant())))[..16];
     internal static string DefaultRoot(string game) => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MotionVfxLive", Key(game));

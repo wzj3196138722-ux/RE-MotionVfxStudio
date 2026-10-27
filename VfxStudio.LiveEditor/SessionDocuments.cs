@@ -32,6 +32,7 @@ internal sealed partial class EditorEngine
         if (gameProcessIdentity != null && gameProcessIdentity != current)
         {
             workingDocuments.Clear(); undo.Clear(); redo.Clear();
+            efxClipboard = null;
             DisposeFile(document); document = null; bytes = null; baseline = null;
             source = null; cacheSource = null; gameSource = null; savedHash = null;
             actionWorkspace = null; actionWorkingSet = new(); exportPlan = null; revision++;
