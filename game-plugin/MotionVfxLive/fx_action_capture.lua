@@ -165,8 +165,7 @@ local function shell_context(owner)
     return context
 end
 local function refresh_actor()
-    local host = {call = call, singleton = function(name) return safe(sdk.get_managed_singleton, name) end,
-        typeof = function(name) return safe(sdk.typeof, name) end}
+    local host = game_profile.host(call, function() return sdk end)
     local player = game.player
     local character = safe(player.character, host)
     local go, weapon = game_object(character), character and safe(player.weapon, host, character)
@@ -219,7 +218,7 @@ local function discard_event_sources(ev, reason)
     for _, id in ipairs(ev._source_ids or {}) do discard_source(id, reason) end
     ev._source_ids = {}
 end
-local function retain_actual_source(ev, player_id, holder, path)
+local function retain_actual_source(ev, player_id, holder, path, source_kind)
     if not ev._retained or ev._excluded or not holder then return end
     if limits.resourceSources < 1 then return end
     while #source_order >= limits.resourceSources do
@@ -239,7 +238,7 @@ local function retain_actual_source(ev, player_id, holder, path)
         eventId = ev.id, sceneEpoch = ev.sceneEpoch, actualPath = path,
         actualHolderIdentity = holder_id, holderIdentityMeaning = "managed_wrapper_not_native_resource_hash",
         playerIdentity = player_id, observedFrame = frame, sharedTargetPath = canonical(path),
-        sourceKind = "actual_effect_player_holder", availability = "retained_observation",
+        sourceKind = source_kind or "actual_effect_player_holder", availability = "retained_observation",
         localConfirmed = ev.localConfirmed == true, currentPlayerVerified = false, cacheBytesAvailable = false}
     actual_sources[descriptor.sourceId] = {descriptor = descriptor, holder = held, event = ev}
     source_order[#source_order + 1] = descriptor.sourceId
@@ -652,7 +651,7 @@ local function observe_path(ev, path, kind, evidence, player)
     if ev.motion then aggregate.motion, aggregate.motionAssociation = copy(ev.motion), ev.motionAssociation end
     aggregate.lastEventId = ev.id
 end
-local function observe_provider(ev, provider)
+local function observe_provider(ev, provider, holders_are_sources)
     if not ev or ev._excluded or not is_a(provider, "via.effect.ProviderData") then return end
     local count = tonumber(call(provider, "getResourcesCount"))
     if not count or count < 0 or count ~= count or count == math.huge then
@@ -681,6 +680,11 @@ local function observe_provider(ev, provider)
                 binding.holder = retain(holder) or binding.holder
                 binding.localConfirmed = binding.localConfirmed or ev.localConfirmed
                 add_unique(ev._bindings, binding)
+            end
+            -- Hooks whose created EffectPlayers cannot be read back (spec flag provider_sources) record the
+            -- ProviderData slot's own EffectResourceHolder as the actual source instead.
+            if holders_are_sources and is_a(holder, "via.effect.EffectResourceHolder") then
+                retain_actual_source(ev, tostring(identity(provider)), holder, path, "provider_resource_holder")
             end
         end
     end
@@ -850,7 +854,11 @@ local function pre(info, args)
     end
     local context = context_for(info, owner)
     local request
-    if info.kind == "engine" then
+    if info.kind == "engine" and info.provider then
+        -- Direct overload: the ProviderData and creator GameObject are plain arguments (no RequestInfo).
+        context.ownership, context.ownerIdentity = local_owner(managed(argument(info, args, 3), "via.GameObject"))
+        context.ownerEvidence = "create_effect_creator"
+    elseif info.kind == "engine" then
         request = managed(argument(info, args, 4), "via.effect.script.EffectManager.RequestInfo")
         local request_owner = field(request, "Owner")
         context.ownership, context.ownerIdentity = local_owner(request_owner or managed(argument(info, args, 3), "via.GameObject"))
@@ -904,7 +912,11 @@ local function pre(info, args)
         ev.containerId, ev.elementId = uint(argument(info, args, 5)), uint(argument(info, args, 6))
         fr.event = capture_container(ev, managed(argument(info, args, 3), "via.effect.script.CreatedEffectContainer"))
     end
-    if info.kind == "engine" then
+    if info.kind == "engine" and info.provider then
+        ev.creatorIdentity = identity(managed(argument(info, args, 3), "via.GameObject"))
+        ev.followTargetIdentity = info.follow and identity(managed(argument(info, args, info.follow), "via.GameObject")) or nil
+        observe_provider(ev, managed(argument(info, args, info.provider), "via.effect.ProviderData"), info.provider_sources)
+    elseif info.kind == "engine" then
         ev.requestIdentity, ev.followTargetIdentity = identity(request), identity(field(request, "FollowTarget"))
         ev.requestOwnerIdentity, ev.creatorIdentity = identity(field(request, "Owner")), identity(managed(argument(info, args, 3), "via.GameObject"))
         observe_provider(ev, field(request, "Data"))

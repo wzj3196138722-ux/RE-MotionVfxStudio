@@ -27,6 +27,7 @@ public sealed record GameProfile(
     IReadOnlyList<string> ActionResourceRoots,
     IReadOnlyList<string> PrefabResourceRoots,
     IReadOnlyList<string> EquipmentComponentTypes,
+    PakLoadEvidence PakLoadEvidence,
     GameFeatures Features)
 {
     /// <summary>Process name as reported by <see cref="System.Diagnostics.Process.ProcessName"/>.</summary>
@@ -55,6 +56,15 @@ public sealed record GameProfile(
     public string Versioned(string logicalPath, string kind) => logicalPath + "." + SuffixFor(kind);
 }
 
+/// <summary>How the backend establishes which installed PAKs the game actually loaded.</summary>
+public enum PakLoadEvidence
+{
+    /// <summary>REFramework's IntegrityCheckBypass logs every PAK it opens (re2_framework_log.txt). Required with pak_mods.</summary>
+    ReframeworkLog,
+    /// <summary>The engine loads re_chunk_000.pak, then patch_001, patch_002, ... until the first missing number.</summary>
+    InstalledPatchChain,
+}
+
 /// <summary>Editor capabilities that depend on game-specific runtime APIs or formats.</summary>
 public sealed record GameFeatures(bool EquipmentRebuild, bool ActionSlots, bool PfbEditing);
 
@@ -79,6 +89,7 @@ public static class GameProfiles
         PrefabResourceRoots: ["art", "gamedesign"],
         // A PFB containing one of these components is weapon/armour equipment, not an effect provider.
         EquipmentComponentTypes: ["app.Weapon", "app.CharacterEditRegion"],
+        PakLoadEvidence: PakLoadEvidence.ReframeworkLog,
         Features: new(EquipmentRebuild: true, ActionSlots: true, PfbEditing: true));
 
     /// <summary>
@@ -103,6 +114,9 @@ public static class GameProfiles
         ActionResourceRoots: ["_chainsaw", "_anotherorder", "_mercenaries", "re_engine_library"],
         PrefabResourceRoots: ["_chainsaw", "_anotherorder", "_mercenaries", "re_engine_library"],
         EquipmentComponentTypes: [],
+        // RE4's REFramework writes no "[IntegrityCheckBypass]: Pak name:" lines; the game loads re_chunk_000.pak
+        // and its contiguous patch_NNN chain.
+        PakLoadEvidence: PakLoadEvidence.InstalledPatchChain,
         // Weapon-resident EFX and effects on actions need action slots / PFB editing: planned, not implemented.
         Features: new(EquipmentRebuild: false, ActionSlots: false, PfbEditing: false));
 

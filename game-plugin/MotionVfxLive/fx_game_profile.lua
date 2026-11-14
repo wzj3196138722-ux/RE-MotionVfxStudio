@@ -73,9 +73,31 @@ profiles.mhwilds = {
 }
 
 -- RE4 remake. Type and method names verified against the running game's TDB (2026-11-14).
+-- chainsaw.PlayerEquipment is NOT a component of the body or head GameObject and no getter on the
+-- player context returns it, so find the scene's PlayerEquipment whose get_Context() is the local
+-- player's context. Cached per context; the cache is revalidated on every use.
+local re4_equipment_cache = { context = nil, equipment = nil }
+local function re4_context(host)
+    return host.call(host.singleton("chainsaw.CharacterManager"), "getPlayerContextRef()")
+end
 local function re4_equipment(host, character)
-    local go = host.call(character, "get_GameObject")
-    return go and host.call(go, "getComponent(System.Type)", host.typeof("chainsaw.PlayerEquipment"))
+    if character == nil then return nil end
+    local context = re4_context(host)
+    local context_address = host.address(context)
+    if context_address == nil then return nil end
+    local cached = re4_equipment_cache
+    if cached.context == context_address and cached.equipment and host.address(host.call(cached.equipment, "get_Context")) == context_address then
+        return cached.equipment
+    end
+    cached.context, cached.equipment = nil, nil
+    local components = host.scene_components("chainsaw.PlayerEquipment")
+    for _, equipment in ipairs(components or {}) do
+        if host.address(host.call(equipment, "get_Context")) == context_address then
+            cached.context, cached.equipment = context_address, equipment
+            return equipment
+        end
+    end
+    return nil
 end
 profiles.re4 = {
     id = "re4",
@@ -83,9 +105,7 @@ profiles.re4 = {
     efx_suffix = "3539837",
     player = {
         -- chainsaw.CharacterManager -> PlayerBaseContext -> body updater (a component on the body GameObject).
-        character = function(host)
-            return host.call(host.call(host.singleton("chainsaw.CharacterManager"), "getPlayerContextRef()"), "get_BodyUpdater")
-        end,
+        character = function(host) return host.call(re4_context(host), "get_BodyUpdater") end,
         -- The equipped weapon (chainsaw.Arms component) lives on the body's chainsaw.PlayerEquipment.
         weapon = function(host, character) return host.call(re4_equipment(host, character), "getEquipWeapon") end,
         weapon_type = function(host, character) return host.call(re4_equipment(host, character), "get_ActiveType") end,
@@ -117,6 +137,11 @@ profiles.re4 = {
             { OEM2, "requestEffectInternal(via.effect.script.EffectID, via.GameObject, System.Int32, via.effect.script.EffectManager.WwiseTriggerInfo, via.effect.script.EffectManager.RequestOverwriteParam)", "request", "oem", { returns = "container" } },
             { BASE, "callEventMotionSequenceCreateEffect(via.effect.script.EffectID, via.effect.script.CreatedEffectContainer)", "event", "oem" },
             { MANAGER, "createEffectInternal(via.GameObject, via.effect.script.EffectManager.RequestInfo)", "engine", "creator", { returns = "objects" } },
+            -- In game (2026-11-14) pistol muzzle flash and knife effects reached none of the hooks above. The
+            -- direct overload takes the ProviderData as an argument: creator GameObject = arg 3,
+            -- ProviderData = arg 4, the second GameObject (follow target) = arg 7. Its returned GameObjects carried
+            -- no readable EffectPlayer in game, so the ProviderData slot holder is the recorded source.
+            { MANAGER, "createEffectInternal(via.GameObject, via.effect.ProviderData, via.vec3, via.Quaternion, via.GameObject, System.String, System.Collections.Generic.IEnumerable`1<via.effect.ExternParameter>, via.GameObject, System.Collections.Generic.IEnumerable`1<System.String>, via.effect.script.EffectManager.LODInfo, System.String, System.Boolean, via.effect.script.EffectManager.RequestOverwriteParam)", "engine", "creator", { returns = "objects", provider = 4, follow = 7, provider_sources = true } },
         },
     },
     features = {
@@ -167,6 +192,23 @@ function M.host(call, env_sdk)
         call = call,
         singleton = function(name) return env_sdk().get_managed_singleton(name) end,
         typeof = function(name) return env_sdk().typeof(name) end,
+        -- Stable identity of a managed object (nil for nil or on failure).
+        address = function(obj)
+            if obj == nil then return nil end
+            local ok, value = pcall(function() return obj:get_address() end)
+            return ok and value and tostring(value) or nil
+        end,
+        -- Every component of the given type in the current scene, as a Lua array.
+        scene_components = function(type_name)
+            local sdk_ = env_sdk()
+            local manager = sdk_.get_native_singleton("via.SceneManager")
+            local scene = manager and sdk_.call_native_func(manager, sdk_.find_type_definition("via.SceneManager"), "get_CurrentScene()")
+            local array = scene and scene:call("findComponents(System.Type)", sdk_.typeof(type_name))
+            local out = {}
+            local count = array and array:get_size() or 0
+            for i = 0, count - 1 do out[#out + 1] = array:get_element(i) end
+            return out
+        end,
     }
 end
 

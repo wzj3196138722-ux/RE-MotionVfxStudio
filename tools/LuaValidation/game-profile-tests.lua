@@ -26,11 +26,13 @@ local function object(name, methods)
         return value
     end }
 end
-local function host_for(singletons, types)
+local function host_for(singletons, components)
     return {
         call = function(o, m, ...) if o == nil then return nil end return o:call(m, ...) end,
         singleton = function(name) log[#log + 1] = "singleton:" .. name; return singletons[name] end,
-        typeof = function(name) log[#log + 1] = "typeof:" .. name; return types and types[name] or name end,
+        typeof = function(name) return name end,
+        address = function(o) return o and o.name end,
+        scene_components = function(name) log[#log + 1] = "scan:" .. name; return components and components[name] or {} end,
     }
 end
 
@@ -80,25 +82,32 @@ do
     check(profile.efx_suffix == "3539837" and module.strip_efx_suffix("_Chainsaw/a.efx.3539837", profile) == "_Chainsaw/a.efx",
         "RE4 EFX suffix")
     local weapon = object("arms", {})
-    local equipment = object("equipment", { getEquipWeapon = weapon, get_ActiveType = 0, get_EquipWeaponID = 4000 })
-    local go = object("body_go", { ["getComponent(System.Type)"] = function(t) return t == "T:chainsaw.PlayerEquipment" and equipment or nil end })
-    local body = object("body", { get_GameObject = go })
+    local body = object("body", {})
     local context = object("context", { get_BodyUpdater = body })
+    local npc_context = object("npc_context", {})
+    local npc_equipment = object("npc_equipment", { get_Context = npc_context })
+    local equipment = object("equipment", { getEquipWeapon = weapon, get_ActiveType = 0, get_EquipWeaponID = 4000, get_Context = context })
     local cm = object("cm", { ["getPlayerContextRef()"] = context })
     log = {}
-    local host = host_for({ ["chainsaw.CharacterManager"] = cm }, { ["chainsaw.PlayerEquipment"] = "T:chainsaw.PlayerEquipment" })
+    local host = host_for({ ["chainsaw.CharacterManager"] = cm }, { ["chainsaw.PlayerEquipment"] = { npc_equipment, equipment } })
     check(profile.player.character(host) == body
         and table.concat(log, ",") == "singleton:chainsaw.CharacterManager,cm:getPlayerContextRef(),context:get_BodyUpdater",
         "RE4 character is the player's body updater")
     check(profile.player.weapon(host, body) == weapon and profile.player.weapon_type(host, body) == 0
         and profile.player.weapon_id(host, body) == 4000 and profile.player.weapon_model_id(host, body) == 4000,
-        "RE4 weapon accessors go through the body's chainsaw.PlayerEquipment")
+        "RE4 weapon accessors use the scene PlayerEquipment whose context is the local player")
+    log = {}
+    profile.player.weapon_id(host, body)
+    local scanned = false
+    for _, line in ipairs(log) do if line:find("^scan:") then scanned = true end end
+    check(not scanned, "RE4 PlayerEquipment lookup is cached while its context still matches")
+    check(profile.player.weapon(host, nil) == nil, "RE4 weapon accessors return nil without a character")
     check(#profile.resource_cache_flags == 1 and profile.resource_cache_flags[1] == "EffectCache", "RE4 has no IgnoreEffectCache flag")
     check(profile.features.equipment_rebuild == false and profile.features.action_slots == false and profile.features.pfb_editing == false,
         "RE4 starts with equipment rebuild, action slots and PFB editing off")
     local by_label = {}
     for _, s in ipairs(profile.capture.specs) do by_label[s[1] .. "." .. s[2]] = s end
-    check(#profile.capture.specs == 12, "RE4 installs the 12 engine-level capture hooks")
+    check(#profile.capture.specs == 13, "RE4 installs the 13 engine-level capture hooks")
     local range = by_label["via.effect.script.ObjectEffectManager2.requestEffectFromRangeSquence(via.effect.script.VFXRangeTrack, System.Boolean, System.UInt32, System.UInt32, System.String)"]
     check(range and (range[5] == nil or range[5].node == nil), "RE4 range-sequence hook uses the RE4 signature and has no motion node argument")
     check(by_label["via.effect.script.ObjectEffectManager2.requestEffectInternal(via.effect.script.EffectID, via.GameObject, System.Int32, via.effect.script.EffectManager.WwiseTriggerInfo, via.effect.script.EffectManager.RequestOverwriteParam)"] ~= nil

@@ -383,7 +383,8 @@ end
 local source_identity_fields = { "sourceKind", "sourceId", "eventId", "sceneEpoch", "actualPath",
     "actualHolderIdentity", "playerIdentity", "sharedTargetPath", "localConfirmed", "availability" }
 local function valid_capture_source(source)
-    if type(source) ~= "table" or source.sourceKind ~= "actual_effect_player_holder" or
+    -- provider_resource_holder: ProviderData slot holder of a local creation whose EffectPlayer is unreadable (RE4).
+    if type(source) ~= "table" or (source.sourceKind ~= "actual_effect_player_holder" and source.sourceKind ~= "provider_resource_holder") or
         source.localConfirmed ~= true or source.availability ~= "retained_observation" or
         type(source.sceneEpoch) ~= "number" or source.sceneEpoch < 1 or source.sceneEpoch % 1 ~= 0 then return false end
     for _, name in ipairs({ "sourceId", "eventId", "actualPath", "actualHolderIdentity", "playerIdentity", "sharedTargetPath" }) do

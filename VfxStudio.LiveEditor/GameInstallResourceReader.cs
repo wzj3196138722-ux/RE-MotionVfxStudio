@@ -91,17 +91,29 @@ internal sealed class GameInstallResourceReader(Options options)
             throw Error("game_pak_priority_unverified", "安装目录启用了 pak_mods 自定义包；其实际注入顺序尚未受本读取器验证，未猜测来源或打开项目素材。");
 
         string logPath = Path.Combine(root, "re2_framework_log.txt");
-        var loaded = ReadLoadedPakNames(logPath);
-        if (loaded.Count == 0)
-            throw Error("game_pak_load_evidence_missing", "未找到游戏安装目录中可核对的 PAK 加载日志；请运行游戏及 REFramework 后重试。没有读取项目素材。");
-        // Keep manifest-bearing mod patches. PakReader consumes this exact
-        // PakUtils order in reverse: latest sub patch, sub base, main patches,
-        // then main base. Only packages observed by this installed loader count.
-        var archives = PakUtils.ScanPakFiles(root, ignoreModPaks: false)
-            .Where(path => loaded.Contains(Path.GetRelativePath(root, path).Replace('\\', '/')))
-            .Reverse().ToArray();
-        if (archives.Length == 0)
-            throw Error("game_pak_load_evidence_missing", "加载日志中的 PAK 与安装目录文件不匹配；没有读取项目素材。");
+        string[] archives;
+        if (options.Game.PakLoadEvidence == VfxStudio.Core.Games.PakLoadEvidence.InstalledPatchChain)
+        {
+            // Latest patch first. Patches after a gap in the numbering are never loaded by the engine.
+            archives = Enumerable.Reverse(InstalledPatchChain(root)).ToArray();
+            logPath = Path.Combine(root, "re_chunk_000.pak");
+            if (archives.Length == 0)
+                throw Error("game_pak_load_evidence_missing", "安装目录中没有 re_chunk_000.pak；没有读取项目素材。");
+        }
+        else
+        {
+            var loaded = ReadLoadedPakNames(logPath);
+            if (loaded.Count == 0)
+                throw Error("game_pak_load_evidence_missing", "未找到游戏安装目录中可核对的 PAK 加载日志；请运行游戏及 REFramework 后重试。没有读取项目素材。");
+            // Keep manifest-bearing mod patches. PakReader consumes this exact
+            // PakUtils order in reverse: latest sub patch, sub base, main patches,
+            // then main base. Only packages observed by this installed loader count.
+            archives = PakUtils.ScanPakFiles(root, ignoreModPaks: false)
+                .Where(path => loaded.Contains(Path.GetRelativePath(root, path).Replace('\\', '/')))
+                .Reverse().ToArray();
+            if (archives.Length == 0)
+                throw Error("game_pak_load_evidence_missing", "加载日志中的 PAK 与安装目录文件不匹配；没有读取项目素材。");
+        }
         ulong hash = PakUtils.GetFilepathHash(native);
         var expected = new Dictionary<ulong, string> { [hash] = native };
         foreach (string archive in archives)
@@ -148,6 +160,22 @@ internal sealed class GameInstallResourceReader(Options options)
                 result[line[..equals].Trim()] = value;
         }
         return result;
+    }
+
+    // re_chunk_000.pak plus patch_001, patch_002, ... up to the first missing number, in load order.
+    private static List<string> InstalledPatchChain(string root)
+    {
+        var chain = new List<string>();
+        string main = Path.Combine(root, "re_chunk_000.pak");
+        if (!File.Exists(main)) return chain;
+        chain.Add(Path.GetFullPath(main));
+        for (int number = 1; number < 1000; number++)
+        {
+            string patch = Path.Combine(root, $"re_chunk_000.pak.patch_{number:000}.pak");
+            if (!File.Exists(patch)) break;
+            chain.Add(Path.GetFullPath(patch));
+        }
+        return chain;
     }
 
     private static HashSet<string> ReadLoadedPakNames(string path)
