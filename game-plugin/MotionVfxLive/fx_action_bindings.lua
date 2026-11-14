@@ -77,16 +77,15 @@ local function current_scene()
 end
 local function identity()
     local scene=current_scene()
-    local pm=sdk.get_managed_singleton(game.player.manager)
-    local master=pm and pm:call(game.player.master)
-    local character=master and master:call("get_Character")
-    local weapon=character and character:call("get_Weapon")
+    -- The player chain comes from the game profile (verified against each game's TDB). The IDs
+    -- also detect changing equipment while reusing the same weapon component.
+    local host=game_profile.host(function(o, m, ...) if o == nil then return nil end return o:call(m, ...) end, function() return sdk end)
+    local character=game.player.character(host)
+    local weapon=game.player.weapon(host,character)
     if not scene or not character or not weapon then fail("角色、场景或装备尚未就绪") end
-    -- These getters were verified against the running Wilds TDB. The IDs also
-    -- detect changing equipment while reusing the same Weapon component.
-    local weapon_id=character:call(game.player.weapon_id)
-    local model_id=character:call(game.player.weapon_model_id)
-    local weapon_type=character:call(game.player.weapon_type)
+    local weapon_id=game.player.weapon_id(host,character)
+    local model_id=game.player.weapon_model_id(host,character)
+    local weapon_type=game.player.weapon_type(host,character)
     if weapon_id == nil or model_id == nil or weapon_type == nil then fail("无法确认装备身份") end
     local result={scene=scene,sceneAddress=address(scene),characterAddress=address(character),weaponAddress=address(weapon),
         weaponId=tostring(weapon_id),modelId=tostring(model_id),weaponType=tostring(weapon_type)}

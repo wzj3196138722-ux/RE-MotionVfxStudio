@@ -192,11 +192,8 @@ local function stop(client, id)
 end
 
 function M.get_character()
-    local pm = sdk.get_managed_singleton(game.player.manager)
-    if not pm then return nil, "PlayerManager unavailable" end
-    local master = pm:call(game.player.master)
-    if not master then return nil, "MasterPlayer unavailable" end
-    local character = master:call(game.player.character)
+    local host = game_profile.host(function(o, m, ...) if o == nil then return nil end return o:call(m, ...) end, function() return sdk end)
+    local character = game.player.character(host)
     if not character then return nil, "Character unavailable" end
     return character
 end
@@ -209,7 +206,8 @@ end
 function M.get_weapon_transform()
     local character, err = M.get_character()
     if not character then return nil, err end
-    local weapon = character:call("get_Weapon")
+    local host = game_profile.host(function(o, m, ...) if o == nil then return nil end return o:call(m, ...) end, function() return sdk end)
+    local weapon = game.player.weapon(host, character)
     if not weapon then return nil, "Weapon unavailable" end
     local go = weapon:call("get_GameObject")
     return go and go:call("get_Transform") or nil, "Weapon Transform unavailable"

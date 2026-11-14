@@ -80,6 +80,7 @@ internal sealed partial class EditorEngine : IDisposable
         {
             string action = Text(request, "action").ToLowerInvariant();
             if (action is "duplicate_entry" or "remove_entry" or "restore_entry" or "add_entry" or "rename_group" or "set_group_note") RejectEmbeddedRootOperation(request);
+            RejectUnsupportedFeature(action);
             if (!action.StartsWith("pfb_", StringComparison.Ordinal) && action is not ("catalog" or "resolve_resource" or "open" or "open_motion" or "open_cached_resource" or "open_game_resource" or "status" or "inspect" or "shutdown" or
                 "cache_list" or "cache_import" or "cache_reload" or "cache_rename" or "cache_materialize" or "desktop_start" or "desktop_stop" or "file_browse" or "file_stat" or "open_action" or "action_effect_groups" or "add_action_slot" or "remove_action_slot" or "reset_action_slots" or "publish_action_preview" or "begin_export" or "prepare_export" or "finish_export")) CheckRevision(request);
             switch (action)
@@ -622,6 +623,17 @@ internal sealed partial class EditorEngine : IDisposable
         WriteNewFile(path, ResolvePrecache(Validate(Require(), path), path));
         savedHash = Hash(bytes!);
         return path;
+    }
+
+    // Features that need per-game formats or runtime APIs stay off until that game's profile enables them.
+    private void RejectUnsupportedFeature(string action)
+    {
+        var game = options.Game;
+        if (action.StartsWith("pfb_", StringComparison.Ordinal) && !game.Features.PfbEditing)
+            throw new NotSupportedException($"{game.DisplayName} 暂不支持独立 PFB 编辑（待实现）。");
+        if (action is "open_motion" or "action_effect_groups" or "open_action" or "add_action_slot" or "remove_action_slot"
+                or "reset_action_slots" or "publish_action_preview" && !game.Features.ActionSlots)
+            throw new NotSupportedException($"{game.DisplayName} 暂不支持动作特效槽位（待实现）。");
     }
 
     private (string Resource, string Output) Publish()

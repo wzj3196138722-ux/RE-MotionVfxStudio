@@ -59,7 +59,7 @@ internal static class SelfTests
         await Initialize(server);
         var listed = await server.Handle(Rpc(2, "tools/list").ToJsonString());
         var tools = listed!["result"]!["tools"]!.AsArray();
-        Check(tools.Count == 17 && tools.All(tool => tool!["name"]!.GetValue<string>().StartsWith("motionvfx_", StringComparison.Ordinal)), "Seventeen namespaced tools including animation capture are discoverable");
+        Check(tools.Count == 19 && tools.All(tool => tool!["name"]!.GetValue<string>().StartsWith("motionvfx_", StringComparison.Ordinal)), "Seventeen namespaced tools including animation capture are discoverable");
         Check(ToolCatalog.Find("motionvfx_list_actions").ReadOnly, "Action observation tool is read-only");
         Check(tools.All(tool => tool!["inputSchema"]!["additionalProperties"]!.GetValue<bool>() == false && tool["annotations"] != null), "Every tool has a bounded schema and annotations");
         Check(ToolCatalog.All.Where(tool => tool.Action is "inspect" or "set_field" or "set_color" or "set_group_note" or "rename_group" or "undo" or "redo" or "save_copy" or "apply")
@@ -262,6 +262,6 @@ internal static class SelfTests
         var messages = stdout.Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(line => JsonNode.Parse(line.TrimEnd('\r'))!.AsObject()).ToArray();
         Check(process.ExitCode == 0 && stderr.Length == 0, "Independent stdio server exits cleanly without diagnostic noise");
         Check(messages.Length == 4 && messages.All(message => message["jsonrpc"]!.GetValue<string>() == "2.0"), "Stdout contains only one valid JSON-RPC message per response line");
-        Check(messages[1]["result"]!["tools"]!.AsArray().Count == 17 && messages[3]["error"]!["code"]!.GetValue<int>() == -32601, "Independent client discovers tools and receives modern-discovery fallback");
+        Check(messages[1]["result"]!["tools"]!.AsArray().Count == 19 && messages[3]["error"]!["code"]!.GetValue<int>() == -32601, "Independent client discovers tools and receives modern-discovery fallback");
     }
 }

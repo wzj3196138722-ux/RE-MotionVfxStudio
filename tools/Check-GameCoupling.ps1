@@ -4,6 +4,8 @@
 # Excluded on purpose (documented in VfxStudio.Core/Games/README.md):
 #   - *Tests.cs / SelfTests.cs / ActionSlotAudit.cs: offline tests built on Wilds fixtures
 #   - fx_equipment_*.lua: Wilds-only equipment rebuild, loaded only when features.equipment_rebuild
+#   - fx_attachment_targets.lua: action-slot attachment targets (Wilds hunter weapons); action slots are
+#     a per-game feature (features.action_slots) and not implemented for other games yet
 #   - VfxStudio.App / Renderer / Unpacker and Core/Services other than EfxEditorService: legacy desktop prototype
 #   - Formats/: the embedded ReeLib copy, which supports every game by design
 $ErrorActionPreference = 'Stop'
@@ -11,7 +13,7 @@ $root = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $tokens = @(
     '5571972', '3539837', '.pfb.18', '.motlist.992', '.mot.932',
     'MonsterHunterWilds', 'EfxVersion.MHWilds', 'ClipVersion.MHWilds', 'GameName.mhwilds', 'rsz_pfb_classes.json',
-    '"app.', "'app.", '"ace.', '"chainsaw.', 'getMasterPlayer', 'get_WeaponID'
+    '"app.', "'app.", '"ace.', '"chainsaw.', 'getMasterPlayer', 'get_WeaponID', '"get_Weapon"', '"get_Character"'
 )
 $files = @()
 $files += Get-ChildItem -LiteralPath (Join-Path $root 'VfxStudio.LiveEditor') -Filter '*.cs' -File |
@@ -21,7 +23,7 @@ $files += Get-ChildItem -LiteralPath (Join-Path $root 'VfxStudio.Mcp') -Filter '
 $files += Get-Item -LiteralPath (Join-Path $root 'VfxStudio.Core/Services/EfxEditorService.cs')
 $files += Get-Item -LiteralPath (Join-Path $root 'game-plugin/MotionVfxLive.lua')
 $files += Get-ChildItem -LiteralPath (Join-Path $root 'game-plugin/MotionVfxLive') -Filter 'fx_*.lua' -File |
-    Where-Object { $_.Name -ne 'fx_game_profile.lua' -and $_.Name -notlike 'fx_equipment_*' }
+    Where-Object { $_.Name -ne 'fx_game_profile.lua' -and $_.Name -notlike 'fx_equipment_*' -and $_.Name -ne 'fx_attachment_targets.lua' }
 
 $hits = @()
 foreach ($file in $files) {

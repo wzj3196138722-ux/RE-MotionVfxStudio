@@ -58,14 +58,13 @@ local function new_effect(host)
     end
     local function world(proof)
         local actor=assert(host.capture().actor,"角色尚未就绪")
-        local pm=assert(sdk.get_managed_singleton(game.player.manager),"角色管理器尚未就绪")
-        local player=assert(pm:call(game.player.master),"当前没有本地角色，请先进入游戏场景")
-        local ch=assert(player:call(game.player.character),"本地角色尚未加载完成")
+        local host=game_profile.host(function(o, m, ...) if o == nil then return nil end return o:call(m, ...) end,function() return sdk end)
+        local ch=assert(game.player.character(host),"当前没有本地角色或尚未加载完成，请先进入游戏场景")
         assert(ch and id(ch)==actor.characterIdentity,"角色来源已变化")
         local manager=ch:call("get_GameObject"):call("getComponent(System.Type)",sdk.typeof("via.effect.script.ObjectEffectManager2"))
         assert(manager and manager:call("get_Valid"),"角色特效管理器尚未就绪")
-        local now={actorIdentity=id(ch),sceneEpoch=actor.sceneEpoch,weaponType=ch:call(game.player.weapon_type),
-            weaponId=ch:call(game.player.weapon_id),managerIdentity=id(manager)}
+        local now={actorIdentity=id(ch),sceneEpoch=actor.sceneEpoch,weaponType=game.player.weapon_type(host,ch),
+            weaponId=game.player.weapon_id(host,ch),managerIdentity=id(manager)}
         if proof then
             for _,k in ipairs({"actorIdentity","sceneEpoch","weaponType","weaponId","managerIdentity"})do
                 assert(now[k]==proof[k],"角色、场景或装备已变化；原始 PFB 备份仍保留，请回到原装备后重试")

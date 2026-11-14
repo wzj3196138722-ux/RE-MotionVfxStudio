@@ -32,14 +32,19 @@ public sealed record GameProfile(
     /// <summary>Process name as reported by <see cref="System.Diagnostics.Process.ProcessName"/>.</summary>
     public string ProcessName => Path.GetFileNameWithoutExtension(ExecutableName);
 
-    public string SuffixFor(string kind) => kind switch
+    public string SuffixFor(string kind)
     {
-        "efx" => EfxSuffix,
-        "pfb" => PfbSuffix,
-        "motlist" => MotlistSuffix,
-        "mot" => MotSuffix,
-        _ => throw new ArgumentException("Unsupported resource kind: " + kind, nameof(kind)),
-    };
+        string suffix = kind switch
+        {
+            "efx" => EfxSuffix,
+            "pfb" => PfbSuffix,
+            "motlist" => MotlistSuffix,
+            "mot" => MotSuffix,
+            _ => throw new ArgumentException("Unsupported resource kind: " + kind, nameof(kind)),
+        };
+        // An empty suffix means the version was never verified for this game; never guess one.
+        return suffix.Length > 0 ? suffix : throw new NotSupportedException($"{DisplayName}: .{kind} file version is not configured.");
+    }
 
     /// <summary>Regex alternation for <see cref="ActionResourceRoots"/>, e.g. <c>(?:art|motion)</c>.</summary>
     public string ActionRootPattern => "(?:" + string.Join("|", ActionResourceRoots.Select(System.Text.RegularExpressions.Regex.Escape)) + ")";
@@ -76,7 +81,32 @@ public static class GameProfiles
         EquipmentComponentTypes: ["app.Weapon", "app.CharacterEditRegion"],
         Features: new(EquipmentRebuild: true, ActionSlots: true, PfbEditing: true));
 
-    public static IReadOnlyList<GameProfile> All { get; } = [MHWilds];
+    /// <summary>
+    /// Resident Evil 4 (2023). Suffixes are from the extracted game files (.efx.3539837, .pfb.17); MOTLIST/MOT
+    /// versions are not verified yet, so action slots stay off. RSZ table: REasy's rszre4.json.
+    /// </summary>
+    public static readonly GameProfile RE4 = new(
+        Id: "re4",
+        DisplayName: "Resident Evil 4",
+        ReframeworkGameName: "re4",
+        ReeLibGame: GameName.re4,
+        ExecutableName: "re4.exe",
+        SteamFolderName: "RESIDENT EVIL 4  BIOHAZARD RE4",
+        EfxVersion: EfxVersion.RE4,
+        EfxSuffix: "3539837",
+        PfbSuffix: "17",
+        MotlistSuffix: "",
+        MotSuffix: "",
+        ClipVersion: ClipVersion.RE4,
+        RszSchemaFile: "rszre4.json",
+        PreviewLogicalRoot: "_Chainsaw/VFX/EffectEditor/MotionVfxLive",
+        ActionResourceRoots: ["_chainsaw", "_anotherorder", "_mercenaries", "re_engine_library"],
+        PrefabResourceRoots: ["_chainsaw", "_anotherorder", "_mercenaries", "re_engine_library"],
+        EquipmentComponentTypes: [],
+        // Weapon-resident EFX and effects on actions need action slots / PFB editing: planned, not implemented.
+        Features: new(EquipmentRebuild: false, ActionSlots: false, PfbEditing: false));
+
+    public static IReadOnlyList<GameProfile> All { get; } = [MHWilds, RE4];
 
     public static GameProfile FromId(string id) =>
         All.FirstOrDefault(p => string.Equals(p.Id, id, StringComparison.OrdinalIgnoreCase))

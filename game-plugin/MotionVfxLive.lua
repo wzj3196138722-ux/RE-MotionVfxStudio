@@ -2771,7 +2771,8 @@ local function ai_execute(action, arguments, done)
         done(true, { resources = resources, recording = state.capture_snapshot.recording, sceneEpoch = state.capture_snapshot.sceneEpoch }); return
     end
     local supported = { open_effect = true, inspect = true, set_field = true, set_color = true, rename_group = true, set_group_note = true,
-        undo = true, redo = true, save_copy = true, apply = true, restore = true, scene_time = true, capture_start = true, capture_stop = true }
+        undo = true, redo = true, save_copy = true, apply = true, restore = true, scene_time = true, capture_start = true, capture_stop = true,
+        preview_effect = true, stop_preview = true }
     if not supported[action] then return reject("unknown_action", "This action is not available; arbitrary Lua and SDK execution are not supported") end
     refresh_action_state()
     if state.reloading or not M.active then return reject("editor_reloading", "The editor is reloading") end
@@ -2869,6 +2870,32 @@ local function ai_execute(action, arguments, done)
                 reject("scene_interrupted", "The scene command was replaced; inspect current status", true)
             elseif not latest.ok then reject("scene_failed", state.scene_message)
             else done(true, { scene = state.scene_actual, message = state.scene_message }) end
+        end
+    elseif action == "preview_effect" or action == "stop_preview" then
+        -- Lets an AI client re-trigger the applied revision without the user repeating the action.
+        if not client then return reject("preview_unavailable", "The shared preview runtime is not loaded: " .. tostring(runtime_error)) end
+        local finished
+        local function on_result(result) finished = result; preview_result(result) end
+        local id, err
+        if action == "preview_effect" then
+            local path = state.published_path
+            if type(path) ~= "string" or path == "" then return reject("not_applied", "Apply the document first; preview plays the last applied revision") end
+            local attachment = arguments.attachment == nil and "weapon" or arguments.attachment
+            if attachment ~= "weapon" and attachment ~= "player" and attachment ~= "world" then return reject("invalid_arguments", "attachment must be weapon, player or world") end
+            local scale = arguments.scale == nil and 1 or arguments.scale
+            if type(scale) ~= "number" or scale ~= scale or scale < 0.01 or scale > 100 then return reject("invalid_arguments", "scale must be a finite number from 0.01 to 100") end
+            if arguments.bone ~= nil and (type(arguments.bone) ~= "string" or #arguments.bone > 256) then return reject("invalid_arguments", "bone must be a joint name") end
+            local parent = attachment == "player" and runtime.get_player_transform or attachment == "weapon" and runtime.get_weapon_transform or nil
+            id, err = client:play("preview", { path = path, scale = scale, play_speed = 1, offset = { x = 0, y = 0, z = 0 },
+                resolve_parent = parent, bone_name = arguments.bone ~= "" and arguments.bone or nil }, on_result)
+        else
+            id, err = client:stop("preview", on_result)
+        end
+        if not id then return reject("preview_failed", tostring(err)) end
+        return function()
+            if not finished then return end
+            if not finished.ok then reject("preview_failed", tostring(finished.message)); return end
+            done(true, { operation = finished.operation, path = action == "preview_effect" and state.published_path or nil })
         end
     elseif action == "capture_start" or action == "capture_stop" then
         local operation = action == "capture_start" and "start" or "stop"

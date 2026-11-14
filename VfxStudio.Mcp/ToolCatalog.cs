@@ -62,7 +62,12 @@ internal static class ToolCatalog
             new() { ["operation"] = new JsonObject { ["type"] = "string", ["enum"] = new JsonArray("speed", "pause", "resume") },
                 ["speed"] = new JsonObject { ["type"] = "number", ["minimum"] = 0.01, ["maximum"] = 10, ["description"] = "Required for speed, from 0.01 to 10; for example 0.1 or 1." } }, ["operation"]),
         Define("capture_start", "Begin recording effects triggered by actual character actions. Ask the user to perform the intended action, then call capture_stop and list_effects.", new(), []),
-        Define("capture_stop", "Finish recording the current character-action capture.", new(), [], false, true)
+        Define("capture_stop", "Finish recording the current character-action capture.", new(), [], false, true),
+        Define("preview_effect", "Play the last applied revision of the current document once through a standalone EffectPlayer, without the user performing the action. Attach it to the local player, the equipped weapon or the world origin. Success means the engine accepted the request; it does not prove how the effect looks. Call stop_preview (or restore) afterwards.",
+            new() { ["attachment"] = new JsonObject { ["type"] = "string", ["enum"] = new JsonArray("weapon", "player", "world"), ["description"] = "Where to attach the preview. Default weapon." },
+                ["bone"] = Text("Optional joint name on the attachment target.", 256),
+                ["scale"] = new JsonObject { ["type"] = "number", ["minimum"] = 0.01, ["maximum"] = 100, ["description"] = "Uniform scale, default 1." } }, []),
+        Define("stop_preview", "Stop the standalone preview started by preview_effect.", new(), [], false, true)
     ];
 
     public static ToolDefinition Find(string name) => All.SingleOrDefault(tool => Prefix + tool.Action == name)

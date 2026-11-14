@@ -641,6 +641,61 @@
         "idempotentHint": true,
         "openWorldHint": false
       }
+    },
+    {
+      "name": "motionvfx_preview_effect",
+      "description": "Play the last applied revision of the current document once through a standalone EffectPlayer, without the user performing the action. Attach it to the local player, the equipped weapon or the world origin. Success means the engine accepted the request; it does not prove how the effect looks. Call stop_preview (or restore) afterwards.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "attachment": {
+            "type": "string",
+            "enum": [
+              "weapon",
+              "player",
+              "world"
+            ],
+            "description": "Where to attach the preview. Default weapon."
+          },
+          "bone": {
+            "type": "string",
+            "description": "Optional joint name on the attachment target.",
+            "maxLength": 256
+          },
+          "scale": {
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 100,
+            "description": "Uniform scale, default 1."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "MotionVfx preview_effect",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "motionvfx_stop_preview",
+      "description": "Stop the standalone preview started by preview_effect.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "MotionVfx stop_preview",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
     }
   ]
 }

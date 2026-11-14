@@ -100,11 +100,11 @@ local function uint(value)
     if value == nil then return nil end
     return safe(function() return sdk.to_int64(value) & 0xFFFFFFFF end)
 end
-local function scalar(obj, getter)
-    local value = call(obj, getter)
+local function plain(value)
     if type(value) == "string" or type(value) == "boolean" then return value end
     if type(value) == "number" and value == value and math.abs(value) ~= math.huge then return value end
 end
+local function scalar(obj, getter) return plain(call(obj, getter)) end
 local function raw_canonical(path)
     if type(path) ~= "string" then return nil end
     local normalized = path:gsub("^%s+", ""):gsub("%s+$", ""):gsub("^@+", "")
@@ -127,7 +127,8 @@ local function local_owner(go)
     if not go then return "unknown", nil end
     -- An explicit different hunter is remote. A projectile or environmental
     -- target is merely unknown; a follow target must not override its initiator.
-    local other = call(go, "getComponent(System.Type)", sdk.typeof(game.capture.remote_character_type))
+    local remote_type = game.capture.remote_character_type
+    local other = remote_type and call(go, "getComponent(System.Type)", sdk.typeof(remote_type))
     if other and identity(other) ~= actor.characterIdentity then return "remote", id end
     return "unknown", id
 end
@@ -140,7 +141,7 @@ local function shell_context(owner)
         sourceKind = "shell", sourceShellIdentity = identity(shell), isInitiator = true}
     local seen = {}
     for depth = 1, 8 do
-        if not is_a(shell, game.capture.shell_base_type) then break end
+        if not game.capture.shell_base_type or not is_a(shell, game.capture.shell_base_type) then break end
         local shell_id = identity(shell)
         if not shell_id or seen[shell_id] then counters.shellOwnerCycles = counters.shellOwnerCycles + 1; break end
         seen[shell_id] = true
@@ -164,15 +165,17 @@ local function shell_context(owner)
     return context
 end
 local function refresh_actor()
-    local manager = safe(sdk.get_managed_singleton, game.player.manager)
-    local master = call(manager, game.player.master)
-    local character = call(master, "get_Character")
-    local go, weapon = game_object(character), call(character, "get_Weapon")
+    local host = {call = call, singleton = function(name) return safe(sdk.get_managed_singleton, name) end,
+        typeof = function(name) return safe(sdk.typeof, name) end}
+    local player = game.player
+    local character = safe(player.character, host)
+    local go, weapon = game_object(character), character and safe(player.weapon, host, character)
     local weapon_go = game_object(weapon)
     actor_refs = {character = character, object = go, weapon = weapon, weaponObject = weapon_go}
     actor = {available = character ~= nil and go ~= nil, sceneEpoch = scene_epoch,
         characterIdentity = identity(character), gameObjectIdentity = identity(go), weaponIdentity = identity(weapon_go),
-        weaponType = scalar(character, game.player.weapon_type), weaponId = scalar(character, game.player.weapon_id)}
+        weaponType = character and plain(safe(player.weapon_type, host, character)),
+        weaponId = character and plain(safe(player.weapon_id, host, character))}
     return actor.available
 end
 local function retain(obj)
@@ -503,7 +506,7 @@ local function context_for(info, owner)
         motion = field(owner, "Motion"); go = game_object(motion) or game_object(owner)
     elseif info.owner == "controller" then go = field(owner, "_Owner")
     elseif info.owner == "hunter" then
-        local character = call(owner, game.capture.hunter_character_getter)
+        local character = game.capture.hunter_character_getter and call(owner, game.capture.hunter_character_getter)
         go = game_object(character)
         if character and identity(character) ~= actor.characterIdentity then
             return {ownership = "remote", ownerIdentity = identity(go), ownerEvidence = "hunter_character"}
@@ -882,7 +885,8 @@ local function pre(info, args)
     fr.context = context
     if info.kind == "scope" then return end
     if info.kind == "motion" then
-        context.motion = motion_snapshot(managed(argument(info, args, info.node), "via.motion.MotionNodeCtrl"), context.motionObject)
+        -- Some games' range-sequence requests carry no MotionNodeCtrl (no node index in the spec).
+        context.motion = info.node and motion_snapshot(managed(argument(info, args, info.node), "via.motion.MotionNodeCtrl"), context.motionObject) or nil
         return
     end
     local ev = make_event(info, context, parent); fr.event = ev
