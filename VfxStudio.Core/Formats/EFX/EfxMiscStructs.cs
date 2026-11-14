@@ -543,7 +543,7 @@ public partial class EFXAttributeNoiseExpression : EFXAttribute, IExpressionAttr
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.StretchBlur, EfxVersion.RE4)]
-public partial class EFXAttributeStretchBlur : EFXAttribute
+public partial class EFXAttributeStretchBlur : EFXAttribute, IBoneRelationAttribute
 {
 	public EFXAttributeStretchBlur() : base(EfxAttributeType.StretchBlur) { }
 
@@ -556,6 +556,11 @@ public partial class EFXAttributeStretchBlur : EFXAttribute
     public float AlphaIntensity;
     public float AdjustRotationBySpeed;
     public Vector3 SamplingOffset;
+
+    // RE-MotionVfxStudio：RE4 下 StretchBlur 也按出现顺序消费一个 BoneRelations 槽位。
+    // 证据（EfxCorpusGate bonealign，RE4 3946 个文件）：不加时 27 个作用域数量对不上、110 处骨骼名不一致，加上后都是 0。
+    // 不带 Rsz 标注，不参与读写，字节布局不变。
+    public string? ParentBone { get; set; }
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.TexelChannelOperator, EfxVersion.RE4)]
@@ -847,10 +852,10 @@ public partial class EFXAttributeDestinationCSV : EFXAttribute
 	public UndeterminedFieldType unkn5;
 	public UndeterminedFieldType unkn6;
 	public UndeterminedFieldType unkn7;
-	[RszInlineWString] public string? efcsvPath;
-	[RszInlineWString] public string? unknPath2;
-	[RszInlineWString] public string? unknPath3;
-	[RszInlineWString] public string? unknPath4;
+	[RszInlineWString(ByteSize = true)] public string? efcsvPath;
+	[RszInlineWString(ByteSize = true)] public string? unknPath2;
+	[RszInlineWString(ByteSize = true)] public string? unknPath3;
+	[RszInlineWString(ByteSize = true)] public string? unknPath4;
 
     public override string ToString() => !string.IsNullOrEmpty(efcsvPath) ? efcsvPath : type.ToString();
 }

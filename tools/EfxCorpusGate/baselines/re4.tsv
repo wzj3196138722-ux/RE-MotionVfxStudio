@@ -1,8 +1,8 @@
 # EfxCorpusGate roundtrip v1
 # corpus	E:\Program\Steam\steamapps\common\RESIDENT EVIL 4  BIOHAZARD RE4\RE4_EXTRACT\natives\stm
 # files	3946
-# same	3600
-# diff	346
+# same	3924
+# diff	22
 # read-error	0
 # write-error	0
 # status	path	detail
@@ -27,7 +27,7 @@ same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chd7/efd_0015_ao_chd7_g
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chd7/efd_0015_ao_chd7_gimmick_mot_0040.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chd7/efd_0015_ao_chd7_grapple_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chd7/efd_0015_ao_chd7_rage_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_anaemia_down_vera_0000.efx.3539837	off=9943 orig=37743 new=37743 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_anaemia_down_vera_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_down_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_drool_0001.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_footstep_0000.efx.3539837	
@@ -38,21 +38,21 @@ same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_g
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_handstamp_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_hookshot_attack_damage_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_hookshot_attack_damage_0001.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_jump_0000.efx.3539837	off=7668 orig=8301 new=8301 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_kick_0001.efx.3539837	off=5811 orig=32668 new=32668 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_kneeldown_f_start_parasite appearance_0000.efx.3539837	off=9871 orig=37427 new=37427 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_punchthrough_0000.efx.3539837	off=5852 orig=37570 new=37570 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_punchthrough_0001.efx.3539837	off=10008 orig=39089 new=39089 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_jump_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_kick_0001.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_kneeldown_f_start_parasite appearance_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_punchthrough_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_punchthrough_0001.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_rock_throw_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_shinlanding_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_slams_single_0000.efx.3539837	off=28658 orig=61492 new=61492 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_stomp_0000.efx.3539837	off=18399 orig=48127 new=48127 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_stomp_strong_0000.efx.3539837	off=12295 orig=44439 new=44439 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_strike_0000.efx.3539837	off=14857 orig=15259 new=15259 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_through_0000.efx.3539837	off=3202 orig=18073 new=18073 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_through_0001.efx.3539837	off=8302 orig=10642 new=10642 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_through_0003.efx.3539837	off=7378 orig=8591 new=8591 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_through_0004.efx.3539837	off=8579 orig=11896 new=11896 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_slams_single_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_stomp_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_stomp_strong_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_strike_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_through_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_through_0001.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_through_0003.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_through_0004.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_through_0005.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0000_damage_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0000_spear_0000.efx.3539837	
@@ -161,7 +161,7 @@ same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfb/efd_0015_ao_chfb_0
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfb/efd_0015_ao_chfb_0001_hookshot_attack_damage_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfb/efd_0015_ao_chfb_0001_hookshot_attack_damage_0001.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfb/efd_0015_ao_chfb_0001_roar_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfb/efd_0015_ao_chfb_0001_rockfall_0000.efx.3539837	off=7379 orig=7499 new=7499 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfb/efd_0015_ao_chfb_0001_rockfall_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfb/efd_0015_ao_chfb_0001_saliva_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfb/efd_0015_ao_chfb_0001_smoke_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfb/efd_0015_ao_chfb_0001_smoke_0010.efx.3539837	
@@ -198,8 +198,8 @@ same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfb/efd_0015_ao_chfb_0
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfb/efd_0015_ao_chfb_0001_underground_emerge_5100.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfb/efd_0015_ao_chfb_0001_underground_emerge_5105.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfb/efd_0015_ao_chfb_0001_underground_walk_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfb/efd_0015_ao_chfb_0001_wall_move_0000.efx.3539837	off=8288 orig=9199 new=9199 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfb/efd_0015_ao_chfb_0001_wall_start_0000.efx.3539837	off=8338 orig=9249 new=9249 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfb/efd_0015_ao_chfb_0001_wall_move_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfb/efd_0015_ao_chfb_0001_wall_start_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfb/efd_0015_ao_chfb_0001_weakdamage_blood_handgun_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfb/efd_0015_ao_chfb_0001_weakdamage_blood_knife_slash_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfb/efd_0015_ao_chfb_0001_weakdamage_blood_knife_stab_0000.efx.3539837	
@@ -228,7 +228,7 @@ same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_d
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_damage_core_shotgun_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_dash_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_falldamage_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_fatalattack_0000.efx.3539837	off=8166 orig=9027 new=9027 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_fatalattack_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_fatalattack_0001.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_fatalattack_0002.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_fatalattack_0003.efx.3539837	
@@ -296,7 +296,7 @@ same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse010_s00/efd_0015_cse010_
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse010_s00/efd_0015_cse010_s00_needle_0002.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse010_s00/efd_0015_cse010_s00_needle_0003.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse010_s00/efd_0015_cse010_s00_needle_0010.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse010_s00/efd_0015_cse010_s00_needle_0020.efx.3539837	off=10240 orig=10266 new=10266 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse010_s00/efd_0015_cse010_s00_needle_0020.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse010_s00/efd_0015_cse010_s00_sakebi_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse010_s00/efd_0015_cse010_s00_smoke_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse010_s00/efd_0015_cse010_s00_smoke_0001.efx.3539837	
@@ -472,12 +472,12 @@ same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse350_s00/efd_0015_cse350_
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse350_s00/efd_0015_cse350_s00_ch4fbz0_00_scream_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse350_s00/efd_0015_cse350_s00_cloth_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse350_s00/efd_0015_cse350_s00_dust_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse350_s00/efd_0015_cse350_s00_dust_0001.efx.3539837	off=6348 orig=7455 new=7455 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse350_s00/efd_0015_cse350_s00_dust_0001.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse350_s00/efd_0015_cse350_s00_dust_0002.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse350_s00/efd_0015_cse350_s00_dust_0004.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse350_s00/efd_0015_cse350_s00_dust_0005.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse350_s00/efd_0015_cse350_s00_dust_0006.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse350_s00/efd_0015_cse350_s00_dust_cloud_0000.efx.3539837	off=15139 orig=18554 new=18554 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse350_s00/efd_0015_cse350_s00_dust_cloud_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse350_s00/efd_0015_cse350_s00_dust_cloud_0001.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse350_s00/efd_0015_cse350_s00_dust_cloud_0002.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse350_s00/efd_0015_cse350_s00_dust_cloud_0003.efx.3539837	
@@ -609,15 +609,15 @@ same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse930_s01/efd_0015_cse930_
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse930_s02/efd_0015_cse930_s02_blood_0001.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse930_s02/efd_0015_cse930_s02_kick_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse930_s02/efd_0015_cse930_s02_kick_0010.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse930_s02/efd_0015_cse930_s02_smoke_0000.efx.3539837	off=2502 orig=3721 new=3721 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse930_s02/efd_0015_cse930_s02_smoke_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse930_s02/efd_0015_cse930_s02_smoke_0010.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse930_s02/efd_0015_cse930_s02_smoke_0011.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse930_s02/efd_0015_cse930_s02_smoke_0020.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse930_s02/efd_0015_cse930_s02_smoke_0030.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse940_s00/efd_0015_cse940_s00_fire_0000.efx.3539837	off=5534 orig=17257 new=17257 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse940_s00/efd_0015_cse940_s00_fire_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse941_s00/efd_0015_cse941_s00_blood_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse941_s00/efd_0015_cse941_s00_spark_0000.efx.3539837	off=9099 orig=12572 new=12572 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse941_s00/efd_0015_cse941_s00_spark_0001.efx.3539837	off=4553 orig=5560 new=5560 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse941_s00/efd_0015_cse941_s00_spark_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse941_s00/efd_0015_cse941_s00_spark_0001.efx.3539837	
 diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse941_s00/efd_0015_cse941_s00_spark_0010.efx.3539837	off=11131 orig=20688 new=20688 at=action:PlayEmitter>before-attributes hint=same-length
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse941_s00/efd_0015_cse941_s00_spark_0020.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse942_s00/efd_0015_cse942_s00_blood_0000.efx.3539837	
@@ -629,8 +629,8 @@ same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse944_s00/efd_0015_cse944_
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse950_s00/efd_0015_cse950_s00_blood_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse950_s00/efd_0015_cse950_s00_spark_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf000_s00/efd_0015_csf000_s00_destruction_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf000_s00/efd_0015_csf000_s00_destruction_0001.efx.3539837	off=12518 orig=16676 new=16676 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf000_s00/efd_0015_csf000_s00_destruction_0002.efx.3539837	off=11676 orig=24519 new=24519 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf000_s00/efd_0015_csf000_s00_destruction_0001.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf000_s00/efd_0015_csf000_s00_destruction_0002.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf000_s00/efd_0015_csf000_s00_destruction_0003.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf000_s00/efd_0015_csf000_s00_destruction_0004.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf000_s00/efd_0015_csf000_s00_destruction_0005.efx.3539837	
@@ -640,12 +640,12 @@ same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf001_s00/efd_0015_csf001_
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf001_s00/efd_0015_csf001_s00_destruction_0003.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf001_s00/efd_0015_csf001_s00_destruction_0004.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf001_s00/efd_0015_csf001_s00_destruction_0005.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf002_s00/efd_0015_csf002_s00_destruction_0000.efx.3539837	off=12858 orig=14037 new=14037 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf002_s00/efd_0015_csf002_s00_destruction_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf002_s00/efd_0015_csf002_s00_impact_0002.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf002_s00/efd_0015_csf002_s00_impact_0003.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf002_s00/efd_0015_csf002_s00_smoke_0001.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf002_s00/efd_0015_csf002_s00_stoneimpact_0000.efx.3539837	off=13828 orig=19581 new=19581 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf002_s00/efd_0015_csf002_s00_stoneimpact_0001.efx.3539837	off=12951 orig=18700 new=18700 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf002_s00/efd_0015_csf002_s00_stoneimpact_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf002_s00/efd_0015_csf002_s00_stoneimpact_0001.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf003_s00/efd_0015_csf003_s00_destruction_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf003_s00/efd_0015_csf003_s00_destruction_0001.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf003_s00/efd_0015_csf003_s00_destruction_0002.efx.3539837	
@@ -657,9 +657,9 @@ same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf004_s00/efd_0015_csf004_
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf004_s00/efd_0015_csf004_s00_destruction_0001.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf004_s00/efd_0015_csf004_s00_destruction_0002.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf004_s00/efd_0015_csf004_s00_destruction_0003.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf004_s00/efd_0015_csf004_s00_destruction_0004.efx.3539837	off=13765 orig=19430 new=19430 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf004_s00/efd_0015_csf004_s00_destruction_0005.efx.3539837	off=13765 orig=19430 new=19430 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf004_s00/efd_0015_csf004_s00_destruction_0006.efx.3539837	off=13765 orig=19430 new=19430 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf004_s00/efd_0015_csf004_s00_destruction_0004.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf004_s00/efd_0015_csf004_s00_destruction_0005.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf004_s00/efd_0015_csf004_s00_destruction_0006.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf004_s00/efd_0015_csf004_s00_destruction_0007.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf004_s00/efd_0015_csf004_s00_destruction_0008.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf004_s00/efd_0015_csf004_s00_destruction_0009.efx.3539837	
@@ -667,11 +667,11 @@ same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm23_301_00/efd_0015_sm23_3
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm23_301_10/efd_0015_sm23_301_10_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm23_301_20/efd_0015_sm23_301_20_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm23_302_10/efd_0015_sm23_302_10_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm25_307_00/efd_0015_sm25_307_00_0000.efx.3539837	off=1373 orig=3457 new=3457 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm25_307_10/efd_0015_sm25_307_10_0000.efx.3539837	off=1373 orig=3457 new=3457 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm25_307_20/efd_0015_sm25_307_20_0000.efx.3539837	off=1373 orig=3457 new=3457 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm61_305_00/efd_0015_sm61_305_00_0000.efx.3539837	off=21329 orig=23009 new=23009 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm61_305_00/efd_0015_sm61_305_00_0005.efx.3539837	off=43431 orig=48246 new=48246 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm25_307_00/efd_0015_sm25_307_00_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm25_307_10/efd_0015_sm25_307_10_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm25_307_20/efd_0015_sm25_307_20_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm61_305_00/efd_0015_sm61_305_00_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm61_305_00/efd_0015_sm61_305_00_0005.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm61_305_00/efd_0015_sm61_305_00_0010.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm61_538_00/efd_0015_sm61_538_00_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm61_541_00/efd_0015_sm61_541_00_0000.efx.3539837	
@@ -695,14 +695,14 @@ same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm82_311_01/efd_0015_sm82_3
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm82_312_00/efd_0015_sm82_312_00_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm82_312_00/efd_0015_sm82_312_00_0010.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm82_312_00/efd_0015_sm82_312_00_0020.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm82_312_00/efd_0015_sm82_312_00_0030.efx.3539837	off=4552 orig=5727 new=5727 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm82_312_00/efd_0015_sm82_312_00_0030.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm82_318_00/efd_0015_sm82_318_00_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm82_320_00/efd_0015_sm82_320_00_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm82_329_00/efd_0015_sm82_329_00_0000.efx.3539837	off=5649 orig=24622 new=24622 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm82_329_00/efd_0015_sm82_329_00_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_300_00/efd_0015_sm84_300_00_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_300_00/efd_0015_sm84_300_00_0001.efx.3539837	off=7687 orig=17942 new=17942 at=action:PlayEmitter>entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_300_00/efd_0015_sm84_300_00_0002.efx.3539837	off=12115 orig=29763 new=29763 at=action:PlayEmitter>entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_300_00/efd_0015_sm84_300_00_0003.efx.3539837	off=8190 orig=20932 new=20932 at=entry:PtCollision hint=prefix-bytes-written-as-units
+diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_300_00/efd_0015_sm84_300_00_0001.efx.3539837	off=10408 orig=17942 new=17942 at=action:PlayEmitter>before-attributes hint=same-length
+diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_300_00/efd_0015_sm84_300_00_0002.efx.3539837	off=14845 orig=29763 new=29763 at=action:PlayEmitter>before-attributes hint=same-length
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_300_00/efd_0015_sm84_300_00_0003.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_305_00/efd_0015_sm84_305_00_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_306_00/efd_0015_sm84_306_00_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_307_00/efd_0015_sm84_307_00_0000.efx.3539837	
@@ -723,24 +723,24 @@ same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_335_00/efd_0015_sm84_3
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_335_00/efd_0015_sm84_335_00_0010.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_343_00/efd_0015_sm84_343_00_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_343_00/efd_0015_sm84_343_01_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_354_00/efd_0015_sm84_354_00_0000.efx.3539837	off=7036 orig=9026 new=9026 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_354_00/efd_0015_sm84_354_00_0000.efx.3539837	
 diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_356_00/efd_0015_sm84_356_00_0000.efx.3539837	off=387 orig=20847 new=20847 at=action:PlayEmitter>before-attributes hint=same-length
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_359_00/efd_0015_sm84_359_00_0000.efx.3539837	off=11474 orig=19094 new=19094 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_359_00/efd_0015_sm84_359_00_0001.efx.3539837	off=1629 orig=43778 new=43778 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_359_00/efd_0015_sm84_359_00_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_359_00/efd_0015_sm84_359_00_0001.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_360_00/efd_0015_sm84_360_00_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_360_00/efd_0015_sm84_360_00_0010.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_363_00/efd_0015_sm84_363_00_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_363_00/efd_0015_sm84_363_00_0000_lasersight_0001.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_365_00/efd_0015_sm25_365_00_0000.efx.3539837	off=1430 orig=4557 new=4557 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_365_00/efd_0015_sm25_365_00_0010.efx.3539837	off=1425 orig=4552 new=4552 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_365_00/efd_0015_sm25_365_00_0030.efx.3539837	off=1484 orig=7938 new=7938 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_365_00/efd_0015_sm25_365_00_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_365_00/efd_0015_sm25_365_00_0010.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_365_00/efd_0015_sm25_365_00_0030.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_367_00/efd_0015_sm84_367_00_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_567_00/efd_0015_sm84_567_00_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm91_308_00/efd_0015_sm91_308_00_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm91_308_00/efd_0015_sm91_308_00_0010.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm91_308_00/efd_0015_sm91_308_00_0020.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm91_316_00/efd_0015_sm91_316_00_0000.efx.3539837	off=5035 orig=40569 new=40569 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm91_316_00/efd_0015_sm91_316_00_0001.efx.3539837	off=15324 orig=39164 new=39164 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm91_316_00/efd_0015_sm91_316_00_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm91_316_00/efd_0015_sm91_316_00_0001.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm91_316_00/efd_0015_sm91_316_00_0010.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm91_339_00/efd_0015_sm91_339_00_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm91_339_00/efd_0015_sm91_339_00_0010.efx.3539837	
@@ -764,7 +764,7 @@ same	_anotherorder/vfx/effecteditor/efd_stage/efd_st40/efd_st40_200/efd_0015_st4
 same	_anotherorder/vfx/effecteditor/efd_stage/efd_st40/efd_st40_200/efd_0015_st40_200_0017.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_stage/efd_st40/efd_st40_200/efd_0015_st40_200_0018.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_stage/efd_st40/efd_st40_200/efd_0015_st40_200_0019.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_stage/efd_st40/efd_st40_200/efd_0015_st40_200_0050.efx.3539837	off=3570 orig=39195 new=39195 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_stage/efd_st40/efd_st40_200/efd_0015_st40_200_0050.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_stage/efd_st40/efd_st40_200/efd_0015_st40_200_1010.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_stage/efd_st40/efd_st40_200/efd_0015_st40_200_1010_lightver.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_stage/efd_st40/efd_st40_210/efd_0015_st40_210_0010.efx.3539837	
@@ -845,7 +845,7 @@ same	_anotherorder/vfx/effecteditor/efd_stage/efd_st59/efd_st59_101/efd_0015_st5
 same	_anotherorder/vfx/effecteditor/efd_stage/efd_st60/efd_st60_850/efd_0015_st60_850_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_stage/efd_st60/efd_st60_850/efd_0015_st60_850_0001.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_stage/efd_st60/efd_st60_850/efd_0015_st60_850_0010.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_stage/efd_st60/efd_st60_851/efd_0015_st60_851_0000_nami_rt.efx.3539837	off=93 orig=1024 new=1024 at=entry:RenderTarget hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_stage/efd_st60/efd_st60_851/efd_0015_st60_851_0000_nami_rt.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_stage/efd_st60/efd_st60_860/efd_0015_st60_860_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_stage/efd_st60/efd_st60_860/efd_0015_st60_860_0001.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_stage/efd_st60/efd_st60_860/efd_0015_st60_860_0002.efx.3539837	
@@ -867,7 +867,7 @@ same	_anotherorder/vfx/effecteditor/efd_stage/efd_st69/efd_st69_100/efd_0015_st6
 same	_anotherorder/vfx/effecteditor/efd_ui/efd_ui1010/efd_0015_ui1010_firedust_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_weapon/efd_wp5826/efd_0015_ao_wp5826_roar_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_weapon/efd_wp5826/efd_0015_ao_wp5826_roar_0001.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_weapon/efd_wp5826/efd_0015_ao_wp5826_roar_0100.efx.3539837	off=40 orig=2537 new=2535 at=before-attributes hint=length-changed
+same	_anotherorder/vfx/effecteditor/efd_weapon/efd_wp5826/efd_0015_ao_wp5826_roar_0100.efx.3539837	
 same	_anotherorder/vfx/provider/epv_gmactorweapon/efd_wp_common/efd_0015_gmactor_wp_common_muzzle_0005.efx.3539837	
 same	_chainsaw/ui/ui_effect/cs_ui_cursoreffect.efx.3539837	
 same	_chainsaw/ui/ui_effect/cs_ui_dust.efx.3539837	
@@ -922,8 +922,8 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_ch_common/efd_0015_ch_common_d
 same	_chainsaw/vfx/effecteditor/efd_character/efd_ch_common/efd_0015_ch_common_damage_smoke_kick_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_ch_common/efd_0015_ch_common_damage_spark_add_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_ch_common/efd_0015_ch_common_damage_spark_handgun_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_ch_common/efd_0015_ch_common_damage_spark_knife_slash_0000.efx.3539837	off=7696 orig=9840 new=9840 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_ch_common/efd_0015_ch_common_damage_spark_knife_stab_0000.efx.3539837	off=6738 orig=7697 new=7697 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_ch_common/efd_0015_ch_common_damage_spark_knife_slash_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_ch_common/efd_0015_ch_common_damage_spark_knife_stab_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_ch_common/efd_0015_ch_common_damage_spark_machinegun_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_ch_common/efd_0015_ch_common_damage_spark_magnum_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_ch_common/efd_0015_ch_common_damage_spark_rifle_0000.efx.3539837	
@@ -981,7 +981,7 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_chc0_jack_p
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_chc0_jack_pl_1st_com_3110_damage_failed_dead_f_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_chc0_jack_pl_1st_com_3110_damage_failed_dead_f_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_chc0_jack_pl_2nd_wp5804_0100_damage_failed_f_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_chc0_jack_pl_2nd_wp5804_0110_damage_failed_dead_f_0000.efx.3539837	off=36233 orig=40187 new=40187 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_chc0_jack_pl_2nd_wp5804_0110_damage_failed_dead_f_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_chc0_jack_pl_2nd_wp5804_3100_damage_failed_f_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_chc0_jack_pl_2nd_wp5804_3110_damage_failed_dead_f_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_chc0_jack_pl_2nd_wp5804_3300_hold_f_start_wp5811_0000.efx.3539837	
@@ -997,7 +997,7 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_chf7_jack_p
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_chf7_jack_pl_2000_grab_start_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_chf7_jack_pl_2000_grab_start_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_chf7_jack_pl_2002_grab_dead_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_chf8_jack_pl_0010_throw_turn_game_0000.efx.3539837	off=7498 orig=7524 new=7524 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_chf8_jack_pl_0010_throw_turn_game_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_chf8_jack_pl_0022_catch_dead_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_colmillos_holddawn_bite_end_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_colmillos_holddawn_escape_0000.efx.3539837	
@@ -1053,7 +1053,7 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_damage_bloo
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_damage_blood_verdugo_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_damage_electric_stanrod_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_damage_fire_block_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_dead_hold_dead_verb_0000.efx.3539837	off=21522 orig=26034 new=26034 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_dead_hold_dead_verb_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_dead_hold_dead_verb_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_jack_pl_hold_jump_dead_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_jack_pl_hold_jump_dead_0001.efx.3539837	
@@ -1074,7 +1074,7 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_water_swim_
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_water_swim_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_water_swim_0003.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_cha0_water_to_boat_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_chc0_jack_pl_0th_com_0010_hold_attack_0000.efx.3539837	off=8479 orig=12880 new=12880 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_chc0_jack_pl_0th_com_0010_hold_attack_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_chc0_jack_pl_0th_com_0081_hold_dead_1st_com_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_chc0_jack_pl_0th_com_0081_hold_dead_1st_com_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha0/efd_0015_chc0_jack_pl_0th_com_0082_hold_dead_2nd_wp5804_0000.efx.3539837	
@@ -1091,7 +1091,7 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_cha1/efd_0015_cha1_chd2_jack_p
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha1/efd_0015_cha1_damage_hit_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha1/efd_0015_cha1_damage_hit_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha1/efd_0015_cha1_hold_dead_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_cha1/efd_0015_cha1_hold_dead_0001.efx.3539837	off=5243 orig=18712 new=18712 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_cha1/efd_0015_cha1_hold_dead_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha1/efd_cha1_rainsplash/efd_0015_cha1_rainsplash_01_body.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha1/efd_cha1_rainsplash/efd_0015_cha1_rainsplash_01_hair.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_cha1/efd_cha1_rainsplash/efd_0015_cha1_rainsplash_02_body.efx.3539837	
@@ -1108,25 +1108,25 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_chb7/efd_0015_chb7_grapple_006
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chb7/efd_0015_chb7_grapple_0720_front_hold_escape_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chb7/efd_0015_chb7_grapple_0720_front_hold_escape_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chb7/efd_0015_chb7_grapple_0740_front_hold_escape_verb_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chb7/efd_0015_chb7_grapple_1000_parry_vera_0000.efx.3539837	off=9595 orig=12948 new=12948 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chb7/efd_0015_chb7_grapple_1010_parry_verb_0000.efx.3539837	off=9595 orig=12948 new=12948 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chb7/efd_0015_chb7_grapple_1000_parry_vera_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chb7/efd_0015_chb7_grapple_1010_parry_verb_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chb7/efd_0015_chb7_grapple_2000_grab_start_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chb7/efd_0015_chb7_grapple_2001_grab_escape_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chb7/efd_0015_chb7_grapple_2003_grab_escape_verb_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chb7/efd_0015_chb7_step_l_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chb7/efd_0015_chb7_step_r_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_attack_2nd_wp5804_1020_sprinkle_sand_wp5821_vera_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_attack_2nd_wp5804_1111_strike_large_fat_verb_0000.efx.3539837	off=34968 orig=65148 new=65148 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_attack_2nd_wp5804_1111_strike_large_fat_verb_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_attack_2nd_wp5804_5000_strike_near_chc4_vera_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_attack_2nd_wp5804_5005_strike_medium_chc4_vera_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_attack_2nd_wp5804_5010_strike_near_end_chc4_vera_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_attack_2nd_wp5804_5015_strike_medium_end_chc4_vera_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_attack_2nd_wp5804_5027_swing_around_end_chc4_vera_0000.efx.3539837	off=9779 orig=14991 new=14991 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_attack_2nd_wp5804_5027_swing_around_end_chc4_vera_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_blood_claw_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_broken_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_broken_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_broken_0002.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_broken_0003.efx.3539837	off=45766 orig=48480 new=48480 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_broken_0003.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_broken_0004.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_burn_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_burn_0001.efx.3539837	
@@ -1138,7 +1138,7 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_grapple_0th
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_grapple_0th_com_0021_hold_escape_wp5000_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_grapple_0th_com_0022_hold_escape_dead_wp5000_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_grapple_0th_com_0030_hold_dead_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_grapple_0th_com_0070_hold_escape_0000.efx.3539837	off=10823 orig=14439 new=14439 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_grapple_0th_com_0070_hold_escape_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_grapple_0th_com_1000_knife_decapitation_f_layfacedown_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_grapple_0th_com_1005_knife_decapitation_f_layfacedown_verb_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_grapple_0th_com_1010_knife_decapitation_f_layfaceup_0000.efx.3539837	
@@ -1150,21 +1150,21 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_grapple_0th
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_grapple_0th_com_5921_wp5000_carry_knife_stealth_kill_b_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_grapple_0th_com_7222_hold_escape_dead_che400_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_grapple_stealthkill_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_headshot_0000.efx.3539837	off=22867 orig=27867 new=27867 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_headshot_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_hit_wall_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_jumpdown_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_rise_zombie_in_water_0000.efx.3539837	off=13904 orig=14937 new=14937 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_undiscovered_0th_com_4006_hold_verb_0000.efx.3539837	off=7352 orig=7378 new=7378 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_rise_zombie_in_water_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_undiscovered_0th_com_4006_hold_verb_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_undiscovered_0th_com_4015_falling_fireplace_vera_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_undiscovered_0th_com_6301_self_harm_change_loop_che3_vera_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_undiscovered_0th_com_6302_self_harm_change_end_che3_vera_0000.efx.3539837	off=13485 orig=20132 new=20132 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_undiscovered_0th_com_6302_self_harm_change_end_che3_vera_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_undiscovered_0th_com_6307_body_plaga_appear_end_che2_vera_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_undiscovered_0th_com_6307_body_plaga_appear_end_che2_vera_0001.efx.3539837	off=26918 orig=27691 new=27691 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_undiscovered_0th_com_7000_born_plagec_0000.efx.3539837	off=18286 orig=19622 new=19622 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_hematemesis_0000.efx.3539837	off=14820 orig=15912 new=15912 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_hematemesis_0001.efx.3539837	off=11376 orig=12652 new=12652 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_hematemesis_0002.efx.3539837	off=14193 orig=15285 new=15285 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_hematemesis_0003.efx.3539837	off=8038 orig=8597 new=8597 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_undiscovered_0th_com_6307_body_plaga_appear_end_che2_vera_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_chc0_undiscovered_0th_com_7000_born_plagec_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_hematemesis_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_hematemesis_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_hematemesis_0002.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chc0/efd_0015_hematemesis_0003.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc3/efd_0015_chc3_burn_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc3/efd_0015_chc3_burn_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc3/efd_0015_chc3_chainsawhit_0000.efx.3539837	
@@ -1175,9 +1175,9 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_chc3/efd_0015_chc3_chc0_layfac
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc3/efd_0015_chc3_chc0_layfacedownverb_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc3/efd_0015_chc3_chc0_layfacedownverb_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc3/efd_0015_chc3_chc0_layfacedownverb_0002.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chc3/efd_0015_chc3_chc0_set_work_start_sm62_502_vera_0000.efx.3539837	off=5202 orig=6205 new=6205 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chc3/efd_0015_chc3_chc0_set_work_start_sm62_502_vera_0001.efx.3539837	off=6485 orig=14791 new=14791 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chc3/efd_0015_chc3_chc0_set_work_start_sm62_502_vera_0002.efx.3539837	off=3759 orig=8278 new=8278 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chc3/efd_0015_chc3_chc0_set_work_start_sm62_502_vera_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chc3/efd_0015_chc3_chc0_set_work_start_sm62_502_vera_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chc3/efd_0015_chc3_chc0_set_work_start_sm62_502_vera_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc3/efd_0015_chc3_hold_dead_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc3/efd_0015_chc3_hold_dead_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chc3/efd_0015_chc3_hold_dead_b_0000.efx.3539837	
@@ -1199,19 +1199,19 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_chd0/efd_0015_chd0_avoidance_f
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd0/efd_0015_chd0_avoidance_failed_dead_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd0/efd_0015_chd0_avoidance_failed_dead_0007.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd0/efd_0015_chd0_avoidance_failed_dead_0008.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd0/efd_0015_chd0_change_0000.efx.3539837	off=3351 orig=9061 new=9061 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chd0/efd_0015_chd0_change_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd0/efd_0015_chd0_criticalattack_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd0/efd_0015_chd0_criticalattack_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd0/efd_0015_chd0_electric shock_end_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd0/efd_0015_chd0_electric shock_start_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd0/efd_0015_chd0_plag_idle_start_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd0/efd_0015_chd0_prage_dead_0000.efx.3539837	off=16772 orig=43583 new=43583 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chd0/efd_0015_chd0_prage_dead_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd0/efd_0015_chd0_punch_prg_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd0/efd_0015_chd0_stealth_kill_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd0/efd_0015_chd0_stealth_kill_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd0/efd_0015_chd0_swing_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd2/efd_0015_chd2_damage_5110_dead_flash_l_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd2/efd_0015_chd2_deadbody_0000.efx.3539837	off=7296 orig=8658 new=8658 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chd2/efd_0015_chd2_deadbody_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd2/efd_0015_chd2_general_idle_change_to parasite_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd2/efd_0015_chd2_grapple_1000_knife_decapitation_foot side_vera_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd2/efd_0015_chd2_grapple_1000_knife_decapitation_foot side_vera_0001.efx.3539837	
@@ -1240,13 +1240,13 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_chd3/efd_0015_chd3_attack_0050
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd3/efd_0015_chd3_attack_0101_strike_medium_armr_vera_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd3/efd_0015_chd3_attack_0120_strike_medium_fly_vera_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd3/efd_0015_chd3_attack_5000_water_strike_medium_armr_vera_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd3/efd_0015_chd3_damage_5000_water_burst_stand_small_f_to_layfaceup_vera_0000.efx.3539837	off=14733 orig=14759 new=14759 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chd3/efd_0015_chd3_damage_5000_water_burst_stand_small_f_to_layfaceup_vera_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd3/efd_0015_chd3_damage_dust_slam_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd3/efd_0015_chd3_damage_dust_slam_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd3/efd_0015_chd3_dead_2000_flame_dead_0000.efx.3539837	
 diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd3/efd_0015_chd3_dead_5000_water_layfaceup_vera_0000.efx.3539837	off=675 orig=19594 new=19594 at=action:PlayEmitter>before-attributes hint=same-length
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd3/efd_0015_chd3_dead_dust_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd3/efd_0015_chd3_deadbody_0000.efx.3539837	off=76120 orig=77828 new=77828 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chd3/efd_0015_chd3_deadbody_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd3/efd_0015_chd3_grapple_0000_acid_first_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd3/efd_0015_chd3_grapple_0020_acid_escape_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd3/efd_0015_chd3_grapple_0021_acid_escape_wp5000_0000.efx.3539837	
@@ -1272,15 +1272,15 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_broken_r_le
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_damage_core_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_damage_core_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_damage_core_0002.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_dead_0000_stand_layfacedown_f_vera_0000.efx.3539837	off=71922 orig=73630 new=73630 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_dead_0000_stand_layfacedown_f_vera_0001.efx.3539837	off=81887 orig=83583 new=83583 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_dead_0000_stand_layfacedown_f_vera_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_dead_0000_stand_layfacedown_f_vera_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_dead_0000_stand_layfacedown_f_vera_0002.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_dead_0020_stand_layfaceup_f_verd_0000.efx.3539837	off=81887 orig=83583 new=83583 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_dead_0020_stand_layfaceup_f_verd_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_dead_1000_layfacedown_vera_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_eliminate_l_arm_0000.efx.3539837	off=17710 orig=17736 new=17736 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_eliminate_l_leg_0000.efx.3539837	off=19159 orig=19185 new=19185 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_eliminate_r_arm_0000.efx.3539837	off=16626 orig=16652 new=16652 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_eliminate_r_leg_0000.efx.3539837	off=19159 orig=19185 new=19185 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_eliminate_l_arm_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_eliminate_l_leg_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_eliminate_r_arm_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_eliminate_r_leg_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_general_5100_transform_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_general_5100_transform_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_general_5110_transform_layfacedown_0000.efx.3539837	
@@ -1300,24 +1300,24 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_regeneratio
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_regeneration_l_leg_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_regeneration_r_arm_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd4/efd_0015_chd4_regeneration_r_leg_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd5/efd_0015_chd4_dead_0005_stand_layfacedown_f_verb_0000.efx.3539837	off=119134 orig=120842 new=120842 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd5/efd_0015_chd4_dead_1005_layfacedown_verb_0000.efx.3539837	off=139171 orig=141234 new=141234 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chd5/efd_0015_chd4_dead_0005_stand_layfacedown_f_verb_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chd5/efd_0015_chd4_dead_1005_layfacedown_verb_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd5/efd_0015_chd4_grapple_hold_needle_knife_escape_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd5/efd_0015_chd4_grapple_hold_needle_knife_escape_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd5/efd_0015_chd5_broken_core_0000.efx.3539837	off=17510 orig=20617 new=20617 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd5/efd_0015_chd5_needle_envhit_0000.efx.3539837	off=1483 orig=16836 new=16836 at=action:PlayEmitter>entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_attack_0010_strike_near_sword_vera_0000.efx.3539837	off=10369 orig=17837 new=17837 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chd5/efd_0015_chd5_broken_core_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chd5/efd_0015_chd5_needle_envhit_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_attack_0010_strike_near_sword_vera_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_attack_0010_strike_near_sword_vera_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_attack_0011_strike_near_sword_verb_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_attack_0020_strike_spin_sword_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_attack_0030_strike_side_sword_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_attack_2500_walk_f_vera_0000.efx.3539837	off=15987 orig=45916 new=45916 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_attack_2500_walk_f_vera_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_attack_2500_walk_f_vera_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_dead_0050_stand_layfacedown_f_sword_vera_0000.efx.3539837	off=15190 orig=34992 new=34992 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_dead_0050_stand_layfacedown_f_sword_vera_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_dead_0100_flame_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_envhit_common_0000.efx.3539837	off=12555 orig=20131 new=20131 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_envhit_common_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_envhit_staging_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_general_5050_set_to_attack_sword_0000.efx.3539837	off=15948 orig=45506 new=45506 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_general_5050_set_to_attack_sword_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_general_5050_set_to_attack_sword_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_grapple_1000_knife_decapitation_f_kneeldown_vera_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_grapple_1000_knife_decapitation_f_kneeldown_vera_0001.efx.3539837	
@@ -1326,20 +1326,20 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_grapple_100
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_grapple_1005_knife_decapitation_f_kneeldown_verb_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_grapple_1006_knife_decapitation_dead_f_kneeldown_verb_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chd6/efd_0015_chd6_lantern_stop_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_che0/efd_0015_che0_deadbody_0000.efx.3539837	off=35843 orig=37551 new=37551 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_che0/efd_0015_che0_deadbody_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_che0/efd_0015_che0_other_7013_appearance_loop_vera_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_che0/efd_0015_che0_other_8001_born_jump_plagec_0000.efx.3539837	off=8054 orig=9614 new=9614 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_che0/efd_0015_che0_other_8001_born_jump_plagec_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_che2/efd_0015_che2_apper_plage_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_che2/efd_0015_che2_apper_plage_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_che2/efd_0015_che2_attack_0000_strike_near_vera_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_che2/efd_0015_che2_attack_0001_strike_near_verb_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_che2/efd_0015_che2_attack_0101_strike_medium_verb_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_che2/efd_0015_che2_attack_0105_strike_medium_verc_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_che2/efd_0015_che2_damage_1010_dead_flash_0000.efx.3539837	off=19129 orig=20004 new=20004 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_che2/efd_0015_che2_damage_1010_dead_flash_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_che3/efd_0015_che3_attack_0250_spit_out_vera_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_che3/efd_0015_che3_attack_0250_spit_out_vera_0001.efx.3539837	off=8311 orig=9188 new=9188 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_che3/efd_0015_che3_attack_0250_spit_out_vera_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_che3/efd_0015_che3_damage_1000_dead_vera_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_che3/efd_0015_che3_damage_1010_dead_flash_0000.efx.3539837	off=19065 orig=19934 new=19934 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_che3/efd_0015_che3_damage_1010_dead_flash_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_che3/efd_0015_che3_general_idle_start_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_che3/efd_0015_che3_general_idle_start_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_che3/efd_0015_che3_grapple_6500_parry_0000.efx.3539837	
@@ -1351,13 +1351,13 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_che3/efd_0015_che3_grapple_655
 same	_chainsaw/vfx/effecteditor/efd_character/efd_che3/efd_0015_che3_shell_acid_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_che3/efd_0015_che3_shell_acid_hit_floor_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_che3/efd_0015_che3_shell_acid_hit_wall_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_anaemia_down_vera_0000.efx.3539837	off=9943 orig=37647 new=37647 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_anaemia_down_vera_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_anger_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_anger_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_charge attack_env_0000.efx.3539837	off=39269 orig=74698 new=74698 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_charge attack_env_0001.efx.3539837	off=2450 orig=45682 new=45682 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_charge attack_env_0002.efx.3539837	off=1286 orig=7654 new=7654 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_death_0000.efx.3539837	off=8435 orig=61791 new=61791 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_charge attack_env_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_charge attack_env_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_charge attack_env_0002.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_death_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_death_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_death_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_down_0000.efx.3539837	
@@ -1369,24 +1369,24 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_grapple_000
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_grapple_0003.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_grapple_0004.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_handstamp_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_jump_0000.efx.3539837	off=7668 orig=8341 new=8341 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_kick_0001.efx.3539837	off=5811 orig=32632 new=32632 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_kneeldown_f_start_parasite appearance_0000.efx.3539837	off=9871 orig=37331 new=37331 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_landslide down_start_env_0000.efx.3539837	off=30462 orig=60868 new=60868 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_jump_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_kick_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_kneeldown_f_start_parasite appearance_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_landslide down_start_env_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_plag_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_plag_damage_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_plag_damage_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_punchthrough_0000.efx.3539837	off=5852 orig=37518 new=37518 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_punchthrough_0001.efx.3539837	off=10008 orig=39037 new=39037 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_punchthrough_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_punchthrough_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_shinlanding_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_slams_single_0000.efx.3539837	off=30459 orig=63253 new=63253 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_stomp_0000.efx.3539837	off=20179 orig=49863 new=49863 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_stomp_strong_0000.efx.3539837	off=12270 orig=42220 new=42220 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_strike_0000.efx.3539837	off=14857 orig=15235 new=15235 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_through_0000.efx.3539837	off=9951 orig=13934 new=13934 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_through_0001.efx.3539837	off=8302 orig=10642 new=10642 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_through_0003.efx.3539837	off=7378 orig=8591 new=8591 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_through_0004.efx.3539837	off=8579 orig=11896 new=11896 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_slams_single_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_stomp_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_stomp_strong_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_strike_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_through_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_through_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_through_0003.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_through_0004.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_0015_chf0_through_0005.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_chf0_rainsplash/efd_0015_chf0_rainsplash_00_body.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf0/efd_chf0_rainsplash/efd_0015_chf0_rainsplash_01_body.efx.3539837	
@@ -1438,20 +1438,20 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_attack_bulr
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_attack_bulr_r_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_attack_cellingcrow_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_attack_landing_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_attack_strike_medium_tail_0000.efx.3539837	off=6301 orig=22999 new=22999 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_attack_strike_medium_tail_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_attack_strike_medium_tail_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_attack_strike_medium_tail_0002.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_attack_strike_medium_tail_0003.efx.3539837	off=4166 orig=14728 new=14728 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_attack_strike_medium_tail_0004.efx.3539837	off=4071 orig=14112 new=14112 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_attack_strike_medium_tail_0003.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_attack_strike_medium_tail_0004.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_damage_freeze_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_damage_handgun_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_damage_handgun_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_damage_machinegun_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_damage_magnum_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_damage_shotgun_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_general_frozen_end_0000.efx.3539837	off=1642 orig=14626 new=14626 at=action:PlayEmitter>entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_general_frozen_end_0001.efx.3539837	off=15001 orig=15027 new=15027 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_general_frozen_end_0002.efx.3539837	off=17652 orig=19171 new=19171 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_general_frozen_end_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_general_frozen_end_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_general_frozen_end_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_general_frozen_end_0003.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_general_frozen_end_0004.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf2/efd_0015_chf2_general_frozen_end_0005.efx.3539837	
@@ -1492,10 +1492,10 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_chf5/efd_0015_chf5_attack_bulr
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf5/efd_0015_chf5_attack_bulr_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf5/efd_0015_chf5_attack_bulr_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf5/efd_0015_chf5_attack_bulr_0003.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf5/efd_0015_chf5_attack_jump_0000.efx.3539837	off=10702 orig=16335 new=16335 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf5/efd_0015_chf5_attack_jump_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf5/efd_0015_chf5_attack_jump_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf5/efd_0015_chf5_attack_sledgehammer_0001.efx.3539837	off=10790 orig=16423 new=16423 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf5/efd_0015_chf5_damage_down_0001.efx.3539837	off=7881 orig=12383 new=12383 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf5/efd_0015_chf5_attack_sledgehammer_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf5/efd_0015_chf5_damage_down_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf5/efd_0015_chf5_grapple_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf5/efd_0015_chf5_grapple_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_ch_chf6_attack_bomb_0000.efx.3539837	
@@ -1514,7 +1514,7 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_ch_chf6_damage_l
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_ch_chf6_damage_liquid_magnum_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_ch_chf6_damage_liquid_rifle_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_ch_chf6_damage_liquid_shotgun_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_attack_bite_0000.efx.3539837	off=29885 orig=29911 new=29911 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_attack_bite_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_attack_bite_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_attack_bite_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_attack_bite_0003.efx.3539837	
@@ -1526,11 +1526,11 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_attack_shot
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_attack_shot_fire_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_attack_shot_laser_up_start_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_charge_rage_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_downattack_end_fall_0000.efx.3539837	off=8412 orig=9637 new=9637 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_downattack_end_fall_0001.efx.3539837	off=7502 orig=11777 new=11777 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_grapple_0000.efx.3539837	off=7995 orig=25756 new=25756 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_grapple_0001.efx.3539837	off=6592 orig=21132 new=21132 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_grapple_0002.efx.3539837	off=11595 orig=12736 new=12736 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_downattack_end_fall_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_downattack_end_fall_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_grapple_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_grapple_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_grapple_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_grapple_0005.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_grapple_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf6/efd_0015_chf6_grapple_0007.efx.3539837	
@@ -1545,8 +1545,8 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_attack_0010
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_attack_0022_stinger_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_attack_0025_stinger_short_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_attack_0050_jump_rotation_slash_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_attack_0050_jump_rotation_slash_0001.efx.3539837	off=23239 orig=26762 new=26762 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_attack_0211_fall_panch_landing_0000.efx.3539837	off=27066 orig=58877 new=58877 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_attack_0050_jump_rotation_slash_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_attack_0211_fall_panch_landing_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_damage_0205_body_large_f_vera_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_damage_0206_body_large_b_vera_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_damage_0211_body_large_f_verc_0000.efx.3539837	
@@ -1566,13 +1566,13 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_grapple_200
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_grapple_2001_grab_escape_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_grapple_2003_grab_escape_verb_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_other_0075_slash_landing_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_other_0075_slash_landing_0001.efx.3539837	off=23239 orig=26762 new=26762 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_other_0075_slash_landing_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_other_0090_jump_climb_large_f_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_other_0091_jump_climb_large_b_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_other_0092_jump_climb_large_f_turn_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_other_0095_jump_climb_large_f_3f_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_other_0100_jump_climb_slash_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_other_0100_jump_climb_slash_0001.efx.3539837	off=23239 orig=26762 new=26762 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf7/efd_0015_chf7_other_0100_jump_climb_slash_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_ch_chf8_attack_liquid_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_ch_chf8_attack_liquid_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_ch_chf8_attack_liquid_0002.efx.3539837	
@@ -1580,10 +1580,10 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_ch_chf8_attack_l
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_ch_chf8_attack_liquid_0004.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_ch_chf8_attack_liquid_0005.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf5_attack_bulr_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_attack_0000.efx.3539837	off=11427 orig=20564 new=20564 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_attack_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_attack_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_attack_0002.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_attack_0003.efx.3539837	off=5665 orig=20198 new=20198 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_attack_0003.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_damage_core_handgun_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_damage_core_knife_slash_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_damage_core_knife_stab_0000.efx.3539837	
@@ -1591,10 +1591,10 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_damage_core
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_damage_core_magnum_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_damage_core_rifle_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_damage_core_shotgun_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_damage_eye_breaking_0000.efx.3539837	off=34647 orig=45648 new=45648 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_damage_eye_breaking_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_damage_spark_handgun_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_damage_spark_knife_slash_0000.efx.3539837	off=7723 orig=11052 new=11052 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_damage_spark_knife_stab_0000.efx.3539837	off=7722 orig=11051 new=11051 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_damage_spark_knife_slash_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_damage_spark_knife_stab_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_damage_spark_machinegun_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_damage_spark_magnum_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_damage_spark_rifle_0000.efx.3539837	
@@ -1606,13 +1606,13 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_grapple_000
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_grapple_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_grapple_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_grapple_0003.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_grapple_0004.efx.3539837	off=11328 orig=25868 new=25868 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_grapple_0004.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_grapple_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chf8/efd_0015_chf8_grapple_0007.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chfd/efd_0015_chfd_attack_0000.efx.3539837	off=9771 orig=20734 new=20734 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chfd/efd_0015_chfd_attack_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chfd/efd_0015_chfd_attack_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chfd/efd_0015_chfd_attack_0003.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chfd/efd_0015_chfd_attack_0004.efx.3539837	off=4556 orig=8325 new=8325 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chfd/efd_0015_chfd_attack_0004.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chg1/efd_0015_chg1_damage_blood_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chg2/efd_0015_chg2_damage_blood_bowgun_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chg2/efd_0015_chg2_damage_blood_handgun_0000.efx.3539837	
@@ -1623,22 +1623,22 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_chg2/efd_0015_chg2_damage_bloo
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chg2/efd_0015_chg2_damage_blood_rifle_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chg2/efd_0015_chg2_damage_blood_shotgun_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chg3/efd_0015_chg3_damage_fire_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_bowgun_0000.efx.3539837	off=8549 orig=8575 new=8575 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_bowgun_0001.efx.3539837	off=8597 orig=8623 new=8623 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_handgun_0000.efx.3539837	off=9245 orig=9271 new=9271 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_handgun_0001.efx.3539837	off=10349 orig=10375 new=10375 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_knife_slash_0000.efx.3539837	off=13734 orig=13760 new=13760 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_knife_slash_0001.efx.3539837	off=13782 orig=13808 new=13808 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_knife_stab_0000.efx.3539837	off=15386 orig=15412 new=15412 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_knife_stab_0001.efx.3539837	off=15434 orig=15460 new=15460 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_machinegun_0000.efx.3539837	off=9768 orig=9794 new=9794 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_machinegun_0001.efx.3539837	off=9816 orig=9842 new=9842 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_magnum_0000.efx.3539837	off=11623 orig=11649 new=11649 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_magnum_0001.efx.3539837	off=12829 orig=12855 new=12855 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_rifle_0000.efx.3539837	off=7326 orig=7352 new=7352 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_rifle_0001.efx.3539837	off=7374 orig=7400 new=7400 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_shotgun_0000.efx.3539837	off=8369 orig=8395 new=8395 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_shotgun_0001.efx.3539837	off=8417 orig=8443 new=8443 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_bowgun_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_bowgun_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_handgun_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_handgun_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_knife_slash_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_knife_slash_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_knife_stab_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_knife_stab_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_machinegun_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_machinegun_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_magnum_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_magnum_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_rifle_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_rifle_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_shotgun_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_damage_blood_shotgun_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_jump_m_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_jump_s_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chg4/efd_0015_chg4_ripple_l_0000.efx.3539837	
@@ -1658,9 +1658,9 @@ same	_chainsaw/vfx/effecteditor/efd_character/efd_chg5/efd_0015_chg5_damage_bloo
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chg5/efd_0015_chg5_damage_blood_rifle_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chg5/efd_0015_chg5_damage_blood_shotgun_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chg5/efd_0015_chg5_damage_blood_shotgun_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chg5/efd_0015_chg5_damage_egg_0000.efx.3539837	off=2397 orig=10641 new=10641 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chg5/efd_0015_chg5_damage_egg_0001.efx.3539837	off=2397 orig=10641 new=10641 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_character/efd_chg5/efd_0015_chg5_damage_egg_0002.efx.3539837	off=2397 orig=10641 new=10641 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chg5/efd_0015_chg5_damage_egg_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chg5/efd_0015_chg5_damage_egg_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_character/efd_chg5/efd_0015_chg5_damage_egg_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chg5/efd_0015_chg5_damage_fire_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chg9/efd_0015_chg9_damage_blood_bowgun_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_character/efd_chg9/efd_0015_chg9_damage_blood_handgun_0000.efx.3539837	
@@ -1697,7 +1697,7 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa009_s00/efd_0015_csa009_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa009_s00/efd_0015_csa009_s00_destruction_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa010_s00/efd_0015_csa010_s00_chainsawlanding_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa010_s00/efd_0015_csa010_s00_chainsawlanding_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa010_s00/efd_0015_csa010_s00_chainsawlanding_0002.efx.3539837	off=16335 orig=16361 new=16361 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa010_s00/efd_0015_csa010_s00_chainsawlanding_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa010_s00/efd_0015_csa010_s00_destruction_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa011_s00/efd_0015_csa011_s00_axe_splash_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa011_s00/efd_0015_csa011_s00_ch1c0z0_03_splash_0000.efx.3539837	
@@ -1804,7 +1804,7 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa022_s00/efd_0015_csa022_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa022_s00/efd_0015_csa022_s00_footstep_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa022_s00/efd_0015_csa022_s00_impact_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa022_s00/efd_0015_csa022_s00_impact_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa022_s00/efd_0015_csa022_s00_impact_0002.efx.3539837	off=5492 orig=12316 new=12316 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa022_s00/efd_0015_csa022_s00_impact_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa022_s00/efd_0015_csa022_s00_mud_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa022_s00/efd_0015_csa022_s00_mud_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa022_s00/efd_0015_csa022_s00_mud_0002.efx.3539837	
@@ -1945,8 +1945,8 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_damage_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_damage_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_distortion_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_dive_0000.efx.3539837	off=11725 orig=12978 new=12978 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_dive_0001.efx.3539837	off=1311 orig=4864 new=4864 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_dive_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_dive_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_down_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_down_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_drum_0000.efx.3539837	
@@ -1960,8 +1960,8 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_smoke_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_sparkle_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_wall_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_woodchip_0000.efx.3539837	off=1288 orig=2447 new=2447 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa029_s00/efd_0015_csa029_s00_backdraft_0000.efx.3539837	off=20962 orig=24627 new=24627 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_woodchip_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa029_s00/efd_0015_csa029_s00_backdraft_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa029_s00/efd_0015_csa029_s00_fire_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa029_s00/efd_0015_csa029_s00_smoke_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa030_s00/efd_0015_csa030_s00_fire2_0000.efx.3539837	
@@ -2021,7 +2021,7 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa038_s00/efd_0015_csa038_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa038_s00/efd_0015_csa038_s00_smoke_0003.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa038_s00/efd_0015_csa038_s00_spark_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa038_s00/efd_0015_csa038_s00_torch_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa039_s00/efd_0015_csa039_s00_chb400_00_0000_stamp.efx.3539837	off=181 orig=6745 new=6745 at=entry:RenderTarget hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa039_s00/efd_0015_csa039_s00_chb400_00_0000_stamp.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa039_s00/efd_0015_csa039_s00_damage_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa039_s00/efd_0015_csa039_s00_damage_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa039_s00/efd_0015_csa039_s00_damage_0002.efx.3539837	
@@ -2076,14 +2076,14 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa048_s00/efd_0015_csa048_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa048_s00/efd_0015_csa048_s00_knifedamage_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa048_s00/efd_0015_csa048_s00_landing_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa048_s00/efd_0015_csa048_s00_landing_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa048_s00/efd_0015_csa048_s00_rolling_0000.efx.3539837	off=5703 orig=6802 new=6802 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa048_s00/efd_0015_csa048_s00_run_0000.efx.3539837	off=4409 orig=4435 new=4435 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa048_s00/efd_0015_csa048_s00_run_0001.efx.3539837	off=4409 orig=4435 new=4435 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa048_s00/efd_0015_csa048_s00_run_0002.efx.3539837	off=4409 orig=4435 new=4435 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa048_s00/efd_0015_csa048_s00_rolling_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa048_s00/efd_0015_csa048_s00_run_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa048_s00/efd_0015_csa048_s00_run_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa048_s00/efd_0015_csa048_s00_run_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa048_s00/efd_0015_csa048_s00_vomit_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa049_s00/efd_0015_csa049_s00_spark_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa049_s00/efd_0015_csa049_s00_spark_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa049_s01/efd_0015_csa049_s01_spark_0000.efx.3539837	off=8359 orig=9618 new=9618 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa049_s01/efd_0015_csa049_s01_spark_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa049_s02/efd_0015_csa049_s02_falldust_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa049_s02/efd_0015_csa049_s02_falldust_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa049_s02/efd_0015_csa049_s02_fire_0000.efx.3539837	
@@ -2155,8 +2155,8 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa055_s00/efd_0015_csa055_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa055_s00/efd_0015_csa055_s00_sm61_538_00_0018.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa055_s00/efd_0015_csa055_s00_sm61_538_00_0019.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa055_s00/efd_0015_csa055_s00_sm61_541_00_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa055_s00/efd_0015_csa055_s00_wavert_0000.efx.3539837	off=149 orig=5844 new=5844 at=entry:RenderTarget hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa055_s00/efd_0015_csa055_s00_wavert_0001.efx.3539837	off=179 orig=8203 new=8203 at=entry:RenderTarget hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa055_s00/efd_0015_csa055_s00_wavert_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa055_s00/efd_0015_csa055_s00_wavert_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa061_s00/efd_0015_csa061_s00_ch1c0z1_03_blood_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa061_s00/efd_0015_csa061_s00_ch1c0z1_04_blood_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa061_s00/efd_0015_csa061_s00_ch2b8z00_00_shader.efx.3539837	
@@ -2187,7 +2187,7 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_ch1d3z0_01_fire_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_ch1d3z0_02_fire_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_ch1d3z0_03_fire_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_crash_0000.efx.3539837	off=18326 orig=36244 new=36244 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_crash_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_dust_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_fire_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_helicopter2_0000.efx.3539837	
@@ -2206,7 +2206,7 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_smoke_0003.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_smoke_0004.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_smoke_0005.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_break_0000.efx.3539837	off=12591 orig=13750 new=13750 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_break_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_ch1c0z1_00_damage_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_ch1c0z1_00_damage_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_ch1c0z1_00_damage_0002.efx.3539837	
@@ -2223,17 +2223,17 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_cough_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_gunsmoke_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_gunsmoke_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_objectlanding_0000.efx.3539837	off=11169 orig=21189 new=21189 at=action:PlayEmitter>entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_objectlanding_0001.efx.3539837	off=6592 orig=28247 new=28247 at=action:PlayEmitter>entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_objectlanding_0002.efx.3539837	off=6587 orig=28009 new=28009 at=action:PlayEmitter>entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_objectlanding_0003.efx.3539837	off=3473 orig=13986 new=13986 at=action:PlayEmitter>entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_objectlanding_0004.efx.3539837	off=3479 orig=13948 new=13948 at=action:PlayEmitter>entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_objectlanding_0005.efx.3539837	off=3480 orig=13747 new=13747 at=action:PlayEmitter>entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_objectlanding_0006.efx.3539837	off=3502 orig=15516 new=15516 at=action:PlayEmitter>entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_objectlanding_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_objectlanding_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_objectlanding_0002.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_objectlanding_0003.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_objectlanding_0004.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_objectlanding_0005.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_objectlanding_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_objectlanding_0007.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_objectlanding_0008.efx.3539837	off=10507 orig=11582 new=11582 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_smoke_0000.efx.3539837	off=8613 orig=9874 new=9874 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_smoke_0001.efx.3539837	off=11823 orig=17022 new=17022 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_objectlanding_0008.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_smoke_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_smoke_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_smoke_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_smoke_0003.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa067_s00/efd_0015_csa067_s00_smoke_0004.efx.3539837	
@@ -2265,8 +2265,8 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa071_s00/efd_0015_csa071_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa071_s00/efd_0015_csa071_s00_roar_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa071_s00/efd_0015_csa071_s00_sm61_541_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa071_s00/efd_0015_csa071_s00_smoke_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa071_s00/efd_0015_csa071_s00_smoke_0001.efx.3539837	off=4566 orig=7777 new=7777 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa071_s00/efd_0015_csa071_s00_smoke_0002.efx.3539837	off=5498 orig=9650 new=9650 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa071_s00/efd_0015_csa071_s00_smoke_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa071_s00/efd_0015_csa071_s00_smoke_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa071_s00/efd_0015_csa071_s00_smoke_0003.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa071_s00/efd_0015_csa071_s00_smoke_0004.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa071_s00/efd_0015_csa071_s00_smoke_0005.efx.3539837	
@@ -2333,7 +2333,7 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa076_s00/efd_0015_csa076_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa076_s00/efd_0015_csa076_s00_smoke_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa082_s00/efd_0015_csa082_s00_dust_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa082_s00/efd_0015_csa082_s00_dust_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa082_s00/efd_0015_csa082_s00_inpact_0000.efx.3539837	off=11554 orig=35079 new=35079 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa082_s00/efd_0015_csa082_s00_inpact_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa082_s00/efd_0015_csa082_s00_smok_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa082_s00/efd_0015_csa082_s00_smok_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa082_s00/efd_0015_csa082_s00_smok_0002.efx.3539837	
@@ -2373,7 +2373,7 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa114_s00/efd_0015_csa114_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa114_s00/efd_0015_csa114_s00_dust_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa114_s00/efd_0015_csa114_s00_dust_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa114_s00/efd_0015_csa114_s00_smoke_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa114_s00/efd_0015_csa114_s00_smoke_0001.efx.3539837	off=7726 orig=18125 new=18125 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa114_s00/efd_0015_csa114_s00_smoke_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa114_s00/efd_0015_csa114_s00_smoke_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa117_s00/efd_0015_csa117_s00_rain_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa118_s00/efd_0015_csa118_s00_explosion_0000.efx.3539837	
@@ -2406,12 +2406,12 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa123_s00/efd_0015_csa123_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa125_s00/efd_0015_csa125_s00_dust_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa125_s00/efd_0015_csa125_s00_smoke_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa125_s00/efd_0015_csa125_wp5300_chainsaw_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa125_s00/efd_0015_csa125_wp5300_chainsaw_0001.efx.3539837	off=12068 orig=29218 new=29218 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa125_s00/efd_0015_csa125_wp5300_chainsaw_0002.efx.3539837	off=12068 orig=29218 new=29218 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa125_s00/efd_0015_csa125_wp5300_chainsaw_0003.efx.3539837	off=12068 orig=29218 new=29218 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa125_s00/efd_0015_csa125_wp5300_chainsaw_0004.efx.3539837	off=12068 orig=29218 new=29218 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa125_s00/efd_0015_csa125_wp5300_chainsaw_0005.efx.3539837	off=12059 orig=29209 new=29209 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa125_s00/efd_0015_csa125_wp5300_chainsaw_0006.efx.3539837	off=13003 orig=30153 new=30153 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa125_s00/efd_0015_csa125_wp5300_chainsaw_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa125_s00/efd_0015_csa125_wp5300_chainsaw_0002.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa125_s00/efd_0015_csa125_wp5300_chainsaw_0003.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa125_s00/efd_0015_csa125_wp5300_chainsaw_0004.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa125_s00/efd_0015_csa125_wp5300_chainsaw_0005.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa125_s00/efd_0015_csa125_wp5300_chainsaw_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa126_s00/efd_0015_csa126_s00_impact_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa126_s00/efd_0015_csa126_s00_knifestab_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa126_s00/efd_0015_csa126_s00_smoke_0000.efx.3539837	
@@ -2435,7 +2435,7 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa136_s00/efd_0015_csa136_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa137_s00/efd_0015_csa137_s00_leaf_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa138_s00/efd_0015_csa138_s00_inpact_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa138_s00/efd_0015_csa138_s00_inpact_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa138_s00/efd_0015_csa138_s00_inpact_0002.efx.3539837	off=2369 orig=15613 new=15613 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa138_s00/efd_0015_csa138_s00_inpact_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa138_s00/efd_0015_csa138_s00_smok_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa138_s00/efd_0015_csa138_s00_wood_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa139_s00/efd_0015_csa139_s00_destruction_0000.efx.3539837	
@@ -2458,7 +2458,7 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa145_s00/efd_0015_csa145_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa147_s00/efd_0015_csa147_s00_crossbow_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa150_s00/efd_0015_csa150_s00_smoke_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa153_s00/efd_0015_csa153_s00_fire_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa153_s00/efd_0015_csa153_s00_floordust_0000.efx.3539837	off=7929 orig=10237 new=10237 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa153_s00/efd_0015_csa153_s00_floordust_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa153_s00/efd_0015_csa153_s00_floordust_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa153_s00/efd_0015_csa153_s00_floordust_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa153_s00/efd_0015_csa153_s00_kick_0000.efx.3539837	
@@ -2481,7 +2481,7 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa156_s00/efd_0015_csa156_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa156_s00/efd_0015_csa156_s00_dust_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa156_s00/efd_0015_csa156_s00_fly_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa156_s00/efd_0015_csa156_s00_fly_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa157_s00/efd_0015_csa157_s00_animmask_0000.efx.3539837	off=102 orig=1536 new=1536 at=entry:RenderTarget hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa157_s00/efd_0015_csa157_s00_animmask_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa157_s00/efd_0015_csa157_s00_env_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa157_s00/efd_0015_csa157_s00_env_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa157_s00/efd_0015_csa157_s00_env_0002.efx.3539837	
@@ -2498,7 +2498,7 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa158_s00/efd_0015_csa158_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa158_s00/efd_0015_csa158_s00_landing_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa158_s00/efd_0015_csa158_s00_sm61_527_00_blood_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa158_s00/efd_0015_csa158_s00_sm61_527_00_blood_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa158_s00/efd_0015_csa158_s00_sm61_575_00_bodyfluids_0000.efx.3539837	off=54210 orig=69976 new=69976 at=action:PlayEmitter>entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa158_s00/efd_0015_csa158_s00_sm61_575_00_bodyfluids_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa158_s00/efd_0015_csa158_s00_sm61_575_00_debris_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa158_s00/efd_0015_csa158_s00_smoke_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa158_s00/efd_0015_csa158_s00_smoke_0001.efx.3539837	
@@ -2522,7 +2522,7 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb100_s00/efd_0015_csb100_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb100_s00/efd_0015_csb100_s00_0018.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb100_s00/efd_0015_csb100_s00_0019.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb102_s00/efd_0015_csb102_s00_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb102_s00/efd_0015_csb102_s00_0001.efx.3539837	off=2476 orig=10859 new=10859 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb102_s00/efd_0015_csb102_s00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb111_s00/efd_0015_csb111_s00_blood_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb111_s00/efd_0015_csb111_s00_bodyup_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb111_s00/efd_0015_csb111_s00_env_0000.efx.3539837	
@@ -2549,25 +2549,25 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb113_s00/efd_0015_csa113_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb113_s00/efd_0015_csa113_s00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb113_s00/efd_0015_csa113_s00_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb113_s00/efd_0015_csa113_s00_0003.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb114_s00/efd_0015_csa114_s00_0000.efx.3539837	off=27572 orig=32262 new=32262 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb114_s00/efd_0015_csa114_s00_0001.efx.3539837	off=12951 orig=17485 new=17485 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb114_s00/efd_0015_csa114_s00_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb114_s00/efd_0015_csa114_s00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb114_s00/efd_0015_csa114_s00_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb114_s00/efd_0015_csa114_s00_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb114_s00/efd_0015_csa114_s00_0007.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0000.efx.3539837	off=8491 orig=21049 new=21049 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0003.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0004.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0007.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0008.efx.3539837	off=1313 orig=2586 new=2586 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0009.efx.3539837	off=2457 orig=4759 new=4759 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0010.efx.3539837	off=2448 orig=3721 new=3721 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0008.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0009.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0010.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0011.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0012.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0013.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0014.efx.3539837	off=21840 orig=25391 new=25391 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0014.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0015.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0016.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb115_s00/efd_0015_csb115_s00_0017.efx.3539837	
@@ -2575,19 +2575,19 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb118_s00/efd_0015_csb118_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb118_s00/efd_0015_csb118_s00_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb119_s00/efd_0015_csb119_s00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb119_s00/efd_0015_csb119_s00_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb119_s00/efd_0015_csb119_s00_0002.efx.3539837	off=7974 orig=8000 new=8000 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb119_s00/efd_0015_csb119_s00_0003.efx.3539837	off=7974 orig=8000 new=8000 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb119_s00/efd_0015_csb119_s00_0004.efx.3539837	off=9176 orig=9202 new=9202 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb119_s00/efd_0015_csb119_s00_0005.efx.3539837	off=9859 orig=14806 new=14806 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb119_s00/efd_0015_csb119_s00_0002.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb119_s00/efd_0015_csb119_s00_0003.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb119_s00/efd_0015_csb119_s00_0004.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb119_s00/efd_0015_csb119_s00_0005.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb119_s00/efd_0015_csb119_s00_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb119_s00/efd_0015_csb119_s00_0007.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb119_s00/efd_0015_csb119_s00_0008.efx.3539837	off=8330 orig=19044 new=19044 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb119_s00/efd_0015_csb119_s00_0009.efx.3539837	off=9403 orig=19388 new=19388 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb119_s00/efd_0015_csb119_s00_0008.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb119_s00/efd_0015_csb119_s00_0009.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb119_s00/efd_0015_csb119_s00_0010.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb123_s00/efd_0015_csb123_s00_0000.efx.3539837	off=4061 orig=33174 new=33174 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb123_s00/efd_0015_csb123_s00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb123_s00/efd_0015_csb123_s00_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb126_s00/efd_0015_csb126_s00_0000.efx.3539837	off=3546 orig=6553 new=6553 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb127_s00/efd_0015_csb127_s00_0000.efx.3539837	off=8715 orig=12587 new=12587 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb126_s00/efd_0015_csb126_s00_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb127_s00/efd_0015_csb127_s00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb128_s00/efd_0015_csb128_s00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb128_s00/efd_0015_csb128_s00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb129_s00/efd_0015_csb129_s00_0000.efx.3539837	
@@ -2601,12 +2601,12 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb133_s00/efd_0015_csb133_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb133_s00/efd_0015_csb133_s00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csb135_s00/efd_0015_csb135_s00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd000_s00/efd_0015_csd000_s00_smoke_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd001_s00/efd_0015_csd001_s00_0000.efx.3539837	off=22579 orig=26494 new=26494 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd001_s00/efd_0015_csd001_s00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd001_s00/efd_0015_csd001_s00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd001_s00/efd_0015_csd001_s00_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd001_s00/efd_0015_csd001_s00_0003.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd001_s00/efd_0015_csd001_s00_0004.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd001_s00/efd_0015_csd001_s00_0005.efx.3539837	off=8260 orig=9473 new=9473 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd001_s00/efd_0015_csd001_s00_0005.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd003_s00/efd_0015_csd003_s00_breaking_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd003_s00/efd_0015_csd003_s00_breaking_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd003_s00/efd_0015_csd003_s00_breaking_0002.efx.3539837	
@@ -2615,21 +2615,21 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd003_s00/efd_0015_csd003_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd003_s00/efd_0015_csd003_s00_breaking_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd003_s00/efd_0015_csd003_s00_breaking_0007.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd003_s00/efd_0015_csd003_s00_breaking_0008.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd004_s00/efd_0015_csd004_s00_smoke_0000.efx.3539837	off=19850 orig=20853 new=20853 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd004_s00/efd_0015_csd004_s00_smoke_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd005_s00/efd_0015_csd005_s00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd005_s00/efd_0015_csd005_s00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd005_s00/efd_0015_csd005_s00_0002.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd005_s00/efd_0015_csd005_s00_0003.efx.3539837	off=8700 orig=16532 new=16532 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd005_s00/efd_0015_csd005_s00_0003.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd005_s00/efd_0015_csd005_s00_0007.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd006_s00/efd_0015_csd006_s00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd006_s00/efd_0015_csd006_s00_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd006_s00/efd_0015_csd006_s00_0003.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd006_s00/efd_0015_csd006_s00_0004.efx.3539837	off=20031 orig=27816 new=27816 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd006_s00/efd_0015_csd006_s00_0004.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd007_s00/efd_0015_csd007_s00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd011_s00/efd_0015_csd011_s00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd016_s00/efd_0015_csd016_s00_explosion_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd016_s00/efd_0015_csd016_s00_smoke_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd016_s00/efd_0015_csd016_s00_smoke_0001.efx.3539837	off=20129 orig=21156 new=21156 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csd016_s00/efd_0015_csd016_s00_smoke_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm82_721_01_0/efd_gm82_721_01_0_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm82_721_02_0/efd_gm82_721_02_0_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm82_721_03_0/efd_gm82_721_03_0_0000.efx.3539837	
@@ -2689,7 +2689,7 @@ same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm23_507_10/efd_0015_sm23_507_1
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm23_525_00/efd_0015_sm23_525_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm23_527_01/efd_0015_sm23_527_01_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm23_527_02/efd_0015_sm23_527_02_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm23_561_01/efd_0015_sm23_561_01_0000.efx.3539837	off=12637 orig=97317 new=97317 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm23_561_01/efd_0015_sm23_561_01_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm23_562_00/efd_0015_sm23_562_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm23_562_01/efd_0015_sm23_562_01_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm23_608_10/efd_0015_sm23_608_10_0000.efx.3539837	
@@ -2874,8 +2874,8 @@ same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm55_548_01/efd_0015_sm55_548_0
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm59_501_01/efd_0015_sm59_501_01_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm59_502_01/efd_0015_sm59_502_01_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm59_506_00/efd_0015_sm59_506_00_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm62_500_01/efd_0015_sm62_500_01_0000.efx.3539837	off=3886 orig=14184 new=14184 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm62_500_02/efd_0015_sm62_500_02_0000.efx.3539837	off=6523 orig=40649 new=40649 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm62_500_01/efd_0015_sm62_500_01_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm62_500_02/efd_0015_sm62_500_02_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm74_506_00/efd_0015_sm74_506_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm74_506_00/efd_0015_sm74_506_00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm74_506_00/efd_0015_sm74_506_00_0002.efx.3539837	
@@ -2925,10 +2925,10 @@ same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_510_10/efd_0015_sm82_510_1
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_513_00/efd_0015_sm82_513_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_514_01/efd_0015_sm82_514_01_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_522_00/efd_0015_sm82_522_00_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_522_00/efd_0015_sm82_522_00_0001.efx.3539837	off=26217 orig=27006 new=27006 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_522_00/efd_0015_sm82_522_00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_523_00/efd_0015_sm82_523_00_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_532_00/efd_0015_sm82_532_00_0000.efx.3539837	off=9784 orig=22490 new=22490 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_532_00/efd_0015_sm82_532_00_0001.efx.3539837	off=6248 orig=7531 new=7531 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_532_00/efd_0015_sm82_532_00_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_532_00/efd_0015_sm82_532_00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_535_00/efd_0015_sm82_535_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_535_00/efd_0015_sm82_535_00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_536_00/efd_0015_sm82_536_00_0000.efx.3539837	
@@ -3035,7 +3035,7 @@ same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_504_00/efd_0015_sm84_504_0
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_504_00/efd_0015_sm84_504_00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_505_00/efd_0015_sm84_505_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_506_00/efd_0015_sm84_506_00_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_508_01/efd_0015_sm84_508_01_0000.efx.3539837	off=6141 orig=10451 new=10451 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_508_01/efd_0015_sm84_508_01_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_509_02/efd_0015_sm84_509_02_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_511_01/efd_0015_sm84_511_01_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_514_00/efd_0015_sm84_514_00_0000.efx.3539837	
@@ -3053,14 +3053,14 @@ same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_528_00/efd_0015_sm84_528_0
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_534_01/efd_0015_sm84_534_01_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_534_01/efd_0015_sm84_534_01_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_535_01/efd_0015_sm84_535_01_0101.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_535_01/efd_0015_sm84_535_01_0200.efx.3539837	off=1639 orig=4963 new=4963 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_535_01/efd_0015_sm84_535_01_0200.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_545_01/efd_0015_sm84_545_01_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_546_01/efd_0015_sm84_546_01_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_547_00/efd_0015_sm84_547_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_547_00/efd_0015_sm84_547_01_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_549_00/efd_0015_sm84_549_00_0000.efx.3539837	off=9237 orig=17182 new=17182 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_549_00/efd_0015_sm84_549_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_549_00/efd_0015_sm84_549_00_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_549_00/efd_0015_sm84_549_00_0002.efx.3539837	off=18008 orig=28009 new=28009 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_549_00/efd_0015_sm84_549_00_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_561_00/efd_0015_sm84_561_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_562_00/efd_0015_sm84_562_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_563_00/efd_0015_sm84_563_00_0000.efx.3539837	
@@ -3068,12 +3068,12 @@ same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_564_00/efd_0015_sm84_564_0
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_567_00/efd_0015_sm84_567_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_569_00/efd_0015_sm84_569_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_572_00/efd_0015_sm84_572_00_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_572_00/efd_0015_sm84_572_00_0001.efx.3539837	off=2001 orig=11042 new=11042 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_572_00/efd_0015_sm84_572_00_0002.efx.3539837	off=3046 orig=11246 new=11246 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_572_00/efd_0015_sm84_572_00_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_572_00/efd_0015_sm84_572_00_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_574_00/efd_0015_sm84_574_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_574_00/efd_0015_sm84_574_00_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_574_00/efd_0015_sm84_574_00_0002.efx.3539837	off=3085 orig=83415 new=83415 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_575_00/efd_0015_sm84_575_00_0000.efx.3539837	off=7212 orig=49109 new=49109 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_574_00/efd_0015_sm84_574_00_0002.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_575_00/efd_0015_sm84_575_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_576_00/efd_0015_sm84_576_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_577_00/efd_0015_sm84_577_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_577_00/efd_0015_sm84_577_00_0001.efx.3539837	
@@ -3092,9 +3092,9 @@ same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_655_00/efd_0015_sm84_655_0
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_655_00/efd_0015_sm84_655_00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_655_00/efd_0015_sm84_655_00_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_666_00/efd_0015_sm84_666_00_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_666_00/efd_0015_sm84_666_00_0001.efx.3539837	off=6823 orig=18694 new=18694 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_666_00/efd_0015_sm84_666_00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_667_00/efd_0015_sm84_667_00_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_667_00/efd_0015_sm84_667_00_0001.efx.3539837	off=1968 orig=1994 new=1994 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_667_00/efd_0015_sm84_667_00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_674_00/efd_0015_sm84_674_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_674_00/efd_0015_sm84_674_00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_682_00/efd_0015_sm84_682_00_0000.efx.3539837	
@@ -3105,7 +3105,7 @@ same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_727_00/efd_0015_sm84_727_0
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_728_00/efd_0015_sm84_728_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_729_00/efd_0015_sm84_729_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_744_00/efd_0015_sm84_744_00_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_744_00/efd_0015_sm84_744_00_0001.efx.3539837	off=15057 orig=20356 new=20356 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_744_00/efd_0015_sm84_744_00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_744_00/efd_0015_sm84_744_00_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_760_00/efd_0015_sm84_760_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_761_00/efd_0015_sm84_761_00_0000.efx.3539837	
@@ -3117,8 +3117,8 @@ same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_782_00/efd_0015_sm84_782_0
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_785_00/efd_0015_sm84_785_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_785_00/efd_0015_sm84_785_00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_786_00/efd_0015_sm84_786_00_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_803_00/efd_0015_sm84_803_00_0000.efx.3539837	off=11931 orig=26936 new=26936 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_804_00/efd_0015_sm84_804_00_0000.efx.3539837	off=10741 orig=16680 new=16680 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_803_00/efd_0015_sm84_803_00_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_804_00/efd_0015_sm84_804_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_812_00/efd_0015_sm84_812_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_841_00/efd_0015_sm84_841_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_848_00/efd_0015_sm84_848_00_0000.efx.3539837	
@@ -3127,9 +3127,9 @@ same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_852_00/efd_0015_sm84_852_0
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_855_01/efd_0015_sm84_855_01_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_856_01/efd_0015_sm84_856_01_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_886_02/efd_0015_sm84_886_02_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_896_01/efd_0015_sm84_896_01_0000.efx.3539837	off=9071 orig=15979 new=15979 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_896_01/efd_0015_sm84_896_01_0001.efx.3539837	off=69105 orig=90225 new=90225 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_896_01/efd_0015_sm84_896_01_0002.efx.3539837	off=44115 orig=60056 new=60056 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_896_01/efd_0015_sm84_896_01_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_896_01/efd_0015_sm84_896_01_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_896_01/efd_0015_sm84_896_01_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_896_01/efd_0015_sm84_896_01_0003.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_896_01/efd_0015_sm84_896_01_0004.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_897_00/efd_0015_sm84_597_00_0000.efx.3539837	
@@ -3263,14 +3263,14 @@ same	_chainsaw/vfx/effecteditor/efd_stage/efd_st45/efd_st45_210/efd_0015_st45_21
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st45/efd_st45_300/efd_0015_st45_300_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st45/efd_st45_301/efd_0015_st45_301_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st45/efd_st45_303/efd_0015_st45_303_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_stage/efd_st45/efd_st45_400/efd_0015_st45_400_0000.efx.3539837	off=113 orig=2596 new=2596 at=entry:RenderTarget hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_stage/efd_st45/efd_st45_400/efd_0015_st45_400_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st45/efd_st45_400/efd_0015_st45_400_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st45/efd_st45_401/efd_0015_st45_401_1000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st45/efd_st45_401/efd_0015_st45_401_9000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st45/efd_st45_500/efd_0015_st45_500_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_stage/efd_st46/efd_st46_100/efd_0015_st45_100_rtt_00_0000.efx.3539837	off=171 orig=7606 new=7606 at=entry:RenderTarget hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_stage/efd_st46/efd_st46_100/efd_0015_st45_100_rtt_01_0000.efx.3539837	off=161 orig=7727 new=7727 at=entry:RenderTarget hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_stage/efd_st46/efd_st46_100/efd_0015_st45_100_rtt_02_0000.efx.3539837	off=101 orig=1949 new=1949 at=entry:RenderTarget hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_stage/efd_st46/efd_st46_100/efd_0015_st45_100_rtt_00_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_stage/efd_st46/efd_st46_100/efd_0015_st45_100_rtt_01_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_stage/efd_st46/efd_st46_100/efd_0015_st45_100_rtt_02_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st46/efd_st46_100/efd_0015_st46_100_0002_chp2_1.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st46/efd_st46_100/efd_0015_st46_100_0003_chp2_1.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st46/efd_st46_110/efd_0015_st46_110_0000.efx.3539837	
@@ -3314,7 +3314,7 @@ same	_chainsaw/vfx/effecteditor/efd_stage/efd_st50/efd_st50_200/efd_0015_st50_20
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st50/efd_st50_201/efd_0015_st50_201_1000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st50/efd_st50_201/efd_0015_st50_201_2000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st50/efd_st50_201/efd_0015_st50_201_9900.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_stage/efd_st50/efd_st50_201/efd_0015_st50_401_1000_rt.efx.3539837	off=136 orig=3831 new=3831 at=entry:RenderTarget hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_stage/efd_st50/efd_st50_201/efd_0015_st50_401_1000_rt.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st50/efd_st50_201/efd_0015_st50_401_1000_rt_lightver.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st50/efd_st50_202/efd_0015_st50_202_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st50/efd_st50_300/efd_0015_st50_300_0000.efx.3539837	
@@ -3418,7 +3418,7 @@ same	_chainsaw/vfx/effecteditor/efd_stage/efd_st54/efd_st54_300/efd_0015_st54_30
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st54/efd_st54_301/efd_0015_st54_301_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st54/efd_st54_400/efd_0015_st54_400_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st54/efd_st54_400/efd_0015_st54_400_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_stage/efd_st54/efd_st54_400/efd_0015_st54_400_1000.efx.3539837	off=103 orig=1777 new=1777 at=entry:RenderTarget hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_stage/efd_st54/efd_st54_400/efd_0015_st54_400_1000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st54/efd_st54_401/efd_0015_st54_401_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st54/efd_st54_402/efd_0015_st54_402_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st54/efd_st54_403/efd_0015_st54_403_0000.efx.3539837	
@@ -3431,7 +3431,7 @@ same	_chainsaw/vfx/effecteditor/efd_stage/efd_st54/efd_st54_406/efd_0015_st54_40
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st54/efd_st54_407/efd_0015_st54_407_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st55/efd_st55_103/efd_0015_st55_103_0010.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st55/efd_st55_103/efd_0015_st55_103_0012.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_stage/efd_st55/efd_st55_200/efd_0015_st55_200_0000_lava_rt.efx.3539837	off=115 orig=2254 new=2254 at=entry:RenderTarget hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_stage/efd_st55/efd_st55_200/efd_0015_st55_200_0000_lava_rt.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st55/efd_st55_200/efd_0015_st55_200_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st55/efd_st55_202/efd_0015_st55_202_0100.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st55/efd_st55_202/efd_0015_st55_202_0101.efx.3539837	
@@ -3488,13 +3488,13 @@ same	_chainsaw/vfx/effecteditor/efd_stage/efd_st56/efd_st56_300/efd_0015_st56_30
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st56/efd_st56_300/efd_0015_st56_300_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st56/efd_st56_301/efd_0015_st56_301_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st56/efd_st56_302/efd_0015_st56_302_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_stage/efd_st59/efd_st59_101/efd_0015_st59_101_0100.efx.3539837	off=9003 orig=41668 new=41668 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_stage/efd_st59/efd_st59_101/efd_0015_st59_101_0100.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st59/efd_st59_101/efd_0015_st59_101_0200.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st59/efd_st59_205/efd_0015_st59_205_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st59/efd_st59_206/efd_0015_st59_206_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st59/efd_st59_209/efd_0015_st59_209_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_stage/efd_st60/efd_st60_000/efd_0015_st60_100_0000_awa_rt.efx.3539837	off=113 orig=2602 new=2602 at=entry:RenderTarget hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_stage/efd_st60/efd_st60_000/efd_0015_st60_100_0000_nami_rt.efx.3539837	off=153 orig=4659 new=4659 at=entry:RenderTarget hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_stage/efd_st60/efd_st60_000/efd_0015_st60_100_0000_awa_rt.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_stage/efd_st60/efd_st60_000/efd_0015_st60_100_0000_nami_rt.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st60/efd_st60_000/efd_0015_st60_100_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st60/efd_st60_100/efd_0015_st60_100_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st60/efd_st60_101/efd_0015_st60_101_0000.efx.3539837	
@@ -3517,7 +3517,7 @@ same	_chainsaw/vfx/effecteditor/efd_stage/efd_st61/efd_st61_105/efd_0015_st61_10
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st61/efd_st61_201/efd_0015_st61_201_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st61/efd_st61_201/efd_0015_st61_201_9900.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st61/efd_st61_305/efd_0015_st61_305_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_stage/efd_st61/efd_st61_305/efd_0015_st61_305_1000_rt.efx.3539837	off=125 orig=3101 new=3101 at=entry:RenderTarget hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_stage/efd_st61/efd_st61_305/efd_0015_st61_305_1000_rt.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st61/efd_st61_305/efd_0015_st61_305_9900.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st61/efd_st61_401/efd_0015_st61_401_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st61/efd_st61_500/efd_0015_st61_500_0000.efx.3539837	
@@ -3584,14 +3584,14 @@ same	_chainsaw/vfx/effecteditor/efd_stage/efd_stage_common/efd_0015_stage_common
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_weapon_common/efd_0002_weapon_common_lasersight_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_weapon_common/efd_0002_weapon_common_lasersight_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp4600/efd_0015_wp4600_20_explosive_bullet_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp4600/efd_0015_wp4600_20_explosive_bullet_0001.efx.3539837	off=23656 orig=34856 new=34856 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp4600/efd_0015_wp4600_20_explosive_bullet_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp4600/efd_0015_wp4600_20_explosive_bullet_0002.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp4600/efd_0015_wp4600_20_explosive_bullet_0003.efx.3539837	off=24786 orig=35936 new=35936 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp4701/efd_0015_wp4701_attack_0000.efx.3539837	off=1317 orig=10885 new=10885 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp4600/efd_0015_wp4600_20_explosive_bullet_0003.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp4701/efd_0015_wp4701_attack_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp4701/efd_0015_wp4701_ground_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp4701/efd_0015_wp4701_hit_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp4701/efd_0015_wp4701_pilotlight_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp4701/efd_0015_wp4701_wall_0000.efx.3539837	off=1869 orig=1895 new=1895 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp4701/efd_0015_wp4701_wall_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp4900/efd_0015_wp4900_bullet_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp4900/efd_0015_wp4900_explosion_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp4900/efd_0015_wp4900_explosion_0001.efx.3539837	
@@ -3603,59 +3603,59 @@ same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp4902/efd_0015_wp4902_explosion_
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp4902/efd_0015_wp4902_explosion_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp4902/efd_0015_wp4902_objectlanding_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5003/efd_0015_wp5003_knife_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5300/efd_0015_wp5300_chainsaw_0000.efx.3539837	off=22793 orig=30195 new=30195 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5300/efd_0015_wp5300_chainsaw_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5300/efd_0015_wp5300_chainsaw_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5300/efd_0015_wp5300_chainsaw_0002.efx.3539837	off=13539 orig=18305 new=18305 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5300/efd_0015_wp5300_chainsaw_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5400/efd_0015_wp5400_grenade_explosion_0000s.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5400/efd_0015_wp5400_grenade_explosion_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5400/efd_0015_wp5400_grenade_explosion_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5400/efd_0015_wp5400_grenade_explosion_0003.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5400/efd_0015_wp5400_grenade_objectlanding_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5400/efd_0015_wp5400_grenade_objectlanding_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5402/efd_0015_wp5402_flushgrenade_0000.efx.3539837	off=8533 orig=15509 new=15509 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5402/efd_0015_wp5402_flushgrenade_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5402/efd_0015_wp5402_flushgrenade_objectlanding_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5402/efd_0015_wp5402_flushgrenade_objectlanding_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5403/efd_0015_wp5403_egg_crash_0000.efx.3539837	off=4649 orig=11063 new=11063 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5403/efd_0015_wp5403_egg_crash_0001.efx.3539837	off=2397 orig=10641 new=10641 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5403/efd_0015_wp5403_egg_crash_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5403/efd_0015_wp5403_egg_crash_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5403/efd_0015_wp5403_egg_crash_0002.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5404/efd_0015_wp5404_egg_crash_0000.efx.3539837	off=4649 orig=11063 new=11063 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5404/efd_0015_wp5404_egg_crash_0001.efx.3539837	off=2397 orig=10641 new=10641 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5404/efd_0015_wp5404_egg_crash_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5404/efd_0015_wp5404_egg_crash_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5404/efd_0015_wp5404_egg_crash_0002.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5405/efd_0015_wp5405_egg_crash_0000.efx.3539837	off=4649 orig=11063 new=11063 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5405/efd_0015_wp5405_egg_crash_0001.efx.3539837	off=2397 orig=10641 new=10641 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5405/efd_0015_wp5405_egg_crash_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5405/efd_0015_wp5405_egg_crash_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5405/efd_0015_wp5405_egg_crash_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5406/efd_0015_wp5406_harpoon_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5406/efd_0015_wp5406_harpoon_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5406/efd_0015_wp5406_objectlanding_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5406/efd_0015_wp5406_objectlanding_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5408/efd_0015_wp5408_flushgrenade_0000.efx.3539837	off=7662 orig=11444 new=11444 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5408/efd_0015_wp5408_flushgrenade_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5503/efd_0015_wp5503_gatling_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5503/efd_0015_wp5503_gatling_0001.efx.3539837	off=7455 orig=7481 new=7481 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5503/efd_0015_wp5503_gatling_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5504/efd_0015_wp5504_explosion_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5504/efd_0015_wp5504_explosion_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5504/efd_0015_wp5504_missile_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5801/efd_0015_wp5801_axe_0000.efx.3539837	off=9267 orig=15299 new=15299 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5801/efd_0015_wp5801_axe_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5805/efd_0015_wp5805_torch_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5805/efd_0015_wp5805_torch_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5806/efd_0015_wp5806_dynamite_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5806/efd_0015_wp5806_dynamite_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5806/efd_0015_wp5806_dynamite_0002.efx.3539837	off=22589 orig=33891 new=33891 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5806/efd_0015_wp5806_dynamite_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5806/efd_0015_wp5806_dynamite_0003.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5806/efd_0015_wp5806_dynamite_0004.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5806/efd_0015_wp5806_dynamite_objectlanding_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5808/efd_0015_wp5808_hit_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5810/efd_0015_wp5810_hammer_0000.efx.3539837	off=19116 orig=97237 new=97237 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5810/efd_0015_wp5810_hammer_0001.efx.3539837	off=17052 orig=44518 new=44518 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5810/efd_0015_wp5810_hammer_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5810/efd_0015_wp5810_hammer_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5811/efd_0015_wp5811_stanrod_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5811/efd_0015_wp5811_stanrod_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5813/efd_0015_wp5813_hit_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5814/efd_0015_wp5814_firebomb_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5814/efd_0015_wp5814_firebomb_0001.efx.3539837	off=2502 orig=12074 new=12074 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5814/efd_0015_wp5814_firebomb_0002.efx.3539837	off=3244 orig=22756 new=22756 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5814/efd_0015_wp5814_firebomb_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5814/efd_0015_wp5814_firebomb_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5814/efd_0015_wp5814_firebomb_0003.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5814/efd_0015_wp5814_firebomb_0012.efx.3539837	off=4829 orig=7862 new=7862 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5814/efd_0015_wp5814_firebomb_0012_low.efx.3539837	off=3682 orig=5716 new=5716 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5814/efd_0015_wp5814_firebomb_0013.efx.3539837	off=5814 orig=10977 new=10977 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5814/efd_0015_wp5814_firebomb_0012.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5814/efd_0015_wp5814_firebomb_0012_low.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5814/efd_0015_wp5814_firebomb_0013.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5815/efd_0015_wp5815_crossbow_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5815/efd_0015_wp5815_firearrow_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5824/efd_0015_wp5824_bullet_0000.efx.3539837	
@@ -3663,7 +3663,7 @@ same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5824/efd_0015_wp5824_explosion_
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5824/efd_0015_wp5824_explosion_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5824/efd_0015_wp5824_explosion_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5825/efd_0015_wp5825_10_explosive_bullet_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5825/efd_0015_wp5825_10_explosive_bullet_0001.efx.3539837	off=23631 orig=33596 new=33596 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5825/efd_0015_wp5825_10_explosive_bullet_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5826/efd_0015_wp5826_roar_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5826/efd_0015_wp5826_roar_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5826/efd_0015_wp5826_torch_0000.efx.3539837	
@@ -3674,9 +3674,9 @@ same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5830/efd_0015_wp5830_spark_0000
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5836/efd_0015_wp5836_fire_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5836/efd_0015_wp5836_fire_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5837/efd_0015_wp5837_explosion_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5837/efd_0015_wp5837_explosion_0001.efx.3539837	off=30687 orig=34999 new=34999 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp_common/efd_0015_wp_common_knife_hit_0000.efx.3539837	off=9454 orig=11598 new=11598 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp_common/efd_0015_wp_common_knife_hit_0001.efx.3539837	off=8592 orig=10736 new=10736 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp5837/efd_0015_wp5837_explosion_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp_common/efd_0015_wp_common_knife_hit_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp_common/efd_0015_wp_common_knife_hit_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp_common/efd_0015_wp_common_knife_hit_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp_common/efd_0015_wp_common_knife_hit_0003.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_weapon/efd_wp_common/efd_0015_wp_common_knife_hit_0004.efx.3539837	
@@ -3702,7 +3702,7 @@ same	_mercenaries/vfx/effecteditor/efd_character/efd_ao_ac50/efd_0015_ao_ac50_10
 same	_mercenaries/vfx/effecteditor/efd_character/efd_ao_ac50/efd_0015_ao_ac50_10_hookshot_1000.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_character/efd_ao_ac50/efd_0015_ao_ac50_10_hookshot_1001.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_character/efd_ao_ac50/efd_0015_ao_ac50_10_hookshot_attack_0000.efx.3539837	
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_ao_cha8/efd_0015_ao_cha8_chc002_0000.efx.3539837	off=40 orig=3683 new=3681 at=before-attributes hint=length-changed
+same	_mercenaries/vfx/effecteditor/efd_character/efd_ao_cha8/efd_0015_ao_cha8_chc002_0000.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_character/efd_ao_cha8/efd_0015_ao_cha8_chc0_jack_cha8_0th_com_0030_hold_dead_0000.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_character/efd_ao_cha8/efd_0015_ao_cha8_chc0_jack_cha8_0th_com_0532_hold_dead_verb_0000.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_character/efd_ao_cha8/efd_0015_ao_cha8_chd5_dead_0000.efx.3539837	
@@ -3816,35 +3816,35 @@ same	_mercenaries/vfx/effecteditor/efd_character/efd_chi3/efd_0015_mc_chi3_damag
 same	_mercenaries/vfx/effecteditor/efd_character/efd_chi3/efd_0015_mc_chi3_damage_0960_dead_burn_0000.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_character/efd_chi3/efd_0015_mc_chi3_fatalhit_0000.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_character/efd_chi3/efd_0015_mc_chi3_fatalhit_0010.efx.3539837	
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0001.efx.3539837	off=40 orig=5615 new=5611 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0002.efx.3539837	off=40 orig=5612 new=5608 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0003.efx.3539837	off=40 orig=5612 new=5608 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0004.efx.3539837	off=40 orig=9040 new=9036 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0050.efx.3539837	off=40 orig=5633 new=5629 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0051.efx.3539837	off=40 orig=5665 new=5661 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0100.efx.3539837	off=40 orig=6496 new=6492 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0101.efx.3539837	off=40 orig=6496 new=6492 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0102.efx.3539837	off=40 orig=6496 new=6492 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0103.efx.3539837	off=40 orig=7564 new=7560 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0104.efx.3539837	off=40 orig=6514 new=6510 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0105.efx.3539837	off=40 orig=13669 new=13665 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0203.efx.3539837	off=40 orig=8539 new=8535 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0204.efx.3539837	off=40 orig=8539 new=8535 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0205.efx.3539837	off=40 orig=8539 new=8535 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0208.efx.3539837	off=40 orig=8539 new=8535 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0209.efx.3539837	off=40 orig=8539 new=8535 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0211.efx.3539837	off=40 orig=8539 new=8535 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0212.efx.3539837	off=40 orig=8539 new=8535 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0213.efx.3539837	off=40 orig=8539 new=8535 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0214.efx.3539837	off=40 orig=8539 new=8535 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0216.efx.3539837	off=40 orig=6528 new=6524 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0217.efx.3539837	off=40 orig=6528 new=6524 at=before-attributes hint=length-changed
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_1000.efx.3539837	off=40 orig=2971 new=2967 at=before-attributes hint=length-changed
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0001.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0002.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0003.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0004.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0050.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0051.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0100.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0101.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0102.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0103.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0104.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0105.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0203.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0204.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0205.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0208.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0209.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0211.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0212.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0213.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0214.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0216.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_0217.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_attack_1000.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_bulletrush_0000.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_bulletrush_0001.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_bulletrush_0002.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_move_0000.efx.3539837	
-diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_move_0001.efx.3539837	off=40 orig=2110 new=2106 at=before-attributes hint=prefix-bytes-written-as-units
+same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_move_0001.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_action_0000_move_0002.efx.3539837	
 diff	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_beahead_head_0000.efx.3539837	off=358 orig=9662 new=9662 at=action:PlayEmitter>before-attributes hint=same-length
 same	_mercenaries/vfx/effecteditor/efd_character/efd_chi5/efd_0015_mc_chi5_counter_0000.efx.3539837	
@@ -3932,8 +3932,8 @@ same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_401_00_0/efd_0015_gm84_4
 same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_401_00_0/efd_0015_gm84_401_03_0001.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_401_00_0/efd_0015_gm84_401_03_0002.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_402_00_0/efd_0015_gm84_402_00_0000.efx.3539837	
-diff	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_402_00_0/efd_0015_gm84_402_00_0001.efx.3539837	off=2001 orig=11042 new=11042 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
-diff	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_402_00_0/efd_0015_gm84_402_00_0002.efx.3539837	off=3046 orig=11246 new=11246 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_402_00_0/efd_0015_gm84_402_00_0001.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_402_00_0/efd_0015_gm84_402_00_0002.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_weapon/efd_wp5826_mc/efd_0015_mc_wp5826_roar_0000.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_weapon/efd_wp5826_mc/efd_0015_mc_wp5826_roar_0001.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_weapon/efd_wp5826_mc/efd_0015_mc_wp5826_torch_0000.efx.3539837	
@@ -3943,10 +3943,10 @@ same	_mercenaries/vfx/effecteditor/efd_weapon/efd_wp6102/efd_0015_wp6102_explosi
 same	_mercenaries/vfx/effecteditor/efd_weapon/efd_wp6102/efd_0015_wp6102_explosive_bullet_0003.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_weapon/efd_wp6306_mc/efd_0015_mc_wp6306_dynamite_0000.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_weapon/efd_wp6306_mc/efd_0015_mc_wp6306_dynamite_exposion_0000.efx.3539837	
-diff	_mercenaries/vfx/effecteditor/efd_weapon/efd_wp6400_mc/efd_0015_mc_wp6400_chainsaw_0000.efx.3539837	off=28140 orig=58832 new=58832 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_mercenaries/vfx/effecteditor/efd_weapon/efd_wp6400_mc/efd_0015_mc_wp6400_chainsaw_0000.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_weapon/efd_wp6400_mc/efd_0015_mc_wp6400_chainsaw_0001.efx.3539837	
-diff	_mercenaries/vfx/effecteditor/efd_weapon/efd_wp6400_mc/efd_0015_mc_wp6400_chainsaw_0002.efx.3539837	off=14069 orig=36529 new=36529 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_mercenaries/vfx/effecteditor/efd_weapon/efd_wp6400_mc/efd_0015_mc_wp6400_chainsaw_0003.efx.3539837	off=7221 orig=21649 new=21649 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	_mercenaries/vfx/effecteditor/efd_weapon/efd_wp6400_mc/efd_0015_mc_wp6400_chainsaw_0002.efx.3539837	
+same	_mercenaries/vfx/effecteditor/efd_weapon/efd_wp6400_mc/efd_0015_mc_wp6400_chainsaw_0003.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_weapon/efd_wp_common/efd_0015_ao_wp_common_muzzle_0000.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_weapon/efd_wp_common/efd_0015_ao_wp_common_muzzle_0010.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_weapon/efd_wp_common/efd_0015_ao_wp_common_objectlanding_bow_0000.efx.3539837	

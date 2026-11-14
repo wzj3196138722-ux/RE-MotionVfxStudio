@@ -233,10 +233,10 @@ public partial class EFXAttributePtColliderAction : EFXAttribute
 	[RszVersionExact(EfxVersion.DD2)]
 	public uint dd2_unkn2;
 
-	[RszConditional("(dataFlags & (1 << 1)) != 0"), RszInlineWString]
+	[RszConditional("(dataFlags & (1 << 1)) != 0"), RszInlineWString(ByteSize = true)]
 	public string? unknString_flag2;
 
-	[RszConditional("(dataFlags & (1 << 0)) != 0"), RszInlineWString]
+	[RszConditional("(dataFlags & (1 << 0)) != 0"), RszInlineWString(ByteSize = true)]
 	public string? unknString_flag1;
 
 	[RszVersionExact(EfxVersion.MHWilds)]
@@ -269,7 +269,7 @@ public partial class EFXAttributePtCollision : EFXAttribute
     public float LookNormalDirectionOffset;
 	[RszVersion('>', EfxVersion.RERT, EndAt = nameof(DelayFrameCollision))]
     public via.RangeI DelayFrameCollision;
-	[RszConditional("(stringBitFlag & (1 << 0)) != 0"), RszInlineWString]
+	[RszConditional("(stringBitFlag & (1 << 0)) != 0"), RszInlineWString(ByteSize = true)]
 	public string? unknString0;
 
 	[RszConditional("(stringBitFlag & (1 << 1)) != 0"), RszInlineWString(ByteSize = true)]
@@ -290,7 +290,7 @@ public partial class EFXAttributePtProjection : EFXAttribute
     public UndeterminedFieldType unkn6;
     public UndeterminedFieldType unkn7;
 	[RszConditional("(flags & 2) != 0")] // TODO either 64 or 2 for string (or both); 128 is NOT string; see: 11_em0156_00_011.efx.5571972
-	[RszInlineWString] public string? unknString0;
+	[RszInlineWString(ByteSize = true)] public string? unknString0;
 }
 
 

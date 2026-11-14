@@ -1,8 +1,8 @@
 # EfxCorpusGate roundtrip v1
 # corpus	E:\Program\Steam\steamapps\common\MonsterHunterWilds\MHWILDS_EXTRACT\natives\STM\Art\VFX
 # files	9225
-# same	8942
-# diff	237
+# same	9037
+# diff	142
 # read-error	46
 # write-error	0
 # status	path	detail
@@ -144,7 +144,7 @@ same	EffectEditor/Enemy/em0001/11_em0001_00_501.efx.5571972
 same	EffectEditor/Enemy/em0001/11_em0001_00_502.efx.5571972	
 same	EffectEditor/Enemy/em0001/11_em0001_00_503.efx.5571972	
 same	EffectEditor/Enemy/em0001/11_em0001_00_504.efx.5571972	
-diff	EffectEditor/Enemy/em0001/11_em0001_00_505.efx.5571972	off=18309 orig=19966 new=19966 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0001/11_em0001_00_505.efx.5571972	
 same	EffectEditor/Enemy/em0001/11_em0001_00_506.efx.5571972	
 same	EffectEditor/Enemy/em0001/11_em0001_00_507.efx.5571972	
 same	EffectEditor/Enemy/em0001/11_em0001_00_600.efx.5571972	
@@ -543,8 +543,8 @@ same	EffectEditor/Enemy/em0046/11_em0046_00_910.efx.5571972
 same	EffectEditor/Enemy/em0046/11_em0046_00_911.efx.5571972	
 same	EffectEditor/Enemy/em0046/11_em0046_00_912.efx.5571972	
 same	EffectEditor/Enemy/em0046/11_em0046_00_913.efx.5571972	
-diff	EffectEditor/Enemy/em0046/11_em0046_00_951.efx.5571972	off=5532 orig=12978 new=12978 at=entry:PtProjection hint=prefix-bytes-written-as-units
-diff	EffectEditor/Enemy/em0046/11_em0046_00_952.efx.5571972	off=4404 orig=12260 new=12260 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0046/11_em0046_00_951.efx.5571972	
+same	EffectEditor/Enemy/em0046/11_em0046_00_952.efx.5571972	
 same	EffectEditor/Enemy/em0046/11_em0046_00_953.efx.5571972	
 same	EffectEditor/Enemy/em0046/11_em0046_00_collision.efx.5571972	
 same	EffectEditor/Enemy/em0070/11_em0070_00_000.efx.5571972	
@@ -582,7 +582,7 @@ same	EffectEditor/Enemy/em0070/11_em0070_11_015.efx.5571972
 same	EffectEditor/Enemy/em0070/11_em0070_11_019.efx.5571972	
 same	EffectEditor/Enemy/em0070/11_em0070_11_022.efx.5571972	
 same	EffectEditor/Enemy/em0070/11_em0070_11_050.efx.5571972	
-diff	EffectEditor/Enemy/em0070/11_em0070_11_052.efx.5571972	off=6826 orig=10472 new=10472 at=entry:DestinationCSV hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0070/11_em0070_11_052.efx.5571972	
 same	EffectEditor/Enemy/em0070/11_em0070_11_053.efx.5571972	
 same	EffectEditor/Enemy/em0070/11_em0070_11_054.efx.5571972	
 same	EffectEditor/Enemy/em0071/11_em0071_00_000.efx.5571972	
@@ -605,7 +605,7 @@ same	EffectEditor/Enemy/em0071/11_em0071_00_016.efx.5571972
 same	EffectEditor/Enemy/em0071/11_em0071_00_017.efx.5571972	
 same	EffectEditor/Enemy/em0071/11_em0071_00_018.efx.5571972	
 same	EffectEditor/Enemy/em0071/11_em0071_00_019.efx.5571972	
-diff	EffectEditor/Enemy/em0071/11_em0071_00_020.efx.5571972	off=42002 orig=72542 new=72542 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0071/11_em0071_00_020.efx.5571972	
 same	EffectEditor/Enemy/em0071/11_em0071_00_021.efx.5571972	
 same	EffectEditor/Enemy/em0071/11_em0071_00_022.efx.5571972	
 same	EffectEditor/Enemy/em0071/11_em0071_00_023.efx.5571972	
@@ -729,7 +729,7 @@ same	EffectEditor/Enemy/em0078/11_em0078_00_601.efx.5571972
 same	EffectEditor/Enemy/em0078/11_em0078_00_602.efx.5571972	
 same	EffectEditor/Enemy/em0078/11_em0078_00_603.efx.5571972	
 read-error	EffectEditor/Enemy/em0078/11_em0078_00_700.efx.5571972	Exception: charCount 3735584 too large
-diff	EffectEditor/Enemy/em0078/11_em0078_00_701.efx.5571972	off=42296 orig=42350 new=42350 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0078/11_em0078_00_701.efx.5571972	
 read-error	EffectEditor/Enemy/em0078/11_em0078_00_702.efx.5571972	Exception: charCount 3735584 too large
 read-error	EffectEditor/Enemy/em0078/11_em0078_00_703.efx.5571972	Exception: charCount 3735584 too large
 same	EffectEditor/Enemy/em0078/11_em0078_00_704.efx.5571972	
@@ -737,7 +737,7 @@ read-error	EffectEditor/Enemy/em0078/11_em0078_00_705.efx.5571972	Exception: cha
 read-error	EffectEditor/Enemy/em0078/11_em0078_00_706.efx.5571972	Exception: charCount 3735584 too large
 read-error	EffectEditor/Enemy/em0078/11_em0078_00_707.efx.5571972	Exception: charCount 3735584 too large
 read-error	EffectEditor/Enemy/em0078/11_em0078_00_708.efx.5571972	Exception: charCount 3735584 too large
-diff	EffectEditor/Enemy/em0078/11_em0078_00_709.efx.5571972	off=1160 orig=1348 new=1348 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0078/11_em0078_00_709.efx.5571972	
 same	EffectEditor/Enemy/em0078/11_em0078_00_710.efx.5571972	
 same	EffectEditor/Enemy/em0078/11_em0078_00_711.efx.5571972	
 same	EffectEditor/Enemy/em0078/11_em0078_00_712.efx.5571972	
@@ -751,12 +751,12 @@ same	EffectEditor/Enemy/em0082/11_em0082_00_005.efx.5571972
 same	EffectEditor/Enemy/em0082/11_em0082_00_007.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_010.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_019.efx.5571972	
-diff	EffectEditor/Enemy/em0082/11_em0082_00_020.efx.5571972	off=80983 orig=84180 new=84180 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0082/11_em0082_00_020.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_021.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_022.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_023.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_024.efx.5571972	
-diff	EffectEditor/Enemy/em0082/11_em0082_00_025.efx.5571972	off=25410 orig=41010 new=41010 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0082/11_em0082_00_025.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_026.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_027.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_030.efx.5571972	
@@ -779,7 +779,7 @@ same	EffectEditor/Enemy/em0082/11_em0082_00_150.efx.5571972
 same	EffectEditor/Enemy/em0082/11_em0082_00_151.efx.5571972	
 diff	EffectEditor/Enemy/em0082/11_em0082_00_152.efx.5571972	off=330 orig=12044 new=12044 at=action:PlayEmitter>before-attributes hint=same-length
 same	EffectEditor/Enemy/em0082/11_em0082_00_700.efx.5571972	
-diff	EffectEditor/Enemy/em0082/11_em0082_00_701.efx.5571972	off=3293 orig=8034 new=8034 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0082/11_em0082_00_701.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_800.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_801.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_810.efx.5571972	
@@ -1050,7 +1050,7 @@ same	EffectEditor/Enemy/em0156/11_em0156_00_005.efx.5571972
 same	EffectEditor/Enemy/em0156/11_em0156_00_006.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_007.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_010.efx.5571972	
-diff	EffectEditor/Enemy/em0156/11_em0156_00_011.efx.5571972	off=25396 orig=128663 new=128663 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0156/11_em0156_00_011.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_013.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_014.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_015.efx.5571972	
@@ -1059,7 +1059,7 @@ diff	EffectEditor/Enemy/em0156/11_em0156_00_017.efx.5571972	off=1170 orig=111852
 same	EffectEditor/Enemy/em0156/11_em0156_00_018.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_019.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_020.efx.5571972	
-diff	EffectEditor/Enemy/em0156/11_em0156_00_021.efx.5571972	off=15356 orig=84235 new=84235 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0156/11_em0156_00_021.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_030.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_031.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_032.efx.5571972	
@@ -1144,7 +1144,7 @@ same	EffectEditor/Enemy/em0158/11_em0158_00_030.efx.5571972
 same	EffectEditor/Enemy/em0158/11_em0158_00_031.efx.5571972	
 same	EffectEditor/Enemy/em0158/11_em0158_00_040.efx.5571972	
 same	EffectEditor/Enemy/em0158/11_em0158_00_050.efx.5571972	
-diff	EffectEditor/Enemy/em0158/11_em0158_00_060.efx.5571972	off=1160 orig=1262 new=1262 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0158/11_em0158_00_060.efx.5571972	
 same	EffectEditor/Enemy/em0158/11_em0158_00_100.efx.5571972	
 same	EffectEditor/Enemy/em0158/11_em0158_00_101.efx.5571972	
 same	EffectEditor/Enemy/em0158/11_em0158_00_102.efx.5571972	
@@ -1194,7 +1194,7 @@ same	EffectEditor/Enemy/em0158/11_em0158_00_809.efx.5571972
 same	EffectEditor/Enemy/em0158/11_em0158_00_950.efx.5571972	
 same	EffectEditor/Enemy/em0158/11_em0158_00_951.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_000.efx.5571972	
-diff	EffectEditor/Enemy/em0159/11_em0159_00_001.efx.5571972	off=7038 orig=26610 new=26610 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+diff	EffectEditor/Enemy/em0159/11_em0159_00_001.efx.5571972	off=26602 orig=26610 new=26610 at=after-attributes hint=same-length
 same	EffectEditor/Enemy/em0159/11_em0159_00_002.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_003.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_004.efx.5571972	
@@ -1209,11 +1209,11 @@ same	EffectEditor/Enemy/em0159/11_em0159_00_013.efx.5571972
 same	EffectEditor/Enemy/em0159/11_em0159_00_100.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_101.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_102.efx.5571972	
-diff	EffectEditor/Enemy/em0159/11_em0159_00_200.efx.5571972	off=21544 orig=64821 new=64821 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0159/11_em0159_00_200.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_201.efx.5571972	
-diff	EffectEditor/Enemy/em0159/11_em0159_00_202.efx.5571972	off=8368 orig=16394 new=16394 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0159/11_em0159_00_202.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_203.efx.5571972	
-diff	EffectEditor/Enemy/em0159/11_em0159_00_204.efx.5571972	off=5580 orig=12712 new=12712 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0159/11_em0159_00_204.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_205.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_300.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_301.efx.5571972	
@@ -1227,10 +1227,10 @@ same	EffectEditor/Enemy/em0159/11_em0159_00_315.efx.5571972
 same	EffectEditor/Enemy/em0159/11_em0159_00_320.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_321.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_322.efx.5571972	
-diff	EffectEditor/Enemy/em0159/11_em0159_00_325.efx.5571972	off=17193 orig=79944 new=79944 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0159/11_em0159_00_325.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_326.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_327.efx.5571972	
-diff	EffectEditor/Enemy/em0159/11_em0159_00_340.efx.5571972	off=17716 orig=53572 new=53572 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0159/11_em0159_00_340.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_350.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_360.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_370.efx.5571972	
@@ -1246,7 +1246,7 @@ same	EffectEditor/Enemy/em0159/11_em0159_00_902.efx.5571972
 same	EffectEditor/Enemy/em0159/11_em0159_00_903.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_950.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_951.efx.5571972	
-diff	EffectEditor/Enemy/em0159/11_em0159_00_952.efx.5571972	off=16055 orig=19677 new=19677 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0159/11_em0159_00_952.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_collision.efx.5571972	
 diff	EffectEditor/Enemy/em0160/11_em0160_00_000.efx.5571972	off=2346 orig=88141 new=88141 at=action:PlayEmitter>before-attributes hint=same-length
 same	EffectEditor/Enemy/em0160/11_em0160_00_002.efx.5571972	
@@ -1259,17 +1259,17 @@ same	EffectEditor/Enemy/em0160/11_em0160_00_009.efx.5571972
 diff	EffectEditor/Enemy/em0160/11_em0160_00_010.efx.5571972	off=757 orig=85258 new=85258 at=action:PlayEmitter>before-attributes hint=same-length
 same	EffectEditor/Enemy/em0160/11_em0160_00_011.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_012.efx.5571972	
-diff	EffectEditor/Enemy/em0160/11_em0160_00_013.efx.5571972	off=63619 orig=99486 new=99486 at=entry:PtProjection hint=prefix-bytes-written-as-units
-diff	EffectEditor/Enemy/em0160/11_em0160_00_014.efx.5571972	off=13407 orig=21551 new=21551 at=entry:PtProjection hint=prefix-bytes-written-as-units
-diff	EffectEditor/Enemy/em0160/11_em0160_00_015.efx.5571972	off=45103 orig=106012 new=106012 at=entry:PtProjection hint=prefix-bytes-written-as-units
-diff	EffectEditor/Enemy/em0160/11_em0160_00_016.efx.5571972	off=50846 orig=126721 new=126721 at=entry:PtProjection hint=prefix-bytes-written-as-units
-diff	EffectEditor/Enemy/em0160/11_em0160_00_017.efx.5571972	off=60772 orig=171304 new=171304 at=entry:PtProjection hint=prefix-bytes-written-as-units
-diff	EffectEditor/Enemy/em0160/11_em0160_00_018.efx.5571972	off=26885 orig=51122 new=51122 at=entry:PtProjection hint=prefix-bytes-written-as-units
-diff	EffectEditor/Enemy/em0160/11_em0160_00_019.efx.5571972	off=12485 orig=63214 new=63214 at=entry:PtProjection hint=prefix-bytes-written-as-units
-diff	EffectEditor/Enemy/em0160/11_em0160_00_020.efx.5571972	off=11268 orig=68695 new=68695 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0160/11_em0160_00_013.efx.5571972	
+same	EffectEditor/Enemy/em0160/11_em0160_00_014.efx.5571972	
+same	EffectEditor/Enemy/em0160/11_em0160_00_015.efx.5571972	
+same	EffectEditor/Enemy/em0160/11_em0160_00_016.efx.5571972	
+same	EffectEditor/Enemy/em0160/11_em0160_00_017.efx.5571972	
+same	EffectEditor/Enemy/em0160/11_em0160_00_018.efx.5571972	
+same	EffectEditor/Enemy/em0160/11_em0160_00_019.efx.5571972	
+same	EffectEditor/Enemy/em0160/11_em0160_00_020.efx.5571972	
 diff	EffectEditor/Enemy/em0160/11_em0160_00_021.efx.5571972	off=2077 orig=137947 new=137947 at=action:PlayEmitter>before-attributes hint=same-length
 same	EffectEditor/Enemy/em0160/11_em0160_00_022.efx.5571972	
-diff	EffectEditor/Enemy/em0160/11_em0160_00_023.efx.5571972	off=19207 orig=25091 new=25091 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0160/11_em0160_00_023.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_024.efx.5571972	
 diff	EffectEditor/Enemy/em0160/11_em0160_00_025.efx.5571972	off=1844 orig=114136 new=114136 at=action:PlayEmitter>before-attributes hint=same-length
 same	EffectEditor/Enemy/em0160/11_em0160_00_026.efx.5571972	
@@ -1290,12 +1290,12 @@ same	EffectEditor/Enemy/em0160/11_em0160_00_551.efx.5571972
 diff	EffectEditor/Enemy/em0160/11_em0160_00_552.efx.5571972	off=277 orig=7512 new=7512 at=action:PlayEmitter>before-attributes hint=same-length
 same	EffectEditor/Enemy/em0160/11_em0160_00_553.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_554.efx.5571972	
-diff	EffectEditor/Enemy/em0160/11_em0160_00_555.efx.5571972	off=26597 orig=50834 new=50834 at=entry:PtProjection hint=prefix-bytes-written-as-units
-diff	EffectEditor/Enemy/em0160/11_em0160_00_556.efx.5571972	off=12469 orig=63166 new=63166 at=entry:PtProjection hint=prefix-bytes-written-as-units
-diff	EffectEditor/Enemy/em0160/11_em0160_00_557.efx.5571972	off=11252 orig=68631 new=68631 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0160/11_em0160_00_555.efx.5571972	
+same	EffectEditor/Enemy/em0160/11_em0160_00_556.efx.5571972	
+same	EffectEditor/Enemy/em0160/11_em0160_00_557.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_558.efx.5571972	
 diff	EffectEditor/Enemy/em0160/11_em0160_00_560.efx.5571972	off=3381 orig=52599 new=52599 at=action:PlayEmitter>before-attributes hint=same-length
-diff	EffectEditor/Enemy/em0160/11_em0160_00_561.efx.5571972	off=13945 orig=19620 new=19620 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0160/11_em0160_00_561.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_565.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_566.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_567.efx.5571972	
@@ -1313,7 +1313,7 @@ same	EffectEditor/Enemy/em0160/11_em0160_00_590.efx.5571972
 same	EffectEditor/Enemy/em0160/11_em0160_00_591.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_592.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_593.efx.5571972	
-diff	EffectEditor/Enemy/em0160/11_em0160_00_595.efx.5571972	off=40547 orig=52337 new=52337 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0160/11_em0160_00_595.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_600.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_700.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_701.efx.5571972	
@@ -1325,8 +1325,8 @@ same	EffectEditor/Enemy/em0160/11_em0160_00_900.efx.5571972
 same	EffectEditor/Enemy/em0160/11_em0160_00_901.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_902.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_903.efx.5571972	
-diff	EffectEditor/Enemy/em0160/11_em0160_00_950.efx.5571972	off=1200 orig=9927 new=9927 at=entry:PtProjection hint=prefix-bytes-written-as-units
-diff	EffectEditor/Enemy/em0160/11_em0160_00_951.efx.5571972	off=1565 orig=50024 new=50024 at=action:PlayEmitter>entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0160/11_em0160_00_950.efx.5571972	
+same	EffectEditor/Enemy/em0160/11_em0160_00_951.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_952.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_collision.efx.5571972	
 diff	EffectEditor/Enemy/em0160/11_em0160_50_000.efx.5571972	off=2300 orig=80354 new=80354 at=action:PlayEmitter>before-attributes hint=same-length
@@ -1349,7 +1349,7 @@ same	EffectEditor/Enemy/em0161/11_em0161_00_081.efx.5571972
 same	EffectEditor/Enemy/em0161/11_em0161_00_999.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_000.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_001.efx.5571972	
-diff	EffectEditor/Enemy/em0162/11_em0162_00_002.efx.5571972	off=35315 orig=56116 new=56116 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0162/11_em0162_00_002.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_003.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_004.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_006.efx.5571972	
@@ -1360,7 +1360,7 @@ same	EffectEditor/Enemy/em0162/11_em0162_00_010.efx.5571972
 same	EffectEditor/Enemy/em0162/11_em0162_00_011.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_013.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_014.efx.5571972	
-diff	EffectEditor/Enemy/em0162/11_em0162_00_015.efx.5571972	off=1501 orig=9684 new=9684 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0162/11_em0162_00_015.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_016.efx.5571972	
 diff	EffectEditor/Enemy/em0162/11_em0162_00_017.efx.5571972	off=350 orig=11074 new=11074 at=action:PlayEmitter>before-attributes hint=same-length
 same	EffectEditor/Enemy/em0162/11_em0162_00_018.efx.5571972	
@@ -1374,10 +1374,10 @@ same	EffectEditor/Enemy/em0162/11_em0162_00_025.efx.5571972
 same	EffectEditor/Enemy/em0162/11_em0162_00_051.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_053.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_054.efx.5571972	
-diff	EffectEditor/Enemy/em0162/11_em0162_00_055.efx.5571972	off=2961 orig=6348 new=6348 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
-diff	EffectEditor/Enemy/em0162/11_em0162_00_056.efx.5571972	off=2961 orig=6302 new=6302 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
-diff	EffectEditor/Enemy/em0162/11_em0162_00_057.efx.5571972	off=7595 orig=7649 new=7649 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
-diff	EffectEditor/Enemy/em0162/11_em0162_00_058.efx.5571972	off=7598 orig=7652 new=7652 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0162/11_em0162_00_055.efx.5571972	
+same	EffectEditor/Enemy/em0162/11_em0162_00_056.efx.5571972	
+same	EffectEditor/Enemy/em0162/11_em0162_00_057.efx.5571972	
+same	EffectEditor/Enemy/em0162/11_em0162_00_058.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_059.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_060.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_061.efx.5571972	
@@ -1388,10 +1388,10 @@ same	EffectEditor/Enemy/em0162/11_em0162_00_065.efx.5571972
 same	EffectEditor/Enemy/em0162/11_em0162_00_066.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_067.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_068.efx.5571972	
-diff	EffectEditor/Enemy/em0162/11_em0162_00_069.efx.5571972	off=7094 orig=15338 new=15338 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
-diff	EffectEditor/Enemy/em0162/11_em0162_00_070.efx.5571972	off=15602 orig=18438 new=18438 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
-diff	EffectEditor/Enemy/em0162/11_em0162_00_071.efx.5571972	off=6956 orig=12522 new=12522 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
-diff	EffectEditor/Enemy/em0162/11_em0162_00_072.efx.5571972	off=3837 orig=5320 new=5320 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0162/11_em0162_00_069.efx.5571972	
+same	EffectEditor/Enemy/em0162/11_em0162_00_070.efx.5571972	
+same	EffectEditor/Enemy/em0162/11_em0162_00_071.efx.5571972	
+same	EffectEditor/Enemy/em0162/11_em0162_00_072.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_073.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_074.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_075.efx.5571972	
@@ -1454,11 +1454,11 @@ same	EffectEditor/Enemy/em0163/11_em0163_00_952.efx.5571972
 same	EffectEditor/Enemy/em0163/11_em0163_00_953.efx.5571972	
 same	EffectEditor/Enemy/em0163/11_em0163_00_collision.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_000.efx.5571972	
-diff	EffectEditor/Enemy/em0164/11_em0164_50_001.efx.5571972	off=11756 orig=56182 new=56182 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0164/11_em0164_50_001.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_003.efx.5571972	
-diff	EffectEditor/Enemy/em0164/11_em0164_50_004.efx.5571972	off=15370 orig=16752 new=16752 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0164/11_em0164_50_004.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_005.efx.5571972	
-diff	EffectEditor/Enemy/em0164/11_em0164_50_006.efx.5571972	off=28765 orig=97128 new=97128 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0164/11_em0164_50_006.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_007.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_008.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_009.efx.5571972	
@@ -1469,35 +1469,35 @@ same	EffectEditor/Enemy/em0164/11_em0164_50_013.efx.5571972
 same	EffectEditor/Enemy/em0164/11_em0164_50_014.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_015.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_016.efx.5571972	
-diff	EffectEditor/Enemy/em0164/11_em0164_50_017.efx.5571972	off=63064 orig=74241 new=74241 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0164/11_em0164_50_017.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_018.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_019.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_020.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_021.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_022.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_023.efx.5571972	
-diff	EffectEditor/Enemy/em0164/11_em0164_50_025.efx.5571972	off=13056 orig=53527 new=53527 at=entry:PtProjection hint=prefix-bytes-written-as-units
-diff	EffectEditor/Enemy/em0164/11_em0164_50_026.efx.5571972	off=16053 orig=46377 new=46377 at=entry:PtProjection hint=prefix-bytes-written-as-units
-diff	EffectEditor/Enemy/em0164/11_em0164_50_027.efx.5571972	off=16794 orig=38333 new=38333 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0164/11_em0164_50_025.efx.5571972	
+same	EffectEditor/Enemy/em0164/11_em0164_50_026.efx.5571972	
+same	EffectEditor/Enemy/em0164/11_em0164_50_027.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_028.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_029.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_030.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_031.efx.5571972	
-diff	EffectEditor/Enemy/em0164/11_em0164_50_032.efx.5571972	off=14961 orig=58640 new=58640 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0164/11_em0164_50_032.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_033.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_034.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_035.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_036.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_037.efx.5571972	
-diff	EffectEditor/Enemy/em0164/11_em0164_50_038.efx.5571972	off=16105 orig=29705 new=29705 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0164/11_em0164_50_038.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_039.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_040.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_041.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_042.efx.5571972	
-diff	EffectEditor/Enemy/em0164/11_em0164_50_043.efx.5571972	off=14434 orig=26472 new=26472 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0164/11_em0164_50_043.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_044.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_045.efx.5571972	
-diff	EffectEditor/Enemy/em0164/11_em0164_50_046.efx.5571972	off=23628 orig=70095 new=70095 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0164/11_em0164_50_046.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_047.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_048.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_100.efx.5571972	
@@ -1513,7 +1513,7 @@ same	EffectEditor/Enemy/em0164/11_em0164_50_109.efx.5571972
 same	EffectEditor/Enemy/em0164/11_em0164_50_110.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_111.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_112.efx.5571972	
-diff	EffectEditor/Enemy/em0164/11_em0164_50_113.efx.5571972	off=8805 orig=38697 new=38697 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0164/11_em0164_50_113.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_114.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_125.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_198.efx.5571972	
@@ -1544,7 +1544,7 @@ same	EffectEditor/Enemy/em0164/11_em0164_50_352.efx.5571972
 same	EffectEditor/Enemy/em0164/11_em0164_50_353.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_354.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_355.efx.5571972	
-diff	EffectEditor/Enemy/em0164/11_em0164_50_400.efx.5571972	off=5877 orig=53487 new=53487 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0164/11_em0164_50_400.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_401.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_600.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_601.efx.5571972	
@@ -1633,7 +1633,7 @@ same	EffectEditor/Enemy/em0166/11_em0166_00_183.efx.5571972
 same	EffectEditor/Enemy/em0166/11_em0166_00_184.efx.5571972	
 same	EffectEditor/Enemy/em0166/11_em0166_00_190.efx.5571972	
 same	EffectEditor/Enemy/em0166/11_em0166_00_191.efx.5571972	
-diff	EffectEditor/Enemy/em0166/11_em0166_00_192.efx.5571972	off=22993 orig=27256 new=27256 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Enemy/em0166/11_em0166_00_192.efx.5571972	
 same	EffectEditor/Enemy/em0166/11_em0166_00_193.efx.5571972	
 same	EffectEditor/Enemy/em0166/11_em0166_00_200.efx.5571972	
 same	EffectEditor/Enemy/em0166/11_em0166_00_201.efx.5571972	
@@ -3786,7 +3786,7 @@ same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_202.efx.5571972
 same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_203.efx.5571972	
 same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_204.efx.5571972	
 same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_205.efx.5571972	
-diff	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_206.efx.5571972	off=27949 orig=34924 new=34924 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_206.efx.5571972	
 diff	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_207.efx.5571972	off=976 orig=56446 new=56446 at=action:PlayEmitter>before-attributes hint=same-length
 same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_208.efx.5571972	
 same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_209.efx.5571972	
@@ -4760,11 +4760,11 @@ same	EffectEditor/Event/evc0040/evc0040_50/11_evc0040_50_605.efx.5571972
 same	EffectEditor/Event/evc0040/evc0040_50/11_evc0040_50_610.efx.5571972	
 same	EffectEditor/Event/evc0040/evc0040_50/11_evc0040_50_701.efx.5571972	
 same	EffectEditor/Event/evc0040/evc0040_50/11_evc0040_50_702.efx.5571972	
-diff	EffectEditor/Event/evc0040/evc0040_50/11_evc0040_50_710.efx.5571972	off=2810 orig=6169 new=6169 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
-diff	EffectEditor/Event/evc0040/evc0040_50/11_evc0040_50_711.efx.5571972	off=2809 orig=6168 new=6168 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
-diff	EffectEditor/Event/evc0040/evc0040_50/11_evc0040_50_712.efx.5571972	off=7387 orig=7441 new=7441 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
-diff	EffectEditor/Event/evc0040/evc0040_50/11_evc0040_50_713.efx.5571972	off=7390 orig=7444 new=7444 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
-diff	EffectEditor/Event/evc0040/evc0040_50/11_evc0040_50_715.efx.5571972	off=2810 orig=6169 new=6169 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+same	EffectEditor/Event/evc0040/evc0040_50/11_evc0040_50_710.efx.5571972	
+same	EffectEditor/Event/evc0040/evc0040_50/11_evc0040_50_711.efx.5571972	
+same	EffectEditor/Event/evc0040/evc0040_50/11_evc0040_50_712.efx.5571972	
+same	EffectEditor/Event/evc0040/evc0040_50/11_evc0040_50_713.efx.5571972	
+same	EffectEditor/Event/evc0040/evc0040_50/11_evc0040_50_715.efx.5571972	
 same	EffectEditor/Event/evc0040/evc0040_50/11_evc0040_50_723.efx.5571972	
 same	EffectEditor/Event/evc0040/evc0040_50/11_evc0040_50_800.efx.5571972	
 same	EffectEditor/Event/evc0040/evc0040_50/11_evc0040_50_801.efx.5571972	
@@ -5868,7 +5868,7 @@ same	EffectEditor/Event/evc0102/evc0102_50/11_evc0102_50_010.efx.5571972
 same	EffectEditor/Event/evc0102/evc0102_50/11_evc0102_50_013.efx.5571972	
 same	EffectEditor/Event/evc0102/evc0102_50/11_evc0102_50_014.efx.5571972	
 same	EffectEditor/Event/evc0102/evc0102_50/11_evc0102_50_015.efx.5571972	
-diff	EffectEditor/Event/evc0102/evc0102_50/11_evc0102_50_017.efx.5571972	off=6841 orig=25957 new=25957 at=action:PlayEmitter>entry:PtCollision hint=prefix-bytes-written-as-units
+same	EffectEditor/Event/evc0102/evc0102_50/11_evc0102_50_017.efx.5571972	
 same	EffectEditor/Event/evc0102/evc0102_50/11_evc0102_50_021.efx.5571972	
 same	EffectEditor/Event/evc0102/evc0102_50/11_evc0102_50_022.efx.5571972	
 same	EffectEditor/Event/evc0102/evc0102_50/11_evc0102_50_023.efx.5571972	
@@ -5934,13 +5934,13 @@ same	EffectEditor/Event/evc0104/evc0104_50/11_evc0104_50_101.efx.5571972
 same	EffectEditor/Event/evc0104/evc0104_50/11_evc0104_50_102.efx.5571972	
 same	EffectEditor/Event/evc0104/evc0104_50/11_evc0104_50_106.efx.5571972	
 same	EffectEditor/Event/evc0104/evc0104_50/11_evc0104_50_107.efx.5571972	
-diff	EffectEditor/Event/evc0104/evc0104_50/11_evc0104_50_110.efx.5571972	off=5878 orig=5932 new=5932 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
-diff	EffectEditor/Event/evc0104/evc0104_50/11_evc0104_50_111.efx.5571972	off=2809 orig=6122 new=6122 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
-diff	EffectEditor/Event/evc0104/evc0104_50/11_evc0104_50_112.efx.5571972	off=7553 orig=7607 new=7607 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
-diff	EffectEditor/Event/evc0104/evc0104_50/11_evc0104_50_113.efx.5571972	off=7553 orig=7607 new=7607 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
-diff	EffectEditor/Event/evc0104/evc0104_50/11_evc0104_50_114.efx.5571972	off=1250 orig=6548 new=6548 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
-diff	EffectEditor/Event/evc0104/evc0104_50/11_evc0104_50_115.efx.5571972	off=5830 orig=5884 new=5884 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
-diff	EffectEditor/Event/evc0104/evc0104_50/11_evc0104_50_116.efx.5571972	off=2777 orig=6074 new=6074 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+same	EffectEditor/Event/evc0104/evc0104_50/11_evc0104_50_110.efx.5571972	
+same	EffectEditor/Event/evc0104/evc0104_50/11_evc0104_50_111.efx.5571972	
+same	EffectEditor/Event/evc0104/evc0104_50/11_evc0104_50_112.efx.5571972	
+same	EffectEditor/Event/evc0104/evc0104_50/11_evc0104_50_113.efx.5571972	
+same	EffectEditor/Event/evc0104/evc0104_50/11_evc0104_50_114.efx.5571972	
+same	EffectEditor/Event/evc0104/evc0104_50/11_evc0104_50_115.efx.5571972	
+same	EffectEditor/Event/evc0104/evc0104_50/11_evc0104_50_116.efx.5571972	
 same	EffectEditor/Event/evc0104/evc0104_50/11_evc0104_50_121.efx.5571972	
 same	EffectEditor/Event/evc0104/evc0104_50/11_evc0104_50_122.efx.5571972	
 same	EffectEditor/Event/evc0104/evc0104_50/11_evc0104_50_140.efx.5571972	
@@ -6474,14 +6474,14 @@ same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_089.efx.5571972
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_090.efx.5571972	
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_091.efx.5571972	
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_093.efx.5571972	
-diff	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_094.efx.5571972	off=1242 orig=7889 new=7889 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_094.efx.5571972	
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_095.efx.5571972	
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_096.efx.5571972	
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_097.efx.5571972	
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_098.efx.5571972	
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_099.efx.5571972	
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_100.efx.5571972	
-diff	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_101.efx.5571972	off=16852 orig=30776 new=30776 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_101.efx.5571972	
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_102.efx.5571972	
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_104.efx.5571972	
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_105.efx.5571972	
@@ -6522,10 +6522,10 @@ same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_154.efx.5571972
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_155.efx.5571972	
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_156.efx.5571972	
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_157.efx.5571972	
-diff	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_158.efx.5571972	off=2103 orig=2157 new=2157 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
-diff	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_159.efx.5571972	off=2070 orig=2124 new=2124 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
-diff	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_160.efx.5571972	off=1080 orig=2139 new=2139 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
-diff	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_161.efx.5571972	off=1112 orig=2171 new=2171 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_158.efx.5571972	
+same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_159.efx.5571972	
+same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_160.efx.5571972	
+same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_161.efx.5571972	
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_163.efx.5571972	
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_164.efx.5571972	
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_165.efx.5571972	
@@ -7240,7 +7240,7 @@ same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_debuf_ice.efx.5571972
 same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_debuf_paralysis.efx.5571972	
 same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_debuf_poison.efx.5571972	
 same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_debuf_sleep.efx.5571972	
-diff	EffectEditor/Otomo/otm_cm/otm_state/11_otm_debuf_stench.efx.5571972	off=2454 orig=6392 new=6392 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_debuf_stench.efx.5571972	
 same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_debuf_sticky.efx.5571972	
 same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_debuf_stun.efx.5571972	
 same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_debuf_tear.efx.5571972	
@@ -7394,7 +7394,7 @@ same	EffectEditor/Player/pl_cm/pl_ground/11_pl_land_ss_002.efx.5571972
 same	EffectEditor/Player/pl_cm/pl_ground/11_pl_land_w_000.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_ground/11_pl_land_w_001.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_ground/11_pl_land_w_002.efx.5571972	
-diff	EffectEditor/Player/pl_cm/pl_ground/11_pl_pfluid_000.efx.5571972	off=1105 orig=1517 new=1517 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+same	EffectEditor/Player/pl_cm/pl_ground/11_pl_pfluid_000.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_ground/11_pl_run_000.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_ground/11_pl_si_000.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_ground/11_pl_si_002.efx.5571972	
@@ -7464,7 +7464,7 @@ same	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_ice.efx.5571972
 same	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_paralysis.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_poison.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_sleep.efx.5571972	
-diff	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_stench.efx.5571972	off=2454 orig=5872 new=5872 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+same	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_stench.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_sticky.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_stun.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_tear.efx.5571972	
@@ -7473,13 +7473,13 @@ same	EffectEditor/Player/pl_cm/pl_state/11_pl_dmg_floor.efx.5571972
 same	EffectEditor/Player/pl_cm/pl_state/11_pl_heal.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_state/11_pl_powder.efx.5571972	
 same	EffectEditor/Player/pl_collab01/11_collab01_000.efx.5571972	
-diff	EffectEditor/Player/pl_collab01/11_collab01_000_e2d.efx.5571972	off=93 orig=882 new=882 at=entry:RenderTarget hint=prefix-bytes-written-as-units
+same	EffectEditor/Player/pl_collab01/11_collab01_000_e2d.efx.5571972	
 same	EffectEditor/Player/pl_collab01/11_collab01_001.efx.5571972	
 same	EffectEditor/Player/pl_collab01/11_collab01_002.efx.5571972	
 same	EffectEditor/Player/pl_collab01/11_collab01_010.efx.5571972	
-diff	EffectEditor/Player/pl_collab01/11_collab01_010_e2d.efx.5571972	off=119 orig=3242 new=3242 at=entry:RenderTarget hint=prefix-bytes-written-as-units
+same	EffectEditor/Player/pl_collab01/11_collab01_010_e2d.efx.5571972	
 same	EffectEditor/Player/pl_collab01/11_collab01_020.efx.5571972	
-diff	EffectEditor/Player/pl_collab01/11_collab01_020_e2d.efx.5571972	off=119 orig=3242 new=3242 at=entry:RenderTarget hint=prefix-bytes-written-as-units
+same	EffectEditor/Player/pl_collab01/11_collab01_020_e2d.efx.5571972	
 same	EffectEditor/Player/pl_collab01/11_collab01_030.efx.5571972	
 same	EffectEditor/Player/pl_collab01/11_collab01_031.efx.5571972	
 same	EffectEditor/Player/pl_collab01/11_collab01_040.efx.5571972	
@@ -7557,11 +7557,11 @@ same	EffectEditor/Player/pl_sfc/11_sfc_041.efx.5571972
 same	EffectEditor/Player/pl_sfc/11_sfc_042.efx.5571972	
 same	EffectEditor/Player/pl_sfc/11_sfc_043.efx.5571972	
 same	EffectEditor/Player/pl_sfc/11_sfc_050.efx.5571972	
-diff	EffectEditor/Player/pl_sfc/11_sfc_051.efx.5571972	off=15976 orig=16120 new=16120 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	EffectEditor/Player/pl_sfc/11_sfc_051.efx.5571972	
 same	EffectEditor/Player/pl_sfc/11_sfc_052.efx.5571972	
 same	EffectEditor/Player/pl_sfc/11_sfc_053.efx.5571972	
 diff	EffectEditor/Player/pl_sfc/11_sfc_054.efx.5571972	off=356 orig=18091 new=18091 at=action:PlayEmitter>before-attributes hint=same-length
-diff	EffectEditor/Player/pl_sfc/11_sfc_055.efx.5571972	off=11684 orig=11828 new=11828 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
+same	EffectEditor/Player/pl_sfc/11_sfc_055.efx.5571972	
 same	EffectEditor/Player/pl_sfc/11_sfc_060.efx.5571972	
 same	EffectEditor/Player/pl_sfc/11_sfc_061.efx.5571972	
 same	EffectEditor/Player/pl_sfc/11_sfc_100.efx.5571972	
@@ -7733,7 +7733,7 @@ same	EffectEditor/Props/gm/gm008/gm008_000/11_gm008_000_03.efx.5571972
 same	EffectEditor/Props/gm/gm008/gm008_000/11_gm008_000_100.efx.5571972	
 same	EffectEditor/Props/gm/gm008/gm008_001/11_gm008_001_00.efx.5571972	
 same	EffectEditor/Props/gm/gm008/gm008_001/11_gm008_001_01.efx.5571972	
-diff	EffectEditor/Props/gm/gm008/gm008_001/11_gm008_001_02.efx.5571972	off=4229 orig=49667 new=49667 at=action:PlayEmitter>entry:PtCollision hint=prefix-bytes-written-as-units
+same	EffectEditor/Props/gm/gm008/gm008_001/11_gm008_001_02.efx.5571972	
 same	EffectEditor/Props/gm/gm008/gm008_001/11_gm008_001_03.efx.5571972	
 same	EffectEditor/Props/gm/gm008/gm008_001/11_gm008_001_100.efx.5571972	
 same	EffectEditor/Props/gm/gm009/gm009_000/11_gm009_000_00.efx.5571972	
@@ -7782,7 +7782,7 @@ same	EffectEditor/Props/gm/gm021/gm021_000/11_gm021_000_01.efx.5571972
 same	EffectEditor/Props/gm/gm021/gm021_000/11_gm021_000_02.efx.5571972	
 same	EffectEditor/Props/gm/gm021/gm021_000/11_gm021_000_03.efx.5571972	
 same	EffectEditor/Props/gm/gm021/gm021_000/11_gm021_000_04.efx.5571972	
-diff	EffectEditor/Props/gm/gm030/gm030_003/11_gm030_003_00.efx.5571972	off=2913 orig=6754 new=6754 at=entry:PtProjection hint=prefix-bytes-written-as-units
+same	EffectEditor/Props/gm/gm030/gm030_003/11_gm030_003_00.efx.5571972	
 same	EffectEditor/Props/gm/gm031/gm031_005/11_gm031_005_00.efx.5571972	
 same	EffectEditor/Props/gm/gm031/gm031_009/11_gm031_009_00.efx.5571972	
 same	EffectEditor/Props/gm/gm031/gm031_010/11_gm031_010_00.efx.5571972	
@@ -7901,7 +7901,7 @@ same	EffectEditor/Props/gm/gm200/gm200_000/gm200_000_07/11_gm200_000_07_01.efx.5
 same	EffectEditor/Props/gm/gm200/gm200_001/11_gm200_001_00.efx.5571972	
 same	EffectEditor/Props/gm/gm200/gm200_001/11_gm200_001_00_Air.efx.5571972	
 same	EffectEditor/Props/gm/gm200/gm200_002/11_gm200_002_00.efx.5571972	
-diff	EffectEditor/Props/gm/gm200/gm200_002/11_gm200_002_01.efx.5571972	off=4675 orig=22830 new=22830 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+same	EffectEditor/Props/gm/gm200/gm200_002/11_gm200_002_01.efx.5571972	
 same	EffectEditor/Props/gm/gm200/gm200_002/11_gm200_002_01_Air.efx.5571972	
 same	EffectEditor/Props/gm/gm200/gm200_003/11_gm200_003_00.efx.5571972	
 same	EffectEditor/Props/gm/gm200/gm200_003/11_gm200_003_00_Air.efx.5571972	
@@ -8938,7 +8938,7 @@ same	EffectEditor/Weapon/it07/11_it07_105_pile.efx.5571972
 same	EffectEditor/Weapon/it07/11_it07_193.efx.5571972	
 same	EffectEditor/Weapon/it07/11_it07_194.efx.5571972	
 same	EffectEditor/Weapon/it07/11_it07_197.efx.5571972	
-diff	EffectEditor/Weapon/it07/11_it07_198.efx.5571972	off=2830 orig=5778 new=5778 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+same	EffectEditor/Weapon/it07/11_it07_198.efx.5571972	
 same	EffectEditor/Weapon/it07/11_it07_199.efx.5571972	
 same	EffectEditor/Weapon/it07/11_it07_200.efx.5571972	
 same	EffectEditor/Weapon/it07/11_it07_201.efx.5571972	
@@ -9012,7 +9012,7 @@ same	EffectEditor/Weapon/it08/11_it08_095.efx.5571972
 same	EffectEditor/Weapon/it08/11_it08_097.efx.5571972	
 same	EffectEditor/Weapon/it08/11_it08_098.efx.5571972	
 same	EffectEditor/Weapon/it08/11_it08_099.efx.5571972	
-diff	EffectEditor/Weapon/it08/11_it08_198.efx.5571972	off=1129 orig=8850 new=8850 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+same	EffectEditor/Weapon/it08/11_it08_198.efx.5571972	
 same	EffectEditor/Weapon/it08/11_it08_199.efx.5571972	
 same	EffectEditor/Weapon/it08/11_it08_200.efx.5571972	
 same	EffectEditor/Weapon/it08/11_it08_201.efx.5571972	
@@ -9185,7 +9185,7 @@ same	EffectEditor/Weapon/it12/11_it12_030.efx.5571972
 same	EffectEditor/Weapon/it12/11_it12_031.efx.5571972	
 same	EffectEditor/Weapon/it12/11_it12_032.efx.5571972	
 same	EffectEditor/Weapon/it12/11_it12_100.efx.5571972	
-diff	EffectEditor/Weapon/it12/11_it12_101.efx.5571972	off=8779 orig=19528 new=19528 at=entry:PtCollision hint=prefix-bytes-written-as-units
+same	EffectEditor/Weapon/it12/11_it12_101.efx.5571972	
 same	EffectEditor/Weapon/it12/11_it12_101_hit.efx.5571972	
 same	EffectEditor/Weapon/it12/11_it12_101_parry.efx.5571972	
 same	EffectEditor/Weapon/it12/11_it12_102.efx.5571972	
@@ -9195,7 +9195,7 @@ same	EffectEditor/Weapon/it12/11_it12_105.efx.5571972
 same	EffectEditor/Weapon/it12/11_it12_105_jimen.efx.5571972	
 same	EffectEditor/Weapon/it12/11_it12_195.efx.5571972	
 same	EffectEditor/Weapon/it12/11_it12_196.efx.5571972	
-diff	EffectEditor/Weapon/it12/11_it12_198.efx.5571972	off=1232 orig=12548 new=12548 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+same	EffectEditor/Weapon/it12/11_it12_198.efx.5571972	
 same	EffectEditor/Weapon/it12/11_it12_198_ss.efx.5571972	
 same	EffectEditor/Weapon/it12/11_it12_198_w.efx.5571972	
 same	EffectEditor/Weapon/it12/11_it12_199.efx.5571972	
@@ -9214,7 +9214,7 @@ same	EffectEditor/Weapon/it13/11_it13_102.efx.5571972
 same	EffectEditor/Weapon/it13/11_it13_102_jimen.efx.5571972	
 same	EffectEditor/Weapon/it13/11_it13_106.efx.5571972	
 same	EffectEditor/Weapon/it13/11_it13_106_jimen.efx.5571972	
-diff	EffectEditor/Weapon/it13/11_it13_106_yoin.efx.5571972	off=2238 orig=3739 new=3739 at=entry:FluidParticle2DSimulator hint=prefix-bytes-written-as-units
+same	EffectEditor/Weapon/it13/11_it13_106_yoin.efx.5571972	
 same	EffectEditor/Weapon/it13/11_it13_107.efx.5571972	
 same	EffectEditor/Weapon/it13/11_it13_107_expl.efx.5571972	
 same	EffectEditor/Weapon/it13/11_it13_107_hit.efx.5571972	

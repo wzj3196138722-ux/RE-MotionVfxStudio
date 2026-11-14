@@ -47,17 +47,16 @@ dotnet $gate bonealign <语料目录> <输出.json> [--extra 类型名,类型名
 | 代码 | RE4（3946）相同 | Wilds（9225）相同 / 读取异常 |
 |---|---|---|
 | main fadfc0f（旧的内嵌拷贝） | 3512 | 6520 / 53 |
-| B1：EFX 子树换成 1c2f92d + 0002..0006（当前基线） | 3600 | 8942 / 46 |
+| B1：EFX 子树换成 1c2f92d + 0002..0006 | 3600 | 8942 / 46 |
+| B2：长度前缀与 StretchBlur（当前基线） | 3924 | 9037 / 46 |
 
 当前基线下还剩的问题：
-- RE4 写出不同（346）：内联宽字符串长度前缀写成一半（PtCollision 187、PtColliderAction 85、RenderTarget 15，
-  PlayEmitter 内嵌的 PtCollision 12）；另外 attribute 之前的区域 27 个、PlayEmitter 内嵌 EFX 的头部 20 个。
-- Wilds 写出不同（237）：PlayEmitter 内嵌 EFX 的头部 104、PtProjection 42、FluidParticle2DSimulator 41（str1..5）、
-  attribute 之后的区域 36，其余零散。
-- bonealign：RE4 有 27 个作用域数量对不上、110 处骨骼名不一致；加 `--extra EFXAttributeStretchBlur` 后两项都降到 0。
-  Wilds 是 0 个作用域、2 处不一致。
+- RE4 写出不同（22）：全部在 PlayEmitter 内嵌 EFX 的头部（写出长度不变）。
+- Wilds 写出不同（142）：PlayEmitter 内嵌 EFX 的头部 104、最后一个 attribute 之后的区域 37（写出长度都不变），另有 1 个嵌套的同类问题。
+- bonealign：RE4 0 / 0。Wilds 0 个作用域数量对不上，2 处骨骼名不一致（`11_em0162_00_063`、`11_pl_pfluid_000`，
+  消费者数量是对的，问题出在个别名字上）。
 
-B1 之前（main fadfc0f）的 bonealign：RE4 52 / 1153，Wilds 218 / 1158。
+bonealign 的历史：main fadfc0f 时 RE4 52 / 1153、Wilds 218 / 1158；B1 后 RE4 27 / 110、Wilds 0 / 2。
 
 **什么时候更新基线**：只有在 `compare` 通过（没有退化）、并且确实有文件新变成 same 时才更新，
 提交时写明哪些文件变好了、为什么。不允许为了让门禁通过而更新基线。

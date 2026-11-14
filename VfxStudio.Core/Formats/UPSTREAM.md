@@ -27,6 +27,28 @@
 - `EfxFile`：`Version <= 0` 时当作 MHWilds（游戏配置层完成后改为由调用方传入）；构造 attribute 时补上 `this.type = type`。
 - `ClipSubstructs`：`IntValue` 的 setter 原来没有赋值。
 
+### B2：RE4 与 Wilds 的格式修复（2026-11-14）
+
+判定方法：先把候选字段全部无条件加上 `ByteSize = true`，用 EfxCorpusGate 跑两份语料，看哪里出现退化（结果是 0 退化），
+再逐字段核对两边是否都有非空实例。修之前，这些文件在门禁里都是“写出不同”，且首个差异就落在对应 attribute 上。
+
+| 字段 | RE4 非空实例 | Wilds 非空实例 | 结论 |
+|---|---|---|---|
+| `PtCollision.unknString0` | 600（205 个文件） | 1（`11_it12_101`） | 两个版本都按字节数 |
+| `PtColliderAction.unknString_flag1` / `_flag2` | 203 / 13 | 0 / 8 | 字节数 |
+| `RenderTarget.rtexPath` | 15 | 3 | 字节数 |
+| `PtProjection.unknString0` | — | 104（45 个文件） | 字节数 |
+| `FluidParticle2DSimulator.str1..str5` | — | str3 有 1 个 | 字节数（0005 漏了） |
+| `DestinationCSV.unknPath2..4` | — | 3 个文件 | 字节数（efcsvPath 已在 0005 里） |
+
+- 修正之前的推测：曾认为 Wilds 下 `PtCollision.unknString0` 按字符数，所以要按版本加条件。但 Wilds 唯一的实例
+  `11_it12_101` 在加了 ByteSize 之后和原文件逐字节相同，说明 Wilds 也按字节数，不需要按版本区分。
+  RE4、Wilds 以外的版本没有语料可验证。
+- `EFXAttributeStretchBlur` 实现 `IBoneRelationAttribute`，这个类型只在 RE4 下注册。bonealign 结果：RE4 从 27 / 110 降到 0 / 0；
+  原先 27 个首个差异在 attribute 之前的文件（BoneRelations 少写了槽位）也随之和原文件一致。
+
+结果：RE4 3600 → 3924 / 3946，Wilds 8942 → 9037 / 9225，两边都没有退化。
+
 ### 换基线时舍弃的旧改动
 
 - 表达式三件（EfxExpressionParser / ExpressionTree / ExpressionData）原先是 `a96e1d9` 之前的旧版

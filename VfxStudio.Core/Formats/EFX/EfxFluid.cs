@@ -229,11 +229,11 @@ public partial class EFXAttributeFluidParticle2DSimulator : ReeLib.Efx.EFXAttrib
     public UndeterminedFieldType unkn39;
     public UndeterminedFieldType unkn40;
     public int dataCount;
-    [RszInlineWString] public string? str1;
-    [RszInlineWString] public string? str2;
-    [RszInlineWString] public string? str3;
-    [RszInlineWString] public string? str4;
-    [RszInlineWString] public string? str5;
+    [RszInlineWString(ByteSize = true)] public string? str1;
+    [RszInlineWString(ByteSize = true)] public string? str2;
+    [RszInlineWString(ByteSize = true)] public string? str3;
+    [RszInlineWString(ByteSize = true)] public string? str4;
+    [RszInlineWString(ByteSize = true)] public string? str5;
 
     [RszFixedSizeArray(nameof(dataCount))] public HashValue[]? data;
 

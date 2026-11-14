@@ -556,7 +556,7 @@ public partial class EFXAttributeRenderTarget : EFXAttribute
 	public EFXAttributeRenderTarget() : base(EfxAttributeType.RenderTarget) { }
 
 	public uint unkn_toggle;
-	[RszInlineWString] public string? rtexPath;
+	[RszInlineWString(ByteSize = true)] public string? rtexPath;
 
     public override string ToString() => $"RenderTarget: {rtexPath}";
 }
