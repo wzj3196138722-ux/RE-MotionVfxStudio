@@ -42,20 +42,22 @@ dotnet $gate bonealign <语料目录> <输出.json> [--extra 类型名,类型名
 把整份 RE4 语料和大半 Wilds 语料覆盖了。`WriteTo` 还会吞掉异常、只返回 false，所以返回值也必须检查。
 跑之前想确认的话，可以先 `touch` 一个时间戳文件，跑完用 `find <语料> -newer <时间戳>` 确认没有文件被改。
 
-## 基线（`baselines/`，代码基于 main fadfc0f）
+## 基线（`baselines/`）
 
-| | 和原文件相同 | 写出不同 | 读取异常 |
-|---|---|---|---|
-| RE4 | 3512 / 3946 | 434 | 0 |
-| Wilds | 6520 / 9225 | 2652 | 53 |
+| 代码 | RE4（3946）相同 | Wilds（9225）相同 / 读取异常 |
+|---|---|---|
+| main fadfc0f（旧的内嵌拷贝） | 3512 | 6520 / 53 |
+| B1：EFX 子树换成 1c2f92d + 0002..0006（当前基线） | 3600 | 8942 / 46 |
 
-- RE4 写出不同：主要是内联宽字符串长度前缀写成一半（PtCollision 187、PtColliderAction 84、PlayEfx 36、
-  VanishArea3D 24、RenderTarget 15、AssignCSV 3，另有 PlayEmitter 内嵌的同类问题），
-  另外 attribute 之前的区域 50 个、PlayEmitter 内嵌 EFX 的头部 20 个。
-- Wilds 写出不同：Layout 1124（缺 0002 生成器修复），其余以 FlowMap、VanishArea3D、AssignCSV 的长度前缀为主。
-- bonealign：RE4 有 52 个作用域数量对不上，骨骼名不一致 1153 处；Wilds 是 218 个和 1158 处。
-  RE4 上加 `--extra EFXAttributeStretchBlur,EFXAttributeTypeStrainRibbonV3,EFXAttributeFluidParticle2DSimulator`
-  之后两项都降到 0。
+当前基线下还剩的问题：
+- RE4 写出不同（346）：内联宽字符串长度前缀写成一半（PtCollision 187、PtColliderAction 85、RenderTarget 15，
+  PlayEmitter 内嵌的 PtCollision 12）；另外 attribute 之前的区域 27 个、PlayEmitter 内嵌 EFX 的头部 20 个。
+- Wilds 写出不同（237）：PlayEmitter 内嵌 EFX 的头部 104、PtProjection 42、FluidParticle2DSimulator 41（str1..5）、
+  attribute 之后的区域 36，其余零散。
+- bonealign：RE4 有 27 个作用域数量对不上、110 处骨骼名不一致；加 `--extra EFXAttributeStretchBlur` 后两项都降到 0。
+  Wilds 是 0 个作用域、2 处不一致。
+
+B1 之前（main fadfc0f）的 bonealign：RE4 52 / 1153，Wilds 218 / 1158。
 
 **什么时候更新基线**：只有在 `compare` 通过（没有退化）、并且确实有文件新变成 same 时才更新，
 提交时写明哪些文件变好了、为什么。不允许为了让门禁通过而更新基线。

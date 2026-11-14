@@ -272,7 +272,7 @@ public partial class EFXAttributePtCollision : EFXAttribute
 	[RszConditional("(stringBitFlag & (1 << 0)) != 0"), RszInlineWString]
 	public string? unknString0;
 
-	[RszConditional("(stringBitFlag & (1 << 1)) != 0"), RszInlineWString]
+	[RszConditional("(stringBitFlag & (1 << 1)) != 0"), RszInlineWString(ByteSize = true)]
 	public string? unknString1;
 }
 
@@ -401,7 +401,7 @@ public partial class EFXAttributePtFreezer : EFXAttribute
 [RszGenerate, RszAutoReadWrite]
 public partial class PtPathTranslateName : BaseModel
 {
-	[RszInlineWString] public string name = "";
+	[RszInlineWString(ByteSize = true)] public string name = "";
 
     public override string ToString() => name;
 }
@@ -505,6 +505,5 @@ public partial class EFXAttributePtCollisionInfluence : EFXAttribute
 	public uint Unkn6;
 	public float Unkn7;
 	public uint Unkn8;
-	[RszArraySizeField(nameof(Data))] public int DataCount;
-	[RszFixedSizeArray(nameof(DataCount))] public PtCollisionInfluenceData[]? Data;
+	[RszFixedSizeArray] public PtCollisionInfluenceData[]? Data;
 }

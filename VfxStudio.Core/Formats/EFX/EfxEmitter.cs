@@ -233,12 +233,12 @@ public partial class EFXAttributeMeshEmitterV2 : EFXAttribute
     public uint MaskVTilingCount;
     public Vector2 MaskUVOffset;
 
-	[RszInlineWString] public string? DynamicColorMapPath;
-	[RszInlineWString] public string? MeshPath;
-	[RszInlineWString] public string? MeshMirrorPath;
-	[RszInlineWString] public string? ColorMapPath;
-	[RszInlineWString] public string? MaskMapPath;
-	[RszInlineWString] public string? TargetGameObjectName;
+	[RszInlineWString(ByteSize = true)] public string? DynamicColorMapPath;
+	[RszInlineWString(ByteSize = true)] public string? MeshPath;
+	[RszInlineWString(ByteSize = true)] public string? MeshMirrorPath;
+	[RszInlineWString(ByteSize = true)] public string? ColorMapPath;
+	[RszInlineWString(ByteSize = true)] public string? MaskMapPath;
+	[RszInlineWString(ByteSize = true)] public string? TargetGameObjectName;
 
     public override string ToString() => !string.IsNullOrEmpty(MeshPath) ? MeshPath : type.ToString();
 }

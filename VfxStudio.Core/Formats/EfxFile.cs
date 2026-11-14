@@ -184,6 +184,14 @@ namespace ReeLib.Efx
         public EfxVersion Version;
         public bool IsTypeAttribute => type.ToString().StartsWith("Type") && this is not IExpressionAttribute and not IClipAttribute and not IMaterialExpressionAttribute;
 
+        // MHWs-EFX-Editor 本地补丁：MHWilds 起每个 attribute 前面会声明一个字节长度
+        // （下面 EFXEntry/EFXAction.DoRead() 里读到的 expectedSize，含 UniqueID 的 4 字节），
+        // 原本只用来读完之后校验，没有传给 attribute 自己。给完全不认识字段结构的类型
+        // （opaque 透传实现，见 EfxUnknownAttributes.cs）留一个读取自己长度的口子。
+        // -1 = 未提供（非 MHWilds 版本，或者调用方没设置）。
+        [JsonIgnore]
+        public int ExpectedByteSize = -1;
+
         public static EFXAttribute Create(EfxVersion version, EfxAttributeType type, int seqNum = -1)
         {
             var item = EfxAttributeTypeRemapper.Create(type, version);
@@ -722,6 +730,7 @@ namespace ReeLib.Efx
                 var seqNum = handler.Read<int>();
                 var attr = EFXAttribute.Create(Version, type, seqNum);
                 attr.Version = Version;
+                attr.ExpectedByteSize = expectedSize;
                 attr.Read(handler);
                 // Log.Debug($"Read {attr.type} at {attr.Start}");
                 if (expectedSize != -1 && expectedSize - 4 != attr.StructSize) {//UniqueID is included in the struct size, so subtract 4
@@ -851,6 +860,7 @@ namespace ReeLib.Efx
                 var seqNum = handler.Read<int>();
                 var attr = EFXAttribute.Create(Version, type, seqNum);
                 attr.Version = Version;
+                attr.ExpectedByteSize = expectedSize;
                 attr.Read(handler);
                 if (expectedSize != -1 && expectedSize - 4 != attr.StructSize) {//UniqueID is included in the struct size, so subtract 4
                     throw new Exception($"EFX attribute ({attr.type}) was not properly read. Expected: {expectedSize} Actual: {attr.StructSize+4} Start:{attr.Start} End:{attr.Start + attr.StructSize}");

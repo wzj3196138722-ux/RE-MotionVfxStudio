@@ -1,8 +1,8 @@
 # EfxCorpusGate roundtrip v1
 # corpus	E:\Program\Steam\steamapps\common\RESIDENT EVIL 4  BIOHAZARD RE4\RE4_EXTRACT\natives\stm
 # files	3946
-# same	3512
-# diff	434
+# same	3600
+# diff	346
 # read-error	0
 # write-error	0
 # status	path	detail
@@ -54,16 +54,16 @@ diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_t
 diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_through_0003.efx.3539837	off=7378 orig=8591 new=8591 at=entry:PtCollision hint=prefix-bytes-written-as-units
 diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_through_0004.efx.3539837	off=8579 orig=11896 new=11896 at=entry:PtCollision hint=prefix-bytes-written-as-units
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chf9/efd_0015_ao_chf9_through_0005.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0000_damage_0000.efx.3539837	off=1962 orig=4162 new=4162 at=action:PlayEmitter>entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0000_damage_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0000_spear_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0000_spear_0001.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0000_spear_0002.efx.3539837	off=882 orig=5055 new=5055 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0000_spear_0002.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0000_spear_0010.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0000_spear_0011.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0000_spear_0012.efx.3539837	off=893 orig=6101 new=6101 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0000_spear_0012.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0000_spear_0020.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0000_spear_0021.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0000_spear_0022.efx.3539837	off=882 orig=5055 new=5055 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0000_spear_0022.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0000_thornshoot_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0001_2d_destortion_0001.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0001_2d_destortion_0002.efx.3539837	
@@ -118,11 +118,11 @@ same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0002_appearance_0090.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0002_attack_blur_l_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0002_attack_blur_r_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0002_damage_0000.efx.3539837	off=731 orig=2728 new=2728 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0002_damage_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0002_vanish_0100.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0002_vanish_0101.efx.3539837	off=845 orig=3643 new=3643 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0002_vanish_0102.efx.3539837	off=845 orig=3643 new=3643 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0002_vanish_0103.efx.3539837	off=845 orig=3643 new=3643 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0002_vanish_0101.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0002_vanish_0102.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0002_vanish_0103.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0002_vanish_0110.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0002_vanish_0150.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfa/efd_0015_ao_chfa_0002_vanish_0190.efx.3539837	
@@ -218,7 +218,7 @@ same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_a
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_attack_liquid_0005.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_bulletshoot_end_0000.efx.3539837	
 diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_bulletshoot_loop_0000.efx.3539837	off=242 orig=5276 new=5276 at=action:PlayEmitter>before-attributes hint=same-length
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_bulletshoot_start_0000.efx.3539837	off=1125 orig=16172 new=16172 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_bulletshoot_start_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_damage_core_handgun_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_damage_core_knife_slash_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_damage_core_knife_stab_0000.efx.3539837	
@@ -228,7 +228,7 @@ same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_d
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_damage_core_shotgun_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_dash_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_falldamage_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_fatalattack_0000.efx.3539837	off=253 orig=9027 new=9027 at=action:PlayEfx hint=prefix-bytes-written-as-units
+diff	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_fatalattack_0000.efx.3539837	off=8166 orig=9027 new=9027 at=entry:PtColliderAction hint=prefix-bytes-written-as-units
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_fatalattack_0001.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_fatalattack_0002.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_character/efd_ao_chfe/efd_0015_ao_chfe_fatalattack_0003.efx.3539837	
@@ -321,7 +321,7 @@ same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse030_s00/efd_0015_cse030_
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse030_s00/efd_0015_cse030_s00_dust_0001.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse030_s00/efd_0015_cse030_s00_water_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse030_s00/efd_0015_cse030_s00_water_0001.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse040_s00/efd_0015_cse040_s00_smoke_0000.efx.3539837	off=767 orig=8556 new=8556 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse040_s00/efd_0015_cse040_s00_smoke_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse100_s00/efd_0015_csa100_s00_background_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse100_s00/efd_0015_csa100_s00_landing_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse100_s00/efd_0015_csa100_s00_smoke_0000.efx.3539837	
@@ -344,7 +344,7 @@ same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse145_s00/efd_0015_csa145_
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse150_s00/efd_0015_cse150_s00_blood_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse150_s00/efd_0015_cse150_s00_fire_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse150_s00/efd_0015_cse150_s00_muzzleflash_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse150_s00/efd_0015_cse150_s00_smoke_0000.efx.3539837	off=1830 orig=4380 new=4380 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse150_s00/efd_0015_cse150_s00_smoke_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse150_s00/efd_0015_cse150_s00_spark_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse200_s00/efd_0015_csa200_s00_envsmoke_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse200_s00/efd_0015_csa200_s00_landing_0000.efx.3539837	
@@ -508,7 +508,7 @@ same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse355_s00/efd_0015_cse355_
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse355_s00/efd_0015_cse355_s00_liquid_0002.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse355_s00/efd_0015_cse355_s00_liquid_0003.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse355_s00/efd_0015_cse355_s00_liquid_0004.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse355_s00/efd_0015_cse355_s00_saliva_0000.efx.3539837	off=40 orig=2390 new=2386 at=before-attributes hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse355_s00/efd_0015_cse355_s00_saliva_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse355_s00/efd_0015_cse355_s00_sand_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse355_s00/efd_0015_cse355_s00_smoke_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse355_s00/efd_0015_cse355_s00_smoke_0001.efx.3539837	
@@ -539,16 +539,16 @@ same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse435_s00/efd_0015_cse435_
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse435_s00/efd_0015_cse435_s00_dust_0004.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse435_s00/efd_0015_cse435_s00_envfog_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse435_s00/efd_0015_cse435_s00_envfog_0001.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse440_s00/efd_0015_cse440_s00_laser_0000.efx.3539837	off=40 orig=16761 new=16755 at=before-attributes hint=length-changed
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse440_s00/efd_0015_cse440_s00_laser_0001.efx.3539837	off=40 orig=13559 new=13555 at=before-attributes hint=length-changed
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse440_s00/efd_0015_cse440_s00_laser_0010.efx.3539837	off=40 orig=16761 new=16755 at=before-attributes hint=length-changed
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse440_s00/efd_0015_cse440_s00_laser_0011.efx.3539837	off=40 orig=16790 new=16784 at=before-attributes hint=length-changed
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse440_s00/efd_0015_cse440_s00_laser_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse440_s00/efd_0015_cse440_s00_laser_0001.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse440_s00/efd_0015_cse440_s00_laser_0010.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse440_s00/efd_0015_cse440_s00_laser_0011.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse440_s00/efd_0015_cse440_s00_laserejection_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse440_s00/efd_0015_cse440_s00_laserejection_0010.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse440_s00/efd_0015_cse440_s00_laserejection_0020.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse440_s00/efd_0015_cse440_s00_light_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse440_s00/efd_0015_cse440_s00_smoke_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse455_s00/efd_0015_cse455_s00_laser_0000.efx.3539837	off=40 orig=81155 new=81131 at=before-attributes hint=length-changed
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse455_s00/efd_0015_cse455_s00_laser_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse455_s00/efd_0015_cse455_s00_laserejection_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse455_s00/efd_0015_cse455_s00_smoke_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse455_s00/efd_0015_cse455_s00_smoke_0001.efx.3539837	
@@ -557,8 +557,8 @@ same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse460_s00/efd_0015_cse460_
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse460_s00/efd_0015_cse460_s00_explosion_0001.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse460_s00/efd_0015_cse460_s00_fog_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse460_s00/efd_0015_cse460_s00_jetskisplash_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse460_s00/efd_0015_cse460_s00_laser_0000.efx.3539837	off=40 orig=19409 new=19375 at=before-attributes hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse460_s00/efd_0015_cse460_s00_laser_0001.efx.3539837	off=40 orig=206741 new=206707 at=before-attributes hint=length-changed
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse460_s00/efd_0015_cse460_s00_laser_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse460_s00/efd_0015_cse460_s00_laser_0001.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse460_s00/efd_0015_cse460_s00_muzzleflash_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse460_s00/efd_0015_cse460_s00_smoke_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse460_s00/efd_0015_cse460_s00_spark_0000.efx.3539837	
@@ -579,7 +579,7 @@ same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse530_s02/efd_0015_cse530_
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse530_s02/efd_0015_cse530_s02_smoke_0001.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse530_s02/efd_0015_cse530_s02_spark_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse550_s00/efd_0015_cse550_s00_muzzle_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse550_s00/efd_0015_cse550_s00_sparks_0000.efx.3539837	off=4967 orig=5491 new=5491 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse550_s00/efd_0015_cse550_s00_sparks_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse550_s00/efd_0015_cse550_s00_sparks_0001.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse550_s00/efd_0015_cse550_s00_sparks_0002.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse550_s00/efd_0015_cse550_s00_sparks_0003.efx.3539837	
@@ -621,11 +621,11 @@ diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse941_s00/efd_0015_cse941_
 diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse941_s00/efd_0015_cse941_s00_spark_0010.efx.3539837	off=11131 orig=20688 new=20688 at=action:PlayEmitter>before-attributes hint=same-length
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse941_s00/efd_0015_cse941_s00_spark_0020.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse942_s00/efd_0015_cse942_s00_blood_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse942_s00/efd_0015_cse942_s00_laser_0000.efx.3539837	off=40 orig=13559 new=13555 at=before-attributes hint=length-changed
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse942_s00/efd_0015_cse942_s00_laser_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse943_s00/efd_0015_cse943_s00_blood_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse943_s00/efd_0015_cse943_s00_laser_0000.efx.3539837	off=40 orig=13559 new=13555 at=before-attributes hint=length-changed
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse943_s00/efd_0015_cse943_s00_laser_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse944_s00/efd_0015_cse944_s00_irradiation_0001.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse944_s00/efd_0015_cse944_s00_laser_0000.efx.3539837	off=40 orig=182423 new=182393 at=before-attributes hint=length-changed
+same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse944_s00/efd_0015_cse944_s00_laser_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse950_s00/efd_0015_cse950_s00_blood_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_cse950_s00/efd_0015_cse950_s00_spark_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_event/cs/efd_csf000_s00/efd_0015_csf000_s00_destruction_0000.efx.3539837	
@@ -706,28 +706,28 @@ diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_300_00/efd_0015_sm84_3
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_305_00/efd_0015_sm84_305_00_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_306_00/efd_0015_sm84_306_00_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_307_00/efd_0015_sm84_307_00_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_313_00/efd_0015_sm84_313_00_0000.efx.3539837	off=40 orig=13559 new=13555 at=before-attributes hint=length-changed
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_313_00/efd_0015_sm84_313_00_0010.efx.3539837	off=40 orig=2709 new=2707 at=before-attributes hint=length-changed
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_313_00/efd_0015_sm84_313_00_0011.efx.3539837	off=40 orig=2709 new=2707 at=before-attributes hint=length-changed
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_313_00/efd_0015_sm84_313_00_0012.efx.3539837	off=40 orig=2709 new=2707 at=before-attributes hint=length-changed
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_313_00/efd_0015_sm84_313_00_0013.efx.3539837	off=40 orig=2709 new=2707 at=before-attributes hint=length-changed
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_313_00/efd_0015_sm84_313_00_0014.efx.3539837	off=40 orig=2709 new=2707 at=before-attributes hint=length-changed
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_313_00/efd_0015_sm84_313_00_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_313_00/efd_0015_sm84_313_00_0010.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_313_00/efd_0015_sm84_313_00_0011.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_313_00/efd_0015_sm84_313_00_0012.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_313_00/efd_0015_sm84_313_00_0013.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_313_00/efd_0015_sm84_313_00_0014.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_323_00/efd_0015_sm84_323_00_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_324_00/efd_0015_sm84_324_00_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_333_00/efd_0015_sm84_333_00_0000.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_334_00/efd_0015_sm84_334_00_0000.efx.3539837	off=40 orig=159027 new=158979 at=before-attributes hint=length-changed
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_334_00/efd_0015_sm84_334_00_0010.efx.3539837	off=40 orig=35752 new=35740 at=before-attributes hint=length-changed
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_334_00/efd_0015_sm84_334_00_0011.efx.3539837	off=40 orig=30886 new=30864 at=before-attributes hint=length-changed
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_334_00/efd_0015_sm84_334_00_0012.efx.3539837	off=40 orig=32429 new=32407 at=before-attributes hint=length-changed
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_335_00/efd_0015_sm84_335_00_0000.efx.3539837	off=40 orig=168515 new=168485 at=before-attributes hint=length-changed
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_335_00/efd_0015_sm84_335_00_0010.efx.3539837	off=40 orig=22213 new=22197 at=before-attributes hint=length-changed
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_334_00/efd_0015_sm84_334_00_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_334_00/efd_0015_sm84_334_00_0010.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_334_00/efd_0015_sm84_334_00_0011.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_334_00/efd_0015_sm84_334_00_0012.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_335_00/efd_0015_sm84_335_00_0000.efx.3539837	
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_335_00/efd_0015_sm84_335_00_0010.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_343_00/efd_0015_sm84_343_00_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_343_00/efd_0015_sm84_343_01_0000.efx.3539837	
 diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_354_00/efd_0015_sm84_354_00_0000.efx.3539837	off=7036 orig=9026 new=9026 at=entry:PtCollision hint=prefix-bytes-written-as-units
 diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_356_00/efd_0015_sm84_356_00_0000.efx.3539837	off=387 orig=20847 new=20847 at=action:PlayEmitter>before-attributes hint=same-length
 diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_359_00/efd_0015_sm84_359_00_0000.efx.3539837	off=11474 orig=19094 new=19094 at=entry:PtCollision hint=prefix-bytes-written-as-units
 diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_359_00/efd_0015_sm84_359_00_0001.efx.3539837	off=1629 orig=43778 new=43778 at=entry:PtCollision hint=prefix-bytes-written-as-units
-diff	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_360_00/efd_0015_sm84_360_00_0000.efx.3539837	off=132 orig=27276 new=27268 at=action:PlayEmitter hint=length-changed
+same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_360_00/efd_0015_sm84_360_00_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_360_00/efd_0015_sm84_360_00_0010.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_363_00/efd_0015_sm84_363_00_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_setmodel/efd_sm84_363_00/efd_0015_sm84_363_00_0000_lasersight_0001.efx.3539837	
@@ -781,7 +781,7 @@ same	_anotherorder/vfx/effecteditor/efd_stage/efd_st44/efd_st44_101/efd_0015_st4
 same	_anotherorder/vfx/effecteditor/efd_stage/efd_st44/efd_st44_101/efd_0015_st44_101_1025.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_stage/efd_st44/efd_st44_101/efd_0015_st44_101_1026.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_stage/efd_st44/efd_st44_101/efd_0015_st44_101_1030.efx.3539837	
-diff	_anotherorder/vfx/effecteditor/efd_stage/efd_st44/efd_st44_101/efd_0015_st44_101_1050.efx.3539837	off=127 orig=2767 new=2767 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_anotherorder/vfx/effecteditor/efd_stage/efd_st44/efd_st44_101/efd_0015_st44_101_1050.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_stage/efd_st44/efd_st44_101/efd_0015_st44_101_1051.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_stage/efd_st45/efd_st45_300/efd_0015_st45_300_0000.efx.3539837	
 same	_anotherorder/vfx/effecteditor/efd_stage/efd_st50/efd_st50_100/efd_0015_st50_100_0010.efx.3539837	
@@ -1708,8 +1708,8 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa012_s00/efd_0015_csa012_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa012_s00/efd_0015_csa012_s00_dust_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa012_s00/efd_0015_csa012_s00_dust_0003.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa012_s00/efd_0015_csa012_s00_dust_0004.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa012_s00/efd_0015_csa012_s00_dust_0005.efx.3539837	off=812 orig=1544 new=1544 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa012_s00/efd_0015_csa012_s00_dust_0006.efx.3539837	off=812 orig=1544 new=1544 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa012_s00/efd_0015_csa012_s00_dust_0005.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa012_s00/efd_0015_csa012_s00_dust_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa012_s00/efd_0015_csa012_s00_smoke_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa012_s00/efd_0015_csa012_s00_smoke_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa012_s00/efd_0015_csa012_s00_smoke_0002.efx.3539837	
@@ -1863,7 +1863,7 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa024_s00/efd_0015_csa024_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa024_s00/efd_0015_csa024_s00_torch_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa025_s00/efd_0015_csa025_s00_footprint_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa025_s00/efd_0015_csa025_s00_footprint_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa025_s00/efd_0015_csa025_s00_rain_0000.efx.3539837	off=581 orig=7463 new=7463 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa025_s00/efd_0015_csa025_s00_rain_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa025_s00/efd_0015_csa025_s00_rain_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa025_s00/efd_0015_csa025_s00_torch_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa025_s00/efd_0015_csa025_s00_torch_0001.efx.3539837	
@@ -1953,7 +1953,7 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_explosion_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_explosion_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_gunsmoke_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_landingsmoke_0000.efx.3539837	off=8237 orig=12877 new=12877 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_landingsmoke_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_muzzleflash_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_muzzleflash_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa028_s00/efd_0015_csa028_s00_smoke_0000.efx.3539837	
@@ -2202,7 +2202,7 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_sm84_667_00_blur_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_smoke_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_smoke_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_smoke_0002.efx.3539837	off=798 orig=2328 new=2328 at=action:PlayEmitter>entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_smoke_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_smoke_0003.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_smoke_0004.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa066_s00/efd_0015_csa066_s00_smoke_0005.efx.3539837	
@@ -2381,12 +2381,12 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa118_s00/efd_0015_csa118_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa118_s00/efd_0015_csa118_s00_mazzle_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa118_s00/efd_0015_csa118_s00_mazzle_0010.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa118_s00/efd_0015_csa118_s00_mazzle_0020.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa118_s00/efd_0015_csa118_s00_warhead_0000.efx.3539837	off=113 orig=1344 new=1344 at=action:PlayEfx hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa118_s00/efd_0015_csa118_s00_warhead_0001.efx.3539837	off=113 orig=1344 new=1344 at=action:PlayEfx hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa118_s00/efd_0015_csa118_s00_warhead_0002.efx.3539837	off=113 orig=1344 new=1344 at=action:PlayEfx hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa118_s00/efd_0015_csa118_s00_warhead_0010.efx.3539837	off=113 orig=1344 new=1344 at=action:PlayEfx hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa118_s00/efd_0015_csa118_s00_warhead_0011.efx.3539837	off=113 orig=1344 new=1344 at=action:PlayEfx hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa118_s00/efd_0015_csa118_s00_warhead_0012.efx.3539837	off=113 orig=1344 new=1344 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa118_s00/efd_0015_csa118_s00_warhead_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa118_s00/efd_0015_csa118_s00_warhead_0001.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa118_s00/efd_0015_csa118_s00_warhead_0002.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa118_s00/efd_0015_csa118_s00_warhead_0010.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa118_s00/efd_0015_csa118_s00_warhead_0011.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa118_s00/efd_0015_csa118_s00_warhead_0012.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa118_s00/efd_0015_csa118_s00_warhead_0050.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa119_s00/efd_0015_csa119_s00_blood_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa119_s00/efd_0015_csa119_s00_footdropmud_0000.efx.3539837	
@@ -2431,7 +2431,7 @@ same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa136_s00/efd_0015_csa136_s00_
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa136_s00/efd_0015_csa136_s00_env_fire_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa136_s00/efd_0015_csa136_s00_smoke_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa136_s00/efd_0015_csa136_s00_smoke_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa136_s00/efd_0015_csa136_s00_smoke_0002.efx.3539837	off=767 orig=8556 new=8556 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa136_s00/efd_0015_csa136_s00_smoke_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa137_s00/efd_0015_csa137_s00_leaf_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa138_s00/efd_0015_csa138_s00_inpact_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_event/cs/efd_csa138_s00/efd_0015_csa138_s00_inpact_0001.efx.3539837	
@@ -2649,25 +2649,25 @@ same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm82_721_16_0/efd_gm82_721_16_0_
 same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm82_721_17_0/efd_gm82_721_17_0_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm82_721_18_0/efd_gm82_721_18_0_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm82_721_19_0/efd_gm82_721_19_0_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_01_0/efd_0015_gm91_519_01_0_0000.efx.3539837	off=94 orig=751 new=751 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_01_0/efd_0015_gm91_519_01_0_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_01_0/efd_0015_gm91_519_01_0_1000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_02_0/efd_0015_gm91_519_02_0_0000.efx.3539837	off=109 orig=1233 new=1233 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_02_0/efd_0015_gm91_519_02_0_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_02_0/efd_0015_gm91_519_02_0_1000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_03_0/efd_0015_gm91_519_03_0_0000.efx.3539837	off=94 orig=751 new=751 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_03_0/efd_0015_gm91_519_03_0_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_03_0/efd_0015_gm91_519_03_0_1000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_04_0/efd_0015_gm91_519_04_0_0000.efx.3539837	off=147 orig=1940 new=1940 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_04_0/efd_0015_gm91_519_04_0_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_04_0/efd_0015_gm91_519_04_0_1000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_04_0/efd_0015_gm91_519_04_0_1010.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_05_0/efd_0015_gm91_519_05_0_0000.efx.3539837	off=111 orig=1235 new=1235 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_05_0/efd_0015_gm91_519_05_0_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_05_0/efd_0015_gm91_519_05_0_1000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_06_0/efd_0015_gm91_519_06_0_0000.efx.3539837	off=94 orig=751 new=751 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_06_0/efd_0015_gm91_519_06_0_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_06_0/efd_0015_gm91_519_06_0_1000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_07_0/efd_0015_gm91_519_07_0_0000.efx.3539837	off=129 orig=1720 new=1720 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_07_0/efd_0015_gm91_519_07_0_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_07_0/efd_0015_gm91_519_07_0_1000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_08_0/efd_0015_gm91_519_08_0_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_09_0/efd_0015_gm91_519_09_0_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_10_0/efd_0015_gm91_519_10_0_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_11_0/efd_0015_gm91_519_11_0_0000.efx.3539837	off=137 orig=2849 new=2849 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_11_0/efd_0015_gm91_519_11_0_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_11_0/efd_0015_gm91_519_11_0_1000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_11_0/efd_0015_gm91_519_11_0_1010.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_gimmick/efd_gm91_519_12_0/efd_0015_gm91_519_12_0_0000.efx.3539837	
@@ -2951,7 +2951,7 @@ same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_580_00/efd_0015_sm82_580_0
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_581_00/efd_0015_sm82_581_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_581_00/efd_0015_sm82_581_00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_582_00/efd_0015_sm82_582_00_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_585_02/efd_0015_sm82_585_02_0000.efx.3539837	off=6259 orig=8604 new=8604 at=entry:AssignCSV hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_585_02/efd_0015_sm82_585_02_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_586_00/efd_0015_sm82_586_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_596_00/efd_0015_sm82_596_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_613_00/efd_0015_sm82_613_00_0000.efx.3539837	
@@ -2961,21 +2961,21 @@ diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_616_00/efd_0015_sm82_616_0
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_619_00/efd_0015_sm82_619_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_619_00/efd_0015_sm82_619_00_0001.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_700_00/efd_0015_sm82_700_00_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_700_00/efd_0015_sm82_700_00_0005.efx.3539837	off=143 orig=4772 new=4772 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_700_00/efd_0015_sm82_700_00_0005.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_700_00/efd_0015_sm82_700_00_0100.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_700_00/efd_0015_sm82_700_00_1000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_701_00/efd_0015_sm82_701_00_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_701_00/efd_0015_sm82_701_00_0005.efx.3539837	off=192 orig=5680 new=5680 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_701_00/efd_0015_sm82_701_00_0005.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_701_00/efd_0015_sm82_701_00_1000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_701_00/efd_0015_sm82_701_00_1010.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_701_00/efd_0015_sm82_701_00_1020.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_702_00/efd_0015_sm82_702_00_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_702_00/efd_0015_sm82_702_00_0005.efx.3539837	off=128 orig=4290 new=4290 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_702_00/efd_0015_sm82_702_00_0005.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_702_00/efd_0015_sm82_702_00_0100.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_702_00/efd_0015_sm82_702_00_1000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_703_00/efd_0015_sm82_703_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_703_00/efd_0015_sm82_703_00_0005.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_703_00/efd_0015_sm82_703_00_0006.efx.3539837	off=180 orig=4143 new=4143 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_703_00/efd_0015_sm82_703_00_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_703_00/efd_0015_sm82_703_00_1000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_703_00/efd_0015_sm82_703_00_1010.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_703_00/efd_0015_sm82_703_00_1020.efx.3539837	
@@ -2983,34 +2983,34 @@ same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_704_00/efd_0015_sm82_704_0
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_704_00/efd_0015_sm82_704_00_0005.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_705_00/efd_0015_sm82_705_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_705_00/efd_0015_sm82_705_00_0005.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_705_00/efd_0015_sm82_705_00_0006.efx.3539837	off=174 orig=4281 new=4281 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_705_00/efd_0015_sm82_705_00_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_706_00/efd_0015_sm82_706_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_706_00/efd_0015_sm82_706_00_0005.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_706_00/efd_0015_sm82_706_00_0006.efx.3539837	off=189 orig=4296 new=4296 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_706_00/efd_0015_sm82_706_00_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_707_00/efd_0015_sm82_707_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_707_00/efd_0015_sm82_707_00_0005.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_707_00/efd_0015_sm82_707_00_0006.efx.3539837	off=189 orig=4296 new=4296 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_707_00/efd_0015_sm82_707_00_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_707_00/efd_0015_sm82_707_00_0100.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_708_00/efd_0015_sm82_708_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_708_00/efd_0015_sm82_708_00_0005.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_708_00/efd_0015_sm82_708_00_0006.efx.3539837	off=327 orig=11520 new=11520 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_708_00/efd_0015_sm82_708_00_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_708_00/efd_0015_sm82_708_00_0100.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_709_00/efd_0015_sm82_709_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_709_00/efd_0015_sm82_709_00_0005.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_709_00/efd_0015_sm82_709_00_0006.efx.3539837	off=296 orig=11033 new=11033 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_709_00/efd_0015_sm82_709_00_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_709_00/efd_0015_sm82_709_00_0100.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_709_00/efd_0015_sm82_709_00_1000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_709_00/efd_0015_sm82_709_00_1010.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_709_00/efd_0015_sm82_709_00_1020.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_710_00/efd_0015_sm82_710_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_710_00/efd_0015_sm82_710_00_0005.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_710_00/efd_0015_sm82_710_00_0006.efx.3539837	off=201 orig=5293 new=5293 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_710_00/efd_0015_sm82_710_00_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_710_00/efd_0015_sm82_710_00_0100.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_710_00/efd_0015_sm82_710_00_1000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_710_00/efd_0015_sm82_710_00_1010.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_710_00/efd_0015_sm82_710_00_1020.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_711_00/efd_0015_sm82_711_00_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_711_00/efd_0015_sm82_711_00_0006.efx.3539837	off=145 orig=2879 new=2879 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_711_00/efd_0015_sm82_711_00_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_711_00/efd_0015_sm82_711_00_0100.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_711_00/efd_0015_sm82_711_00_1000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_711_00/efd_0015_sm82_711_00_1010.efx.3539837	
@@ -3018,17 +3018,17 @@ same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_711_00/efd_0015_sm82_711_0
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_711_00/efd_0015_sm82_711_00_1030.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_711_00/efd_0015_sm82_711_00_1040.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_712_00/efd_0015_sm82_712_00_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_712_00/efd_0015_sm82_712_00_0006.efx.3539837	off=301 orig=21199 new=21199 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_712_00/efd_0015_sm82_712_00_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_713_00/efd_0015_sm82_713_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_714_00/efd_0015_sm82_714_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_715_00/efd_0015_sm82_715_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_716_00/efd_0015_sm82_716_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_717_00/efd_0015_sm82_717_00_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_717_00/efd_0015_sm82_717_00_0006.efx.3539837	off=264 orig=7638 new=7638 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_717_00/efd_0015_sm82_717_00_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_718_00/efd_0015_sm82_718_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_719_00/efd_0015_sm82_719_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_720_00/efd_0015_sm82_720_00_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_720_00/efd_0015_sm82_720_00_0006.efx.3539837	off=354 orig=14502 new=14502 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_720_00/efd_0015_sm82_720_00_0006.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm82_720_00/efd_0015_sm82_720_00_0100.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_500_00/efd_0015_sm84_500_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_504_00/efd_0015_sm84_504_00_0000.efx.3539837	
@@ -3047,8 +3047,8 @@ same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_518_00/efd_0015_sm84_518_0
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_519_00/efd_0015_sm84_519_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_520_00/efd_0015_sm84_520_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_525_01/efd_0015_sm84_525_01_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_527_03/efd_0015_sm84_527_03_0000.efx.3539837	off=1901 orig=8079 new=8079 at=entry:AssignCSV hint=prefix-bytes-written-as-units
-diff	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_527_03/efd_0015_sm84_527_03_0010.efx.3539837	off=1901 orig=8079 new=8079 at=entry:AssignCSV hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_527_03/efd_0015_sm84_527_03_0000.efx.3539837	
+same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_527_03/efd_0015_sm84_527_03_0010.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_528_00/efd_0015_sm84_528_00_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_534_01/efd_0015_sm84_534_01_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_setmodel/efd_sm84_534_01/efd_0015_sm84_534_01_0001.efx.3539837	
@@ -3157,7 +3157,7 @@ same	_chainsaw/vfx/effecteditor/efd_stage/efd_st40/efd_st40_200/efd_0015_st40_20
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st40/efd_st40_200/efd_0015_st40_200_1026_lightver.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st40/efd_st40_200/efd_0015_st40_200_1030.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st40/efd_st40_200/efd_0015_st40_200_1030_lightver.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_stage/efd_st40/efd_st40_200/efd_0015_st40_200_1050.efx.3539837	off=215 orig=7607 new=7607 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_stage/efd_st40/efd_st40_200/efd_0015_st40_200_1050.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st40/efd_st40_200/efd_0015_st40_200_1050_lightver.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st40/efd_st40_200/efd_0015_st40_200_1051.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st40/efd_st40_200/efd_0015_st40_200_1100.efx.3539837	
@@ -3239,7 +3239,7 @@ same	_chainsaw/vfx/effecteditor/efd_stage/efd_st44/efd_st44_110/efd_0015_st44_11
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st44/efd_st44_200/efd_0015_st44_200_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st44/efd_st44_200/efd_0015_st44_200_0010.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st44/efd_st44_210/efd_0015_st44_210_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_stage/efd_st44/efd_st44_210/efd_0015_st44_210_0010.efx.3539837	off=180 orig=4635 new=4635 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_stage/efd_st44/efd_st44_210/efd_0015_st44_210_0010.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st44/efd_st44_210/efd_0015_st44_210_0022.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st44/efd_st44_300/efd_0015_st44_300_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st44/efd_st44_400/efd_0015_st44_400_0000.efx.3539837	
@@ -3250,9 +3250,9 @@ same	_chainsaw/vfx/effecteditor/efd_stage/efd_st44/efd_st44_400/efd_0015_st44_40
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st44/efd_st44_400/efd_0015_st44_400_0100.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st44/efd_st44_410/efd_0015_st44_410_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st44/efd_st44_410/efd_0015_st44_410_0001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_stage/efd_st44/efd_st44_410/efd_0015_st44_410_0010.efx.3539837	off=217 orig=6073 new=6073 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_stage/efd_st44/efd_st44_410/efd_0015_st44_410_0010.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st44/efd_st44_410/efd_0015_st44_410_0011.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_stage/efd_st44/efd_st44_410/efd_0015_st44_410_0050.efx.3539837	off=206 orig=5595 new=5595 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_stage/efd_st44/efd_st44_410/efd_0015_st44_410_0050.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st44/efd_st44_410/efd_0015_st44_410_0051.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st45/efd_st45_100/efd_0015_st45_100_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st45/efd_st45_100/efd_0015_st45_100_0010.efx.3539837	
@@ -3498,7 +3498,7 @@ diff	_chainsaw/vfx/effecteditor/efd_stage/efd_st60/efd_st60_000/efd_0015_st60_10
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st60/efd_st60_000/efd_0015_st60_100_0002.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st60/efd_st60_100/efd_0015_st60_100_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st60/efd_st60_101/efd_0015_st60_101_0000.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_stage/efd_st60/efd_st60_101/efd_0015_st60_101_0010.efx.3539837	off=158 orig=3679 new=3679 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_stage/efd_st60/efd_st60_101/efd_0015_st60_101_0010.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st60/efd_st60_101/efd_0015_st60_101_0020.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st60/efd_st60_101/efd_0015_st60_101_0030.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st60/efd_st60_102/efd_0015_st60_102_0000.efx.3539837	
@@ -3512,7 +3512,7 @@ same	_chainsaw/vfx/effecteditor/efd_stage/efd_st61/efd_st61_102/efd_0015_st61_10
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st61/efd_st61_104/efd_0015_st61_104_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st61/efd_st61_104/efd_0015_st61_104_2000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st61/efd_st61_104/efd_0015_st61_104_2001.efx.3539837	
-diff	_chainsaw/vfx/effecteditor/efd_stage/efd_st61/efd_st61_104/efd_0015_st61_104_2100.efx.3539837	off=139 orig=5583 new=5583 at=action:PlayEfx hint=prefix-bytes-written-as-units
+same	_chainsaw/vfx/effecteditor/efd_stage/efd_st61/efd_st61_104/efd_0015_st61_104_2100.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st61/efd_st61_105/efd_0015_st61_105_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st61/efd_st61_201/efd_0015_st61_201_0000.efx.3539837	
 same	_chainsaw/vfx/effecteditor/efd_stage/efd_st61/efd_st61_201/efd_0015_st61_201_9900.efx.3539837	
@@ -3912,24 +3912,24 @@ same	_mercenaries/vfx/effecteditor/efd_character/efd_mc_chc0/efd_0015_mc_chi5_ch
 same	_mercenaries/vfx/effecteditor/efd_character/efd_mc_chc3/efd_0015_mc_chc3_chc0_chainsaw_gas_0000.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_character/efd_mc_chd0/efd_0015_mc_chd0_stealth_kill_0000.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_400_00_0/efd_0015_gm84_400_00_0000.efx.3539837	
-diff	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_400_00_0/efd_0015_gm84_400_00_0001.efx.3539837	off=1887 orig=9994 new=9994 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_400_00_0/efd_0015_gm84_400_00_0001.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_400_00_0/efd_0015_gm84_400_00_0002.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_400_00_0/efd_0015_gm84_400_00_0003.efx.3539837	
-diff	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_400_00_0/efd_0015_gm84_400_01_0001.efx.3539837	off=1887 orig=9994 new=9994 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_400_00_0/efd_0015_gm84_400_01_0001.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_400_00_0/efd_0015_gm84_400_01_0002.efx.3539837	
-diff	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_400_00_0/efd_0015_gm84_400_02_0001.efx.3539837	off=1887 orig=9994 new=9994 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_400_00_0/efd_0015_gm84_400_02_0001.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_400_00_0/efd_0015_gm84_400_02_0002.efx.3539837	
-diff	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_400_00_0/efd_0015_gm84_400_03_0001.efx.3539837	off=1887 orig=9994 new=9994 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_400_00_0/efd_0015_gm84_400_03_0001.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_400_00_0/efd_0015_gm84_400_03_0002.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_401_00_0/efd_0015_gm84_401_00_0000.efx.3539837	
-diff	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_401_00_0/efd_0015_gm84_401_00_0001.efx.3539837	off=1887 orig=9994 new=9994 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_401_00_0/efd_0015_gm84_401_00_0001.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_401_00_0/efd_0015_gm84_401_00_0002.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_401_00_0/efd_0015_gm84_401_00_0003.efx.3539837	
-diff	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_401_00_0/efd_0015_gm84_401_01_0001.efx.3539837	off=1887 orig=9994 new=9994 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_401_00_0/efd_0015_gm84_401_01_0001.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_401_00_0/efd_0015_gm84_401_01_0002.efx.3539837	
-diff	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_401_00_0/efd_0015_gm84_401_02_0001.efx.3539837	off=1887 orig=9994 new=9994 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_401_00_0/efd_0015_gm84_401_02_0001.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_401_00_0/efd_0015_gm84_401_02_0002.efx.3539837	
-diff	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_401_00_0/efd_0015_gm84_401_03_0001.efx.3539837	off=1887 orig=9994 new=9994 at=entry:VanishArea3D hint=prefix-bytes-written-as-units
+same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_401_00_0/efd_0015_gm84_401_03_0001.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_401_00_0/efd_0015_gm84_401_03_0002.efx.3539837	
 same	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_402_00_0/efd_0015_gm84_402_00_0000.efx.3539837	
 diff	_mercenaries/vfx/effecteditor/efd_gimmick/efd_gm84_402_00_0/efd_0015_gm84_402_00_0001.efx.3539837	off=2001 orig=11042 new=11042 at=entry:PtColliderAction hint=prefix-bytes-written-as-units

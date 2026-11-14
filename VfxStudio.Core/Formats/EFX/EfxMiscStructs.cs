@@ -278,25 +278,98 @@ public partial class EFXAttributeAttractor : EFXAttribute, IBoneRelationAttribut
 	public EFXAttributeAttractor() : base(EfxAttributeType.Attractor) { }
 
 	public uint Flags;
-	public Vector3 AttractPosition;
-	public via.Range ForceScale;
-    public via.Range ReversalForceScale;
+	// MHWs-EFX-Editor 本地补丁：原名 AttractPosition。实机确认只有 Flags bit1(数值1)
+	// 打开时这个 Vector3 才会作为世界/固定参考系目标点分量生效（bit1=0 时改任意值都测不出
+	// 效果）；bit1=1 时和下面的 AttractPositionLocal 矢量相加，共同决定最终吸引目标点。
+	// 改名加 World 后缀跟 Local 分量对称，见 tools/vendor-patches/README.md #0007。
+	public Vector3 AttractPositionWorld;
+
+	// MHWs-EFX-Editor 本地补丁：vendor 原声明是 `via.Range ForceScale` 全部 + `via.Range
+	// ReversalForceScale` 的前半（`.s`/`.r`+`.s`），三个字段边界切错了位置——这连续 12 字节
+	// 实际是一个 Vector3。实机测试单独改 X/Y/Z 任意一维都能让粒子群朝对应坐标轴偏移吸引
+	// 目标点，效果和 AttractPositionWorld 相同、可矢量叠加，而且**恒常开**（不受 Flags
+	// 门控），跟随发射器局部变换。见 0007 patch。
+	public Vector3 AttractPositionLocal;
+
+	// MHWs-EFX-Editor 本地补丁：原 ReversalForceScale.r。实机振荡周期测试确认是弹簧力常数
+	// （数值越大，120 帧生命周期内粒子往返吸引点的振荡次数越多）；"Reversal" 前缀是 vendor
+	// 原错误分组遗留，这个值本身没有"反向"含义。跟下面 ForceBiRand 不能合并成一个
+	// via.Range——两者版本可用性不同（这个恒可用，那个只在 DD2+），合并会在 RE7RT/RE4 文件
+	// 上错误多读/少读字节，故拆成两个独立 float。
+	public float ForceStatic;
+
 	[RszVersion(EfxVersion.DD2, EndAt = nameof(ForceResist))]//TODO Verify older game fields
-    public via.Range ReversalDistance;
+	// MHWs-EFX-Editor 本地补丁：原 ReversalDistance.s。实机确认公式是双向对称随机
+	// `[ForceStatic - x, ForceStatic + x]`，不是标准 via.Range 的 Static+Random
+	// `[Static, Static+Random]`——取 x 和 -x 效果完全相同，只有取绝对值参与计算才能解释。
+	// 详见 docs/PITFALLS.md #29、model.is_static_birand_node()。
+	public float ForceBiRand;
+	// 原 ReversalDistance.r，语义未知——"ReversalDistance" 这个分组名已经证明是错的，这个
+	// float 自己也不属于任何一对，先不强行归类，占位 unkn1。
+	public float unkn1;
 	public float ForceResist;
 
-	[RszVersion(EfxVersion.MHWilds, EndAt = nameof(endwilds))]
-	public UndeterminedFieldType unknWild1;
+	[RszVersion(EfxVersion.MHWilds, EndAt = nameof(ShapeRotation))]
+	// MHWs-EFX-Editor 本地补丁：全语料 1105 个实例的取值分布证实这两个字段是 float，不是
+	// 未定型的裸 int——非零取值按 IEEE754 位模式解出来全是干净的十进制数（原 unknWild1: 0.1/
+	// 0.2/0.3/0.8/1.0/8.0/10.0；unknWild10 仅在 Flags==8 时非零，落在 -0.68~2.0 弧度），
+	// 按裸 int 读会是 1036831949 这种没有意义的天文数字。见 tools/vendor-patches/README.md。
+	// 原 unknWild1 已实机确认是阻尼/阻力系数（0.5=运动明显变慢，1.0=看不出运动），MHWilds 下
+	// 老字段 ForceResist 实测全语料 1104/1105 恒为 0（已废弃），这个字段接管了它的角色，
+	// 故按其真实作用重命名为 ForceResistWilds；unknWild10 语义仍未知，字段名不动。
+	public float ForceResistWilds;
 	public UndeterminedFieldType unknWild2;
-	public via.Range unknWild3;
-	public via.Range unknWild4;
-	public via.Range unknWild5;
-	public via.Range unknWild6;
-	public via.Range unknWild7;
-	public via.Range unknWild8;
-	public via.Range unknWild9;
-	public UndeterminedFieldType unknWild10;
-	public UndeterminedFieldType endwilds;
+
+	// MHWs-EFX-Editor 本地补丁：原 unknWild3 是一个 via.Range，但 `.s`/`.r` 是两个互不相关的
+	// 独立量，不是 Static/Random 一对，拆成两个 float——**声明顺序必须保持 s 在前、r 在后**
+	// （`via.Range` 自身是 `{float s; float r;}`，字节序不因为拆分改变）。
+	// 原 unknWild3.s：实机观测到会让粒子群从球壳收缩成正八面体、再收缩成十字（越偏离 XYZ 轴
+	// 的粒子受力越强），单粒子追踪确认轨迹是直线段（不是旋转/切向力，之前的"风车状"是多粒子
+	// 不同振荡相位叠加出的拖影）。用户推导：疑似让 XYZ 分量各自独立收缩的力，负值会让粒子
+	// 经过吸引点附近后直接沿某个 XYZ 方向高速飞出——这是推导结论，不是逐条单独实机验证过，
+	// 按此定名 AttractAxisBias，具体模型仍有待用不同 ES3D 形状/吸引点位置继续验证。
+	public float AttractAxisBias;
+	// 原 unknWild3.r：实机确认是吸引力的最大作用距离阈值，粒子与目标点距离超过这个值就完全
+	// 不受力；-1 是"无限制"哨兵值（语料里 84% 取 -1；此前"非 -1 就全体静止"的现象正是因为
+	// 超出了有限阈值导致完全无力）。
+	public float MaxAttractDistance;
+
+	// MHWs-EFX-Editor 本地补丁：原 unknWild4/unknWild5/unknWild6 三个 via.Range 共 6 个
+	// float，真实边界比 vendor 声明的晚 4 字节（同一种错位模式，见 ForceStatic/ForceBiRand
+	// 那对的说明），重新切成"1 个独立 float + 2 对 via.Range + 1 个独立 float"：
+	// 原 unknWild4.s：实机确认——粒子与目标点距离在这个半径以内（含球面）时进入一个特殊区域，
+	// 使用下面 ZoneVelocityMultiplier 的乘数逻辑，而不是正常的弹簧力。
+	public float MultZoneRadius;
+	// 原 unknWild4.r + unknWild5.s：区域内逐帧对粒子速度做乘数——Static≈1 时区域效果被完全
+	// 忽略（等价于不受影响的正常弹簧力），<1 明显减速，>1 明显加速。是否遵守标准
+	// Static+Random 公式（vs ForceBiRand 那种双向对称）尚未验证。
+	public via.Range ZoneVelocityMultiplier;
+	// 原 unknWild5.r + unknWild6.s：疑似吸引效果的生成延迟，Static=基准延迟、Random=随机
+	// 浮动，公式未验证，单位未知。
+	public via.Range SpawnDelay;
+	// MHWs-EFX-Editor 本地补丁：原 `unknWild6.r`~`endwilds`（1 个独立 float + 3 个 via.Range +
+	// 1 个独立 float，共 8 个 float）实机测试确认是跟 `MultZoneRadius` 定义的区域配套的一套
+	// "形状"参数，边界同样比 vendor 声明的晚半格——真实的三对 Range 是
+	// `unknWild6.r`+`unknWild7.s`、`unknWild7.r`+`unknWild8.s`、`unknWild8.r`+`unknWild9.s`，
+	// 最后 `unknWild9.r`+`unknWild10`+`endwilds` 三个连续 float 全部实机确认是角度
+	// （`unknWild10` 绕全局 Y），命名上直接对齐 `EFXAttributeEmitterShape3D` 的
+	// `RangeX/Y/Z`+`Vector3 LocalRotation` 这套惯例，加 `Shape` 前缀区分（这里不是 ES3D 本身，
+	// 只是疑似复用了同一套参数化思路）。
+	//
+	// 三对 Range 各自的公式（Static+Random、min/max 还是 `ForceBiRand` 那种双向对称）尚未
+	// 单独验证，`ShapeRotation` 三轴各自的旋转顺序/是否有欧拉角万向锁问题也没验证，先只按
+	// "这三个字段在一起、语义是角度"这个已确认的部分改结构，公式细节留到确认后再补充。
+	//
+	// ⚠ 已知异常：给 `ShapeRangeX.s`+`ShapeRangeY.s`+`ShapeRangeZ.s` 各设 1、`Flags=8` 时，
+	// 实机看到的是一个**始终正对摄像机**的正方形边框，角色自转不会带着它转——这不是典型的
+	// 世界/局部空间几何体该有的行为，可能这套参数根本不是定义"物理空间的一个立体"，语义
+	// 还没有最终定论，命名先按结构对齐 ES3D，不代表已经确认是"形状"本身。另外语料里
+	// `Flags=8` 从不单独出现（只见于 8/24/26，即总带着数值 16 那一位），疑似 16 是这套参数的
+	// 形状类型开关（类似 `ShapeType`），待验证。
+	public via.Range ShapeRangeX;
+	public via.Range ShapeRangeY;
+	public via.Range ShapeRangeZ;
+	public Vector3 ShapeRotation;
 
 	[RszInlineWString(ByteSize = true)] public string? boneName;
 
@@ -519,7 +592,7 @@ public partial class EFXAttributeVanishArea3D : EFXAttribute, IBoneRelationAttri
     public Vector3 AreaScale;
     public Vector3 AreaAngle;
 	public via.Range VanishFrame;
-	[RszInlineWString] public string? JointName;
+	[RszInlineWString(ByteSize = true)] public string? JointName;
 
     public string? ParentBone { get; set; }
 
@@ -741,7 +814,7 @@ public partial class EFXAttributeFlowMap : EFXAttribute
     public via.Range Speed;
     public via.Range SpeedCoef;
 
-    [RszInlineWString] public string? flowmapMaskPath;
+    [RszInlineWString(ByteSize = true)] public string? flowmapMaskPath;
 
     public override string ToString() => !string.IsNullOrEmpty(flowmapMaskPath) ? flowmapMaskPath : type.ToString();
 }
@@ -754,10 +827,10 @@ public partial class EFXAttributeAssignCSV : EFXAttribute
     public bool RandomizeIndexOrder;
     public bool UseTableRange;
     public via.RangeI mTableRange;
-    [RszInlineWString] public string? efcsvPostionListPath;
-    [RszInlineWString] public string? efcsvRotationListPath;
-    [RszInlineWString] public string? efcsvVelocityListPath;
-    [RszInlineWString] public string? efcsvColorListPath;
+    [RszInlineWString(ByteSize = true)] public string? efcsvPostionListPath;
+    [RszInlineWString(ByteSize = true)] public string? efcsvRotationListPath;
+    [RszInlineWString(ByteSize = true)] public string? efcsvVelocityListPath;
+    [RszInlineWString(ByteSize = true)] public string? efcsvColorListPath;
 
     public override string ToString() => !string.IsNullOrEmpty(efcsvPostionListPath) ? efcsvPostionListPath : type.ToString();
 }
@@ -856,7 +929,7 @@ public partial class EFXAttributeLayout : EFXAttribute
 
 	// note: not 100% on the flag bits but most Wilds files seem to work with this
 	[RszConditional("((flags1 & (8 | 4 | 16)) != 0)", EndAt = nameof(layoutDataFloats))]
-	[RszInlineWString]
+	[RszInlineWString(ByteSize = true)]
 	public string? layoutName;
 	[RszFixedSizeArray]
 	public byte[]? layoutDataFloats;

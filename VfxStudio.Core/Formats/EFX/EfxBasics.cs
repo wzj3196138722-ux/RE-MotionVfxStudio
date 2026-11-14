@@ -480,7 +480,7 @@ public partial class EFXAttributePlayEfx : EFXAttribute
 	public EFXAttributePlayEfx() : base(EfxAttributeType.PlayEfx) { }
 
 	// [RszVersion(EfxVersion.MHWilds)] public uint mhws_unkn;
-	[RszInlineWString] public string? efxPath;
+	[RszInlineWString(ByteSize = true)] public string? efxPath;
 
     protected override bool DoRead(FileHandler handler)
     {

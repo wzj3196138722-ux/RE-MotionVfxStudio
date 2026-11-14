@@ -40,8 +40,8 @@ public static partial class EfxExpressionStringParser
 	{
 		switch (item) {
 			case ExpressionBinaryOperation bin:
-				StoreNewParameters(ref ctx, bin.left, usedParams);
 				StoreNewParameters(ref ctx, bin.right, usedParams);
+				StoreNewParameters(ref ctx, bin.left, usedParams);
 				break;
 			case ExpressionUnaryOperation unary:
 				StoreNewParameters(ref ctx, unary.atom, usedParams);
@@ -104,9 +104,9 @@ public static partial class EfxExpressionStringParser
 
     private static ExpressionAtom ParseBinaryOperationMulDiv(ref ParseContext ctx)
     {
-		var left = ParseUnary(ref ctx);
+		var left = ParseBinaryOperationPow(ref ctx);
         var op = ctx.nextToken;
-		if (op is TokenType.OpMul or TokenType.OpDiv) {
+		if (op is TokenType.OpMul or TokenType.OpDiv or TokenType.OpMod) {
 			SkipToken(ref ctx);
         	var right = ParseBinaryOperationMulDiv(ref ctx);
 			return new ExpressionBinaryOperation() {
@@ -114,8 +114,26 @@ public static partial class EfxExpressionStringParser
 				oper = op switch {
 					TokenType.OpMul => BinaryExpressionOperator.Mul,
 					TokenType.OpDiv => BinaryExpressionOperator.Div,
+					TokenType.OpMod => BinaryExpressionOperator.Mod,
 					_ => throw new Exception("Unhandled token type " + op)
 				},
+				right = right,
+			};
+		} else {
+			return left;
+		}
+    }
+
+    private static ExpressionAtom ParseBinaryOperationPow(ref ParseContext ctx)
+    {
+		var left = ParseUnary(ref ctx);
+        var op = ctx.nextToken;
+		if (op is TokenType.OpPow) {
+			SkipToken(ref ctx);
+        	var right = ParseBinaryOperationPow(ref ctx);
+			return new ExpressionBinaryOperation() {
+				left = left,
+				oper = BinaryExpressionOperator.Pow,
 				right = right,
 			};
 		} else {
@@ -221,35 +239,33 @@ public static partial class EfxExpressionStringParser
 	}
 
 	private static readonly Dictionary<EfxExpressionFunction, int> FunctionArgCounts = new() {
-		[EfxExpressionFunction.Unary0] = 1,
-		[EfxExpressionFunction.Unary1] = 1,
-		[EfxExpressionFunction.Unary2] = 1,
-		[EfxExpressionFunction.Unary4] = 1,
-		[EfxExpressionFunction.Unary5] = 1,
-		[EfxExpressionFunction.Unary6] = 1,
-		[EfxExpressionFunction.Unary7] = 1,
-		[EfxExpressionFunction.Unary8] = 1,
-		[EfxExpressionFunction.Unary9] = 1,
-		[EfxExpressionFunction.Unary10] = 1,
-		[EfxExpressionFunction.Unary11] = 1,
-		[EfxExpressionFunction.Unary12] = 1,
+		[EfxExpressionFunction.Sin] = 1,
+		[EfxExpressionFunction.Cos] = 1,
+		[EfxExpressionFunction.Asin] = 1,
+		[EfxExpressionFunction.Acos] = 1,
+		[EfxExpressionFunction.Floor] = 1,
+		[EfxExpressionFunction.Ceil] = 1,
+		[EfxExpressionFunction.Log] = 1,
+		[EfxExpressionFunction.Log10] = 1,
+		[EfxExpressionFunction.Exp] = 1,
+		[EfxExpressionFunction.Abs] = 1,
+		[EfxExpressionFunction.Saturate] = 1,
+		[EfxExpressionFunction.SinDeg] = 1,
+		[EfxExpressionFunction.CosDeg] = 1,
 
-		[EfxExpressionFunction.Func18] = 2,
-		[EfxExpressionFunction.Func19] = 2,
+		[EfxExpressionFunction.Min] = 2,
+		[EfxExpressionFunction.Max] = 2,
 		[EfxExpressionFunction.Lerp] = 3,
-		[EfxExpressionFunction.InvLerp] = 3,
 		[EfxExpressionFunction.Clamp] = 3,
-		[EfxExpressionFunction.Func20] = 2,
-		[EfxExpressionFunction.Func21] = 5,
+		[EfxExpressionFunction.SmoothStep] = 3,
+		[EfxExpressionFunction.Pow] = 2,
+		[EfxExpressionFunction.Remap] = 5,
 	};
 
 	public static int GetFunctionParameterCount(string functionName) => functionArgCount.GetValueOrDefault(functionName.GetSpanHash(), -1);
 	public static int GetFunctionParameterCount(EfxExpressionFunction functionId) => FunctionArgCounts.GetValueOrDefault(functionId, -1);
 
-	private static readonly Dictionary<int, int> functionArgCount = new(FunctionArgCounts.Select(x => new KeyValuePair<int, int>(x.Key.ToString().GetHashCode(), x.Value))) {
-		[nameof(BinaryExpressionOperator.Min).GetHashCode()] = 2,
-		[nameof(BinaryExpressionOperator.Max).GetHashCode()] = 2,
-	};
+	private static readonly Dictionary<int, int> functionArgCount = new(FunctionArgCounts.Select(x => new KeyValuePair<int, int>(x.Key.ToString().GetHashCode(), x.Value)));
 
 	private static ExpressionAtom ParseFunction(ref ParseContext ctx, in Token idToken)
 	{
@@ -268,20 +284,6 @@ public static partial class EfxExpressionStringParser
 				func = Enum.Parse<EfxExpressionFunction>(nameSpan, true),
 				atom = ParseExpression(ref ctx),
 			};
-		} else if (args == 2) {
-			var bin = new ExpressionBinaryOperation() { oper = Enum.Parse<BinaryExpressionOperator>(nameSpan, true) };
-			bin.left = ParseExpression(ref ctx);
-			SkipToken(ref ctx, TokenType.Comma);
-			bin.right = ParseExpression(ref ctx);
-			result = bin;
-		// } else if (args == 3) {
-		// 	var ter = new ExpressionTernaryOperation() { func = Enum.Parse<EfxExpressionFunction>(nameSpan, true) };
-		// 	ter.left = ParseExpression(ref ctx);
-		// 	SkipToken(ref ctx, TokenType.Comma);
-		// 	ter.arg2 = ParseExpression(ref ctx);
-		// 	SkipToken(ref ctx, TokenType.Comma);
-		// 	ter.arg3 = ParseExpression(ref ctx);
-		// 	result = ter;
 		} else {
 			var ter = new ExpressionFuncOperation() { func = Enum.Parse<EfxExpressionFunction>(nameSpan, true) };
 			ter.args = new ExpressionAtom[args];
@@ -319,6 +321,8 @@ public static partial class EfxExpressionStringParser
 			case '-': return TokenType.OpSub;
 			case '/': return TokenType.OpDiv;
 			case '*': return TokenType.OpMul;
+			case '%': return TokenType.OpMod;
+			case '^': return TokenType.OpPow;
 			case ',': return TokenType.Comma;
 			case '|': return TokenType.RootValueOption;
 			case '0':
@@ -360,6 +364,8 @@ public static partial class EfxExpressionStringParser
 			case '-': return new Token(ctx.position, ++ctx.position, TokenType.OpSub);
 			case '/': return new Token(ctx.position, ++ctx.position, TokenType.OpDiv);
 			case '*': return new Token(ctx.position, ++ctx.position, TokenType.OpMul);
+			case '%': return new Token(ctx.position, ++ctx.position, TokenType.OpMod);
+			case '^': return new Token(ctx.position, ++ctx.position, TokenType.OpPow);
 			case ',': return new Token(ctx.position, ++ctx.position, TokenType.Comma);
 			case '|': return new Token(ctx.position, ++ctx.position, TokenType.RootValueOption);
 			case '0':
@@ -418,6 +424,8 @@ public static partial class EfxExpressionStringParser
 		OpSub,
 		OpMul,
 		OpDiv,
+		OpMod,
+		OpPow,
 		ParenOpen,
 		ParenClosed,
 		Comma,
@@ -494,13 +502,13 @@ public static class EfxExpressionTreeUtils
 			return;
 		}
 		if (item is ExpressionBinaryOperation binary) {
-			FlattenExpression(components, parameters, binary.right, tree, paramSource);
 			FlattenExpression(components, parameters, binary.left, tree, paramSource);
+			FlattenExpression(components, parameters, binary.right, tree, paramSource);
 			components.Add(new EFXExpressionData(new EFXExpressionDataBinaryOperator() { value = binary.oper }));
 			return;
 		}
 		if (item is ExpressionFuncOperation func) {
-			for (int i = func.args.Length - 1; i >= 0; i--) {
+			for (int i = 0; i < func.args.Length; i++) {
 				FlattenExpression(components, parameters, func.args[i], tree, paramSource);
 			}
 			components.Add(new EFXExpressionData(new EFXExpressionDataFunction() { value = func.func }));
@@ -583,8 +591,8 @@ public static class EfxExpressionTreeUtils
 		if (comp.data is EFXExpressionDataBinaryOperator binary) {
 			var item = new ExpressionBinaryOperation();
 			item.oper = binary.value;
-			item.left = UnflattenExpression(expression, paramSource, ref index);
 			item.right = UnflattenExpression(expression, paramSource, ref index);
+			item.left = UnflattenExpression(expression, paramSource, ref index);
 			return item;
 		}
 		if (comp.data is EFXExpressionDataFloat floatType) {
@@ -604,7 +612,7 @@ public static class EfxExpressionTreeUtils
 				var item = new ExpressionFuncOperation();
 				item.args = new ExpressionAtom[argCount];
 				item.func = intType.value;
-				for (int i = 0; i < argCount; i++) {
+				for (int i = argCount - 1; i >= 0; i--) {
 					item.args[i] = UnflattenExpression(expression, paramSource, ref index);
 				}
 				return item;

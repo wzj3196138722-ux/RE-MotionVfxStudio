@@ -177,7 +177,7 @@ public partial class EFXAttributeFluidSimulator2D : ReeLib.Efx.EFXAttribute
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.FluidParticle2DSimulator, EfxVersion.MHWilds)]
-public partial class EFXAttributeFluidParticle2DSimulator : ReeLib.Efx.EFXAttribute
+public partial class EFXAttributeFluidParticle2DSimulator : ReeLib.Efx.EFXAttribute, IBoneRelationAttribute
 {
     public EFXAttributeFluidParticle2DSimulator() : base(EfxAttributeType.FluidParticle2DSimulator) { }
 
@@ -237,6 +237,12 @@ public partial class EFXAttributeFluidParticle2DSimulator : ReeLib.Efx.EFXAttrib
 
     [RszFixedSizeArray(nameof(dataCount))] public HashValue[]? data;
 
+    // MHWs-EFX-Editor 本地补丁：这个类型在 MHWilds 下确实会消费一个 BoneRelations 槽位（全语料
+    // 9175 个文件实测：不把它当消费者时，220 个作用域的索引流整体错位、导致 1158 处
+    // ParentBone 被解析成别的骨骼；两个类型（TypeStrainRibbonV3 + FluidParticle2DSimulator）都算上后降到 1 处）。
+    // 见 KNOWN_UPSTREAM_ISSUES.md #9 / tools/vendor-patches/README.md。
+    public string? ParentBone { get; set; }
+
     public struct HashValue
     {
         public float Value;
@@ -266,5 +272,5 @@ public partial class EFXAttributeFluidParticleEmitterTarget : EFXAttribute
 	public uint Unkn2;
 	public uint Unkn3;
 	public uint Unkn4;
-	[RszInlineWString] public string? UserDataFilePath;
+	[RszInlineWString(ByteSize = true)] public string? UserDataFilePath;
 }
