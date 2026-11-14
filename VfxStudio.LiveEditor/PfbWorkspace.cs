@@ -18,6 +18,7 @@ internal sealed class PfbWorkspace
         IList? List, object? Item, string? ResourceField, Action Remove);
     private sealed record Field(string Path, string Label, object Value, RszField Schema, Action<object> Assign);
     private readonly RszFileOption format;
+    private readonly VfxStudio.Core.Games.GameProfile game;
     private readonly Clipboard clipboard;
     private readonly byte[] baseline;
     private byte[] content;
@@ -32,11 +33,12 @@ internal sealed class PfbWorkspace
     internal PfbWorkspace(Options options, string path, string sourceKind = "local_file", Clipboard? clipboard = null)
     {
         this.clipboard = clipboard ?? new();
+        game = options.Game;
         SourceKind = sourceKind;
         if (sourceKind == "local_file")
         {
             SourcePath = Path.GetFullPath(path);
-            if (!Regex.IsMatch(SourcePath, @"\.pfb(?:\.18)?$", RegexOptions.IgnoreCase)) throw new ArgumentException("请选择 .pfb 或 .pfb.18 文件。");
+            if (!Regex.IsMatch(SourcePath, @"\.pfb(?:\." + game.PfbSuffix + ")?$", RegexOptions.IgnoreCase)) throw new ArgumentException($"请选择 .pfb 或 .pfb.{game.PfbSuffix} 文件。");
             var info = new FileInfo(SourcePath);
             if (!info.Exists || info.Length < 56 || info.Length > 128 * 1024 * 1024) throw new InvalidDataException("PFB 文件不存在或大小无效。");
             baseline = File.ReadAllBytes(SourcePath);
@@ -51,9 +53,8 @@ internal sealed class PfbWorkspace
         }
         else throw new ArgumentException("未知 PFB 文件来源。");
         content = baseline;
-        string schema = Path.Combine(options.Assets, "Lists", "rsz_pfb_classes.json");
-        if (!File.Exists(schema)) schema = Path.Combine(AppContext.BaseDirectory, "formats", "rsz_pfb_classes.json");
-        format = new RszFileOption(GameName.mhwilds, RszParser.GetInstance(schema));
+        string schema = options.RszSchemaPath();
+        format = options.RszOption(schema);
         using var parsed = Read(content);
     }
 
@@ -201,7 +202,7 @@ internal sealed class PfbWorkspace
             if (reference.Target != null && to < 0) throw new InvalidOperationException("该槽位仍被其他组件引用，不能删除。");
             var info = reference.Info; info.objectId = from; info.targetId = to; file.GameObjectRefInfoList.Add(info);
         }
-        using var stream = new MemoryStream(); using var writer = new FileHandler(stream, "edited.pfb.18");
+        using var stream = new MemoryStream(); using var writer = new FileHandler(stream, game.Versioned("edited.pfb", "pfb"));
         if (!file.WriteTo(writer, false)) throw new InvalidDataException("PFB 重建失败，原文档未改变。");
         byte[] candidate = stream.ToArray(); using var verify = Read(candidate);
         if (verify.RSZ.ObjectList.Count != file.RSZ.ObjectList.Count || verify.ResourceInfoList.Count != file.ResourceInfoList.Count)
@@ -215,7 +216,7 @@ internal sealed class PfbWorkspace
     private PfbFile Read(byte[] bytes)
     {
         CheckSchema(bytes);
-        var file = new PfbFile(format, new FileHandler(new MemoryStream(bytes), "document.pfb.18"));
+        var file = new PfbFile(format, new FileHandler(new MemoryStream(bytes), game.Versioned("document.pfb", "pfb")));
         try { if (!file.Read()) throw new InvalidDataException("无法解析 PFB。"); file.SetupGameObjects(); return file; }
         catch { file.Dispose(); throw; }
     }
@@ -250,10 +251,10 @@ internal sealed class PfbWorkspace
         if(cls=="via.effect.script.ObjectEffectManager2") Set(component,"DataContainer",Create("via.Prefab"));
         owner.Components.Add(component); return component;
     }
-    private static string TypeOf(PfbFile file)
+    private string TypeOf(PfbFile file)
     {
         var names = Walk(file.GameObjects).SelectMany(g=>g.Components).Select(c=>c.RszClass.name).ToHashSet();
-        if(names.Contains("app.Weapon") || names.Contains("app.CharacterEditRegion")) return "equipment";
+        if(game.EquipmentComponentTypes.Any(names.Contains)) return "equipment";
         if(EffectContainers(file).Any()) return "effect";
         return "unknown";
     }

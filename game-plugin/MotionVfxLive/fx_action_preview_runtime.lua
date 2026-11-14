@@ -2,6 +2,29 @@
 -- Resource construction is isolated; actor references change only after every
 -- new resource is ready. No original installed file is replaced.
 local M={version="1.2.0"}
+-- Game profile (fx_game_profile.lua): per-game type/method names. Loaded the same way
+-- as the other optional modules: require, then the autorun path, then this file's directory.
+local function load_game_profile()
+    local loaded = rawget(_G, "MotionVfxGameProfile") or package.loaded["MotionVfxLive.fx_game_profile"]
+    if type(loaded) ~= "table" then
+        local ok, result = pcall(require, "MotionVfxLive.fx_game_profile")
+        if ok and type(result) == "table" then loaded = result else
+            local loader = loadfile("reframework/autorun/MotionVfxLive/fx_game_profile.lua")
+            if not loader then
+                -- Offline tests load modules by absolute path: try this file's own directory.
+                local info = debug and debug.getinfo and debug.getinfo(1, "S")
+                local dir = info and type(info.source) == "string" and info.source:match("^@(.*)[/\\][^/\\]+$")
+                loader = dir and loadfile(dir .. "/fx_game_profile.lua")
+            end
+            loaded = loader and loader()
+        end
+    end
+    assert(type(loaded) == "table", "MotionVfx game profile (fx_game_profile.lua) is not installed")
+    package.loaded["MotionVfxLive.fx_game_profile"] = loaded
+    return loaded
+end
+local game_profile = load_game_profile()
+local game = game_profile.current()
 local function id(o)return o and tostring(o:get_address())end
 local function path(o,kind)return o:call(kind=="pfb" and "get_Path" or "get_ResourcePath")end
 local function samepath(a,b)return type(a)=="string" and type(b)=="string" and a:lower()==b:lower()end
@@ -35,10 +58,10 @@ function M.new(transaction,host)
     local function context(proof)
         local snapshot=host.capture()
         assert(snapshot.actor and snapshot.actor.sceneEpoch==proof.sceneEpoch,"场景已变化，请还原后重新记录。")
-        local pm=assert(sdk.get_managed_singleton("app.PlayerManager"),"角色尚未就绪")
-        local ch=pm:call("getMasterPlayer"):call("get_Character")
+        local pm=assert(sdk.get_managed_singleton(game.player.manager),"角色尚未就绪")
+        local ch=pm:call(game.player.master):call(game.player.character)
         assert(id(ch)==proof.actorIdentity,"角色已变化，未访问旧角色引用。")
-        assert(ch:call("get_WeaponType")==proof.weaponType and ch:call("get_WeaponID")==proof.weaponId,"装备已变化，请切回原装备后还原。")
+        assert(ch:call(game.player.weapon_type)==proof.weaponType and ch:call(game.player.weapon_id)==proof.weaponId,"装备已变化，请切回原装备后还原。")
         local manager=ch:call("get_GameObject"):call("getComponent(System.Type)",sdk.typeof("via.effect.script.ObjectEffectManager2"))
         assert(id(manager)==proof.managerIdentity and manager:call("get_Valid"),"特效管理器已重建，未访问旧组件。")
         local motion=manager:get_field("Motion")

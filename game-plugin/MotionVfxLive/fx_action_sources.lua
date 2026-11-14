@@ -1,6 +1,29 @@
 -- Read-only provenance for the selected actor action. No filename guessing,
 -- pointer resurrection, resource creation, or live-object setters are permitted here.
 local M={}
+-- Game profile (fx_game_profile.lua): per-game type/method names. Loaded the same way
+-- as the other optional modules: require, then the autorun path, then this file's directory.
+local function load_game_profile()
+    local loaded = rawget(_G, "MotionVfxGameProfile") or package.loaded["MotionVfxLive.fx_game_profile"]
+    if type(loaded) ~= "table" then
+        local ok, result = pcall(require, "MotionVfxLive.fx_game_profile")
+        if ok and type(result) == "table" then loaded = result else
+            local loader = loadfile("reframework/autorun/MotionVfxLive/fx_game_profile.lua")
+            if not loader then
+                -- Offline tests load modules by absolute path: try this file's own directory.
+                local info = debug and debug.getinfo and debug.getinfo(1, "S")
+                local dir = info and type(info.source) == "string" and info.source:match("^@(.*)[/\\][^/\\]+$")
+                loader = dir and loadfile(dir .. "/fx_game_profile.lua")
+            end
+            loaded = loader and loader()
+        end
+    end
+    assert(type(loaded) == "table", "MotionVfx game profile (fx_game_profile.lua) is not installed")
+    package.loaded["MotionVfxLive.fx_game_profile"] = loaded
+    return loaded
+end
+local game_profile = load_game_profile()
+local game = game_profile.current()
 local function call(o,m,...)
     if not o then return nil end
     local ok,v=pcall(o.call,o,m,...);if ok then return v end
@@ -23,9 +46,9 @@ function M.resolve(record,snapshot,aliases,attachments)
     assert(record and record.componentKind=="character","请选择角色动作记录。")
     local actor=snapshot.actor or {}
     assert(record.sceneEpoch==actor.sceneEpoch and record.actorIdentity==actor.characterIdentity,"记录所属角色或场景已经变化，请重新记录。")
-    local character=call(call(sdk.get_managed_singleton("app.PlayerManager"),"getMasterPlayer"),"get_Character")
+    local character=call(call(sdk.get_managed_singleton(game.player.manager),game.player.master),game.player.character)
     assert(id(character)==actor.characterIdentity,"当前角色与记录不一致。")
-    assert(call(character,"get_WeaponType")==record.weaponType and call(character,"get_WeaponID")==record.weaponId,"装备已变化，请重新记录。")
+    assert(call(character,game.player.weapon_type)==record.weaponType and call(character,game.player.weapon_id)==record.weaponId,"装备已变化，请重新记录。")
     local go=call(character,"get_GameObject")
     local manager=call(go,"getComponent(System.Type)",sdk.typeof("via.effect.script.ObjectEffectManager2"))
     assert(call(manager,"get_Valid")==true,"角色特效管理器不可用。")

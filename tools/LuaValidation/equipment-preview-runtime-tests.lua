@@ -180,7 +180,7 @@ end
 do
     local c=fixture();c.env.require=function()error("Manual Run Script has no autorun package.path")end
     c.env.loadfile=function(p)
-        local name=p:match("^reframework/autorun/MotionVfxLive/(fx_equipment[%w_]+%.lua)$");assert(name,"Unexpected fallback path")
+        local name=p:match("^reframework/autorun/MotionVfxLive/(fx_equipment[%w_]+%.lua)$") or p:match("^reframework/autorun/MotionVfxLive/(fx_game_profile%.lua)$");assert(name,"Unexpected fallback path")
         return loadfile(root.."/"..name,"t",c.env)
     end
     local facade=assert(loadfile(root.."/fx_pfb_preview_runtime.lua","t",c.env))();c.runtime=facade.new(c.host)

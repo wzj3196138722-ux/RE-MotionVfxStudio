@@ -46,6 +46,8 @@ end
 local capture, capture_error = load_action_module("MotionVfxActionCapture", "MotionVfxLive.fx_action_capture", "fx_action_capture.lua")
 local bindings, bindings_error = load_action_module("MotionVfxActionBindings", "MotionVfxLive.fx_action_bindings", "fx_action_bindings.lua")
 local parameters = load_action_module("MotionVfxParameterUI", "MotionVfxLive.fx_parameter_ui", "fx_parameter_ui.lua")
+local game_profile_module = load_action_module("MotionVfxGameProfile", "MotionVfxLive.fx_game_profile", "fx_game_profile.lua")
+local game = game_profile_module and game_profile_module.current() or nil
 if bindings and type(bindings.configure) == "function" then
     local ok, result, err = pcall(bindings.configure, { capture = capture })
     if not ok or result == false then bindings_error = tostring(ok and err or result) end
@@ -513,8 +515,14 @@ local function load_json(path)
     if not ok then return nil, tostring(result) end
     return type(result) == "table" and result or nil
 end
+-- The backend reports which game profile it runs (status.game); older backends omit it.
+local function backend_game_mismatch()
+    local reported = state.status and state.status.game
+    return game ~= nil and type(reported) == "string" and reported ~= game.id
+end
 local function is_ready()
     if not state.status or state.status.ready ~= true or state.status.protocol ~= 1 then return false end
+    if backend_game_mismatch() then return false end
     local heartbeat = state.status.heartbeatUnixSeconds
     if heartbeat == nil then return true end -- Protocol 1 backends predating heartbeat support.
     if type(heartbeat) ~= "number" then return false end
@@ -812,6 +820,8 @@ local function poll()
         end
         if state.status and state.status.protocol ~= 1 then
             state.status_error = "后台协议不兼容；需要 protocol 1，收到 " .. tostring(state.status.protocol)
+        elseif backend_game_mismatch() then
+            state.status_error = "后台配置的游戏是 " .. tostring(state.status.game) .. "，当前游戏是 " .. game.id .. "；请用对应游戏的启动入口重新启动后台。"
         elseif state.status and state.status.ready == true and not is_ready() then
             state.status_error = "后台心跳已过期或无效；请检查后台进程，当前不能提交编辑。"
         end

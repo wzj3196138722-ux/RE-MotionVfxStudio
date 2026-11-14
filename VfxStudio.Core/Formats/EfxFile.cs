@@ -59,7 +59,8 @@ namespace ReeLib.Efx
             Version = (EfxVersion)handler.FileVersion;
             if ((int)Version <= 0)
             {
-                Version = EfxVersion.MHWilds;
+                // RE-MotionVfxStudio：版本只能来自 .efx.<版本号> 路径，不再默认当作 MHWilds（游戏配置层，A1）。
+                throw new InvalidDataException("EFX file version is unknown; open it through a path ending in .efx.<version>.");
             }
             DefaultRead(handler);
             if (magic != EfxFile.Magic)

@@ -101,6 +101,17 @@ public record EfxAttributeMatch(
 /// </summary>
 public class EfxEditorService
 {
+    private readonly string? defaultEfxSuffix;
+
+    /// <param name="defaultEfxSuffix">
+    /// Version suffix (e.g. the active game profile's <c>EfxSuffix</c>) appended to a path that ends in a bare
+    /// <c>.efx</c>. Without it, such paths are rejected instead of being guessed as one particular game.
+    /// </param>
+    public EfxEditorService(string? defaultEfxSuffix = null)
+    {
+        this.defaultEfxSuffix = defaultEfxSuffix;
+    }
+
     // =========================================================================
     // I/O Operations
     // =========================================================================
@@ -116,11 +127,13 @@ public class EfxEditorService
         return Load(bytes, filePath);
     }
 
-    public EfxFile Load(byte[] data, string originalPath = "memory.efx.5571972")
+    public EfxFile Load(byte[] data, string originalPath)
     {
         if (!originalPath.Contains(".efx."))
         {
-            originalPath += ".5571972";
+            if (defaultEfxSuffix == null)
+                throw new ArgumentException("EFX path must end with .efx.<version>; the game version cannot be inferred.", nameof(originalPath));
+            originalPath += "." + defaultEfxSuffix;
         }
         var ms = new MemoryStream(data, writable: false);
         var handler = new FileHandler(ms, originalPath);
@@ -164,7 +177,8 @@ public class EfxEditorService
     {
         SynchronizeEffectGroups(efx);
         using var ms = new MemoryStream();
-        int versionNum = (int)efx.Header.Version > 0 ? (int)efx.Header.Version : 5571972;
+        int versionNum = (int)efx.Header.Version > 0 ? (int)efx.Header.Version
+            : throw new InvalidOperationException("EFX has no file version; it was not loaded from a versioned .efx.<version> path.");
         string virtualPath = $"output.efx.{versionNum}";
         using var handler = new FileHandler(ms, virtualPath);
         // The path supplies format/version metadata only. WriteTo defaults to

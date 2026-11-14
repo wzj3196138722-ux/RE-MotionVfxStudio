@@ -68,7 +68,7 @@ internal static class ClipboardTests
         JsonObject Paste(JsonObject buffer, JsonObject target, bool? replace = null, int? index = null, bool ok = true) =>
             Request("paste_efx", new() { ["clipboardId"] = buffer["id"]!.DeepClone(), ["target"] = target, ["replace"] = replace, ["replaceAttributeIndex"] = index }, ok);
         byte[] Save() => File.ReadAllBytes(Request("save")["outputPath"]!.GetValue<string>());
-        EfxFile Read() => service.Load(Save());
+        EfxFile Read() => service.Load(Save(), options.Game.Versioned("clipboard-readback.efx", "efx"));
         Request("open", new() { ["path"] = pathA });
         byte[] initial = Save(); long beforeCopy = revision;
         var entryCopy = Copy(Target());

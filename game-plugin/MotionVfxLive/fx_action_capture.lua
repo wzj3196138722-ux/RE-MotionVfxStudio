@@ -3,6 +3,29 @@
 -- A MotionNode is attributed only through a live same-thread request scope.
 if _G.MotionVfxActionCapture then return _G.MotionVfxActionCapture end
 local M = { version = "1.4.2", recording = false }
+-- Game profile (fx_game_profile.lua): per-game type/method names. Loaded the same way
+-- as the other optional modules: require, then the autorun path, then this file's directory.
+local function load_game_profile()
+    local loaded = rawget(_G, "MotionVfxGameProfile") or package.loaded["MotionVfxLive.fx_game_profile"]
+    if type(loaded) ~= "table" then
+        local ok, result = pcall(require, "MotionVfxLive.fx_game_profile")
+        if ok and type(result) == "table" then loaded = result else
+            local loader = loadfile("reframework/autorun/MotionVfxLive/fx_game_profile.lua")
+            if not loader then
+                -- Offline tests load modules by absolute path: try this file's own directory.
+                local info = debug and debug.getinfo and debug.getinfo(1, "S")
+                local dir = info and type(info.source) == "string" and info.source:match("^@(.*)[/\\][^/\\]+$")
+                loader = dir and loadfile(dir .. "/fx_game_profile.lua")
+            end
+            loaded = loader and loader()
+        end
+    end
+    assert(type(loaded) == "table", "MotionVfx game profile (fx_game_profile.lua) is not installed")
+    package.loaded["MotionVfxLive.fx_game_profile"] = loaded
+    return loaded
+end
+local game_profile = load_game_profile()
+local game = game_profile.current()
 local limits = { events = 500, resources = 2048, bindings = 4096, pending = 256,
     collection = 256, scans = 8, sourceFrames = 600, layers = 32, nodes = 128, players = 64, paths = 1024,
     resourceSources = 1024, actions = 256, actionLayers = 8, actionLinks = 16 }
@@ -104,7 +127,7 @@ local function local_owner(go)
     if not go then return "unknown", nil end
     -- An explicit different hunter is remote. A projectile or environmental
     -- target is merely unknown; a follow target must not override its initiator.
-    local other = call(go, "getComponent(System.Type)", sdk.typeof("app.HunterCharacter"))
+    local other = call(go, "getComponent(System.Type)", sdk.typeof(game.capture.remote_character_type))
     if other and identity(other) ~= actor.characterIdentity then return "remote", id end
     return "unknown", id
 end
@@ -117,7 +140,7 @@ local function shell_context(owner)
         sourceKind = "shell", sourceShellIdentity = identity(shell), isInitiator = true}
     local seen = {}
     for depth = 1, 8 do
-        if not is_a(shell, "ace.ShellBase") then break end
+        if not is_a(shell, game.capture.shell_base_type) then break end
         local shell_id = identity(shell)
         if not shell_id or seen[shell_id] then counters.shellOwnerCycles = counters.shellOwnerCycles + 1; break end
         seen[shell_id] = true
@@ -132,8 +155,8 @@ local function shell_context(owner)
         end
         -- A child shell may name its parent shell's object as its owner. Only
         -- follow another typed ShellBase; never a transform parent or target.
-        shell = call(shooter, "getComponent(System.Type)", sdk.typeof("ace.ShellBase"))
-        if depth == 8 and is_a(shell, "ace.ShellBase") then
+        shell = call(shooter, "getComponent(System.Type)", sdk.typeof(game.capture.shell_base_type))
+        if depth == 8 and is_a(shell, game.capture.shell_base_type) then
             counters.shellOwnerDepthExceeded = counters.shellOwnerDepthExceeded + 1
         end
     end
@@ -141,15 +164,15 @@ local function shell_context(owner)
     return context
 end
 local function refresh_actor()
-    local manager = safe(sdk.get_managed_singleton, "app.PlayerManager")
-    local master = call(manager, "getMasterPlayer")
+    local manager = safe(sdk.get_managed_singleton, game.player.manager)
+    local master = call(manager, game.player.master)
     local character = call(master, "get_Character")
     local go, weapon = game_object(character), call(character, "get_Weapon")
     local weapon_go = game_object(weapon)
     actor_refs = {character = character, object = go, weapon = weapon, weaponObject = weapon_go}
     actor = {available = character ~= nil and go ~= nil, sceneEpoch = scene_epoch,
         characterIdentity = identity(character), gameObjectIdentity = identity(go), weaponIdentity = identity(weapon_go),
-        weaponType = scalar(character, "get_WeaponType"), weaponId = scalar(character, "get_WeaponID")}
+        weaponType = scalar(character, game.player.weapon_type), weaponId = scalar(character, game.player.weapon_id)}
     return actor.available
 end
 local function retain(obj)
@@ -480,7 +503,7 @@ local function context_for(info, owner)
         motion = field(owner, "Motion"); go = game_object(motion) or game_object(owner)
     elseif info.owner == "controller" then go = field(owner, "_Owner")
     elseif info.owner == "hunter" then
-        local character = call(owner, "get_HunterCharacter")
+        local character = call(owner, game.capture.hunter_character_getter)
         go = game_object(character)
         if character and identity(character) ~= actor.characterIdentity then
             return {ownership = "remote", ownerIdentity = identity(go), ownerEvidence = "hunter_character"}
@@ -916,30 +939,8 @@ local function spec(type_name, signature, kind, owner, extra)
     for key, value in pairs(extra or {}) do info[key] = value end
     specs[#specs + 1] = info
 end
-for _, type_name in ipairs({"via.effect.script.ObjectEffectManager", "via.effect.script.ObjectEffectManager2"}) do
-    spec(type_name, "requestEffectVFTriggerTrackByMotionNode(via.motion.MotionNodeCtrl, System.UInt32)", "motion", "oem", {node = 3})
-    spec(type_name, "requestEffectVRangeTrackByMotionNode(via.motion.MotionNodeCtrl, System.UInt32)", "motion", "oem", {node = 3})
-    spec(type_name, "requestEffectFromRangeSquence(via.effect.script.VFXRangeTrack, via.motion.MotionNodeCtrl, System.UInt32, System.UInt32)", "motion", "oem", {node = 4})
-    spec(type_name, "registerCreatedEffectDataList(via.effect.script.CreatedEffectContainer, System.Int32, System.UInt32, System.UInt32)", "register", "oem")
-    spec(type_name, "requestEffectInternal(via.effect.script.EffectID, via.GameObject, System.Int32, via.effect.script.EffectManager.WwiseTriggerInfo, via.effect.script.EffectManager.RequestParam)", "request", "oem", {returns = "container"})
-end
-spec("via.effect.script.ObjectEffectManagerBase", "callEventMotionSequenceCreateEffect(via.effect.script.EffectID, via.effect.script.CreatedEffectContainer, via.effect.script.ObjectEffectManagerBase.CreateMotionSequenceEffectEventInfo.CallSequenceType)", "event", "oem")
-spec("via.effect.script.EffectManager", "createEffectInternal(via.GameObject, via.effect.script.EffectManager.RequestInfo)", "engine", "creator", {returns = "objects"})
-spec("app.cEffectController", "playEffectCore(System.UInt32, app.EffectID_Common.ID, via.GameObject, app.cEffectOverwriteParams, via.GameObject)", "play", "controller", {domain = "Common", id = 4, returns = "container"})
-spec("app.cEffectController", "playEffectLoopCore(System.UInt32, app.EffectID_Common.ID, System.UInt64, via.GameObject, app.cEffectOverwriteParams, via.GameObject)", "play", "controller", {domain = "Common", id = 4, returns = "container"})
-for _, domain in ipairs({"Hit", "Damage"}) do
-    spec("app.cEffectController", "playEffectCore(app.EffectID_" .. domain .. ".ID, via.GameObject, app.cEffectOverwriteParams, via.GameObject)", "play", "controller", {domain = domain, id = 3, returns = "container"})
-end
--- These are source-specific methods, not the shared effect controller. No
--- scope is retained after return, and no async attribution is guessed.
-for _, signature in ipairs({
-    "callEffect(app.EffectID_Common.ID, via.vec3, via.Quaternion, System.UInt32, System.Action`1<via.effect.script.CreatedEffectContainer>, app.cEffectOverwriteParams)",
-    "callEffect(app.EffectID_Common.ID, via.GameObject, System.UInt32, System.Action`1<via.effect.script.CreatedEffectContainer>)",
-    "callEffectLoop(app.EffectID_Common.ID, via.GameObject, System.UInt32, System.Action`1<via.effect.script.CreatedEffectContainer>)",
-    "callEffectLoop(app.EffectID_Common.ID, via.vec3, via.Quaternion, System.UInt32, System.UInt32, System.Action`1<via.effect.script.CreatedEffectContainer>, app.cEffectOverwriteParams)"
-}) do spec("app.mcShellCallEffect", signature, "scope", "shell") end
-spec("app.mcShellCallEffect", "callShellExEffect(app.AppShellDef.EX_EFFECT_TYPE, via.vec3, via.Quaternion, app.cEffectOverwriteParams, System.Boolean, System.UInt32)", "play", "shell", {returns = "container"})
-spec("app.mcShellCallEffect", "callShellHitMarkEffect(app.HitInfo, via.vec3, via.Quaternion)", "play", "shell", {returns = "container"})
+-- Hook list (engine OEM methods plus game-layer effect entry points) comes from the game profile.
+for _, s in ipairs(game.capture.specs) do spec(s[1], s[2], s[3], s[4], s[5]) end
 local function install()
     if attempted then return installed_count > 0 end
     if not thread or not thread.get_id or not thread.get_hook_storage then return false, "REFramework thread hook storage is unavailable" end

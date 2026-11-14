@@ -6,8 +6,20 @@ return await Host.Run(args);
 
 namespace VfxStudio.LiveEditor
 {
-    internal sealed record Options(string Assets, string Mailbox, string Output, string? GameRoot, bool SelfTest, string? LogDirectory = null)
+    internal sealed record Options(string Assets, string Mailbox, string Output, string? GameRoot, bool SelfTest, string? LogDirectory = null, string? GameId = null)
     {
+        /// <summary>Active game: --game wins, else the executable in --game-root, else MHWilds (pre-profile default).</summary>
+        public VfxStudio.Core.Games.GameProfile Game => VfxStudio.Core.Games.GameProfiles.Resolve(GameId, GameRoot);
+        /// <summary>The active game's RSZ type table: Assets/Lists first, then the packaged formats directory.</summary>
+        public string RszSchemaPath()
+        {
+            string assets = Path.Combine(Assets, "Lists", Game.RszSchemaFile);
+            return File.Exists(assets) ? assets : Path.Combine(AppContext.BaseDirectory, "formats", Game.RszSchemaFile);
+        }
+        /// <summary>RSZ reader options for the active game (its type table and ReeLib game id).</summary>
+        public ReeLib.RszFileOption RszOption(string? schema = null) =>
+            new(Game.ReeLibGame, ReeLib.RszParser.GetInstance(schema ?? RszSchemaPath()));
+
         public static Options Parse(string[] args)
         {
             var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -15,15 +27,15 @@ namespace VfxStudio.LiveEditor
             for (int i = 0; i < args.Length; i++)
             {
                 if (args[i] == "--self-test") { selfTest = true; continue; }
-                if (args[i] is not ("--assets" or "--mailbox" or "--output" or "--game-root" or "--log-directory") || ++i >= args.Length)
-                    throw new ArgumentException("Usage: VfxStudio.LiveEditor --assets <dir> --mailbox <dir> --output <dir> [--game-root <dir>] [--self-test]");
-                values[args[i - 1]] = Path.GetFullPath(args[i]);
+                if (args[i] is not ("--assets" or "--mailbox" or "--output" or "--game-root" or "--log-directory" or "--game") || ++i >= args.Length)
+                    throw new ArgumentException("Usage: VfxStudio.LiveEditor --assets <dir> --mailbox <dir> --output <dir> [--game-root <dir>] [--game <id>] [--self-test]");
+                values[args[i - 1]] = args[i - 1] == "--game" ? args[i] : Path.GetFullPath(args[i]);
             }
             var cwd = Directory.GetCurrentDirectory();
             return new(values.GetValueOrDefault("--assets", Path.Combine(cwd, "Assets")),
                 values.GetValueOrDefault("--mailbox", Path.Combine(cwd, "LiveEditorMailbox")),
                 values.GetValueOrDefault("--output", Path.Combine(cwd, "LiveEditorOutput")),
-                values.GetValueOrDefault("--game-root"), selfTest, values.GetValueOrDefault("--log-directory"));
+                values.GetValueOrDefault("--game-root"), selfTest, values.GetValueOrDefault("--log-directory"), values.GetValueOrDefault("--game"));
         }
     }
 
@@ -73,7 +85,7 @@ namespace VfxStudio.LiveEditor
             using (var stop = new CancellationTokenSource())
             {
                 string startedAt = DateTimeOffset.UtcNow.ToString("O");
-                object Status(bool ready) => new { ready, protocol = 1, version = Version, pid = Environment.ProcessId, startedAt, heartbeatUtc = DateTimeOffset.UtcNow.ToString("O"), heartbeatUnixSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds(), mailbox = options.Mailbox };
+                object Status(bool ready) => new { ready, protocol = 1, version = Version, game = options.Game.Id, pid = Environment.ProcessId, startedAt, heartbeatUtc = DateTimeOffset.UtcNow.ToString("O"), heartbeatUnixSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds(), mailbox = options.Mailbox };
                 Console.CancelKeyPress += (_, e) => { e.Cancel = true; stop.Cancel(); };
                 // Clients wait for ready before sending work. Everything already present
                 // belongs to the previous host, including requests without a response.

@@ -14,7 +14,7 @@ internal sealed partial class EditorEngine : IDisposable
     private readonly Options options;
     private readonly IGameCacheResourceReader cacheReader;
     private readonly GroupNoteStore groupNotes;
-    private readonly EfxEditorService service = new();
+    private readonly EfxEditorService service;
     private readonly Dictionary<string, (string Payload, JsonObject Response)> responses = new();
     private readonly HashSet<string> processedIds = new(StringComparer.Ordinal);
     private readonly List<byte[]> undo = [], redo = [];
@@ -39,6 +39,7 @@ internal sealed partial class EditorEngine : IDisposable
     public EditorEngine(Options options, IGameCacheResourceReader? cacheReader = null)
     {
         this.options = options;
+        service = new EfxEditorService(options.Game.EfxSuffix);
         this.cacheReader = cacheReader ?? new UnavailableGameCacheResourceReader();
         groupNotes = new GroupNoteStore(options.Mailbox);
         // A restarted mailbox must never execute the last mutation again merely because request.json remains present.
@@ -329,7 +330,7 @@ internal sealed partial class EditorEngine : IDisposable
         if (snapshot.Content.Length > 128 * 1024 * 1024)
             throw new CacheSourceException("cache_snapshot_invalid", "缓存 EFX 内容超出大小限制；现有编辑文档保持不变。");
         string logical = ResourceResolver.Normalize(descriptor.ActualPath);
-        string virtualPath = "game-cache://" + Uri.EscapeDataString(descriptor.SourceId) + "/" + logical.Split('/')[^1] + ".5571972";
+        string virtualPath = "game-cache://" + Uri.EscapeDataString(descriptor.SourceId) + "/" + logical.Split('/')[^1] + "." + options.Game.EfxSuffix;
         // The constructor-injected reader is the only byte source. There is no
         // path lookup, same-name fallback or request-provided file/byte payload.
         OpenContent(snapshot.Content.ToArray(), virtualPath, "game_cache", descriptor);
@@ -627,12 +628,13 @@ internal sealed partial class EditorEngine : IDisposable
     {
         Require();
         if (options.GameRoot == null) throw new InvalidOperationException("Publishing requires an explicit --game-root configuration.");
-        if (document!.Header.Version != EfxVersion.MHWilds) throw new InvalidOperationException("Only Monster Hunter Wilds EFX files can be published to this preview.");
+        var game = options.Game;
+        if (document!.Header.Version != game.EfxVersion) throw new InvalidOperationException($"Only {game.DisplayName} EFX files can be published to this preview.");
         string gameRoot = Path.GetFullPath(options.GameRoot);
         if (!Directory.Exists(gameRoot)) throw new DirectoryNotFoundException("Configured game directory was not found.");
-        string logical = $"Art/VFX/EffectEditor/MotionVfxLive/{session}/rev_{revision}_{++publishCount}.efx";
-        string output = Path.GetFullPath(Path.Combine(gameRoot, "natives", "STM", logical.Replace('/', Path.DirectorySeparatorChar) + ".5571972"));
-        string allowed = Path.GetFullPath(Path.Combine(gameRoot, "natives", "STM", "Art", "VFX", "EffectEditor", "MotionVfxLive")) + Path.DirectorySeparatorChar;
+        string logical = $"{game.PreviewLogicalRoot}/{session}/rev_{revision}_{++publishCount}.efx";
+        string output = Path.GetFullPath(Path.Combine(gameRoot, "natives", "STM", game.Versioned(logical, "efx").Replace('/', Path.DirectorySeparatorChar)));
+        string allowed = Path.GetFullPath(Path.Combine(gameRoot, "natives", "STM", game.PreviewLogicalRoot.Replace('/', Path.DirectorySeparatorChar))) + Path.DirectorySeparatorChar;
         if (!output.StartsWith(allowed, StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("Publish destination escaped the dedicated preview directory.");
         RejectReparsePoints(gameRoot, Path.GetDirectoryName(output)!);
         WriteNewFile(output, ResolvePrecache(Validate(Require(), output), output));

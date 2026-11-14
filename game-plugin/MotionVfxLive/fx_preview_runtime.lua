@@ -4,6 +4,29 @@
 -- REFramework's bundled scene-editing examples. This is not a game-thread
 -- safety guarantee for every game build: validate the callback in-game.
 if _G.fx_preview_runtime_v2 then return _G.fx_preview_runtime_v2 end
+-- Game profile (fx_game_profile.lua): per-game type/method names. Loaded the same way
+-- as the other optional modules: require, then the autorun path, then this file's directory.
+local function load_game_profile()
+    local loaded = rawget(_G, "MotionVfxGameProfile") or package.loaded["MotionVfxLive.fx_game_profile"]
+    if type(loaded) ~= "table" then
+        local ok, result = pcall(require, "MotionVfxLive.fx_game_profile")
+        if ok and type(result) == "table" then loaded = result else
+            local loader = loadfile("reframework/autorun/MotionVfxLive/fx_game_profile.lua")
+            if not loader then
+                -- Offline tests load modules by absolute path: try this file's own directory.
+                local info = debug and debug.getinfo and debug.getinfo(1, "S")
+                local dir = info and type(info.source) == "string" and info.source:match("^@(.*)[/\\][^/\\]+$")
+                loader = dir and loadfile(dir .. "/fx_game_profile.lua")
+            end
+            loaded = loader and loader()
+        end
+    end
+    assert(type(loaded) == "table", "MotionVfx game profile (fx_game_profile.lua) is not installed")
+    package.loaded["MotionVfxLive.fx_game_profile"] = loaded
+    return loaded
+end
+local game_profile = load_game_profile()
+local game = game_profile.current()
 
 local M = { version = "2.2", capabilities = { point_cloud = true }, clients = {}, instances = {}, cache = {}, queue = {}, hotkey_owner = nil,
     max_per_owner = 32, max_total = 128 }
@@ -169,11 +192,11 @@ local function stop(client, id)
 end
 
 function M.get_character()
-    local pm = sdk.get_managed_singleton("app.PlayerManager")
+    local pm = sdk.get_managed_singleton(game.player.manager)
     if not pm then return nil, "PlayerManager unavailable" end
-    local master = pm:call("getMasterPlayer")
+    local master = pm:call(game.player.master)
     if not master then return nil, "MasterPlayer unavailable" end
-    local character = master:call("get_Character")
+    local character = master:call(game.player.character)
     if not character then return nil, "Character unavailable" end
     return character
 end

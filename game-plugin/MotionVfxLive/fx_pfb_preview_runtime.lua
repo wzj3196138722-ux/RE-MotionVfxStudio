@@ -2,6 +2,29 @@
 -- Loading a prefab is not activation: every matched live manager/container is
 -- rebuilt, then its actual prefab and EPV lookup table are read back.
 local M={version="1.1.0"}
+-- Game profile (fx_game_profile.lua): per-game type/method names. Loaded the same way
+-- as the other optional modules: require, then the autorun path, then this file's directory.
+local function load_game_profile()
+    local loaded = rawget(_G, "MotionVfxGameProfile") or package.loaded["MotionVfxLive.fx_game_profile"]
+    if type(loaded) ~= "table" then
+        local ok, result = pcall(require, "MotionVfxLive.fx_game_profile")
+        if ok and type(result) == "table" then loaded = result else
+            local loader = loadfile("reframework/autorun/MotionVfxLive/fx_game_profile.lua")
+            if not loader then
+                -- Offline tests load modules by absolute path: try this file's own directory.
+                local info = debug and debug.getinfo and debug.getinfo(1, "S")
+                local dir = info and type(info.source) == "string" and info.source:match("^@(.*)[/\\][^/\\]+$")
+                loader = dir and loadfile(dir .. "/fx_game_profile.lua")
+            end
+            loaded = loader and loader()
+        end
+    end
+    assert(type(loaded) == "table", "MotionVfx game profile (fx_game_profile.lua) is not installed")
+    package.loaded["MotionVfxLive.fx_game_profile"] = loaded
+    return loaded
+end
+local game_profile = load_game_profile()
+local game = game_profile.current()
 local function copy(t)if type(t)~="table"then return t end;local r={};for k,v in pairs(t)do r[k]=copy(v)end;return r end
 local function id(o)return o and tostring(o:get_address())end
 local function pin(o)assert(o,"PFB 引用为空");o:add_ref();return o end
@@ -35,14 +58,14 @@ local function new_effect(host)
     end
     local function world(proof)
         local actor=assert(host.capture().actor,"角色尚未就绪")
-        local pm=assert(sdk.get_managed_singleton("app.PlayerManager"),"角色管理器尚未就绪")
-        local player=assert(pm:call("getMasterPlayer"),"当前没有本地角色，请先进入游戏场景")
-        local ch=assert(player:call("get_Character"),"本地角色尚未加载完成")
+        local pm=assert(sdk.get_managed_singleton(game.player.manager),"角色管理器尚未就绪")
+        local player=assert(pm:call(game.player.master),"当前没有本地角色，请先进入游戏场景")
+        local ch=assert(player:call(game.player.character),"本地角色尚未加载完成")
         assert(ch and id(ch)==actor.characterIdentity,"角色来源已变化")
         local manager=ch:call("get_GameObject"):call("getComponent(System.Type)",sdk.typeof("via.effect.script.ObjectEffectManager2"))
         assert(manager and manager:call("get_Valid"),"角色特效管理器尚未就绪")
-        local now={actorIdentity=id(ch),sceneEpoch=actor.sceneEpoch,weaponType=ch:call("get_WeaponType"),
-            weaponId=ch:call("get_WeaponID"),managerIdentity=id(manager)}
+        local now={actorIdentity=id(ch),sceneEpoch=actor.sceneEpoch,weaponType=ch:call(game.player.weapon_type),
+            weaponId=ch:call(game.player.weapon_id),managerIdentity=id(manager)}
         if proof then
             for _,k in ipairs({"actorIdentity","sceneEpoch","weaponType","weaponId","managerIdentity"})do
                 assert(now[k]==proof[k],"角色、场景或装备已变化；原始 PFB 备份仍保留，请回到原装备后重试")
@@ -209,6 +232,8 @@ function M.new(host)
     local effect=new_effect(host);local equipment;local selected=effect
     local function equip()
         if not equipment then
+            -- Equipment PFB preview rebuilds the character's gear through game-specific APIs.
+            assert(game.features.equipment_rebuild,game.display_name.." 不支持装备 PFB 预览")
             local name="MotionVfxLive.fx_equipment_pfb_preview_runtime"
             local ok,module=pcall(require,name)
             if not ok or type(module)~="table"then

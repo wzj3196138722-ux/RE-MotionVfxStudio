@@ -17,7 +17,7 @@ internal sealed partial class EditorEngine
     {
         if (options.GameRoot == null || options.SelfTest) return;
         string? current = null;
-        foreach (var process in System.Diagnostics.Process.GetProcessesByName("MonsterHunterWilds"))
+        foreach (var process in System.Diagnostics.Process.GetProcessesByName(options.Game.ProcessName))
         {
             using (process)
             {
