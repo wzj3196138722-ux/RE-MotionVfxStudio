@@ -37,7 +37,20 @@ EFX 语料门禁：RE4 的 3946 个文件全部和原文件逐字节相同（见
 - 安装器（`tools/Installer`）只识别 Wilds；RE4 目前要按下面的方法手动部署。
 - 表达式语义（B4）还没有在 RE4 上复核。
 
-## 手动部署（开发用）
+## 开发部署：`tools/Deploy-Dev.ps1`
+
+一条命令完成：编译后台 → 结束正在运行的旧后台 → 把编译结果复制到独立的运行目录（`%LOCALAPPDATA%\MotionVfxLiveDev\re4\backend`）→ 同步 Lua 插件、手动脚本和图标 → 以 `--game re4` 启动后台，并等它报告就绪。
+
+```powershell
+.\tools\Deploy-Dev.ps1 -Game re4 -GameRoot "E:\Program\Steam\steamapps\common\RESIDENT EVIL 4  BIOHAZARD RE4"
+```
+
+- 也可以设置环境变量 `MOTIONVFX_RE4_ROOT`，之后省略 `-GameRoot`。
+- `-LuaOnly` 只同步插件；`-BackendOnly` 只重启后台；`-SkipBuild` 不重新编译。
+- 输出提示 Lua 有更新时，要在游戏里点一次 **Reset Scripts**；只改了后台时不需要。
+- 只覆盖本编辑器自己的文件。只会结束 `status.json` 里记录、并且确实在运行 `VfxStudio.LiveEditor.dll` 的那个进程。
+
+## 手动部署（脚本做的事情，逐项说明）
 
 以下均为新增文件，不覆盖游戏原有文件。删除这些文件即可撤销。
 
