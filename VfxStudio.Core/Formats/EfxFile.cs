@@ -994,6 +994,9 @@ namespace ReeLib.Efx
     public partial class EFXUvarGroup : BaseModel
     {
         [RszIgnore] public int uvarType;
+        // RE-MotionVfxStudio：文件末尾有两个 uvar 槽位，读取时空槽会被跳过。这里记下组原来在哪个槽（0/1），
+        // 写出时放回原位；-1 表示新建的组，写出时依次填空槽。证据：Wilds 有 37 个文件只用第二个槽，原先写出后被挪到了第一个槽。
+        [RszIgnore] internal int Slot = -1;
 
         [RszInlineWString(ByteSize = true), RszConditional(nameof(uvarType), "==", 2)] public string? path;
         [RszInlineWString(ByteSize = true), RszConditional(nameof(uvarType), "==", 2)] public string? group;
@@ -1185,12 +1188,12 @@ namespace ReeLib
                 // note: found these as either 0 or 1 in DD2
                 // always 0 for RE4,DMC5,RERT
                 if (uvarType1 != 0) {
-                    var grp = new EFXUvarGroup() { uvarType = uvarType1 };
+                    var grp = new EFXUvarGroup() { uvarType = uvarType1, Slot = 0 };
                     grp.Read(handler);
                     UvarGroups.Add(grp);
                 }
                 if (uvarType2 != 0) {
-                    var grp = new EFXUvarGroup() { uvarType = uvarType2 };
+                    var grp = new EFXUvarGroup() { uvarType = uvarType2, Slot = 1 };
                     grp.Read(handler);
                     UvarGroups.Add(grp);
                 }
@@ -1423,10 +1426,14 @@ namespace ReeLib
                 }
 
                 Header.boneAttributeEntryCount = 0;
+                // RE-MotionVfxStudio：必须和 SetupBoneReferences() 用同一张骨骼表。PlayEmitter 内嵌的 EFX
+                // 自己的 Bones 通常是空的，读取时按外层文件的骨骼表解析；写出时如果只查自己的表，
+                // 所有下标都会变成 -1（RE4 22 个、Wilds 104 个文件因此和原文件不同）。
+                var relationBones = parentFile?.Bones ?? Bones;
                 foreach (var entry in Entries) {
                     foreach (var attr in entry.Attributes) {
                         if (attr is IBoneRelationAttribute parented) {
-                            var index = string.IsNullOrEmpty(parented.ParentBone) ? -1 : Bones.FindIndex(b => b.name == parented.ParentBone);
+                            var index = string.IsNullOrEmpty(parented.ParentBone) ? -1 : relationBones.FindIndex(b => b.name == parented.ParentBone);
                             handler.Write((short)index);
                             Header.boneAttributeEntryCount++;
                         }
@@ -1444,16 +1451,20 @@ namespace ReeLib
             Header.effectGroupsLength = (int)(handler.Tell() - writeStart);
 
             if (Header.Version > EfxVersion.DMC5) {
-                handler.Write(UvarGroups.FirstOrDefault()?.uvarType ?? 0);
-                handler.Write(UvarGroups.Skip(1).FirstOrDefault()?.uvarType ?? 0);
-                if (UvarGroups.Count >= 1)
-                {
-                    UvarGroups[0].Write(handler);
+                var uvarSlots = new EFXUvarGroup?[2];
+                foreach (var grp in UvarGroups) {
+                    if (grp.Slot is 0 or 1 && uvarSlots[grp.Slot] == null) uvarSlots[grp.Slot] = grp;
                 }
-                if (UvarGroups.Count >= 2)
-                {
-                    UvarGroups[1].Write(handler);
+                foreach (var grp in UvarGroups) {
+                    if (Array.IndexOf(uvarSlots, grp) >= 0) continue;
+                    int free = Array.IndexOf(uvarSlots, null);
+                    if (free < 0) break;
+                    uvarSlots[free] = grp;
                 }
+                handler.Write(uvarSlots[0]?.uvarType ?? 0);
+                handler.Write(uvarSlots[1]?.uvarType ?? 0);
+                uvarSlots[0]?.Write(handler);
+                uvarSlots[1]?.Write(handler);
             }
 
             var endPosition = handler.Tell();

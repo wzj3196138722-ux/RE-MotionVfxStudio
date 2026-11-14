@@ -48,11 +48,13 @@ dotnet $gate bonealign <语料目录> <输出.json> [--extra 类型名,类型名
 |---|---|---|
 | main fadfc0f（旧的内嵌拷贝） | 3512 | 6520 / 53 |
 | B1：EFX 子树换成 1c2f92d + 0002..0006 | 3600 | 8942 / 46 |
-| B2：长度前缀与 StretchBlur（当前基线） | 3924 | 9037 / 46 |
+| B2：长度前缀与 StretchBlur | 3924 | 9037 / 46 |
+| B3：内嵌 BoneRelations 与 uvar 槽位（当前基线） | **3946（全部）** | **9179** / 46 |
 
-当前基线下还剩的问题：
-- RE4 写出不同（22）：全部在 PlayEmitter 内嵌 EFX 的头部（写出长度不变）。
-- Wilds 写出不同（142）：PlayEmitter 内嵌 EFX 的头部 104、最后一个 attribute 之后的区域 37（写出长度都不变），另有 1 个嵌套的同类问题。
+当前基线下，两份语料里所有能读进来的文件写出都和原文件逐字节相同，`diff` 为 0。
+今后任何一个文件变成 `diff`，都是退化。
+- Wilds 读取异常 46 个：`charCount N too large` 41、TypeLightningExpensive 3、TypeGpuMeshTrail 1、`Unhandled switch case` 1。
+  这些是 Wilds 的问题，和 RE4 无关，暂不处理。
 - bonealign：RE4 0 / 0。Wilds 0 个作用域数量对不上，2 处骨骼名不一致（`11_em0162_00_063`、`11_pl_pfluid_000`，
   消费者数量是对的，问题出在个别名字上）。
 

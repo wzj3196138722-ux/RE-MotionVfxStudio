@@ -1,8 +1,8 @@
 # EfxCorpusGate roundtrip v1
 # corpus	E:\Program\Steam\steamapps\common\MonsterHunterWilds\MHWILDS_EXTRACT\natives\STM\Art\VFX
 # files	9225
-# same	9037
-# diff	142
+# same	9179
+# diff	0
 # read-error	46
 # write-error	0
 # status	path	detail
@@ -482,7 +482,7 @@ same	EffectEditor/Enemy/em0046/11_em0046_00_000.efx.5571972
 same	EffectEditor/Enemy/em0046/11_em0046_00_002.efx.5571972	
 same	EffectEditor/Enemy/em0046/11_em0046_00_003.efx.5571972	
 same	EffectEditor/Enemy/em0046/11_em0046_00_004.efx.5571972	
-diff	EffectEditor/Enemy/em0046/11_em0046_00_005.efx.5571972	off=330 orig=12044 new=12044 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0046/11_em0046_00_005.efx.5571972	
 same	EffectEditor/Enemy/em0046/11_em0046_00_006.efx.5571972	
 same	EffectEditor/Enemy/em0046/11_em0046_00_010.efx.5571972	
 same	EffectEditor/Enemy/em0046/11_em0046_00_011.efx.5571972	
@@ -616,7 +616,7 @@ same	EffectEditor/Enemy/em0071/11_em0071_00_099.efx.5571972
 same	EffectEditor/Enemy/em0071/11_em0071_00_100.efx.5571972	
 same	EffectEditor/Enemy/em0071/11_em0071_00_101.efx.5571972	
 same	EffectEditor/Enemy/em0071/11_em0071_00_102.efx.5571972	
-diff	EffectEditor/Enemy/em0071/11_em0071_00_103.efx.5571972	off=897 orig=42047 new=42047 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0071/11_em0071_00_103.efx.5571972	
 same	EffectEditor/Enemy/em0071/11_em0071_00_200.efx.5571972	
 same	EffectEditor/Enemy/em0071/11_em0071_00_300.efx.5571972	
 same	EffectEditor/Enemy/em0071/11_em0071_00_400.efx.5571972	
@@ -761,7 +761,7 @@ same	EffectEditor/Enemy/em0082/11_em0082_00_026.efx.5571972
 same	EffectEditor/Enemy/em0082/11_em0082_00_027.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_030.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_031.efx.5571972	
-diff	EffectEditor/Enemy/em0082/11_em0082_00_032.efx.5571972	off=1734 orig=21653 new=21653 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0082/11_em0082_00_032.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_033.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_050.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_051.efx.5571972	
@@ -771,13 +771,13 @@ same	EffectEditor/Enemy/em0082/11_em0082_00_054.efx.5571972
 same	EffectEditor/Enemy/em0082/11_em0082_00_100.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_101.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_102.efx.5571972	
-diff	EffectEditor/Enemy/em0082/11_em0082_00_103.efx.5571972	off=188 orig=3219 new=3219 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0082/11_em0082_00_103.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_104.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_105.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_106.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_150.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_151.efx.5571972	
-diff	EffectEditor/Enemy/em0082/11_em0082_00_152.efx.5571972	off=330 orig=12044 new=12044 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0082/11_em0082_00_152.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_700.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_701.efx.5571972	
 same	EffectEditor/Enemy/em0082/11_em0082_00_800.efx.5571972	
@@ -831,7 +831,7 @@ same	EffectEditor/Enemy/em0113/11_em0113_51_002.efx.5571972
 same	EffectEditor/Enemy/em0113/11_em0113_51_003.efx.5571972	
 same	EffectEditor/Enemy/em0113/11_em0113_51_010.efx.5571972	
 same	EffectEditor/Enemy/em0113/11_em0113_51_011.efx.5571972	
-diff	EffectEditor/Enemy/em0113/11_em0113_51_050.efx.5571972	off=441 orig=20956 new=20956 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0113/11_em0113_51_050.efx.5571972	
 same	EffectEditor/Enemy/em0113/11_em0113_51_051.efx.5571972	
 same	EffectEditor/Enemy/em0113/11_em0113_51_100.efx.5571972	
 same	EffectEditor/Enemy/em0113/11_em0113_51_101.efx.5571972	
@@ -1020,7 +1020,7 @@ same	EffectEditor/Enemy/em0155/11_em0155_00_010.efx.5571972
 same	EffectEditor/Enemy/em0155/11_em0155_00_012.efx.5571972	
 same	EffectEditor/Enemy/em0155/11_em0155_00_013.efx.5571972	
 same	EffectEditor/Enemy/em0155/11_em0155_00_020.efx.5571972	
-diff	EffectEditor/Enemy/em0155/11_em0155_00_021.efx.5571972	off=318 orig=7293 new=7293 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0155/11_em0155_00_021.efx.5571972	
 same	EffectEditor/Enemy/em0155/11_em0155_00_022.efx.5571972	
 same	EffectEditor/Enemy/em0155/11_em0155_00_030.efx.5571972	
 same	EffectEditor/Enemy/em0155/11_em0155_00_031.efx.5571972	
@@ -1045,7 +1045,7 @@ same	EffectEditor/Enemy/em0155/11_em0155_00_950.efx.5571972
 same	EffectEditor/Enemy/em0155/11_em0155_00_951.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_000.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_001.efx.5571972	
-diff	EffectEditor/Enemy/em0156/11_em0156_00_004.efx.5571972	off=393 orig=16392 new=16392 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0156/11_em0156_00_004.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_005.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_006.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_007.efx.5571972	
@@ -1055,7 +1055,7 @@ same	EffectEditor/Enemy/em0156/11_em0156_00_013.efx.5571972
 same	EffectEditor/Enemy/em0156/11_em0156_00_014.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_015.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_016.efx.5571972	
-diff	EffectEditor/Enemy/em0156/11_em0156_00_017.efx.5571972	off=1170 orig=111852 new=111852 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0156/11_em0156_00_017.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_018.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_019.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_020.efx.5571972	
@@ -1068,15 +1068,15 @@ same	EffectEditor/Enemy/em0156/11_em0156_00_041.efx.5571972
 same	EffectEditor/Enemy/em0156/11_em0156_00_047.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_048.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_049.efx.5571972	
-diff	EffectEditor/Enemy/em0156/11_em0156_00_050.efx.5571972	off=786 orig=52003 new=52003 at=action:PlayEmitter>before-attributes hint=same-length
-diff	EffectEditor/Enemy/em0156/11_em0156_00_051.efx.5571972	off=789 orig=26621 new=26621 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0156/11_em0156_00_050.efx.5571972	
+same	EffectEditor/Enemy/em0156/11_em0156_00_051.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_052.efx.5571972	
-diff	EffectEditor/Enemy/em0156/11_em0156_00_060.efx.5571972	off=1894 orig=230090 new=230090 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0156/11_em0156_00_060.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_062.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_063.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_064.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_065.efx.5571972	
-diff	EffectEditor/Enemy/em0156/11_em0156_00_066.efx.5571972	off=1772 orig=133512 new=133512 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0156/11_em0156_00_066.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_067.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_068.efx.5571972	
 same	EffectEditor/Enemy/em0156/11_em0156_00_080.efx.5571972	
@@ -1194,14 +1194,14 @@ same	EffectEditor/Enemy/em0158/11_em0158_00_809.efx.5571972
 same	EffectEditor/Enemy/em0158/11_em0158_00_950.efx.5571972	
 same	EffectEditor/Enemy/em0158/11_em0158_00_951.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_000.efx.5571972	
-diff	EffectEditor/Enemy/em0159/11_em0159_00_001.efx.5571972	off=26602 orig=26610 new=26610 at=after-attributes hint=same-length
+same	EffectEditor/Enemy/em0159/11_em0159_00_001.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_002.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_003.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_004.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_005.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_007.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_008.efx.5571972	
-diff	EffectEditor/Enemy/em0159/11_em0159_00_009.efx.5571972	off=21295 orig=21303 new=21303 at=after-attributes hint=same-length
+same	EffectEditor/Enemy/em0159/11_em0159_00_009.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_010.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_011.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_012.efx.5571972	
@@ -1248,7 +1248,7 @@ same	EffectEditor/Enemy/em0159/11_em0159_00_950.efx.5571972
 same	EffectEditor/Enemy/em0159/11_em0159_00_951.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_952.efx.5571972	
 same	EffectEditor/Enemy/em0159/11_em0159_00_collision.efx.5571972	
-diff	EffectEditor/Enemy/em0160/11_em0160_00_000.efx.5571972	off=2346 orig=88141 new=88141 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0160/11_em0160_00_000.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_002.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_003.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_004.efx.5571972	
@@ -1256,7 +1256,7 @@ same	EffectEditor/Enemy/em0160/11_em0160_00_005.efx.5571972
 same	EffectEditor/Enemy/em0160/11_em0160_00_006.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_007.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_009.efx.5571972	
-diff	EffectEditor/Enemy/em0160/11_em0160_00_010.efx.5571972	off=757 orig=85258 new=85258 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0160/11_em0160_00_010.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_011.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_012.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_013.efx.5571972	
@@ -1267,34 +1267,34 @@ same	EffectEditor/Enemy/em0160/11_em0160_00_017.efx.5571972
 same	EffectEditor/Enemy/em0160/11_em0160_00_018.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_019.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_020.efx.5571972	
-diff	EffectEditor/Enemy/em0160/11_em0160_00_021.efx.5571972	off=2077 orig=137947 new=137947 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0160/11_em0160_00_021.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_022.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_023.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_024.efx.5571972	
-diff	EffectEditor/Enemy/em0160/11_em0160_00_025.efx.5571972	off=1844 orig=114136 new=114136 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0160/11_em0160_00_025.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_026.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_027.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_028.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_081.efx.5571972	
-diff	EffectEditor/Enemy/em0160/11_em0160_00_100.efx.5571972	off=483 orig=23511 new=23511 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0160/11_em0160_00_100.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_110.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_200.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_400.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_401.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_402.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_403.efx.5571972	
-diff	EffectEditor/Enemy/em0160/11_em0160_00_501.efx.5571972	off=1804 orig=103925 new=103925 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0160/11_em0160_00_501.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_502.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_550.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_551.efx.5571972	
-diff	EffectEditor/Enemy/em0160/11_em0160_00_552.efx.5571972	off=277 orig=7512 new=7512 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0160/11_em0160_00_552.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_553.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_554.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_555.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_556.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_557.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_558.efx.5571972	
-diff	EffectEditor/Enemy/em0160/11_em0160_00_560.efx.5571972	off=3381 orig=52599 new=52599 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0160/11_em0160_00_560.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_561.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_565.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_566.efx.5571972	
@@ -1303,8 +1303,8 @@ same	EffectEditor/Enemy/em0160/11_em0160_00_570.efx.5571972
 same	EffectEditor/Enemy/em0160/11_em0160_00_571.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_572.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_575.efx.5571972	
-diff	EffectEditor/Enemy/em0160/11_em0160_00_577.efx.5571972	off=1910 orig=121594 new=121594 at=action:PlayEmitter>before-attributes hint=same-length
-diff	EffectEditor/Enemy/em0160/11_em0160_00_578.efx.5571972	off=3648 orig=56792 new=56792 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0160/11_em0160_00_577.efx.5571972	
+same	EffectEditor/Enemy/em0160/11_em0160_00_578.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_579.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_580.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_581.efx.5571972	
@@ -1329,9 +1329,9 @@ same	EffectEditor/Enemy/em0160/11_em0160_00_950.efx.5571972
 same	EffectEditor/Enemy/em0160/11_em0160_00_951.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_952.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_00_collision.efx.5571972	
-diff	EffectEditor/Enemy/em0160/11_em0160_50_000.efx.5571972	off=2300 orig=80354 new=80354 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0160/11_em0160_50_000.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_50_081.efx.5571972	
-diff	EffectEditor/Enemy/em0160/11_em0160_50_100.efx.5571972	off=3648 orig=56792 new=56792 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0160/11_em0160_50_100.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_50_200.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_50_400.efx.5571972	
 same	EffectEditor/Enemy/em0160/11_em0160_50_600.efx.5571972	
@@ -1362,7 +1362,7 @@ same	EffectEditor/Enemy/em0162/11_em0162_00_013.efx.5571972
 same	EffectEditor/Enemy/em0162/11_em0162_00_014.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_015.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_016.efx.5571972	
-diff	EffectEditor/Enemy/em0162/11_em0162_00_017.efx.5571972	off=350 orig=11074 new=11074 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0162/11_em0162_00_017.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_018.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_019.efx.5571972	
 same	EffectEditor/Enemy/em0162/11_em0162_00_020.efx.5571972	
@@ -1530,7 +1530,7 @@ same	EffectEditor/Enemy/em0164/11_em0164_50_209.efx.5571972
 same	EffectEditor/Enemy/em0164/11_em0164_50_211.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_300.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_310.efx.5571972	
-diff	EffectEditor/Enemy/em0164/11_em0164_50_311.efx.5571972	off=4136 orig=30476 new=30476 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0164/11_em0164_50_311.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_319.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_320.efx.5571972	
 same	EffectEditor/Enemy/em0164/11_em0164_50_321.efx.5571972	
@@ -1563,19 +1563,19 @@ same	EffectEditor/Enemy/em0166/11_em0166_00_000.efx.5571972
 same	EffectEditor/Enemy/em0166/11_em0166_00_001.efx.5571972	
 same	EffectEditor/Enemy/em0166/11_em0166_00_002.efx.5571972	
 same	EffectEditor/Enemy/em0166/11_em0166_00_003.efx.5571972	
-diff	EffectEditor/Enemy/em0166/11_em0166_00_004.efx.5571972	off=666 orig=14029 new=14029 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0166/11_em0166_00_004.efx.5571972	
 same	EffectEditor/Enemy/em0166/11_em0166_00_005.efx.5571972	
 same	EffectEditor/Enemy/em0166/11_em0166_00_006.efx.5571972	
 same	EffectEditor/Enemy/em0166/11_em0166_00_007.efx.5571972	
 same	EffectEditor/Enemy/em0166/11_em0166_00_008.efx.5571972	
 same	EffectEditor/Enemy/em0166/11_em0166_00_009.efx.5571972	
 same	EffectEditor/Enemy/em0166/11_em0166_00_011.efx.5571972	
-diff	EffectEditor/Enemy/em0166/11_em0166_00_012.efx.5571972	off=26209 orig=51015 new=51015 at=action:PlayEmitter>before-attributes hint=same-length
-diff	EffectEditor/Enemy/em0166/11_em0166_00_013.efx.5571972	off=481 orig=20162 new=20162 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0166/11_em0166_00_012.efx.5571972	
+same	EffectEditor/Enemy/em0166/11_em0166_00_013.efx.5571972	
 same	EffectEditor/Enemy/em0166/11_em0166_00_014.efx.5571972	
 same	EffectEditor/Enemy/em0166/11_em0166_00_015.efx.5571972	
 same	EffectEditor/Enemy/em0166/11_em0166_00_016.efx.5571972	
-diff	EffectEditor/Enemy/em0166/11_em0166_00_017.efx.5571972	off=616 orig=11050 new=11050 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Enemy/em0166/11_em0166_00_017.efx.5571972	
 same	EffectEditor/Enemy/em0166/11_em0166_00_018.efx.5571972	
 same	EffectEditor/Enemy/em0166/11_em0166_00_019.efx.5571972	
 same	EffectEditor/Enemy/em0166/11_em0166_00_020.efx.5571972	
@@ -1832,19 +1832,19 @@ same	EffectEditor/EnvCreature/em5010/11_em5010_000.efx.5571972
 same	EffectEditor/EnvCreature/em5010/11_em5010_001.efx.5571972	
 same	EffectEditor/EnvCreature/em5010/11_em5010_002.efx.5571972	
 same	EffectEditor/EnvCreature/em5010/11_em5010_003.efx.5571972	
-diff	EffectEditor/EnvCreature/em5010/11_em5010_004.efx.5571972	off=251 orig=10859 new=10859 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/EnvCreature/em5010/11_em5010_004.efx.5571972	
 same	EffectEditor/EnvCreature/em5010/11_em5010_005.efx.5571972	
 same	EffectEditor/EnvCreature/em5010/11_em5010_006.efx.5571972	
 same	EffectEditor/EnvCreature/em5010/11_em5010_007.efx.5571972	
-diff	EffectEditor/EnvCreature/em5010/11_em5010_008.efx.5571972	off=235 orig=15547 new=15547 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/EnvCreature/em5010/11_em5010_008.efx.5571972	
 same	EffectEditor/EnvCreature/em5011/11_em5011_000.efx.5571972	
 same	EffectEditor/EnvCreature/em5011/11_em5011_001.efx.5571972	
-diff	EffectEditor/EnvCreature/em5011/11_em5011_002.efx.5571972	off=251 orig=10871 new=10871 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/EnvCreature/em5011/11_em5011_002.efx.5571972	
 same	EffectEditor/EnvCreature/em5011/11_em5011_003.efx.5571972	
 same	EffectEditor/EnvCreature/em5011/11_em5011_004.efx.5571972	
 same	EffectEditor/EnvCreature/em5011/11_em5011_005.efx.5571972	
 same	EffectEditor/EnvCreature/em5011/11_em5011_006.efx.5571972	
-diff	EffectEditor/EnvCreature/em5011/11_em5011_007.efx.5571972	off=235 orig=15559 new=15559 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/EnvCreature/em5011/11_em5011_007.efx.5571972	
 same	EffectEditor/EnvCreature/em5040/11_em5040_000.efx.5571972	
 same	EffectEditor/EnvCreature/em5040/11_em5040_001.efx.5571972	
 same	EffectEditor/EnvCreature/em5100/11_em5100_000.efx.5571972	
@@ -1973,10 +1973,10 @@ same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_001.efx.5571972
 same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_002.efx.5571972	
 same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_004.efx.5571972	
 same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_005.efx.5571972	
-diff	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_006.efx.5571972	off=721 orig=38552 new=38552 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_006.efx.5571972	
 same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_007.efx.5571972	
 same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_008.efx.5571972	
-diff	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_011.efx.5571972	off=678 orig=34954 new=34954 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_011.efx.5571972	
 same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_012.efx.5571972	
 same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_013.efx.5571972	
 same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_014.efx.5571972	
@@ -2059,24 +2059,24 @@ same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_664.efx.5571972
 same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_666.efx.5571972	
 same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_667.efx.5571972	
 same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_692.efx.5571972	
-diff	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_902.efx.5571972	off=3780 orig=3800 new=3800 at=after-attributes hint=same-length
-diff	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_903.efx.5571972	off=5389 orig=5409 new=5409 at=after-attributes hint=same-length
+same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_902.efx.5571972	
+same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_903.efx.5571972	
 same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_904.efx.5571972	
-diff	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_905.efx.5571972	off=8366 orig=8386 new=8386 at=after-attributes hint=same-length
-diff	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_906.efx.5571972	off=4797 orig=4817 new=4817 at=after-attributes hint=same-length
-diff	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_907.efx.5571972	off=9913 orig=9933 new=9933 at=after-attributes hint=same-length
-diff	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_908.efx.5571972	off=33513 orig=33533 new=33533 at=after-attributes hint=same-length
-diff	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_909.efx.5571972	off=3920 orig=3940 new=3940 at=after-attributes hint=same-length
+same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_905.efx.5571972	
+same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_906.efx.5571972	
+same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_907.efx.5571972	
+same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_908.efx.5571972	
+same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_909.efx.5571972	
 same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_910.efx.5571972	
 same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_911.efx.5571972	
 same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_912.efx.5571972	
 same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_913.efx.5571972	
 same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_914.efx.5571972	
-diff	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_915.efx.5571972	off=1211 orig=1231 new=1231 at=after-attributes hint=same-length
+same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_915.efx.5571972	
 same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_916.efx.5571972	
-diff	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_917.efx.5571972	off=9549 orig=9569 new=9569 at=after-attributes hint=same-length
-diff	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_990.efx.5571972	off=10088 orig=10108 new=10108 at=after-attributes hint=same-length
-diff	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_991.efx.5571972	off=947 orig=967 new=967 at=after-attributes hint=same-length
+same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_917.efx.5571972	
+same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_990.efx.5571972	
+same	EffectEditor/Event/evc0002/evc0002_50/11_evc0002_50_991.efx.5571972	
 same	EffectEditor/Event/evc0003/evc0003_50/11_evc0003_50_002.efx.5571972	
 same	EffectEditor/Event/evc0003/evc0003_50/11_evc0003_50_003.efx.5571972	
 same	EffectEditor/Event/evc0003/evc0003_50/11_evc0003_50_004.efx.5571972	
@@ -2187,7 +2187,7 @@ same	EffectEditor/Event/evc0004/evc0004_50/11_evc0004_50_051.efx.5571972
 same	EffectEditor/Event/evc0004/evc0004_50/11_evc0004_50_052.efx.5571972	
 same	EffectEditor/Event/evc0004/evc0004_50/11_evc0004_50_053.efx.5571972	
 same	EffectEditor/Event/evc0004/evc0004_50/11_evc0004_50_054.efx.5571972	
-diff	EffectEditor/Event/evc0004/evc0004_50/11_evc0004_50_055.efx.5571972	off=1933 orig=26548 new=26548 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0004/evc0004_50/11_evc0004_50_055.efx.5571972	
 same	EffectEditor/Event/evc0004/evc0004_50/11_evc0004_50_056.efx.5571972	
 same	EffectEditor/Event/evc0004/evc0004_50/11_evc0004_50_057.efx.5571972	
 same	EffectEditor/Event/evc0004/evc0004_50/11_evc0004_50_058.efx.5571972	
@@ -3051,9 +3051,9 @@ same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_647.efx.5571972
 same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_648.efx.5571972	
 same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_649.efx.5571972	
 same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_650.efx.5571972	
-diff	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_800.efx.5571972	off=5970 orig=5990 new=5990 at=after-attributes hint=same-length
+same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_800.efx.5571972	
 same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_801.efx.5571972	
-diff	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_802.efx.5571972	off=17041 orig=17061 new=17061 at=after-attributes hint=same-length
+same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_802.efx.5571972	
 same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_803.efx.5571972	
 same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_804.efx.5571972	
 same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_805.efx.5571972	
@@ -3063,15 +3063,15 @@ same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_808.efx.5571972
 same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_809.efx.5571972	
 same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_810.efx.5571972	
 same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_811.efx.5571972	
-diff	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_812.efx.5571972	off=2435 orig=2455 new=2455 at=after-attributes hint=same-length
-diff	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_813.efx.5571972	off=2435 orig=2455 new=2455 at=after-attributes hint=same-length
-diff	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_815.efx.5571972	off=3616 orig=3636 new=3636 at=after-attributes hint=same-length
+same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_812.efx.5571972	
+same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_813.efx.5571972	
+same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_815.efx.5571972	
 same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_816.efx.5571972	
 same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_818.efx.5571972	
 same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_819.efx.5571972	
-diff	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_820.efx.5571972	off=3616 orig=3636 new=3636 at=after-attributes hint=same-length
+same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_820.efx.5571972	
 same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_821.efx.5571972	
-diff	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_822.efx.5571972	off=11434 orig=11454 new=11454 at=after-attributes hint=same-length
+same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_822.efx.5571972	
 same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_900.efx.5571972	
 same	EffectEditor/Event/evc0015/evc0015_50/11_evc0015_50_901.efx.5571972	
 same	EffectEditor/Event/evc0016/evc0016_50/11_evc0016_50_000.efx.5571972	
@@ -3165,7 +3165,7 @@ same	EffectEditor/Event/evc0017/evc0017_50/11_evc0017_50_095.efx.5571972
 same	EffectEditor/Event/evc0017/evc0017_50/11_evc0017_50_104.efx.5571972	
 same	EffectEditor/Event/evc0017/evc0017_50/11_evc0017_50_105.efx.5571972	
 same	EffectEditor/Event/evc0017/evc0017_50/11_evc0017_50_106.efx.5571972	
-diff	EffectEditor/Event/evc0017/evc0017_50/11_evc0017_50_107.efx.5571972	off=8324 orig=8344 new=8344 at=after-attributes hint=same-length
+same	EffectEditor/Event/evc0017/evc0017_50/11_evc0017_50_107.efx.5571972	
 same	EffectEditor/Event/evc0017/evc0017_50/11_evc0017_50_301.efx.5571972	
 same	EffectEditor/Event/evc0017/evc0017_50/11_evc0017_50_500.efx.5571972	
 same	EffectEditor/Event/evc0017/evc0017_50/11_evc0017_50_501.efx.5571972	
@@ -3401,15 +3401,15 @@ same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_054.efx.5571972
 same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_055.efx.5571972	
 same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_056.efx.5571972	
 same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_057.efx.5571972	
-diff	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_058.efx.5571972	off=3896 orig=33318 new=33318 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_058.efx.5571972	
 same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_059.efx.5571972	
-diff	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_060.efx.5571972	off=566 orig=19088 new=19088 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_060.efx.5571972	
 same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_061.efx.5571972	
-diff	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_062.efx.5571972	off=3657 orig=30365 new=30365 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_062.efx.5571972	
 same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_063.efx.5571972	
 same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_064.efx.5571972	
 same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_065.efx.5571972	
-diff	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_066.efx.5571972	off=1271 orig=43508 new=43508 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_066.efx.5571972	
 same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_067.efx.5571972	
 same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_068.efx.5571972	
 same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_070.efx.5571972	
@@ -3423,11 +3423,11 @@ same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_078.efx.5571972
 same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_079.efx.5571972	
 same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_080.efx.5571972	
 same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_081.efx.5571972	
-diff	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_082.efx.5571972	off=443 orig=18830 new=18830 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_082.efx.5571972	
 same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_083.efx.5571972	
 same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_084.efx.5571972	
 same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_085.efx.5571972	
-diff	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_086.efx.5571972	off=616 orig=15639 new=15639 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_086.efx.5571972	
 same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_087.efx.5571972	
 same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_088.efx.5571972	
 same	EffectEditor/Event/evc0020/evc0020_50/11_evc0020_50_100.efx.5571972	
@@ -3787,7 +3787,7 @@ same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_203.efx.5571972
 same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_204.efx.5571972	
 same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_205.efx.5571972	
 same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_206.efx.5571972	
-diff	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_207.efx.5571972	off=976 orig=56446 new=56446 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_207.efx.5571972	
 same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_208.efx.5571972	
 same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_209.efx.5571972	
 same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_210.efx.5571972	
@@ -3795,11 +3795,11 @@ same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_211.efx.5571972
 same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_212.efx.5571972	
 same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_213.efx.5571972	
 same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_300.efx.5571972	
-diff	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_301.efx.5571972	off=1726 orig=71055 new=71055 at=action:PlayEmitter>before-attributes hint=same-length
-diff	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_302.efx.5571972	off=2042 orig=66820 new=66820 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_301.efx.5571972	
+same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_302.efx.5571972	
 same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_303.efx.5571972	
 same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_304.efx.5571972	
-diff	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_305.efx.5571972	off=828 orig=87659 new=87659 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_305.efx.5571972	
 same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_400.efx.5571972	
 same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_401.efx.5571972	
 same	EffectEditor/Event/evc0026/evc0026_50/11_evc0026_50_402.efx.5571972	
@@ -4076,8 +4076,8 @@ same	EffectEditor/Event/evc0030/evc0030_50/11_evc0030_50_094.efx.5571972
 same	EffectEditor/Event/evc0030/evc0030_50/11_evc0030_50_095.efx.5571972	
 same	EffectEditor/Event/evc0030/evc0030_50/11_evc0030_50_096.efx.5571972	
 same	EffectEditor/Event/evc0030/evc0030_50/11_evc0030_50_097.efx.5571972	
-diff	EffectEditor/Event/evc0030/evc0030_50/11_evc0030_50_098.efx.5571972	off=5297 orig=5317 new=5317 at=after-attributes hint=same-length
-diff	EffectEditor/Event/evc0030/evc0030_50/11_evc0030_50_099.efx.5571972	off=3778 orig=3798 new=3798 at=after-attributes hint=same-length
+same	EffectEditor/Event/evc0030/evc0030_50/11_evc0030_50_098.efx.5571972	
+same	EffectEditor/Event/evc0030/evc0030_50/11_evc0030_50_099.efx.5571972	
 same	EffectEditor/Event/evc0030/evc0030_50/11_evc0030_50_100.efx.5571972	
 same	EffectEditor/Event/evc0030/evc0030_50/11_evc0030_50_101.efx.5571972	
 same	EffectEditor/Event/evc0030/evc0030_50/11_evc0030_50_102.efx.5571972	
@@ -4859,11 +4859,11 @@ same	EffectEditor/Event/evc0043/evc0043_50/11_evc0043_50_000.efx.5571972
 same	EffectEditor/Event/evc0043/evc0043_50/11_evc0043_50_001.efx.5571972	
 same	EffectEditor/Event/evc0043/evc0043_50/11_evc0043_50_002.efx.5571972	
 same	EffectEditor/Event/evc0043/evc0043_50/11_evc0043_50_003.efx.5571972	
-diff	EffectEditor/Event/evc0043/evc0043_50/11_evc0043_50_004.efx.5571972	off=11879 orig=87777 new=87777 at=action:PlayEmitter>before-attributes hint=same-length
-diff	EffectEditor/Event/evc0043/evc0043_50/11_evc0043_50_005.efx.5571972	off=1252 orig=76880 new=76880 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0043/evc0043_50/11_evc0043_50_004.efx.5571972	
+same	EffectEditor/Event/evc0043/evc0043_50/11_evc0043_50_005.efx.5571972	
 same	EffectEditor/Event/evc0043/evc0043_50/11_evc0043_50_006.efx.5571972	
 same	EffectEditor/Event/evc0043/evc0043_50/11_evc0043_50_007.efx.5571972	
-diff	EffectEditor/Event/evc0043/evc0043_50/11_evc0043_50_008.efx.5571972	off=255 orig=10386 new=10386 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0043/evc0043_50/11_evc0043_50_008.efx.5571972	
 same	EffectEditor/Event/evc0043/evc0043_50/11_evc0043_50_009.efx.5571972	
 same	EffectEditor/Event/evc0043/evc0043_50/11_evc0043_50_010.efx.5571972	
 same	EffectEditor/Event/evc0043/evc0043_50/11_evc0043_50_011.efx.5571972	
@@ -5576,7 +5576,7 @@ same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_515.efx.5571972
 same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_516.efx.5571972	
 same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_517.efx.5571972	
 same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_518.efx.5571972	
-diff	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_519.efx.5571972	off=7266 orig=7376 new=7376 at=after-attributes hint=same-length
+same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_519.efx.5571972	
 same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_520.efx.5571972	
 same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_521.efx.5571972	
 same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_550.efx.5571972	
@@ -5585,9 +5585,9 @@ same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_552.efx.5571972
 same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_553.efx.5571972	
 same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_554.efx.5571972	
 same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_555.efx.5571972	
-diff	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_556.efx.5571972	off=19269 orig=19379 new=19379 at=after-attributes hint=same-length
-diff	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_557.efx.5571972	off=16476 orig=16586 new=16586 at=after-attributes hint=same-length
-diff	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_558.efx.5571972	off=12261 orig=12371 new=12371 at=after-attributes hint=same-length
+same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_556.efx.5571972	
+same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_557.efx.5571972	
+same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_558.efx.5571972	
 same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_560.efx.5571972	
 same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_561.efx.5571972	
 same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_562.efx.5571972	
@@ -5600,16 +5600,16 @@ same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_603.efx.5571972
 same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_604.efx.5571972	
 same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_605.efx.5571972	
 same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_800.efx.5571972	
-diff	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_801.efx.5571972	off=6549 orig=6569 new=6569 at=after-attributes hint=same-length
+same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_801.efx.5571972	
 same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_802.efx.5571972	
-diff	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_803.efx.5571972	off=9751 orig=9771 new=9771 at=after-attributes hint=same-length
-diff	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_804.efx.5571972	off=8129 orig=8149 new=8149 at=after-attributes hint=same-length
-diff	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_805.efx.5571972	off=5244 orig=5264 new=5264 at=after-attributes hint=same-length
+same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_803.efx.5571972	
+same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_804.efx.5571972	
+same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_805.efx.5571972	
 same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_806.efx.5571972	
-diff	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_807.efx.5571972	off=7076 orig=7096 new=7096 at=after-attributes hint=same-length
-diff	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_808.efx.5571972	off=7072 orig=7092 new=7092 at=after-attributes hint=same-length
-diff	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_809.efx.5571972	off=3932 orig=3952 new=3952 at=after-attributes hint=same-length
-diff	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_810.efx.5571972	off=3484 orig=3504 new=3504 at=after-attributes hint=same-length
+same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_807.efx.5571972	
+same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_808.efx.5571972	
+same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_809.efx.5571972	
+same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_810.efx.5571972	
 same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_811.efx.5571972	
 same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_950.efx.5571972	
 same	EffectEditor/Event/evc0056/evc0056_50/11_evc0056_50_951.efx.5571972	
@@ -5652,13 +5652,13 @@ same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_127.efx.5571972
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_128.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_129.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_130.efx.5571972	
-diff	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_131.efx.5571972	off=1361 orig=52711 new=52711 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_131.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_132.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_133.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_134.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_135.efx.5571972	
-diff	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_136.efx.5571972	off=3287 orig=234840 new=234840 at=action:PlayEmitter>before-attributes hint=same-length
-diff	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_137.efx.5571972	off=600 orig=51575 new=51575 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_136.efx.5571972	
+same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_137.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_139.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_141.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_142.efx.5571972	
@@ -5667,8 +5667,8 @@ same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_144.efx.5571972
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_145.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_146.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_147.efx.5571972	
-diff	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_148.efx.5571972	off=7156 orig=33906 new=33906 at=action:PlayEmitter>before-attributes hint=same-length
-diff	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_149.efx.5571972	off=7169 orig=35523 new=35523 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_148.efx.5571972	
+same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_149.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_150.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_151.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_152.efx.5571972	
@@ -5682,14 +5682,14 @@ same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_161.efx.5571972
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_162.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_163.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_164.efx.5571972	
-diff	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_165.efx.5571972	off=4964 orig=20226 new=20226 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_165.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_166.efx.5571972	
-diff	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_167.efx.5571972	off=1009 orig=43790 new=43790 at=action:PlayEmitter>before-attributes hint=same-length
-diff	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_168.efx.5571972	off=7170 orig=35524 new=35524 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_167.efx.5571972	
+same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_168.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_169.efx.5571972	
-diff	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_170.efx.5571972	off=7166 orig=35613 new=35613 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_170.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_171.efx.5571972	
-diff	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_172.efx.5571972	off=1693 orig=116234 new=116234 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_172.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_174.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_175.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_176.efx.5571972	
@@ -5733,11 +5733,11 @@ same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_217.efx.5571972
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_221.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_222.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_223.efx.5571972	
-diff	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_224.efx.5571972	off=1254 orig=89925 new=89925 at=action:PlayEmitter>before-attributes hint=same-length
-diff	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_225.efx.5571972	off=922 orig=45325 new=45325 at=action:PlayEmitter>before-attributes hint=same-length
-diff	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_226.efx.5571972	off=4790 orig=21644 new=21644 at=action:PlayEmitter>before-attributes hint=same-length
-diff	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_228.efx.5571972	off=5735 orig=29821 new=29821 at=action:PlayEmitter>before-attributes hint=same-length
-diff	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_229.efx.5571972	off=591 orig=14412 new=14412 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_224.efx.5571972	
+same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_225.efx.5571972	
+same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_226.efx.5571972	
+same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_228.efx.5571972	
+same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_229.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_230.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_231.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_232.efx.5571972	
@@ -5748,7 +5748,7 @@ same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_238.efx.5571972
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_239.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_240.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_241.efx.5571972	
-diff	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_242.efx.5571972	off=601 orig=23199 new=23199 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_242.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_243.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_244.efx.5571972	
 same	EffectEditor/Event/evc0057/evc0057_50/11_evc0057_50_245.efx.5571972	
@@ -6179,7 +6179,7 @@ same	EffectEditor/Event/evc1002/evc1002_50/11_evc1002_50_005.efx.5571972
 same	EffectEditor/Event/evc1002/evc1002_50/11_evc1002_50_008.efx.5571972	
 same	EffectEditor/Event/evc1002/evc1002_50/11_evc1002_50_009.efx.5571972	
 same	EffectEditor/Event/evc1002/evc1002_50/11_evc1002_50_010.efx.5571972	
-diff	EffectEditor/Event/evc1002/evc1002_50/11_evc1002_50_011.efx.5571972	off=299 orig=7848 new=7848 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc1002/evc1002_50/11_evc1002_50_011.efx.5571972	
 same	EffectEditor/Event/evc1002/evc1002_50/11_evc1002_50_012.efx.5571972	
 same	EffectEditor/Event/evc1002/evc1002_50/11_evc1002_50_016.efx.5571972	
 same	EffectEditor/Event/evc1002/evc1002_50/11_evc1002_50_017.efx.5571972	
@@ -6540,8 +6540,8 @@ same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_178.efx.5571972
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_179.efx.5571972	
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_200.efx.5571972	
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_201.efx.5571972	
-diff	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_205.efx.5571972	off=4775 orig=4795 new=4795 at=after-attributes hint=same-length
-diff	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_206.efx.5571972	off=7247 orig=7267 new=7267 at=after-attributes hint=same-length
+same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_205.efx.5571972	
+same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_206.efx.5571972	
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_210.efx.5571972	
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_220.efx.5571972	
 same	EffectEditor/Event/evc1005/evc1005_50/11_evc1005_50_221.efx.5571972	
@@ -6850,8 +6850,8 @@ same	EffectEditor/Event/evc2018/evc2018_50/11_evc2018_50_010.efx.5571972
 same	EffectEditor/Event/evc2018/evc2018_50/11_evc2018_50_011.efx.5571972	
 same	EffectEditor/Event/evc2030/evc2030_50/11_evc2030_50_000.efx.5571972	
 same	EffectEditor/Event/evc2030/evc2030_50/11_evc2030_50_001.efx.5571972	
-diff	EffectEditor/Event/evc2030/evc2030_50/11_evc2030_50_002.efx.5571972	off=461 orig=28419 new=28419 at=action:PlayEmitter>before-attributes hint=same-length
-diff	EffectEditor/Event/evc2030/evc2030_50/11_evc2030_50_003.efx.5571972	off=569 orig=32465 new=32465 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc2030/evc2030_50/11_evc2030_50_002.efx.5571972	
+same	EffectEditor/Event/evc2030/evc2030_50/11_evc2030_50_003.efx.5571972	
 same	EffectEditor/Event/evc2030/evc2030_50/11_evc2030_50_004.efx.5571972	
 same	EffectEditor/Event/evc2030/evc2030_50/11_evc2030_50_005.efx.5571972	
 same	EffectEditor/Event/evc2030/evc2030_50/11_evc2030_50_007.efx.5571972	
@@ -6859,7 +6859,7 @@ same	EffectEditor/Event/evc2030/evc2030_50/11_evc2030_50_008.efx.5571972
 same	EffectEditor/Event/evc2030/evc2030_50/11_evc2030_50_009.efx.5571972	
 same	EffectEditor/Event/evc2030/evc2030_50/11_evc2030_50_013.efx.5571972	
 same	EffectEditor/Event/evc2030/evc2030_50/11_evc2030_50_014.efx.5571972	
-diff	EffectEditor/Event/evc2030/evc2030_50/11_evc2030_50_015.efx.5571972	off=700 orig=40807 new=40807 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Event/evc2030/evc2030_50/11_evc2030_50_015.efx.5571972	
 same	EffectEditor/Event/evc2030/evc2030_50/11_evc2030_50_016.efx.5571972	
 same	EffectEditor/Event/evc2033/evc2033_50/11_evc2033_50_001.efx.5571972	
 same	EffectEditor/Event/evc2033/evc2033_50/11_evc2033_50_002.efx.5571972	
@@ -7032,7 +7032,7 @@ same	EffectEditor/NPC/npc_cm/11_npc_mixingpot_000.efx.5571972
 same	EffectEditor/NPC/npc_cm/11_npc_mixingpot_001.efx.5571972	
 same	EffectEditor/NPC/npc_cm/11_npc_mixingpot_002.efx.5571972	
 same	EffectEditor/NPC/npc_cm/11_npc_mixingpot_003.efx.5571972	
-diff	EffectEditor/NPC/npc_cm/11_npc_mixingpot_004.efx.5571972	off=1788 orig=4969 new=4969 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/NPC/npc_cm/11_npc_mixingpot_004.efx.5571972	
 same	EffectEditor/NPC/npc_cm/11_npc_moriv_ wrapping_000.efx.5571972	
 same	EffectEditor/NPC/npc_cm/11_npc_moriv_debufvirus_000.efx.5571972	
 same	EffectEditor/NPC/npc_cm/11_npc_moriv_fishing_000.efx.5571972	
@@ -7125,7 +7125,7 @@ same	EffectEditor/NPC/npc_obj/11_npc_obj_oilpump_001.efx.5571972
 same	EffectEditor/NPC/npc_oil/11_npc_bonepress_000.efx.5571972	
 same	EffectEditor/NPC/npc_oil/11_npc_liq_drop_000.efx.5571972	
 same	EffectEditor/NPC/npc_oil/11_npc_liq_drop_001.efx.5571972	
-diff	EffectEditor/NPC/npc_oil/11_npc_milkballdrop_000.efx.5571972	off=234 orig=2929 new=2929 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/NPC/npc_oil/11_npc_milkballdrop_000.efx.5571972	
 same	EffectEditor/NPC/npc_oil/11_npc_oil_drop_000.efx.5571972	
 same	EffectEditor/NPC/npc_oil/11_npc_oil_drop_001.efx.5571972	
 same	EffectEditor/NPC/npc_oil/11_npc_oil_firewood_000.efx.5571972	
@@ -7163,7 +7163,7 @@ same	EffectEditor/NPC/npc_ryujin/11_npc_makamixing_002.efx.5571972
 same	EffectEditor/NPC/npc_ryujin/11_npc_makamixing_003.efx.5571972	
 same	EffectEditor/NPC/npc_ryujin/11_npc_makamixing_004.efx.5571972	
 same	EffectEditor/NPC/npc_ryujin/11_npc_makamixing_005.efx.5571972	
-diff	EffectEditor/NPC/npc_tent/11_airou_tent_000.efx.5571972	off=181 orig=3808 new=3808 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/NPC/npc_tent/11_airou_tent_000.efx.5571972	
 same	EffectEditor/NPC/npc_tent/11_airou_tent_001.efx.5571972	
 same	EffectEditor/NPC/npc_tent/11_airou_tent_002.efx.5571972	
 same	EffectEditor/NPC/npc_tent/11_airou_tent_003.efx.5571972	
@@ -7187,13 +7187,13 @@ same	EffectEditor/Otomo/otm_acc/11_otm_acc_060.efx.5571972
 same	EffectEditor/Otomo/otm_acc/11_otm_acc_061.efx.5571972	
 same	EffectEditor/Otomo/otm_acc/11_otm_acc_062.efx.5571972	
 same	EffectEditor/Otomo/otm_acc/11_otm_acc_063.efx.5571972	
-diff	EffectEditor/Otomo/otm_acc/11_otm_acc_064.efx.5571972	off=261 orig=24384 new=24384 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Otomo/otm_acc/11_otm_acc_064.efx.5571972	
 same	EffectEditor/Otomo/otm_acc/11_otm_acc_065.efx.5571972	
 same	EffectEditor/Otomo/otm_acc/11_otm_acc_066.efx.5571972	
 same	EffectEditor/Otomo/otm_acc/11_otm_acc_067.efx.5571972	
-diff	EffectEditor/Otomo/otm_acc/11_otm_acc_068.efx.5571972	off=261 orig=9120 new=9120 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Otomo/otm_acc/11_otm_acc_068.efx.5571972	
 same	EffectEditor/Otomo/otm_cm/otm_etc/11_otm_JPOP,Dance.efx.5571972	
-diff	EffectEditor/Otomo/otm_cm/otm_etc/11_otm_Kpop_dance.efx.5571972	off=580 orig=47386 new=47386 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Otomo/otm_cm/otm_etc/11_otm_Kpop_dance.efx.5571972	
 read-error	EffectEditor/Otomo/otm_cm/otm_etc/11_otm_NumbTrapMaintenance.efx.5571972	Exception: EFX attribute (TypeLightningExpensive) was not properly read. Expected: 244 Actual: 188 Start:26699 End:26883
 same	EffectEditor/Otomo/otm_cm/otm_etc/11_otm_dig_000.efx.5571972	
 same	EffectEditor/Otomo/otm_cm/otm_etc/11_otm_equipchange_000.efx.5571972	
@@ -7203,9 +7203,9 @@ same	EffectEditor/Otomo/otm_cm/otm_etc/11_otm_gesture_dance4.efx.5571972
 same	EffectEditor/Otomo/otm_cm/otm_etc/11_otm_gesture_dance_firetorch.efx.5571972	
 same	EffectEditor/Otomo/otm_cm/otm_etc/11_otm_gesture_groundCherry.efx.5571972	
 same	EffectEditor/Otomo/otm_cm/otm_etc/11_otm_gesture_magicBroom.efx.5571972	
-diff	EffectEditor/Otomo/otm_cm/otm_etc/11_otm_gesture_magicBroom_2.efx.5571972	off=210 orig=4570 new=4570 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Otomo/otm_cm/otm_etc/11_otm_gesture_magicBroom_2.efx.5571972	
 same	EffectEditor/Otomo/otm_cm/otm_etc/11_otm_gesture_magicBroom_3.efx.5571972	
-diff	EffectEditor/Otomo/otm_cm/otm_etc/11_otm_gesture_petrified.efx.5571972	off=188 orig=3309 new=3309 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Otomo/otm_cm/otm_etc/11_otm_gesture_petrified.efx.5571972	
 same	EffectEditor/Otomo/otm_cm/otm_etc/11_otm_gesture_petrified1.efx.5571972	
 same	EffectEditor/Otomo/otm_cm/otm_etc/11_otm_gesture_petrified10.efx.5571972	
 same	EffectEditor/Otomo/otm_cm/otm_etc/11_otm_gesture_petrified2.efx.5571972	
@@ -7229,7 +7229,7 @@ same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_debuf_armor.efx.5571972
 same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_debuf_bubble.efx.5571972	
 same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_debuf_bubble_Slide.efx.5571972	
 same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_debuf_dragon.efx.5571972	
-diff	EffectEditor/Otomo/otm_cm/otm_state/11_otm_debuf_elec.efx.5571972	off=203 orig=3759 new=3759 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_debuf_elec.efx.5571972	
 same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_debuf_expl_000.efx.5571972	
 same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_debuf_expl_001.efx.5571972	
 same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_debuf_fire.efx.5571972	
@@ -7247,7 +7247,7 @@ same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_debuf_tear.efx.5571972
 same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_debuf_virus.efx.5571972	
 same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_debuf_water.efx.5571972	
 same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_dmg_floor.efx.5571972	
-diff	EffectEditor/Otomo/otm_cm/otm_state/11_otm_grassfire.efx.5571972	off=375 orig=19655 new=19655 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_grassfire.efx.5571972	
 same	EffectEditor/Otomo/otm_cm/otm_state/11_otm_heal.efx.5571972	
 same	EffectEditor/Otomo/otm_collaboration/FF/11_otm_collab_050.efx.5571972	
 same	EffectEditor/Otomo/otm_collaboration/FF/11_otm_collab_052.efx.5571972	
@@ -7255,13 +7255,13 @@ same	EffectEditor/Otomo/otm_collaboration/FF/11_otm_collabo_001.efx.5571972
 same	EffectEditor/Otomo/otm_collaboration/FF/11_otm_collabo_031.efx.5571972	
 same	EffectEditor/Otomo/otm_collaboration/FF/11_otm_collabo_041.efx.5571972	
 same	EffectEditor/Otomo/otm_collaboration/FF/11_otm_ff.efx.5571972	
-diff	EffectEditor/Otomo/otm_collaboration/FF/11_otm_ff1.efx.5571972	off=208 orig=7562 new=7562 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Otomo/otm_collaboration/FF/11_otm_ff1.efx.5571972	
 same	EffectEditor/Otomo/otm_collaboration/FF/11_otm_ff20.efx.5571972	
 same	EffectEditor/Otomo/otm_collaboration/FF/11_otm_ff21.efx.5571972	
 same	EffectEditor/Otomo/otm_collaboration/SF/11_otm_SF_000.efx.5571972	
 same	EffectEditor/Otomo/otm_collaboration/SF/11_otm_SF_001.efx.5571972	
 same	EffectEditor/Otomo/otm_collaboration/SF/11_otm_SF_020.efx.5571972	
-diff	EffectEditor/Otomo/otm_equip/ch04_210_0010/11_ch04_210_0010_00.efx.5571972	off=215 orig=3590 new=3590 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Otomo/otm_equip/ch04_210_0010/11_ch04_210_0010_00.efx.5571972	
 same	EffectEditor/Otomo/otm_equip/ch04_210_0410/11_ch04_210_0410_00.efx.5571972	
 same	EffectEditor/Otomo/otm_equip/ch05_001_1000/11_ch05_001_1000_00.efx.5571972	
 same	EffectEditor/Otomo/otm_equip/ch05_048_1000/11_ch048_1000.efx.5571972	
@@ -7275,8 +7275,8 @@ same	EffectEditor/Otomo/otm_equip/ch05_069_1000/11_ch048_1000.efx.5571972
 same	EffectEditor/Otomo/otm_equip/ch05_54_0000/11_ch05_54_0000.efx.5571972	
 same	EffectEditor/Otomo/otm_equip/ch05_54_0000/11_ch05_54_00010.efx.5571972	
 same	EffectEditor/Otomo/otm_equip/ch05_54_0000/11_ch05_54_00011.efx.5571972	
-diff	EffectEditor/Otomo/otm_equip/ch05_54_0000/11_ch05_54_0002.efx.5571972	off=402 orig=18114 new=18114 at=action:PlayEmitter>before-attributes hint=same-length
-diff	EffectEditor/Otomo/otm_equip/ch05_54_0000/11_ch05_54_0003.efx.5571972	off=576 orig=18510 new=18510 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Otomo/otm_equip/ch05_54_0000/11_ch05_54_0002.efx.5571972	
+same	EffectEditor/Otomo/otm_equip/ch05_54_0000/11_ch05_54_0003.efx.5571972	
 same	EffectEditor/Otomo/otm_equip/ch05_54_0000/11_ch05_54_0020.efx.5571972	
 same	EffectEditor/Otomo/otm_equip/ch05_54_0000/11_ch05_54_0021.efx.5571972	
 same	EffectEditor/Player/pl_charm/11_it4800_0031_000.efx.5571972	
@@ -7329,7 +7329,7 @@ same	EffectEditor/Player/pl_cm/pl_cloak/11_cloak_014.efx.5571972
 same	EffectEditor/Player/pl_cm/pl_damage/11_dmg_armordown.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_damage/11_dmg_bubble.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_damage/11_dmg_dragon.efx.5571972	
-diff	EffectEditor/Player/pl_cm/pl_damage/11_dmg_elec.efx.5571972	off=217 orig=3672 new=3672 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Player/pl_cm/pl_damage/11_dmg_elec.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_damage/11_dmg_expl.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_damage/11_dmg_ff.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_damage/11_dmg_fire.efx.5571972	
@@ -7353,7 +7353,7 @@ same	EffectEditor/Player/pl_cm/pl_etc/11_pl_feed_000.efx.5571972
 same	EffectEditor/Player/pl_cm/pl_etc/11_pl_gesture_broom.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_etc/11_pl_gesture_dance.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_etc/11_pl_gesture_dance2.efx.5571972	
-diff	EffectEditor/Player/pl_cm/pl_etc/11_pl_gesture_dance3.efx.5571972	off=599 orig=51310 new=51310 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Player/pl_cm/pl_etc/11_pl_gesture_dance3.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_etc/11_pl_gesture_dance4.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_etc/11_pl_gesture_dance_firetorch.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_etc/11_pl_gesture_petrify.efx.5571972	
@@ -7451,12 +7451,12 @@ same	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_chilly.efx.5571972
 same	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_collab01.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_collab01_vanish.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_dragon.efx.5571972	
-diff	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_elec.efx.5571972	off=201 orig=3804 new=3804 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_elec.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_expl.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_fire.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_firefade.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_flashstun.efx.5571972	
-diff	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_freeze.efx.5571972	off=690 orig=28293 new=28293 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_freeze.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_frenzy.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_frenzy_accumulation.efx.5571972	
 same	EffectEditor/Player/pl_cm/pl_state/11_pl_debuf_heat.efx.5571972	
@@ -7496,8 +7496,8 @@ same	EffectEditor/Player/pl_collab01/11_collab01_140.efx.5571972
 same	EffectEditor/Player/pl_collab01/11_collab01_141.efx.5571972	
 same	EffectEditor/Player/pl_collab01/11_collab01_141_jimen.efx.5571972	
 same	EffectEditor/Player/pl_collab01/11_collab01_150.efx.5571972	
-diff	EffectEditor/Player/pl_equip/armor/11_ch02_059_0102.efx.5571972	off=390 orig=12890 new=12890 at=action:PlayEmitter>before-attributes hint=same-length
-diff	EffectEditor/Player/pl_equip/armor/11_ch02_059_0102_knife.efx.5571972	off=214 orig=4859 new=4859 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Player/pl_equip/armor/11_ch02_059_0102.efx.5571972	
+same	EffectEditor/Player/pl_equip/armor/11_ch02_059_0102_knife.efx.5571972	
 same	EffectEditor/Player/pl_equip/armor/11_ch02_081_0001.efx.5571972	
 same	EffectEditor/Player/pl_equip/armor/11_ch02_081_0003.efx.5571972	
 same	EffectEditor/Player/pl_equip/armor/11_ch02_081_0013.efx.5571972	
@@ -7513,7 +7513,7 @@ same	EffectEditor/Player/pl_equip/armor/11_ch03_085_0002.efx.5571972
 same	EffectEditor/Player/pl_equip/armor/11_ch03_085_0003.efx.5571972	
 same	EffectEditor/Player/pl_equip/slinger/11_ch00_059_0006.efx.5571972	
 same	EffectEditor/Player/pl_equip/slinger/11_ch00_059_0006_03.efx.5571972	
-diff	EffectEditor/Player/pl_equip/slinger/11_ch00_059_0116.efx.5571972	off=261 orig=6886 new=6886 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Player/pl_equip/slinger/11_ch00_059_0116.efx.5571972	
 same	EffectEditor/Player/pl_equip/slinger/11_ch00_059_0116_02.efx.5571972	
 same	EffectEditor/Player/pl_equip/slinger/11_ch00_069_0006_00.efx.5571972	
 same	EffectEditor/Player/pl_equip/slinger/11_ch00_069_0006_01.efx.5571972	
@@ -7560,7 +7560,7 @@ same	EffectEditor/Player/pl_sfc/11_sfc_050.efx.5571972
 same	EffectEditor/Player/pl_sfc/11_sfc_051.efx.5571972	
 same	EffectEditor/Player/pl_sfc/11_sfc_052.efx.5571972	
 same	EffectEditor/Player/pl_sfc/11_sfc_053.efx.5571972	
-diff	EffectEditor/Player/pl_sfc/11_sfc_054.efx.5571972	off=356 orig=18091 new=18091 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Player/pl_sfc/11_sfc_054.efx.5571972	
 same	EffectEditor/Player/pl_sfc/11_sfc_055.efx.5571972	
 same	EffectEditor/Player/pl_sfc/11_sfc_060.efx.5571972	
 same	EffectEditor/Player/pl_sfc/11_sfc_061.efx.5571972	
@@ -7709,7 +7709,7 @@ same	EffectEditor/Props/gm/gm001/gm001_016/11_gm001_016_00.efx.5571972
 same	EffectEditor/Props/gm/gm001/gm001_016/11_gm001_016_01.efx.5571972	
 same	EffectEditor/Props/gm/gm001/gm001_016/11_gm001_016_02.efx.5571972	
 same	EffectEditor/Props/gm/gm001/gm001_016/11_gm001_016_03.efx.5571972	
-diff	EffectEditor/Props/gm/gm001/gm001_016/11_gm001_016_05.efx.5571972	off=2855 orig=13272 new=13272 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Props/gm/gm001/gm001_016/11_gm001_016_05.efx.5571972	
 same	EffectEditor/Props/gm/gm001/gm001_017/11_gm001_017_00.efx.5571972	
 same	EffectEditor/Props/gm/gm001/gm001_017/11_gm001_017_01.efx.5571972	
 same	EffectEditor/Props/gm/gm001/gm001_018/11_gm001_018_00.efx.5571972	
@@ -7808,7 +7808,7 @@ same	EffectEditor/Props/gm/gm100/gm100_000/11_gm100_000_40.efx.5571972
 same	EffectEditor/Props/gm/gm100/gm100_001/11_gm100_001_00.efx.5571972	
 same	EffectEditor/Props/gm/gm100/gm100_001/11_gm100_001_01.efx.5571972	
 same	EffectEditor/Props/gm/gm100/gm100_001/11_gm100_001_02.efx.5571972	
-diff	EffectEditor/Props/gm/gm103/gm103_000/11_gm103_000_00.efx.5571972	off=5752 orig=44083 new=44083 at=action:PlayEmitter>after-attributes hint=same-length
+same	EffectEditor/Props/gm/gm103/gm103_000/11_gm103_000_00.efx.5571972	
 same	EffectEditor/Props/gm/gm103/gm103_000/11_gm103_000_01.efx.5571972	
 same	EffectEditor/Props/gm/gm103/gm103_000/11_gm103_000_02.efx.5571972	
 same	EffectEditor/Props/gm/gm103/gm103_000/11_gm103_000_03.efx.5571972	
@@ -7827,7 +7827,7 @@ same	EffectEditor/Props/gm/gm111/gm111_000/11_gm111_000_00.efx.5571972
 same	EffectEditor/Props/gm/gm111/gm111_000/11_gm111_000_01.efx.5571972	
 same	EffectEditor/Props/gm/gm112/gm112_000/11_gm112_000_00.efx.5571972	
 same	EffectEditor/Props/gm/gm113/gm113_000/11_gm113_000_00.efx.5571972	
-diff	EffectEditor/Props/gm/gm113/gm113_000/11_gm113_000_01.efx.5571972	off=255 orig=12567 new=12567 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Props/gm/gm113/gm113_000/11_gm113_000_01.efx.5571972	
 same	EffectEditor/Props/gm/gm114/gm114_000/11_gm114_000_00.efx.5571972	
 same	EffectEditor/Props/gm/gm114/gm114_000/11_gm114_000_01.efx.5571972	
 same	EffectEditor/Props/gm/gm115/gm115_000/11_gm115_000_00.efx.5571972	
@@ -8167,7 +8167,7 @@ same	EffectEditor/Props/gm/gm559/gm559_000/11_gm559_000_01.efx.5571972
 same	EffectEditor/Props/gm/gm560/gm560_000/11_gm560_000_00.efx.5571972	
 same	EffectEditor/Props/gm/gm565/gm565_000/11_gm565_000_00.efx.5571972	
 same	EffectEditor/Props/gm/gm565/gm565_000/11_gm565_000_01.efx.5571972	
-diff	EffectEditor/Props/gm/gm565/gm565_000/11_gm565_000_02.efx.5571972	off=341 orig=33989 new=33989 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Props/gm/gm565/gm565_000/11_gm565_000_02.efx.5571972	
 same	EffectEditor/Props/gm/gm565/gm565_000/11_gm565_000_03.efx.5571972	
 same	EffectEditor/Props/gm/gm565/gm565_000/11_gm565_000_04.efx.5571972	
 same	EffectEditor/Props/gm/gm565/gm565_000/11_gm565_000_05.efx.5571972	
@@ -8192,7 +8192,7 @@ same	EffectEditor/Props/gm/gm574/gm574_000/11_gm574_000_02.efx.5571972
 same	EffectEditor/Props/gm/gm575/gm575_000/11_gm575_000_00.efx.5571972	
 same	EffectEditor/Props/gm/gm577/gm577_000/11_gm577_000_00.efx.5571972	
 same	EffectEditor/Props/gm/gm577/gm577_000/11_gm577_000_01.efx.5571972	
-diff	EffectEditor/Props/gm/gm577/gm577_000/11_gm577_000_02.efx.5571972	off=991 orig=45922 new=45922 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Props/gm/gm577/gm577_000/11_gm577_000_02.efx.5571972	
 same	EffectEditor/Props/gm/gm577/gm577_000/11_gm577_000_03.efx.5571972	
 same	EffectEditor/Props/gm/gm577/gm577_000/11_gm577_000_04.efx.5571972	
 same	EffectEditor/Props/gm/gm577/gm577_000/11_gm577_000_05.efx.5571972	
@@ -8805,7 +8805,7 @@ same	EffectEditor/Weapon/it00/11_it00_900.efx.5571972
 same	EffectEditor/Weapon/it00/11_it00_901.efx.5571972	
 same	EffectEditor/Weapon/it00/11_it00_902.efx.5571972	
 same	EffectEditor/Weapon/it00/11_it00_903.efx.5571972	
-diff	EffectEditor/Weapon/it00/11_it00_904.efx.5571972	off=564 orig=28376 new=28376 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Weapon/it00/11_it00_904.efx.5571972	
 same	EffectEditor/Weapon/it00/11_it00_905.efx.5571972	
 same	EffectEditor/Weapon/it00/11_it00_906.efx.5571972	
 same	EffectEditor/Weapon/it00/11_it00_907.efx.5571972	
@@ -8843,7 +8843,7 @@ same	EffectEditor/Weapon/it03/11_it03_007.efx.5571972
 same	EffectEditor/Weapon/it03/11_it03_008.efx.5571972	
 same	EffectEditor/Weapon/it03/11_it03_900.efx.5571972	
 same	EffectEditor/Weapon/it03/11_it03_901.efx.5571972	
-diff	EffectEditor/Weapon/it03/11_it03_902.efx.5571972	off=588 orig=16815 new=16815 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Weapon/it03/11_it03_902.efx.5571972	
 same	EffectEditor/Weapon/it04/11_it04_000.efx.5571972	
 same	EffectEditor/Weapon/it04/11_it04_001.efx.5571972	
 same	EffectEditor/Weapon/it04/11_it04_002.efx.5571972	
@@ -8856,7 +8856,7 @@ same	EffectEditor/Weapon/it04/11_it04_022.efx.5571972
 same	EffectEditor/Weapon/it04/11_it04_900.efx.5571972	
 same	EffectEditor/Weapon/it04/11_it04_901.efx.5571972	
 same	EffectEditor/Weapon/it04/11_it04_902.efx.5571972	
-diff	EffectEditor/Weapon/it04/11_it04_905.efx.5571972	off=523 orig=32160 new=32160 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Weapon/it04/11_it04_905.efx.5571972	
 same	EffectEditor/Weapon/it04/11_it04_parry.efx.5571972	
 same	EffectEditor/Weapon/it05/11_it05_000.efx.5571972	
 same	EffectEditor/Weapon/it05/11_it05_001.efx.5571972	
@@ -9033,7 +9033,7 @@ same	EffectEditor/Weapon/it08/11_it08_291.efx.5571972
 same	EffectEditor/Weapon/it08/11_it08_900.efx.5571972	
 same	EffectEditor/Weapon/it08/11_it08_901.efx.5571972	
 same	EffectEditor/Weapon/it08/11_it08_902.efx.5571972	
-diff	EffectEditor/Weapon/it08/11_it08_903.efx.5571972	off=317 orig=9479 new=9479 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Weapon/it08/11_it08_903.efx.5571972	
 same	EffectEditor/Weapon/it09/11_it09_000.efx.5571972	
 same	EffectEditor/Weapon/it09/11_it09_001.efx.5571972	
 same	EffectEditor/Weapon/it09/11_it09_002.efx.5571972	
@@ -9163,7 +9163,7 @@ same	EffectEditor/Weapon/it11/11_it11_040.efx.5571972
 same	EffectEditor/Weapon/it11/11_it11_050.efx.5571972	
 same	EffectEditor/Weapon/it11/11_it11_060.efx.5571972	
 same	EffectEditor/Weapon/it11/11_it11_200.efx.5571972	
-diff	EffectEditor/Weapon/it11/11_it11_900.efx.5571972	off=545 orig=19070 new=19070 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Weapon/it11/11_it11_900.efx.5571972	
 same	EffectEditor/Weapon/it11/11_it11_901.efx.5571972	
 same	EffectEditor/Weapon/it12/11_it12_000.efx.5571972	
 same	EffectEditor/Weapon/it12/11_it12_001.efx.5571972	
@@ -9204,7 +9204,7 @@ same	EffectEditor/Weapon/it12/11_it12_201.efx.5571972
 same	EffectEditor/Weapon/it12/11_it12_900.efx.5571972	
 same	EffectEditor/Weapon/it12/11_it12_901.efx.5571972	
 same	EffectEditor/Weapon/it12/11_it12_902.efx.5571972	
-diff	EffectEditor/Weapon/it12/11_it12_903.efx.5571972	off=527 orig=17523 new=17523 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Weapon/it12/11_it12_903.efx.5571972	
 same	EffectEditor/Weapon/it12/11_it12_904.efx.5571972	
 same	EffectEditor/Weapon/it12/11_it12_guard.efx.5571972	
 same	EffectEditor/Weapon/it12/11_it12_land_000.efx.5571972	
@@ -9229,5 +9229,5 @@ same	EffectEditor/Weapon/it13/11_it13_400_hit.efx.5571972
 same	EffectEditor/Weapon/it13/11_it13_900.efx.5571972	
 same	EffectEditor/Weapon/it13/11_it13_901.efx.5571972	
 same	EffectEditor/Weapon/it13/11_it13_902.efx.5571972	
-diff	EffectEditor/Weapon/it13/11_it13_903.efx.5571972	off=3092 orig=58202 new=58202 at=action:PlayEmitter>before-attributes hint=same-length
+same	EffectEditor/Weapon/it13/11_it13_903.efx.5571972	
 same	EffectEditor/Weapon/it13/11_it13_land_000.efx.5571972	
