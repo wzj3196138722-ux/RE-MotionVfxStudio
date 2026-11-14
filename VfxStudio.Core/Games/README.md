@@ -32,7 +32,18 @@ MotionVfx Live 原本只支持《怪物猎人 荒野》。所有因游戏而异�
   不属于 MotionVfx Live 的运行路径。
 - `Formats/`：内嵌的 ReeLib，本来就支持多个游戏。
 
-## 新增一个游戏（A2：RE4R）需要做的
+## 已支持的游戏
+
+- `mhwilds`：原有全部功能。
+- `re4`：记录、打开、编辑、应用（热重载）、独立预览、还原，均已在游戏里验证；动作槽位、PFB 编辑、装备重建尚未开启。
+  现状、和 Wilds 的差异以及手动部署方法见 [docs/development/RE4R.zh-CN.md](../../docs/development/RE4R.zh-CN.md)。
+
+配置里不只有名字：RE4 的玩家链结构和 Wilds 不同，所以 `fx_game_profile.lua` 的 `player` 是一组取值函数，
+只通过调用方传入的 `host`（call / singleton / typeof / address / scene_components）访问游戏；
+捕获钩子的 extra 里，`provider` / `follow` / `provider_sources` 用于“直接传 ProviderData”的创建入口。
+后台的 `PakLoadEvidence` 决定以什么为依据确认游戏加载了哪些 PAK。
+
+## 新增一个游戏需要做的
 
 1. 在 `GameProfiles` 里加一个配置并放进 `All`，在 `fx_game_profile.lua` 的 `profiles` 里加同 id 的条目。
 2. 提供该游戏的 RSZ 类型表（`Assets/Lists/<RszSchemaFile>` 或随包的 `formats/`）。

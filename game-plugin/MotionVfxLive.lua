@@ -828,6 +828,9 @@ local function poll()
         end
         if is_ready() and state.message == backend_unavailable_message then
             state.message = "文件编辑服务已连接，请重试刚才的打开操作。动作记录仍保留。"
+        elseif is_ready() and state.message == "等待后台就绪；所有编辑、播放和暂停均由按钮触发。" then
+            -- The startup text must not keep claiming the backend is pending once it is connected.
+            state.message = "后台已连接；所有编辑、播放和暂停均由按钮触发。"
         end
     end
     if not state.pending then return end
