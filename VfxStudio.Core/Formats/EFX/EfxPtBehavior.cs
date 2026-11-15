@@ -207,14 +207,18 @@ public partial class EFXAttributePtColliderAction : EFXAttribute
 {
     public EFXAttributePtColliderAction() : base(EfxAttributeType.PtColliderAction) { }
 
-    public uint dataFlags;
+    // re4.exe：逐粒子步骤 3d62430，解析器只有 Radius 一个名字。与 PtCollision 独立的另一次碰撞检测：每次碰撞都在碰撞点
+    // 启动 linkedAction 指向的 Action（+Y 朝法线），没有计数。
+    // 无引擎名（旧名 dataFlags）：bit0 有碰撞层字符串，bit1 有掩码字符串，bit2 碰撞时杀死粒子，bit3 用 Radius 做球投射。
+    public uint Flags;
 
-    public float unkn1;
-    public float unkn2;
+    // 引擎名 Radius，lerp(min, max, u)；只在 Flags bit3 时用。旧名 unkn1 / unkn2。
+    public MinMax Radius;
+    // EFX 文件 Action 列表的下标；0xFFFFFFFF = 不触发。
     public uint linkedAction;
 
-	// found in RE2RT
-	[RszConditional("(dataFlags & (1 << 10)) != 0", EndAt = nameof(ukn_flag2_11))]
+	// found in RE2RT（RE4 的加载器不读这一段，语料里也没有 bit10）
+	[RszConditional("(Flags & (1 << 10)) != 0", EndAt = nameof(ukn_flag2_11))]
 	public uint ukn_flag2_0; // likely some sort of shape type + data
     public float ukn_flag2_2;
     public float ukn_flag2_3;
@@ -233,11 +237,13 @@ public partial class EFXAttributePtColliderAction : EFXAttribute
 	[RszVersionExact(EfxVersion.DD2)]
 	public uint dd2_unkn2;
 
-	[RszConditional("(dataFlags & (1 << 1)) != 0"), RszInlineWString(ByteSize = true)]
-	public string? unknString_flag2;
+	// 引擎先读 bit0 的字符串（碰撞层），再读 bit1 的（掩码）；旧代码顺序反了，两个都有时会互换。
+	// 只在 RE4 上核对过顺序。旧名 unknString_flag1 / unknString_flag2。
+	[RszConditional("(Flags & (1 << 0)) != 0"), RszInlineWString(ByteSize = true)]
+	public string? LayerName;
 
-	[RszConditional("(dataFlags & (1 << 0)) != 0"), RszInlineWString(ByteSize = true)]
-	public string? unknString_flag1;
+	[RszConditional("(Flags & (1 << 1)) != 0"), RszInlineWString(ByteSize = true)]
+	public string? MaskName;
 
 	[RszVersionExact(EfxVersion.MHWilds)]
 	public uint wilds_unkn0;
@@ -248,32 +254,47 @@ public partial class EFXAttributePtCollision : EFXAttribute
 {
     public EFXAttributePtCollision() : base(EfxAttributeType.PtCollision) { }
 
-    public byte stringBitFlag;//<format=binary,comment = "bitflag, determines whether there will be strings read">;
-    public byte unkn0_1;
-    public byte unkn0_2;
-    public byte unkn0_3;
+    // re4.exe：vtable 7a0f980，加载器读 UniqueID + 0x44 字节，解析器 3d63320，逐粒子步骤 3d64580。名字来自解析器。
+    // 不是深度缓冲碰撞：CPU 每帧从上一位置到当前位置投射线/球（异步，晚一帧），对物理世界按碰撞层/掩码过滤。
+    // Gpu* 类型上不起作用。
+    // 无引擎名（按作用起名，旧名 stringBitFlag + unkn0_1..3）：bit0 有碰撞层字符串，bit1 有掩码字符串，bit2 用 Radius 做球投射
+    // （否则射线），bit3 最后一次碰撞时冻结动画器，bit4 投影模式，bit5-6 速度重定向，bit7-8 旋转重定向，bit9-11 欧拉顺序，
+    // bit12 对齐法线，bit13 冻结在碰撞点。
+    public uint Flags;
 
-    public via.Range Radius;
-    public via.RangeI BounceNum;
-    public via.Range BounceRate;
+    // 球投射半径（米），lerp(min, max, u)；只在 Flags bit2 时用。
+    public MinMax Radius;
+    // 碰撞次数 [min, max)，包含结束那一次：2 = 弹一次。
+    public MinMaxExclusiveI BounceNum;
+    // 反射后速度倍率，lerp(min, max, u)。反射按真实碰撞法线，速度大小保持，再乘倍率。
+    public MinMax BounceRate;
+    // ×BounceRate，作用在世界 Y 上（不是法线方向）。
     public float VerticalBounce;
+    // ×BounceRate，作用在世界 X/Z 上。
     public float HorizontalBounce;
+    // 碰撞次数用完时：None 穿过、Kill 杀死、Freeze 停在碰撞点。
     public Finish FinishType;
 	[RszVersion('>', EfxVersion.RE7, EndAt = nameof(DelayFrameCollision))]
-    public float projectionOffset;
-    public float projectionDist;
-    public float unkn12;
+    // 以下三个只在投影模式（Flags bit4，出生时从发射器平面沿局部 -Y 投射）用到。
+    public float ProjectionOffset;
+    public float ProjectionDist;
+    // 引擎里是一个区间对 ProjectionCorrectDist（first + u·second），RE4 存两个 float；旧名 unkn12 / unkn13。
+    public float ProjectionCorrectDist;
 	[RszVersion('<', EfxVersion.MHWilds, EndAt = nameof(DelayFrameCollision))]
-    public float unkn13;
+    public float ProjectionCorrectDistExtra;
 	[RszVersion('>', EfxVersion.RE3, EndAt = nameof(DelayFrameCollision))]
+    // Freeze 时沿碰撞法线的偏移。
     public float LookNormalDirectionOffset;
 	[RszVersion('>', EfxVersion.RERT, EndAt = nameof(DelayFrameCollision))]
-    public via.RangeI DelayFrameCollision;
-	[RszConditional("(stringBitFlag & (1 << 0)) != 0"), RszInlineWString(ByteSize = true)]
-	public string? unknString0;
+    // 无引擎名。粒子年龄达到 center + randint[-spread, spread] 帧之前不做碰撞。
+    public CenterSpreadI DelayFrameCollision;
+	// 碰撞层名（如 "Bullet"、"Character"），在全局 CollisionFilter 里按名字查。旧名 unknString0。
+	[RszConditional("(Flags & (1 << 0)) != 0"), RszInlineWString(ByteSize = true)]
+	public string? LayerName;
 
-	[RszConditional("(stringBitFlag & (1 << 1)) != 0"), RszInlineWString(ByteSize = true)]
-	public string? unknString1;
+	// 碰撞掩码名（如 "TcCameraHit"）。旧名 unknString1。
+	[RszConditional("(Flags & (1 << 1)) != 0"), RszInlineWString(ByteSize = true)]
+	public string? MaskName;
 }
 
 
@@ -343,8 +364,17 @@ public partial class EFXAttributePtLife : EFXAttribute
 {
 	public EFXAttributePtLife() : base(EfxAttributeType.PtLife) { }
 
+	// re4.exe：vtable 7a0ce00，加载器 3d3d3d0 读 UniqueID + 0x0c 字节，触发函数 3d3d110。解析器是空壳，没有引擎名。
+	// 子 Action 出生在粒子当前的位置/尺寸，只拿粒子的变换，不继承速度、颜色、寿命；父粒子死后子特效继续跑，矩阵冻结。
+	// 每个 PtLife 有 2 × Spawn.MaxParticles 个 Action 实例池，满了覆盖最旧的。
+	// 位的作用已读到，名字是描述性的：bit0 = 发射器停止或粒子死亡时释放子特效；bit1 = Mesh 粒子的旋转也继承（语料未用）；
+	// bit2/bit3/bit4 = 子特效每帧跟随粒子的位置/旋转/缩放（不置位则冻结在出生时的快照）。
 	public uint Flags;
-	public uint Status;
+	// 按生命阶段边沿触发，每个粒子每个阶段只触发一次：0 出生帧 / 1 进入 Appear / 2 进入 Keep / 3 进入 Vanish / 4 死亡。
+	// 对应阶段帧数为 0 时该阶段不会触发（Appear 0 → 1 不触发；Vanish 0 → 3 不触发，改用 4）。
+	// -1 不是"未知"：更新循环在无变化的帧传 -1，所以 Status = -1 会每帧触发（语料里没有）。
+	public PtLifeStatus Status;
+	// EFX 文件 Action 列表的下标（[file+0x58] + idx·0x38）；-1 或越界 = 不触发。
 	public int ActionIndex;
 }
 
