@@ -358,85 +358,108 @@ public partial class EFXAttributeShaderSettings : EFXAttribute
 {
 	public EFXAttributeShaderSettings() : base(EfxAttributeType.ShaderSettings) { }
 
-	public float Saturation;
-	public uint unkn2;
-    [RszVersion(EfxVersion.RE8, EndAt = nameof(re8_unkn2))]
-	public float re8_unkn1;
-	public float re8_unkn2;
+	// 名字来自 re4.exe（vtable 7a0bd38，加载器 3d27990 读 UniqueID + 0xa4 字节，块 3d27b60，文本解析器 3d26dd0，
+	// 每发射器更新 3d281e0）。没有引擎名的字段按作用起名并注明。语义只在 RE4 上核对过。
+	// 软粒子距离（米，旧名 Saturation）；只在 Flags 位 2 置位时生效。
+	public float SoftParticleDistance;
+	// 无引擎名（旧名 unkn2）：0 = 不受光，1–4 = 受光、逐粒子光照分辨率 1/2/4/8（门控已证实，档位含义为推测；
+	// 低光照画质时 2–4 被压成 1）。对应 MHWI 的 particleLighting。
+	public uint ParticleLighting;
+    [RszVersion(EfxVersion.RE8, EndAt = nameof(PriorityBias))]
+	// 排序距离偏移（旧名 re8_unkn1）。
+	public float DistanceBias;
+	// 排序优先级偏移（旧名 re8_unkn2；exe 按整数读，旧代码按 float）。
+	public int PriorityBias;
 
-	public float LayerNegative;
+	// 加到着色器 depthBias 上的深度偏移（旧名 LayerNegative）。
+	public float DepthBias;
     [RszVersion('<', EfxVersion.RE8)]
 	public uint LayerPositive;
 	[RszVersionExact(EfxVersion.RE7)]
 	public uint toggle_re7;
+	// 无引擎名（旧名 re8_unkn000）：位 2 = 软粒子（官方 99.8% 打开），位 13 = 启用 StencilTarget，位 16 = 分配逐粒子光照缓冲。
     [RszVersion(EfxVersion.RE8)]
-	public uint re8_unkn000;
+	public uint Flags;
 
-	public via.Color color0;
-	public float unkn6;
-	public float unkn7;
-	public float unkn8;
-	public float unkn9;
-	public float unkn10;
-	public float unkn11;
-	public float unkn12;
+	// 阴影颜色，只用 RGB（旧名 color0）。
+	public via.Color ShadowColor;
+	// 体积散射块（旧名 unkn6..12）：ScatteringMode = 0 时引擎忽略这些值、改用默认 0.15 / 0.15 / 0.2；RE4 从不打开。
+	public float RayleighCoeff;
+	public float MieCoeff;
+	public float MieDropoff;
+	public float AlphaScale;
+	public float DensityScale;
+	// 百分比，运行时 ×0.01。
+	public float DensityMax;
+	public float DensityMin;
+	// 只用位 0，写入发射器标志位 13（含义未追）。
 	public uint unkn13;
-	public uint unkn14;
-	public float unkn15;
-	public float unkn16;
+	// 无引擎名（旧名 unkn14）：0 = 不用散射参数。
+	public uint ScatteringMode;
+	// 受光块（旧名 unkn15、unkn16、unkn17）。BackfaceLightRatio 运行时 ×8。
+	public float LightShadowRatio;
+	public float BackfaceLightRatio;
 	[RszVersion(EfxVersion.RE2)]
-	public float unkn17;
+	public float MieShadowRatio;
 
-	[RszVersion(EfxVersion.RE4, EndAt = nameof(re4_unkn3))]
-	public float re4_unkn1;
-	public float re4_unkn2;
-	public float re4_unkn3;
+	// 光照采样偏移（旧名 re4_unkn1..3）。
+	[RszVersion(EfxVersion.RE4, EndAt = nameof(LightingOffsetZ))]
+	public float LightingOffsetX;
+	public float LightingOffsetY;
+	public float LightingOffsetZ;
 
+	// 旧名 unkn19；exe 按 float 读（旧代码按 uint）。
     [RszVersion('<', EfxVersion.DD2)]
-	public uint unkn19;
+	public float LightingVelocityOffset;
 
-// the below fields aren't quite matched by name across the versions, the value ranges seem wildly different
-    [RszVersion(EfxVersion.RERT, EndAt = nameof(sb_unkn5))]
-	public float sb_unkn2;
-	public float sb_unkn3;
-	public float sb_unkn4;
-	public float sb_unkn5;
+	// 进出阴影的过渡时间，毫秒（旧名 sb_unkn2..5）。
+    [RszVersion(EfxVersion.RERT, EndAt = nameof(TimeToNoShadow))]
+	public float InShadowDelay;
+	public float TimeToFullShadow;
+	public float OutShadowDelay;
+	public float TimeToNoShadow;
 
+	// 引擎按 "== 1" 判断（值 2 等于关闭），含义未追。
     [RszVersionExact(EfxVersion.RE4)]
 	public uint toggle_re4;
     [RszVersion(EfxVersion.DD2)]
 	public float dd2_unkn1;
+	// 着色器 detonemapRate：粒子颜色绕过色调映射的比例（旧名 ColorBrightness，**不是亮度**）。
     [RszVersion(EfxVersion.RE2)]
-	public float ColorBrightness;
+	public float DetonemapRatio;
 
     [RszVersion(EfxVersion.DD2)] public uint toggle_dd2;
-    [RszVersion(EfxVersion.RE3, EndAt = nameof(unkn29))]
-	public float unkn21;
+    [RszVersion(EfxVersion.RE3, EndAt = nameof(StochasticShadingRate))]
+	public float VolumeDepth;
 
-    [RszVersion(">", EfxVersion.RERT, EndAt = nameof(sb_unkn12))]
-	public float sb_unkn9;
-	public float sb_unkn10;
-	public float sb_unkn11;
-	public float sb_unkn12;
+	// 旧名 sb_unkn9..12；AlphaCoverage、SSRAlphaThreshold 与着色器常量名对得上。
+    [RszVersion(">", EfxVersion.RERT, EndAt = nameof(SSRAlphaThreshold))]
+	public float VolumetricIntensityBlend;
+	public float DeinterlaceDistance;
+	public float AlphaCoverage;
+	public float SSRAlphaThreshold;
 
     [RszVersion(EfxVersion.DD2)]
 	public float dd2_unkn2;
-	public uint unkn22;
+	// 只用低字节；Flags 位 13 打开时生效（旧名 unkn22）。
+	public uint StencilTarget;
 
     [RszVersionExact(EfxVersion.RE8, EndAt = nameof(re8_unkn5))]
 	public float re8_unkn3;
 	public float re8_unkn4;
 	public float re8_unkn5;
 
+	// 含义未追。
     [RszVersion(EfxVersion.RE8)]
 	public uint unkn24;
 
-    [RszVersion(nameof(Version), ">=", EfxVersion.RERT, "&&", nameof(Version), "<", EfxVersion.MHWilds, EndAt = nameof(unkn29))]
-	public uint unkn25;
-	public uint unkn26;
-	public uint unkn27;
-	public uint unkn28;
-	public uint unkn29;
+	// 可变速率着色（旧名 unkn25..29）：只用低 3 位，255 = 默认。
+    [RszVersion(nameof(Version), ">=", EfxVersion.RERT, "&&", nameof(Version), "<", EfxVersion.MHWilds, EndAt = nameof(StochasticShadingRate))]
+	public uint ParticleShadingRate;
+	public uint LightingShadingRate;
+	public uint ShadowShadingRate;
+	public uint ZPrepassShadingRate;
+	public uint StochasticShadingRate;
 
 	[RszVersion(EfxVersion.MHWilds, EndAt = nameof(mhws_unkn_short))] public float mhws_unkn1;
 	public float mhws_unkn2;
