@@ -33,6 +33,9 @@ python -I -X utf8 -u pe_image.py "<re4.exe>" 3d1d830 80     # 反汇编一个 RV
 | `factory.py` | 属性工厂表：运行每个"分配 + 构造"小函数，读出 `attr+8` 的类型号与虚表，得到 240 个类型 |
 | `emitter.py` | 用引擎代码建发射器并推进：分配器入口补丁、单例与引擎服务桩、静态 TLS 垫片；`Entry` 用各类型自己的加载器读条目（每个属性读多少字节由引擎决定）；`Emitter` 由 3d06440 原地构造 E，经 3d09690 推进；`state()` 输出逐粒子状态 |
 | `exp_emitter.py` | 真实语料条目上的发射器场景，与规格比较出生时刻、Life、积分、出生速度、确定性 |
+| `world.py` | 平地碰撞查询池（替代 d62f8e0）、PtLife 触发记录器、Action 执行记录器、替身 Action 表 |
+| `exp_world.py` | PtCollision / PtColliderAction 碰平地，PtLife 按阶段触发 |
+| `exp_expr.py` | Transform3DExpression：表达式虚拟机求值，结果按 BitNames 落到槽位 |
 
 ## 结果
 
@@ -62,6 +65,15 @@ python -I -X utf8 -u pe_image.py "<re4.exe>" 3d1d830 80     # 反汇编一个 RV
 | 无 FixRandomGenerator | 3d88690 在每个 tick 的属性遍历之后令 `E.seed = next(全局 xorshift128 d6a3150..5c)`，不止构造时一次。新映射镜像里该生成器为全 0，种子恒为 0，结果确定；给生成器设初值后每 tick 种子都变，粒子仍各自按出生 tick 的种子抽样 | 已确认 |
 | RibbonLength | 尺寸槽 U = SizeScalar、X = Width（0.8）、Y = Length（1.3）；Life Flags 1 + KeepHold {0,0} 进入阶段 6 后保持 | 已确认 |
 | UV 帧 | 粒子头 `[p]` 位 10–17 = 序列号，位 18–25 = 帧；PlaySpeed 1 时每 tick 前进 1 帧并循环 | 已确认（.uvs 为合成替身） |
+| PtCollision 反弹 | 平地（法线 +Y）上 47 次反弹逐次符合 `v = vel·coef^n + (0, gvel + 2·accel, 0)` 反射后 Y 乘 rate·Vertical、XZ 乘 rate·Horizontal，重力速度清零（误差 < 1e-8） | 已确认 |
+| BounceNum | 22 个粒子的命中次数都等于抽样的 BounceNum，最后一次命中执行 FinishType | 已确认 |
+| FinishType | Freeze：`[p+4] |= 0x400`，Flags 位 3 时再加 0x800，位置停止；Kill：下一 tick 粒子消失 | 已确认 |
+| DelayFrameCollision | 15 帧：状态在年龄 ≥ 15 时才初始化 | 已确认 |
+| 一帧延迟 | 每次处理的命中都对应上一 tick 提交的查询（69 次） | 已确认 |
+| PtColliderAction | 命中的下一 tick 激活一个 Action 实例，平移 = 命中点，+Y 轴 = 法线 | 已确认 |
+| PtLife | Status 0、2、3 三个条目：每个粒子每个阶段码只传一次；状态码等于 Status 时恰好触发一次（life3：25 个粒子中进入 Vanish 的 15 个各一次）；AppearFrame 0 时从不传 1；Flags 位 2 时实例平移随粒子移动 | 已确认 |
+| 表达式 | Transform3DExpression 位集 0x18 = 槽 3、4（LocalRotationX、Y），赋值类型 Add；每 tick 动画副本 = (文件值度数 + e)·π/180，其余 7 槽保持文件值（3 组共 3,240 次比较） | 已确认 |
+| 表达式外部变量 | 两条表达式都是 `外部值 × 常数`（−0.1、−0.2）。外部值节点（vtable 79f4110）指向表达式自带的值槽（标志 0x400004），默认 0，由游戏的参数系统写入；本目录不写时 e = 0，写 10 / −25 时 e 随之变化 | 已确认 |
 
 ## 替身与桩
 
@@ -73,13 +85,18 @@ python -I -X utf8 -u pe_image.py "<re4.exe>" 3d1d830 80     # 反汇编一个 RV
 | 资源查找 39ef530 | 按路径返回清零对象（引用计数 0x10000）；.uvs 合成为 4 个序列 × 16 或 64 帧，无 UV 矩形；.mesh 只有空的数据对象 | UV 帧数与真实 .uvs 不同；Mesh 的部件、动画不可信 |
 | 渲染槽 4748b80、网格实例 4659170、网格实例设置 46565c0 / 4658830 / 4656200 | 返回清零对象或直接返回 | 只影响渲染侧 |
 | 骨骼查找 3d00f80 | 找不到 | ParentOptions 按无父级处理 |
-| 单例 d62f8f0、d62f9f0、d62f9b0、d62f8e0、d62fa38 | 清零对象；`[d62fa38]+0x4340 → +0x18` 与 `[ctx+0x100]+8`（LOD 因子 q）设 1.0 | q 为 0 时出生数按 max(·,1) 缩小 |
+| 碰撞查询池 d62f8e0 | `world.py`：提交射线 3ce34a0 / 球体 3ce3330 时立即对平面 y = GROUND 求交；轮询走引擎自己的槽表与查询对象 vtable（完成 = 1，结果 +0 命中点、+0x10 法线） | 只有一个水平地面 |
+| 碰撞层名查找 43d8570 / 43d8800 | 层号 0、掩码位 0 | 不分层 |
+| Action 表（加载器上下文 [0] = 文件对象） | 64 个替身 Action：各含 1 个零数据 FixRandomGenerator 节点，vtable 槽 1 返回节点块大小；Action 执行 3d122b0 / 3d0ee50 与 PtLife 发射器步 3d3e0a0 只记录不运行 | 子 Action 不运行，实例保持激活 |
+| 单例 d62f8f0、d62f9f0、d62f9b0、d62fa38 | 清零对象；`[d62fa38]+0x4340 → +0x18` 与 `[ctx+0x100]+8`（LOD 因子 q）设 1.0 | q 为 0 时出生数按 max(·,1) 缩小 |
 | 世界矩阵（更新结构 +0x40..0x7f） | 单位阵 | 无父级运动 |
-| 静态 TLS | 新的 ThreadLocalStoragePointer 数组，re4.exe 用槽 100 | 尚无条目触及 |
+| 静态 TLS | 新的 ThreadLocalStoragePointer 数组，re4.exe 用槽 100；另初始化线程表的临界区 d78b380 | 表达式加载器经 3ab52b0 → 3b0b350 读取 |
 
 ## 卡点
 
 - `[g+0xeb2]`（LegacyMode2018）与 `[g+0xeb0]` 发行版取值未知：构造函数 3cdf250 清零，启动时 7896afe / 7896b12
   从配置块 `+0x51d` / `+0x530` 复制。本目录按 0 运行。
 - Mesh 的模拟依赖网格资源：部件数、动画、材质句柄（attr+0xc8）都来自 .mesh / .mdf2 资源，这里是空替身。
-- 碰撞（PtCollision、PtColliderAction）、PtLife 子 Action、外部驱动 3d03fa0 的补帧路径都没有经过。
+- 子 Action 不运行：语料中的 Action（例如类型 151）内嵌一个 EFX，加载器需要嵌套资源加载器 3cfadc0，没有解析。
+- 碰撞对齐（Flags 位 12）、投影模式、外部驱动 3d03fa0 的补帧路径没有经过。
+- 表达式外部变量的来源（游戏写入值槽的那一侧）没有找到；名字也没有对上。

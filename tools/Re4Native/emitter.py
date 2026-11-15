@@ -152,6 +152,10 @@ SERVICES = {
     0x46565C0: ("mesh instance setup A", None),
     0x4658830: ("mesh instance setup B", None),
     0x4656200: ("mesh instance setup C", None),
+    # collision filter lookups by name (rcx = [d62f928] CollisionFilter, rdx = wide name), used by the
+    # PtCollision / PtColliderAction installs: layer index 0, mask bit 0 (1 << 0)
+    0x43D8570: ("collision layer by name", lambda c, d, p, q: (0, _wstr(d))),
+    0x43D8800: ("collision mask bit by name", lambda c, d, p, q: (0, _wstr(d))),
     # joint lookup by name on the parent's transform (ParentOptions BoneName): no parent -> not found
     0x3D00F80: ("joint lookup", lambda c, d, p, q: 0),
 }
@@ -192,7 +196,7 @@ def _resource(path):
     return RESOURCES[path]
 
 
-def install_runtime(img, eb0=0, eb2=0, global_seed=None):
+def install_runtime(img, eb0=0, eb2=0, global_seed=None, collision=False, ptlife=False):
     install_allocator(img)
     _IMG[:] = [img]
     for rva, (name, fn) in SERVICES.items():
@@ -200,9 +204,17 @@ def install_runtime(img, eb0=0, eb2=0, global_seed=None):
     settings = rn.install_settings(img, eb0=eb0, eb2=eb2)
     singles = install_singletons(img)
     tls = install_tls(img)
+    # critical section of the engine's thread-index table (3b0b350, reached through the memory-tag scope
+    # 3ab52b0 that some loaders open); a static initializer sets it up in the game
+    _k32.InitializeCriticalSection(ctypes.c_void_p(B + 0xD78B380))
     if global_seed is not None:              # the engine's global generator (d6a3150..5c), zero in a fresh image
         for i, v in enumerate(global_seed):
             rn.set_u32(B + 0xD6A3150 + 4 * i, v)
+    import world
+    if collision:
+        world.install_collision(img)        # replaces the zeroed d62f8e0 with the flat-ground query pool
+    if ptlife:
+        world.install_ptlife(img)
     return dict(settings=settings, singletons=singles, tls=tls)
 
 
@@ -241,17 +253,23 @@ class Entry:
     """A root entry: header (index, nameHash, entryAssignment, attribute count) then
     [type id][UniqueID][payload] per attribute."""
 
-    def __init__(self, img, path, off, drop_types=()):
+    def __init__(self, img, path, off, drop_types=(), header=4):
         """drop_types: attribute type ids that are read (their bytes consumed) but left out of the
         entry, e.g. (1,) runs the entry without its FixRandomGenerator."""
         data = open(path, "rb").read()
-        self.index, self.name_hash, self.assign, self.count = struct.unpack_from("<4I", data, off)
+        if header == 4:     # root entry: index, nameHash, entryAssignment, attribute count
+            self.index, self.name_hash, self.assign, self.count = struct.unpack_from("<4I", data, off)
+        else:               # Action: actionUnkn0, nameHash, attribute count
+            self.index, self.name_hash, self.count = struct.unpack_from("<3I", data, off)
+            self.assign = None
         self.obj = img.alloc(0x200)          # entry object the emitter ctor reads (+0xc count, +0x10 list)
         # loaders get a context whose +8+8*type_id holds the attribute of that type already loaded
         # (ScaleAnim reads +0x88 = Spawn -> MaxParticles, UVSequence +0xb0 / +0xc0 / +0x200 / +0x838)
         self.loadctx = img.alloc(0x1000)
+        import world
+        rn.set_u64(self.loadctx, world.make_file(img))   # [0] = file: Action table for ActionIndex / linkedAction
         self.attrs = []
-        st = Stream(img, data, off + 16)
+        st = Stream(img, data, off + 4 * header)
         tbl = _native_table(img)
         prev = None
         for i in range(self.count):

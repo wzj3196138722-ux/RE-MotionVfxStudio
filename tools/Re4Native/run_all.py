@@ -15,7 +15,7 @@ import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-EXPERIMENTS = ["exp_map", "exp_scaleanim", "exp_blink", "exp_loader", "exp_rng", "exp_pipeline", "exp_emitter", "scan_loops"]
+EXPERIMENTS = ["exp_map", "exp_scaleanim", "exp_blink", "exp_loader", "exp_rng", "exp_pipeline", "exp_emitter", "exp_world", "exp_expr", "scan_loops"]
 
 
 def run(name: str, out_dir: Path) -> dict:
