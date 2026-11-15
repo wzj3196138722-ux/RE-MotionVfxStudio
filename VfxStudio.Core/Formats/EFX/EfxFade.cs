@@ -10,10 +10,11 @@ public partial class EFXAttributeFadeByAngle : EFXAttribute
 {
 	public EFXAttributeFadeByAngle() : base(EfxAttributeType.FadeByAngle) { }
 
-	// 名字来自 re4.exe（加载器读 UniqueID + 0x1c 字节，解析器 3d3ecb0）。CPU 只把值抄进发射器常量缓冲，
-	// 公式在绘制着色器里（只核对了 RibbonLength 的 VS）：在 cos 空间里线性过渡，不是按角度线性。
+	// 名字来自 re4.exe（加载器读 UniqueID + 0x1c 字节，解析器 3d3ecb0）。CPU 只把值抄进发射器常量缓冲
+	// （CPU 类型 = primitivevfx 的 Polygon3DConstant，偏移逐项相同；Gpu* = GpuParticleVS），
+	// 公式在顶点着色器里，两族代码相同：在 cos 空间里线性过渡，不是按角度线性。
 	// Flags 只读低 3 位：bit0 = 双向锥（取 |cos|），bit1 = 反转（锥内 AlphaRate、锥外 1），
-	// bit2 = 视线从粒子/段中心算（默认从发射器位置算；bit2 由标志位对应推断，中等把握）。
+	// bit2 = 视线从粒子/段中心算（默认从发射器位置算）。Mesh / Gpu* 的打包没追到，按同样位序推断。
 	public uint Flags;
 	// 内锥半角，弧度。默认锥内完全可见（与 MHWI 文档的方向相反）。
 	public float Cone;
@@ -48,9 +49,9 @@ public partial class EFXAttributeFadeByDepth : EFXAttribute
 	public EFXAttributeFadeByDepth() : base(EfxAttributeType.FadeByDepth) { }
 
 	// 名字来自 re4.exe（加载器读 UniqueID + 0x10 字节，块 = 着色器 fadeDepth.xyzw）。四个独立 float，不是区间对。
-	// 单位是米、视空间深度（裁剪 w），不是到相机的直线距离。系数：d < NearStart 或 d > FarEnd 时为 0，
+	// 单位是米、视空间深度（裁剪 w），不是到相机的直线距离（primitivevfx 与 vfx/*draw 着色器相同）。系数：d < NearStart 或 d > FarEnd 时为 0，
 	// NearStart→NearEnd 线性升到 1，FarStart→FarEnd 线性降到 0，中间为 1。Start == End 为硬切；近处 0/0 = 不做近处淡入。
-	// 顶点的总 alpha 系数小于 2^-23 时直接剔除。只核对了 RibbonLength 的绘制着色器。
+	// 顶点的总 alpha 系数小于 2^-23 时直接剔除。
 	public float NearStart;
 	public float NearEnd;
 	public float FarStart;

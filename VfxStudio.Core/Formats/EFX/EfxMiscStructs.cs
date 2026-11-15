@@ -46,9 +46,13 @@ public partial class EFXAttributeDistortion : EFXAttribute
 	// 名字来自 re4.exe（加载器 3d28ad0 读 UniqueID + 0x14 字节）。MHWI 的 REFRACTION 就是这个属性，
 	// MHWI 的 alphaBlend 实际是 Influence。
 	public DistortionType DistortionType;
-	// 量级随类型而变：Blur 约 5..100，Refract 0.1..3，BlurTexture ±20（语料）。
+	// 公式读自 primitivevfx_2/_3 的像素着色器；Gpu* 类型的绘制着色器没有场景颜色贴图，放在 Gpu* 上无效。
+	// 强度，先乘粒子 alpha α。Refract：偏移 = Influence·α·(2·贴图RG − 1)，视空间米；
+	// Blur：水平 9 点高斯，间距 Influence·α 像素；BlurTexture：沿贴图 RG 方向单侧 9 点拖影，步长 Influence·α 像素。
+	// 最终颜色 = 场景采样 × lerp(1, 顶点色.rgb + 高光, α)。
 	public float Influence;
-	// Specular* 只对 Refract 有意义；Power 0、Intensity 1、白色 = 关闭。
+	// 高光 = SpecularColor.rgb·SpecularColor.a · 2^SpecularIntensity · B^(2.2·SpecularPower)，B = 贴图蓝通道；
+	// SpecularPower < 1e-6 时关闭。三种类型都会加。
 
 	[RszVersion(EfxVersion.RE3, EndAt = nameof(SpecularColor))]
 	public float SpecularPower;
