@@ -12,8 +12,8 @@ public partial class EFXAttributeSpawn : EFXAttribute
 	public uint MaxParticles;
 	[RszVersion('>', EfxVersion.RE3)]
 	public uint ParticleInterval;
-	public via.Int2 SpawnNum;
-	public via.Int2 IntervalFrame;
+	public MinMaxI SpawnNum;
+	public MinMaxI IntervalFrame;
 	[RszVersion("<=", EfxVersion.RE3)]
 	public via.RangeI LoopNumDmc5;
 
@@ -22,12 +22,12 @@ public partial class EFXAttributeSpawn : EFXAttribute
 	public uint UseSpawnFrameInt;
 	[RszVersion(EfxVersion.DD2)] public bool UseSpawnFrame;
 
-	public via.RangeI SpawnFrame;
+	public MinExtraI SpawnFrame;
 
 	[RszVersion(">", EfxVersion.RE3, EndAt = nameof(OriginalMaxParticles))]
-	public via.RangeI LoopNum;
+	public MinExtraI LoopNum;
 
-	public via.Int2 EmitterDelayFrame;
+	public MinMaxI EmitterDelayFrame;
 
 	// RE4 起就有这一段（re4.exe 加载器 3d15720 读 UniqueID + 0x58 字节，tick 3d14c20 使用），字段顺序与 DD2 相同；
 	// RE4 的开关是 4 字节，DD2 起是 1 字节 bool，所以 RE4 用 *Int 版本（同 UseSpawnFrameInt 的约定）。
@@ -45,8 +45,8 @@ public partial class EFXAttributeSpawn : EFXAttribute
 	public float DistancePerSpawn;
 	[RszVersion('<', EfxVersion.DD2)] public uint UseRevivalInt;
 	[RszVersion(EfxVersion.DD2)] public bool UseRevival;
-	public via.RangeI RevivalNum;
-	public via.RangeI RevivalInterval;
+	public MinExtraI RevivalNum;
+	public MinExtraI RevivalInterval;
 
 	[RszVersion(EfxVersion.DD2)] public bool TrySpawnAllParticles;
 
@@ -106,9 +106,9 @@ public partial class EFXAttributeParentOptions : EFXAttribute, IBoneRelationAttr
 	public uint ParticleUseLocal_re7;
 	[RszVersion(EfxVersion.RE8, EndAt = nameof(ConstInheritReleaseRate))]
 	public byte ParticleUseLocal;
-	public via.Range ConstInheritRate;
-	public via.RangeI ConstFrame;
-    public via.RangeI ConstReleaseFrame;
+	public CenterSpread ConstInheritRate;
+	public MinExtraI ConstFrame;
+    public MinExtraI ConstReleaseFrame;
 	public float ConstInheritReleaseRate;
 
 	[RszVersion(EfxVersion.Pragmata)] public uint PragUkn1;
@@ -146,10 +146,10 @@ public partial class EFXAttributeParentOptionsExpression : EFXAttribute, IExpres
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.Life, EfxVersion.RE7, EfxVersion.DMC5, EfxVersion.RE4, EfxVersion.DD2)]
 public partial class EFXAttributeLife : EFXAttribute
 {
-	public via.RangeI AppearFrame;
-	public via.RangeI KeepFrame;
-	public via.RangeI VanishFrame;
-	public via.RangeI KeepHoldFrame;
+	public MinMaxI AppearFrame;
+	public MinMaxI KeepFrame;
+	public MinMaxI VanishFrame;
+	public MinMaxI KeepHoldFrame;
 	// 低 2 位是保持模式（re4.exe 3d1be80）：0 不保持（忽略 KeepHoldFrame）；1 Keep 后满 alpha 保持 KeepHoldFrame 帧，
 	// {0,0} = 直到发射器停止；2 同 1，但释放时再播一遍 Keep；3 CPU 每帧把 alpha 置 0（不要用）。
 	// 四个 *Frame 在 [r, s] 内均匀取整（不是 s±r），s = r − 1 会除以零。
@@ -300,11 +300,11 @@ public partial class EFXAttributeUVSequence : EFXAttribute
 
 	// re4.exe（vtable 7a0b668，加载器 3d1e030）。引擎名只有 PatternNo、PlaySpeed（文本解析器）；其余沿用原名。
 	// .uvs 里第几个序列：在 [r, s) 内随机（s 不含），只存 8 位。RE4 官方全是 {0,1}。
-	public via.RangeI SequenceNo;
+	public MinMaxExclusiveI SequenceNo;
 	// 起始格：在 [r, s) 内随机（s 不含），只存 8 位。不要超过序列的格数。
-    public via.RangeI PatternNo;
+    public MinMaxExclusiveI PatternNo;
 	// 在 [s, r] 内均匀取（r 是最大值，不是幅度）；单位：每 1/60 秒前进的格数，1.0 = 60 fps 序列帧。
-    public via.Range PlaySpeed;
+    public MinMax PlaySpeed;
 	// 位 0-1 播放模式：0 只显示起始格（忽略 PlaySpeed）、1 循环（从第 0 格重开）、2 播一遍后粒子死亡、3 播一遍停在最后一格。
 	// 位 2-3 水平翻转、位 4-5 垂直翻转、位 6-7 倒放、位 8-9 旋转 90°：各为 0 关、1 总是、2 每粒子随机（3 未定义，别用）。
 	// 位 10 = 相邻格交叉淡入；位 11 写入发射器标志（用途未追）；更高位不读。例：21 = 循环 + 固定水平翻转 + 固定垂直翻转。

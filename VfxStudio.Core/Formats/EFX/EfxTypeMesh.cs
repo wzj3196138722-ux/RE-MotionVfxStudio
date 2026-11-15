@@ -105,24 +105,24 @@ public partial class EFXAttributeTypeMeshV2 : EFXAttribute
     // MaxPartsNum = 网格序列长度（循环/结束的边界）。
     public uint MaxPartsNum;
     // 段号取 [r, s)：r = 起始段（含），s = 结束段（不含）；位 24 关时在其中随机取。
-    public via.RangeI PartsStartNo;
+    public MinMaxExclusiveI PartsStartNo;
     // 在 [s, r] 内均匀取值（不是 s±r），单位：段/帧；PlaySpeedCoef 每帧 powf(coef, dt·60)。
-    public via.Range PlaySpeed;
-    public via.Range PlaySpeedCoef;
+    public MinMax PlaySpeed;
+    public CenterSpread PlaySpeedCoef;
     // 0 暂停、1 循环、2 播完粒子死亡、3 播完停在最后一段。
     public PlayType PlayType;
     public PlayOrder PlayOrder;
     public RotationOrder RotationOrder;
     // 弧度，出生时 s ± r 抽样。
-    public via.Range RotationX;
-    public via.Range RotationY;
-    public via.Range RotationZ;
+    public CenterSpread RotationX;
+    public CenterSpread RotationY;
+    public CenterSpread RotationZ;
     // 各轴尺寸倍率（旧名 ScaleX/Y/Z）。
-    public via.Range SizeX;
-    public via.Range SizeY;
-    public via.Range SizeZ;
+    public CenterSpread SizeX;
+    public CenterSpread SizeY;
+    public CenterSpread SizeZ;
     // 统一尺寸，写入粒子尺寸槽（ScaleAnim 作用于它；旧名 ScaleMultiplier）。
-    public via.Range SizeScalar;
+    public CenterSpread SizeScalar;
     // 0 X、1 Y、2 Z（默认 Z）；Flags 位 1 开启时对准飞行方向。
     public AxisXYZ FrontAxis;
     public uint cbSize;

@@ -325,12 +325,12 @@ public partial class EFXAttributeRotateAnim : EFXAttribute
 	// Billboard3D 的滚转角 = X + Y（Z 不起作用）；Mesh 用三轴欧拉角。
 	// Flags 只用位 0：每轴各自 50% 概率把 Add 取反（随机方向）；其余位忽略。
 	public uint Flags;
-    public via.Range RotationAddX;
-    public via.Range RotationAddY;
-    public via.Range RotationAddZ;
-    public via.Range RotationCoefX;
-    public via.Range RotationCoefY;
-    public via.Range RotationCoefZ;
+    public CenterSpread RotationAddX;
+    public CenterSpread RotationAddY;
+    public CenterSpread RotationAddZ;
+    public CenterSpread RotationCoefX;
+    public CenterSpread RotationCoefY;
+    public CenterSpread RotationCoefZ;
     [RszVersion(EfxVersion.DD2, EndAt = nameof(RotationDelayFrame))]
 	public via.RangeI RotationDelayFrame;
 }
@@ -386,14 +386,14 @@ public partial class EFXAttributeScaleAnim : EFXAttribute
 	// 否则 尺寸 = 基准 + Add·Coef·(1 − Coef^t)/(1 − Coef)，Coef < 1 时总增量收敛到 Add·Coef/(1 − Coef)。结果夹在 ≥ 0。
 	// **Coef = 0 时该通道冻结、Add 不起作用**（与 RotateAnim 不同）。统一尺寸与各轴在渲染时相乘。
 	// TypeRibbonLength 的 Y 槽就是条带长度，SizeYAdd 会拉长条带。
-    public via.Range SizeScalarAdd;
-    public via.Range SizeScalarCoef;
-    public via.Range SizeXAdd;
-    public via.Range SizeXAddCoef;
-    public via.Range SizeYAdd;
-    public via.Range SizeYAddCoef;
-    public via.Range SizeZAdd;
-    public via.Range SizeZAddCoef;
+    public CenterSpread SizeScalarAdd;
+    public CenterSpread SizeScalarCoef;
+    public CenterSpread SizeXAdd;
+    public CenterSpread SizeXAddCoef;
+    public CenterSpread SizeYAdd;
+    public CenterSpread SizeYAddCoef;
+    public CenterSpread SizeZAdd;
+    public CenterSpread SizeZAddCoef;
     [RszVersion(EfxVersion.DD2, EndAt = nameof(SizeDelayFrame))]
     public via.RangeI SizeDelayFrame;
 }

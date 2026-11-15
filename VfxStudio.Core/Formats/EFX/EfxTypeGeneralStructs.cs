@@ -19,12 +19,12 @@ public partial class EFXAttributeTypeNoDraw : EFXAttribute
 
 	// 文件里是 6 个交错的 {s, r} 范围（旧代码误读为 Rotation / RotationRandom / Size / SizeRandom 四个 Vector3）。
 	// 旋转为弧度，出生时 s ± r 抽样。
-	public via.Range RotationX;
-	public via.Range RotationY;
-	public via.Range RotationZ;
-	public via.Range SizeX;
-	public via.Range SizeY;
-	public via.Range SizeZ;
+	public CenterSpread RotationX;
+	public CenterSpread RotationY;
+	public CenterSpread RotationZ;
+	public CenterSpread SizeX;
+	public CenterSpread SizeY;
+	public CenterSpread SizeZ;
 	[RszVersion(EfxVersion.MHWilds, EndAt = nameof(unkn15))]
 	public float unkn14;
 	public float unkn15;

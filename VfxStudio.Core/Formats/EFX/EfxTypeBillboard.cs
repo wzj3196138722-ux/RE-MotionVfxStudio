@@ -18,10 +18,10 @@ public partial class EFXAttributeTypeBillboard2D : ReeLib.Efx.EFXAttribute
     public float EdgeBlendRange;
     public float AlphaRate;
 
-    public via.Range Rotation;
-    public via.Range SizeScalar;
-    public via.Range SizeX;
-    public via.Range SizeY;
+    public CenterSpread Rotation;
+    public CenterSpread SizeScalar;
+    public CenterSpread SizeX;
+    public CenterSpread SizeY;
     // 低 2 位写入粒子标志位 30-31（re4.exe 3d1756d）；语料 0 / 3。作用在渲染侧，未追。
     public Repeat Repeat;
 }
@@ -80,10 +80,10 @@ public partial class EFXAttributeTypeBillboard3D : EFXAttribute
     public float EdgeBlendRange;
     public float AlphaRate;
 
-	public via.Range Rotation;
-    public via.Range SizeScalar;
-    public via.Range SizeX;
-    public via.Range SizeY;
+	public CenterSpread Rotation;
+    public CenterSpread SizeScalar;
+    public CenterSpread SizeX;
+    public CenterSpread SizeY;
 
 	[RszVersion("<", EfxVersion.RERT)]
     public ShadowType ShadowType; // TODO verify wilds

@@ -24,12 +24,12 @@ public partial class EFXAttributeTypePolygon : EFXAttribute
 	public uint Flags2;
     // [RszVersion("!=", EfxVersion.RE8, EndAt = nameof(RotationZ))]
 	public RotationOrder RotationOrder;
-    public via.Range RotationX;
-    public via.Range RotationY;
-    public via.Range RotationZ;
-    public via.Range SizeScalar;
-    public via.Range Width;
-    public via.Range Height;
+    public CenterSpread RotationX;
+    public CenterSpread RotationY;
+    public CenterSpread RotationZ;
+    public CenterSpread SizeScalar;
+    public CenterSpread Width;
+    public CenterSpread Height;
     public via.Range Offset;
     [RszVersion('<', EfxVersion.RE4)]
 	public float AlphaRateLegacy;
@@ -139,7 +139,7 @@ public partial class EFXAttributeTypePolygonTrail : EFXAttribute
 	public float ShadowMultiplier;
 
 	public AxisType Axis;
-	public via.Range Length;
+	public CenterSpread Length;
 	public float StretchDistance;
 	public uint NumTrailDivision;
 	public uint NumVerticalDivision;

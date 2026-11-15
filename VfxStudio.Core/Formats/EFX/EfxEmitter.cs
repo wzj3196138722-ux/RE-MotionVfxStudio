@@ -88,9 +88,9 @@ public partial class EFXAttributeEmitterShape3D : EFXAttribute
 {
 	public EFXAttributeEmitterShape3D() : base(EfxAttributeType.EmitterShape3D) { }
 
-    public via.Range RangeX;
-    public via.Range RangeY;
-    public via.Range RangeZ;
+    public InnerOuter RangeX;
+    public InnerOuter RangeY;
+    public InnerOuter RangeZ;
     public Shape3DType ShapeType;
 	public uint RangeDivideNum;
 	public AxisXYZ RangeDivideAxis;
@@ -111,8 +111,8 @@ public partial class EFXAttributeEmitterShape3D : EFXAttribute
 	[RszVersion('>', EfxVersion.RE3)]
     public bool UseExtension;
 
-    public via.Range ScaleHorizontal;//Cylinder angle on cylinder shape
-    public via.Range ScaleVertical;
+    public StartSpan ScaleHorizontal;//Cylinder angle on cylinder shape
+    public StartSpan ScaleVertical;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.EmitterShape3DExpression, EfxVersion.RE7, EfxVersion.DMC5, EfxVersion.RE3, EfxVersion.RE4)]

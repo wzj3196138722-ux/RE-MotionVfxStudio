@@ -161,9 +161,9 @@ public partial class EFXAttributeTypeStrainRibbonV3 : EFXAttribute, IBoneRelatio
 	// 终点：在 boneName 骨骼（找不到时为发射器）坐标系里。
     public Vector3 TerminalPosition;
     public int SegmentNum;
-    public via.Range Width;
+    public CenterSpread Width;
 	// 绳长；两端距离 < Length × 尺寸且 SegmentNum ≥ 2 时沿 SagAxis 下垂成悬链线（3d5d3c0）。
-    public via.Range Length;
+    public CenterSpread Length;
     public float unkn3_4;
     public uint FrontDirectionType;
 	// 下垂轴：{+X, +Y, +Z, −X, −Y, −Z} 的索引，4 = 向下。
@@ -180,8 +180,8 @@ public partial class EFXAttributeTypeStrainRibbonV3 : EFXAttribute, IBoneRelatio
     public float FadeByTwistMax;
 	// 断绳（Flags 0x400）：拉伸超过 EnduranceLength 并持续超过 EnduranceFrame 帧后断开；断开后的逻辑 3d5fb30 未追。
     public via.Range CutoffRatio;
-    public via.Range CutoffEnduranceLength;
-    public via.RangeI CutoffEnduranceFrame;
+    public MinExtra CutoffEnduranceLength;
+    public MinMaxI CutoffEnduranceFrame;
     public via.Range CutoffGravity;
     public via.Range CutoffBendScaleCoef;
 	// Wilds 多出的两个字段，原先放在 CutoffBendScaleCoef 的 s 与 r 之间（位置本来就是猜的），现移到其后；Wilds 读取的字节不变。
@@ -194,9 +194,9 @@ public partial class EFXAttributeTypeStrainRibbonV3 : EFXAttribute, IBoneRelatio
 
 	// 内嵌的 EmitterShape3D（加载器读 UniqueID + 0x54 字节），只在 Flags 0x2 时用于终点抖动；字段同 EmitterShape3D。
     public uint ShapeUniqueID;
-    public via.Range ShapeRangeX;
-    public via.Range ShapeRangeY;
-    public via.Range ShapeRangeZ;
+    public InnerOuter ShapeRangeX;
+    public InnerOuter ShapeRangeY;
+    public InnerOuter ShapeRangeZ;
 	// Wilds 多出的两个颜色，原先放在 ShapeRangeY 的 s 与 r 之间，现移到 ShapeRangeZ 之后；Wilds 读取的字节不变。
 	[RszVersion(EfxVersion.MHWilds, EndAt = nameof(wilds_Color2))]
 	public via.Color wilds_Color1;
@@ -216,8 +216,8 @@ public partial class EFXAttributeTypeStrainRibbonV3 : EFXAttribute, IBoneRelatio
     public bool ShapeDivideEquidistantCalcOuterCurve;
     public bool ShapeDivideEquidistantRecalcEveryFrame;
     public bool ShapeUseExtension;
-    public via.Range ShapeScaleHorizontal;
-    public via.Range ShapeScaleVertical;
+    public StartSpan ShapeScaleHorizontal;
+    public StartSpan ShapeScaleVertical;
 	// past this is wild territory for Wilds
 	[RszVersion(EfxVersion.MHWilds, EndAt = nameof(wilds_UknLast))]
 	public uint wilds_Ukn3_1;

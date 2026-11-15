@@ -21,8 +21,8 @@ public partial class EFXAttributeTypeRibbonLength : EFXAttribute
 
 	[RszVersion('>', EfxVersion.RERT)]
     public uint Flags;
-    public via.Range SizeScalar;
-    public via.Range WidthSize;
+    public CenterSpread SizeScalar;
+    public CenterSpread WidthSize;
 
     [RszVersion(EfxVersion.RERT)]
     public float TextureRepeatNum;
@@ -33,16 +33,16 @@ public partial class EFXAttributeTypeRibbonLength : EFXAttribute
     // 位 3 = 固定起点（尾端留在出生点，拉到 ReleaseFixEnd 距离后释放）。位 0 关时轴 = normalize(rnd(DirX, DirY, DirZ))，出生时定死。
     [RszVersion(EfxVersion.RE2)] public uint LengthFlags;
     // 长度 = rnd(Length) × 粒子尺寸。
-    public via.Range Length;
+    public CenterSpread Length;
     // 沿长度的点数，夹在 [2, 1000]。
     public uint ShapeDivision;
     // s = 横向锚点（0.5 居中，着色器侧）；r = 纵向锚点：尾 = P − (1−r)·L·d，头 = P + r·L·d。
-    public via.Range BasingPoint;
-    public via.Range ReleaseFixEnd;
+    public AnchorPair BasingPoint;
+    public CenterSpread ReleaseFixEnd;
     // 引擎名 DirX / DirY / DirZ（旧名 DirectionX/Y/Z）。
-    public via.Range DirX;
-    public via.Range DirY;
-    public via.Range DirZ;
+    public CenterSpread DirX;
+    public CenterSpread DirY;
+    public CenterSpread DirZ;
 
 	[RszVersion(EfxVersion.RE2, EndAt = nameof(GhostStretch))]
     public via.Color HeadColor;
@@ -271,8 +271,8 @@ public partial class EFXAttributeTypeRibbonChain : EFXAttribute
     [RszVersion(EfxVersion.RE4)]
 	public uint Flags;
 
-	public via.Range SizeScalar;
-	public via.Range WidthSize;
+	public CenterSpread SizeScalar;
+	public CenterSpread WidthSize;
     [RszVersion(EfxVersion.MHWilds)] public uint mhws_unkn1;
 	public float TextureRepeatNum;
     [RszVersion(EfxVersion.RERT)]
@@ -284,32 +284,32 @@ public partial class EFXAttributeTypeRibbonChain : EFXAttribute
 	// 0x20 = 沿链从 Dir 渐变到 BlendDir（用 AxisBlendRate）；0x4000 = 不步进。名字不是引擎名。
 	public uint ChainFlags;
 	// 链长 = |尺寸 × rnd(Length)|，平均分给 (ShapeDivision − 1) 段，节点被拉回、不可伸长。
-	public via.Range Length;
+	public CenterSpread Length;
 	// m/s²，沿 Dir 方向（没有内建重力：要下垂就设 Dir = (0,−1,0)、Acceleration ≈ 9.8）。固定 60 Hz 子步。
-	public via.Range Acceleration;
+	public CenterSpread Acceleration;
 	// 阻尼：每步 vel *= FrameInfluence^(dt·60)，1 = 不衰减。出生时夹在 [0,1]。
-	public via.Range FrameInfluence;
+	public CenterSpread FrameInfluence;
 	// 节点被拉回时，拉回量 / dt × VertexInfluence 变成速度（回弹）。出生时夹在 [0,1]。
-	public via.Range VertexInfluence;
+	public CenterSpread VertexInfluence;
 	// 关节数，夹在 [2, 1000]（同 TypeRibbonLength.ShapeDivision；名字不是引擎名）。
 	[RszVersion('<', EfxVersion.MHWilds)]
 	public uint ShapeDivision;
-	public via.Range BasingPoint;
-	public via.Range DirX;
+	public AnchorPair BasingPoint;
+	public CenterSpread DirX;
 	[RszVersionExact(EfxVersion.RERT)]
 	public float sb_unkn1;
 	[RszVersionExact(EfxVersion.RERT)]
 	public float sb_unkn2;
 
-    public via.Range DirY;
+    public CenterSpread DirY;
 	// RE4 起：DirZ、BlendDirX/Y/Z、AxisBlendRate（旧代码把 DirZ.s 当成 uint re4_unkn2_hash）。
 	// 更早的版本保持原来的未命名字段。
     [RszVersion(EfxVersion.RE4, EndAt = nameof(AxisBlendRate))]
-	public via.Range DirZ;
-	public via.Range BlendDirX;
-	public via.Range BlendDirY;
-	public via.Range BlendDirZ;
-	public via.Range AxisBlendRate;
+	public CenterSpread DirZ;
+	public CenterSpread BlendDirX;
+	public CenterSpread BlendDirY;
+	public CenterSpread BlendDirZ;
+	public CenterSpread AxisBlendRate;
     [RszVersion('<', EfxVersion.RE4, EndAt = nameof(unkn2_32))]
 	public float unkn2_24;
 	public float unkn2_25;
@@ -531,8 +531,8 @@ public partial class EFXAttributeTypeRibbonFixEnd : EFXAttribute
 	public float AlphaRate;
     [RszVersion(EfxVersion.RE4)]
 	public uint Flags;
-	public via.Range SizeScalar;
-	public via.Range WidthSize;
+	public CenterSpread SizeScalar;
+	public CenterSpread WidthSize;
 	[RszVersion(EfxVersion.MHWilds)]
 	public uint Flags2_Wilds;
 	public float TextureRepeatNum;
@@ -546,7 +546,7 @@ public partial class EFXAttributeTypeRibbonFixEnd : EFXAttribute
 	// 疑为 BasingPoint（与 Chain / RibbonLength 同位置）；CPU 代码不读。
 	public via.Range BasingPoint;
 	// 释放前的帧数（60 Hz 步），在两个值之间均匀取（3d91b08、3d92959）；0 = 永不释放。
-	public via.RangeI ReleaseFrame;
+	public MinMaxI ReleaseFrame;
 	// 点数：每帧加一个，直到这个数（官方 92% 为 2，即一条直线）。
 	[RszVersion('<', EfxVersion.MHWilds)]
 	public uint ShapeDivision;
@@ -708,8 +708,8 @@ public partial class EFXAttributeTypeRibbonFollow : EFXAttribute
 
 	[RszVersion(EfxVersion.RE4)]
     public uint Flags;
-    public via.Range SizeScalar;
-    public via.Range WidthSize;
+    public CenterSpread SizeScalar;
+    public CenterSpread WidthSize;
 
     public float TextureRepeatNum;
 	[RszVersion(nameof(Version), ">=", EfxVersion.RE2, "&&", nameof(Version), "<", EfxVersion.RE8)]
@@ -727,7 +727,7 @@ public partial class EFXAttributeTypeRibbonFollow : EFXAttribute
 	// [RszVersion(nameof(Version), "<", EfxVersion.RE2, "||", nameof(Version), ">", EfxVersion.RE8)]
 
 	// {s, r} 范围，单位米，每个粒子出生时 s ± r 抽样（仅定长绳模式使用）。
-    public via.Range StretchDistance;
+    public CenterSpread StretchDistance;
 
 	// RE4 的三个计数依次是：历史点数（夹在 [2,1000]，同 TypeRibbonLength.ShapeDivision）、相邻历史点间插入的样条点数、
 	// 采样间隔帧数（0 = 每帧）。旧代码把它们叫 Unkn / ShapeDivision / SplineDivision，名字整体错开一格。
@@ -763,7 +763,7 @@ public partial class EFXAttributeTypeRibbonFollow : EFXAttribute
     public float FadeByTwistMax;
 
     [RszVersion(EfxVersion.RE8)]
-    public via.Range GhostStretch;
+    public MinExtra GhostStretch;
 }
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.TypeRibbonFollowExpression, EfxVersion.DMC5, EfxVersion.DD2)]
 public partial class EFXAttributeTypeRibbonFollowExpression : EFXAttribute, IExpressionAttribute
@@ -984,7 +984,7 @@ public partial class EFXAttributeTypeRibbonTrail : EFXAttribute
 
 	[RszVersion(">", EfxVersion.RE4)] // TODO verify which field should be gone
     public uint Flags;
-    public via.Range WidthSize;
+    public CenterSpread WidthSize;
 	[RszVersion('<', EfxVersion.RERT)]
     public uint FlagsDmc5; // could be intervalFrame or division?
 	[RszVersion(EfxVersion.RERT, EndAt = nameof(Division))]

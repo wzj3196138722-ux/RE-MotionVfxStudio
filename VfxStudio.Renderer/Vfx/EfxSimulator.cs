@@ -374,23 +374,23 @@ public sealed class EfxSimulator
                 case EFXAttributeSpawn sp:
                 {
                     st.MaxAliveParticles = sp.MaxParticles > 0 ? Math.Clamp((int)sp.MaxParticles, 1, 32) : 24;
-                    st.BurstCount = Math.Clamp(rng.RandInt(sp.SpawnNum.x, sp.SpawnNum.y), 0, st.MaxAliveParticles);
-                    st.IntervalFrames = Math.Max(0, rng.RandInt(sp.IntervalFrame.x, sp.IntervalFrame.y));
-                    st.DelayFrames = Math.Max(0, rng.RandInt(sp.EmitterDelayFrame.x, sp.EmitterDelayFrame.y));
-                    st.MaxLoops = Math.Max(0, rng.SampleIntPlusMinus(sp.LoopNum.r, sp.LoopNum.s));
+                    st.BurstCount = Math.Clamp(rng.RandInt(sp.SpawnNum.min, sp.SpawnNum.max), 0, st.MaxAliveParticles);
+                    st.IntervalFrames = Math.Max(0, rng.RandInt(sp.IntervalFrame.min, sp.IntervalFrame.max));
+                    st.DelayFrames = Math.Max(0, rng.RandInt(sp.EmitterDelayFrame.min, sp.EmitterDelayFrame.max));
+                    st.MaxLoops = Math.Max(0, rng.SampleIntPlusMinus(sp.LoopNum.min, sp.LoopNum.extra));
                     st.NextSpawnFrame = st.DelayFrames;
                     break;
                 }
 
                 case EFXAttributeLife lf:
                 {
-                    st.AppearMin = lf.AppearFrame.r;
-                    st.AppearMax = lf.AppearFrame.s;
-                    int keepHold = Math.Max(0, lf.KeepHoldFrame.r);
-                    st.KeepMin = Math.Max(1, lf.KeepFrame.r + keepHold);
-                    st.KeepMax = Math.Max(1, lf.KeepFrame.s + Math.Max(keepHold, lf.KeepHoldFrame.s));
-                    st.VanishMin = lf.VanishFrame.r;
-                    st.VanishMax = lf.VanishFrame.s;
+                    st.AppearMin = lf.AppearFrame.min;
+                    st.AppearMax = lf.AppearFrame.max;
+                    int keepHold = Math.Max(0, lf.KeepHoldFrame.min);
+                    st.KeepMin = Math.Max(1, lf.KeepFrame.min + keepHold);
+                    st.KeepMax = Math.Max(1, lf.KeepFrame.max + Math.Max(keepHold, lf.KeepHoldFrame.max));
+                    st.VanishMin = lf.VanishFrame.min;
+                    st.VanishMax = lf.VanishFrame.max;
                     break;
                 }
 
@@ -399,14 +399,14 @@ public sealed class EfxSimulator
                     st.EmitterShape = es.ShapeType;
                     // EmitterShape3D ranges are literal (min, max) pairs in
                     // the reference model, unlike the usual static/random fields.
-                    st.RangeXMin = es.RangeX.s; st.RangeXMax = es.RangeX.r;
-                    st.RangeYMin = es.RangeY.s; st.RangeYMax = es.RangeY.r;
-                    st.RangeZMin = es.RangeZ.s; st.RangeZMax = es.RangeZ.r;
+                    st.RangeXMin = es.RangeX.inner; st.RangeXMax = es.RangeX.outer;
+                    st.RangeYMin = es.RangeY.inner; st.RangeYMax = es.RangeY.outer;
+                    st.RangeZMin = es.RangeZ.inner; st.RangeZMax = es.RangeZ.outer;
                     st.ShapeUseExtension = es.UseExtension;
-                    st.ShapeHorizontalStart = es.ScaleHorizontal.s;
-                    st.ShapeHorizontalSpan = es.ScaleHorizontal.r;
-                    st.ShapeVerticalStart = es.ScaleVertical.s;
-                    st.ShapeVerticalSpan = es.ScaleVertical.r;
+                    st.ShapeHorizontalStart = es.ScaleHorizontal.start;
+                    st.ShapeHorizontalSpan = es.ScaleHorizontal.span;
+                    st.ShapeVerticalStart = es.ScaleVertical.start;
+                    st.ShapeVerticalSpan = es.ScaleVertical.span;
                     st.ShapeDivideHorizontal = (int)Math.Min(es.RangeDivideHorizontalNum, 4096u);
                     st.ShapeDivideVertical = (int)Math.Min(es.RangeDivideVerticalNum, 4096u);
                     break;
@@ -416,39 +416,39 @@ public sealed class EfxSimulator
                 {
                     st.HasVelocity3D = true;
                     st.VelocityFlags = vel.Flags;
-                    Vector3 rawDir = new Vector3(vel.DirectionVectorX.s, vel.DirectionVectorY.s, vel.DirectionVectorZ.s);
+                    Vector3 rawDir = new Vector3(vel.DirectionVectorX.center, vel.DirectionVectorY.center, vel.DirectionVectorZ.center);
                     st.VelocityDir = rawDir.LengthSquared() > 1e-6f
                         ? Vector3.Normalize(rawDir)
                         : Vector3.UnitY;
-                    st.SpeedMin = vel.Speed.s; st.SpeedMax = vel.Speed.r;
-                    st.SpeedCoefMin = vel.SpeedCoef.s == 0f && vel.SpeedCoef.r == 0f ? 1f : vel.SpeedCoef.s;
-                    st.SpeedCoefMax = vel.SpeedCoef.r;
-                    st.GravityMin = vel.GravityRate.s; st.GravityMax = vel.GravityRate.r;
+                    st.SpeedMin = vel.Speed.center; st.SpeedMax = vel.Speed.spread;
+                    st.SpeedCoefMin = vel.SpeedCoef.center == 0f && vel.SpeedCoef.spread == 0f ? 1f : vel.SpeedCoef.center;
+                    st.SpeedCoefMax = vel.SpeedCoef.spread;
+                    st.GravityMin = vel.GravityRate.center; st.GravityMax = vel.GravityRate.spread;
                     break;
                 }
 
                 case EFXAttributeScaleAnim sa:
                 {
                     st.HasScaleAnim = true;
-                    st.ScaleAddOverallMin = sa.SizeScalarAdd.s;
-                    st.ScaleAddOverallMax = sa.SizeScalarAdd.r;
-                    st.ScaleCoefOverallMin = sa.SizeScalarCoef.s == 0f && sa.SizeScalarCoef.r == 0f ? 1f : sa.SizeScalarCoef.s;
-                    st.ScaleCoefOverallMax = sa.SizeScalarCoef.r;
-                    st.ScaleAddMin = new Vector3(sa.SizeXAdd.s, sa.SizeYAdd.s, sa.SizeZAdd.s);
-                    st.ScaleAddMax = new Vector3(sa.SizeXAdd.r, sa.SizeYAdd.r, sa.SizeZAdd.r);
+                    st.ScaleAddOverallMin = sa.SizeScalarAdd.center;
+                    st.ScaleAddOverallMax = sa.SizeScalarAdd.spread;
+                    st.ScaleCoefOverallMin = sa.SizeScalarCoef.center == 0f && sa.SizeScalarCoef.spread == 0f ? 1f : sa.SizeScalarCoef.center;
+                    st.ScaleCoefOverallMax = sa.SizeScalarCoef.spread;
+                    st.ScaleAddMin = new Vector3(sa.SizeXAdd.center, sa.SizeYAdd.center, sa.SizeZAdd.center);
+                    st.ScaleAddMax = new Vector3(sa.SizeXAdd.spread, sa.SizeYAdd.spread, sa.SizeZAdd.spread);
                     st.ScaleCoefMin = new Vector3(
-                        sa.SizeXAddCoef.s == 0f && sa.SizeXAddCoef.r == 0f ? 1f : sa.SizeXAddCoef.s,
-                        sa.SizeYAddCoef.s == 0f && sa.SizeYAddCoef.r == 0f ? 1f : sa.SizeYAddCoef.s,
-                        sa.SizeZAddCoef.s == 0f && sa.SizeZAddCoef.r == 0f ? 1f : sa.SizeZAddCoef.s);
-                    st.ScaleCoefMax = new Vector3(sa.SizeXAddCoef.r, sa.SizeYAddCoef.r, sa.SizeZAddCoef.r);
+                        sa.SizeXAddCoef.center == 0f && sa.SizeXAddCoef.spread == 0f ? 1f : sa.SizeXAddCoef.center,
+                        sa.SizeYAddCoef.center == 0f && sa.SizeYAddCoef.spread == 0f ? 1f : sa.SizeYAddCoef.center,
+                        sa.SizeZAddCoef.center == 0f && sa.SizeZAddCoef.spread == 0f ? 1f : sa.SizeZAddCoef.center);
+                    st.ScaleCoefMax = new Vector3(sa.SizeXAddCoef.spread, sa.SizeYAddCoef.spread, sa.SizeZAddCoef.spread);
                     break;
                 }
 
                 case EFXAttributeRotateAnim ra:
                 {
                     st.HasRotateAnim = true;
-                    st.RotateAddMin = new Vector3(ra.RotationAddX.s, ra.RotationAddY.s, ra.RotationAddZ.s);
-                    st.RotateAddMax = new Vector3(ra.RotationAddX.r, ra.RotationAddY.r, ra.RotationAddZ.r);
+                    st.RotateAddMin = new Vector3(ra.RotationAddX.center, ra.RotationAddY.center, ra.RotationAddZ.center);
+                    st.RotateAddMax = new Vector3(ra.RotationAddX.spread, ra.RotationAddY.spread, ra.RotationAddZ.spread);
                     break;
                 }
 
@@ -457,11 +457,11 @@ public sealed class EfxSimulator
                     if (!string.IsNullOrWhiteSpace(uvs.UVSPath))
                     {
                         st.UvsPath = uvs.UVSPath;
-                        st.UvsSeqNo = uvs.SequenceNo.r;
-                        st.UvsPatternMin = uvs.PatternNo.r;
-                        st.UvsPatternMax = uvs.PatternNo.s;
-                        st.UvsPlaySpeedMin = uvs.PlaySpeed.s;
-                        st.UvsPlaySpeedMax = uvs.PlaySpeed.r;
+                        st.UvsSeqNo = uvs.SequenceNo.min;
+                        st.UvsPatternMin = uvs.PatternNo.min;
+                        st.UvsPatternMax = uvs.PatternNo.maxExclusive;
+                        st.UvsPlaySpeedMin = uvs.PlaySpeed.min;
+                        st.UvsPlaySpeedMax = uvs.PlaySpeed.max;
                         st.UvsFlags = uvs.Flags;
                     }
                     break;
@@ -482,11 +482,11 @@ public sealed class EfxSimulator
                     st.BodyKind = EfxRenderBodyKind.Billboard3D;
                     st.BaseColor0 = ColorToVec4(bb2.Color, bb2.ColorRange);
                     st.BaseAlpha = bb2.AlphaRate > 0f ? bb2.AlphaRate : 1.0f;
-                    float sizeScalar = SampleRangeOrDefault(rng, bb2.SizeScalar.s, bb2.SizeScalar.r, 0.35f);
-                    float sx = SampleRangeOrDefault(rng, bb2.SizeX.s, bb2.SizeX.r, 0.35f) * sizeScalar;
-                    float sy = SampleRangeOrDefault(rng, bb2.SizeY.s, bb2.SizeY.r, 0.35f) * sizeScalar;
+                    float sizeScalar = SampleRangeOrDefault(rng, bb2.SizeScalar.center, bb2.SizeScalar.spread, 0.35f);
+                    float sx = SampleRangeOrDefault(rng, bb2.SizeX.center, bb2.SizeX.spread, 0.35f) * sizeScalar;
+                    float sy = SampleRangeOrDefault(rng, bb2.SizeY.center, bb2.SizeY.spread, 0.35f) * sizeScalar;
                     st.BodyScale = new Vector3(Math.Clamp(sx, 0.03f, 2.5f), Math.Clamp(sy, 0.03f, 2.5f), 1.0f);
-                    float rotZ = rng.SamplePlusMinus(bb2.Rotation.s, bb2.Rotation.r);
+                    float rotZ = rng.SamplePlusMinus(bb2.Rotation.center, bb2.Rotation.spread);
                     st.BodyInitialRot = new Vector3(0f, 0f, rotZ);
                     break;
                 }
@@ -498,14 +498,14 @@ public sealed class EfxSimulator
                     // 头部第 6 个 dword 原先被误命名为 AlphaRate；预览沿用它读的同一槽位，行为不变。AlphaRate 的真实作用待核。
                     st.BaseAlpha = bb.EdgeBlendRange > 0f ? bb.EdgeBlendRange : 1.0f;
                     st.RollBillboardSize = true;
-                    st.BillboardSizeX = bb.SizeX.s;
-                    st.BillboardSizeXRandom = bb.SizeX.r;
-                    st.BillboardSizeY = bb.SizeY.s;
-                    st.BillboardSizeYRandom = bb.SizeY.r;
-                    st.BillboardScalar = bb.SizeScalar.s;
-                    st.BillboardScalarRandom = bb.SizeScalar.r;
-                    st.BillboardRotation = bb.Rotation.s;
-                    st.BillboardRotationRandom = bb.Rotation.r;
+                    st.BillboardSizeX = bb.SizeX.center;
+                    st.BillboardSizeXRandom = bb.SizeX.spread;
+                    st.BillboardSizeY = bb.SizeY.center;
+                    st.BillboardSizeYRandom = bb.SizeY.spread;
+                    st.BillboardScalar = bb.SizeScalar.center;
+                    st.BillboardScalarRandom = bb.SizeScalar.spread;
+                    st.BillboardRotation = bb.Rotation.center;
+                    st.BillboardRotationRandom = bb.Rotation.spread;
                     st.BodyScale = Vector3.One;
                     break;
                 }
@@ -536,14 +536,14 @@ public sealed class EfxSimulator
                     st.BodyKind = EfxRenderBodyKind.Polygon;
                     st.BaseColor0 = ColorToVec4(poly.Color, poly.ColorRange);
                     st.BaseAlpha = poly.AlphaRate > 0f ? poly.AlphaRate : 1.0f;
-                    float sc = SampleRangeOrDefault(rng, poly.SizeScalar.s, poly.SizeScalar.r, 0.35f);
-                    float sx = SampleRangeOrDefault(rng, poly.Width.s, poly.Width.r, 0.35f) * sc;
-                    float sy = SampleRangeOrDefault(rng, poly.Height.s, poly.Height.r, 0.35f) * sc;
+                    float sc = SampleRangeOrDefault(rng, poly.SizeScalar.center, poly.SizeScalar.spread, 0.35f);
+                    float sx = SampleRangeOrDefault(rng, poly.Width.center, poly.Width.spread, 0.35f) * sc;
+                    float sy = SampleRangeOrDefault(rng, poly.Height.center, poly.Height.spread, 0.35f) * sc;
                     st.BodyScale = new Vector3(Math.Clamp(sx, 0.03f, 2.5f), Math.Clamp(sy, 0.03f, 2.5f), 1.0f);
                     st.BodyInitialRot = new Vector3(
-                        rng.SamplePlusMinus(poly.RotationX.s, poly.RotationX.r),
-                        rng.SamplePlusMinus(poly.RotationY.s, poly.RotationY.r),
-                        rng.SamplePlusMinus(poly.RotationZ.s, poly.RotationZ.r));
+                        rng.SamplePlusMinus(poly.RotationX.center, poly.RotationX.spread),
+                        rng.SamplePlusMinus(poly.RotationY.center, poly.RotationY.spread),
+                        rng.SamplePlusMinus(poly.RotationZ.center, poly.RotationZ.spread));
                     break;
                 }
 
@@ -581,14 +581,14 @@ public sealed class EfxSimulator
                     st.BaseColor0 = ColorToVec4(rl.Color, rl.ColorRange);
                     st.BaseColor1 = ColorToVec4(rl.HeadColor, rl.ColorPlace1);
                     st.BaseAlpha = rl.AlphaRate > 0f ? rl.AlphaRate : 1.0f;
-                    float sc = SampleRangeOrDefault(rng, rl.SizeScalar.s, rl.SizeScalar.r, 1.0f);
-                    st.RibbonLengthVal = Math.Clamp(SampleRangeOrDefault(rng, rl.Length.s, rl.Length.r, 0.7f) * sc, 0.08f, 3.0f);
-                    st.RibbonWidth0 = Math.Clamp(SampleRangeOrDefault(rng, rl.WidthSize.s, rl.WidthSize.r, 0.16f) * sc, 0.02f, 1.2f);
+                    float sc = SampleRangeOrDefault(rng, rl.SizeScalar.center, rl.SizeScalar.spread, 1.0f);
+                    st.RibbonLengthVal = Math.Clamp(SampleRangeOrDefault(rng, rl.Length.center, rl.Length.spread, 0.7f) * sc, 0.08f, 3.0f);
+                    st.RibbonWidth0 = Math.Clamp(SampleRangeOrDefault(rng, rl.WidthSize.center, rl.WidthSize.spread, 0.16f) * sc, 0.02f, 1.2f);
                     st.RibbonWidth1 = st.RibbonWidth0 * 0.35f;
                     Vector3 dir = new Vector3(
-                        rng.SamplePlusMinus(rl.DirX.s, rl.DirX.r),
-                        rng.SamplePlusMinus(rl.DirY.s, rl.DirY.r),
-                        rng.SamplePlusMinus(rl.DirZ.s, rl.DirZ.r));
+                        rng.SamplePlusMinus(rl.DirX.center, rl.DirX.spread),
+                        rng.SamplePlusMinus(rl.DirY.center, rl.DirY.spread),
+                        rng.SamplePlusMinus(rl.DirZ.center, rl.DirZ.spread));
                     st.RibbonDirVal = dir.LengthSquared() > 1e-6f ? Vector3.Normalize(dir) : Vector3.UnitY;
                     st.MaxTrailPoints = Math.Clamp((int)rl.ShapeDivision, 2, 16);
                     break;
@@ -620,9 +620,9 @@ public sealed class EfxSimulator
                     st.BaseColor0 = ColorToVec4(rf.Color, rf.ColorRange);
                     st.BaseColor1 = ColorToVec4(rf.HeadColor, rf.ColorPlace1);
                     st.BaseAlpha = rf.AlphaRate > 0f ? rf.AlphaRate : 1.0f;
-                    float sc = SampleRangeOrDefault(rng, rf.SizeScalar.s, rf.SizeScalar.r, 1.0f);
+                    float sc = SampleRangeOrDefault(rng, rf.SizeScalar.center, rf.SizeScalar.spread, 1.0f);
                     st.MaxTrailPoints = 16;
-                    st.RibbonWidth0 = Math.Clamp(SampleRangeOrDefault(rng, rf.WidthSize.s, rf.WidthSize.r, 0.2f) * sc, 0.03f, 1.2f);
+                    st.RibbonWidth0 = Math.Clamp(SampleRangeOrDefault(rng, rf.WidthSize.center, rf.WidthSize.spread, 0.2f) * sc, 0.03f, 1.2f);
                     st.RibbonWidth1 = st.RibbonWidth0 * 0.2f;
                     break;
                 }
@@ -672,7 +672,7 @@ public sealed class EfxSimulator
                     st.BaseColor1 = st.BaseColor0;
                     st.BaseAlpha = rt.AlphaRate > 0f ? rt.AlphaRate : 1.0f;
                     st.MaxTrailPoints = Math.Clamp((int)(rt.Division > 2 ? rt.Division : 16), 4, 24);
-                    st.RibbonWidth0 = Math.Clamp(SampleRangeOrDefault(rng, rt.WidthSize.s, rt.WidthSize.r, 0.22f), 0.03f, 1.2f);
+                    st.RibbonWidth0 = Math.Clamp(SampleRangeOrDefault(rng, rt.WidthSize.center, rt.WidthSize.spread, 0.22f), 0.03f, 1.2f);
                     st.RibbonWidth1 = st.RibbonWidth0 * 0.2f;
                     break;
                 }
@@ -684,7 +684,7 @@ public sealed class EfxSimulator
                     st.BaseColor0 = ColorToVec4(pt.Color, pt.ColorRange);
                     st.BaseColor1 = ColorToVec4(pt.HeadColor, pt.Place1);
                     st.BaseAlpha = pt.AlphaRate > 0f ? pt.AlphaRate : 1.0f;
-                    st.RibbonLengthVal = Math.Clamp(SampleRangeOrDefault(rng, pt.Length.s, pt.Length.r, 0.85f), 0.10f, 3.0f);
+                    st.RibbonLengthVal = Math.Clamp(SampleRangeOrDefault(rng, pt.Length.center, pt.Length.spread, 0.85f), 0.10f, 3.0f);
                     st.RibbonWidth0 = Math.Clamp(st.RibbonLengthVal * 0.15f, 0.04f, 0.6f);
                     st.RibbonWidth1 = st.RibbonWidth0 * 0.4f;
                     st.RibbonDirVal = AxisTypeToVec3((int)pt.Axis);
@@ -700,18 +700,18 @@ public sealed class EfxSimulator
                     {
                         st.BaseColor0 = st.MeshMaterial.TintColor;
                     }
-                    float mul = SampleRangeOrDefault(rng, tm2.SizeScalar.s, tm2.SizeScalar.r, 1.0f);
-                    float sx = SampleRangeOrDefault(rng, tm2.SizeX.s, tm2.SizeX.r, 1.0f) * mul;
-                    float sy = SampleRangeOrDefault(rng, tm2.SizeY.s, tm2.SizeY.r, 1.0f) * mul;
-                    float sz = SampleRangeOrDefault(rng, tm2.SizeZ.s, tm2.SizeZ.r, 1.0f) * mul;
+                    float mul = SampleRangeOrDefault(rng, tm2.SizeScalar.center, tm2.SizeScalar.spread, 1.0f);
+                    float sx = SampleRangeOrDefault(rng, tm2.SizeX.center, tm2.SizeX.spread, 1.0f) * mul;
+                    float sy = SampleRangeOrDefault(rng, tm2.SizeY.center, tm2.SizeY.spread, 1.0f) * mul;
+                    float sz = SampleRangeOrDefault(rng, tm2.SizeZ.center, tm2.SizeZ.spread, 1.0f) * mul;
                     st.BodyScale = new Vector3(
                         Math.Clamp(sx, 0.02f, 5.0f),
                         Math.Clamp(sy, 0.02f, 5.0f),
                         Math.Clamp(sz, 0.02f, 5.0f));
                     st.BodyInitialRot = new Vector3(
-                        rng.SamplePlusMinus(tm2.RotationX.s, tm2.RotationX.r),
-                        rng.SamplePlusMinus(tm2.RotationY.s, tm2.RotationY.r),
-                        rng.SamplePlusMinus(tm2.RotationZ.s, tm2.RotationZ.r));
+                        rng.SamplePlusMinus(tm2.RotationX.center, tm2.RotationX.spread),
+                        rng.SamplePlusMinus(tm2.RotationY.center, tm2.RotationY.spread),
+                        rng.SamplePlusMinus(tm2.RotationZ.center, tm2.RotationZ.spread));
                     break;
                 }
 

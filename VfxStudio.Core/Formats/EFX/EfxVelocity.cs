@@ -85,26 +85,26 @@ public partial class EFXAttributeVelocity3D : EFXAttribute
 
 	[RszVersion(EfxVersion.RE2)]
 	public uint Flags;
-	public via.Range DirectionVectorX;
-    public via.Range DirectionVectorY;
-    public via.Range DirectionVectorZ;
-    public via.Range Speed;
-    public via.Range SpeedCoef;
+	public CenterSpread DirectionVectorX;
+    public CenterSpread DirectionVectorY;
+    public CenterSpread DirectionVectorZ;
+    public CenterSpread Speed;
+    public CenterSpread SpeedCoef;
     [RszVersion(EfxVersion.RE4)]
-    public via.RangeI SpeedDelayFrame;
+    public CenterSpreadI SpeedDelayFrame;
 
     public Vector3 Offset;
     public Vector3 Size;
     public VelocityType VelocityType;
-    public via.Range GravityRate;
+    public CenterSpread GravityRate;
     [RszVersion(EfxVersion.RE4)]
-    public via.RangeI GravityDelayFrame;
+    public CenterSpreadI GravityDelayFrame;
 
     [RszVersion(EfxVersion.RE2, EndAt = nameof(Spread))]
-    public via.Range InheritRate;
-    public via.Range InheritDistance;
+    public CenterSpread InheritRate;
+    public ClampRange InheritDistance;
     [RszVersion(EfxVersion.RE8)]
-    public via.Range Spread;
+    public MinExtra Spread;
 }
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.Velocity3DDelayFrame, EfxVersion.RE4)]
 public partial class EFXAttributeVelocity3DDelayFrame : EFXAttribute
