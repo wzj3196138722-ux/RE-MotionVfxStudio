@@ -178,61 +178,43 @@ public partial class EFXAttributeTransform3DModifier : ReeLib.Efx.EFXAttribute
 {
     public EFXAttributeTransform3DModifier() : base(EfxAttributeType.Transform3DModifier) { }
 
-    public uint unkn0;
-    public float unkn1;
-    public float unkn2;
-    public float unkn3;
-    public float unkn4;
-    public float unkn5;
-    public float unkn6;
-    public float unkn7;
-    public float unkn8;
-    public float unkn9;
-    public float unkn10;
-    public float unkn11;
-    public float unkn12;
-    public float unkn13;
-    public float unkn14;
-    public float unkn15;
-    public float unkn16;
-    public float unkn17;
-    public float unkn18;
-    public float unkn19;
-    public float unkn20;
-    public float unkn21;
-    public UndeterminedFieldType unkn22;
-    public float unkn23;
-    public float unkn24;
-    public float unkn25;
-    public UndeterminedFieldType unkn26;
-    public float unkn27;
-    public float unkn28;
-    public float unkn29;
-    public float unkn30;
-    public float unkn31;
-    public float unkn32;
-    public float unkn33;
-    public UndeterminedFieldType unkn34;
-    public float unkn35;
-    public float unkn36;
-    public float unkn37;
-    public float unkn38;
-    public float unkn39;
-    public float unkn40;
-    public float unkn41;
-    public float unkn42;
-    public float unkn43;
-    public float unkn44;
-    public float unkn45;
-    public UndeterminedFieldType unkn46;
-    public float unkn47;
-    public UndeterminedFieldType unkn48;
-    public float unkn49;
-    public UndeterminedFieldType unkn50;
-    public float unkn51;
-    public float unkn52;
-    public float unkn53;
-    public UndeterminedFieldType unkn54;
+    // re4.exe：vtable 7a14100，加载器 3d9a850 读 UniqueID + 0xdc 字节，每帧 3d9b300。解析器是空壳，没有引擎名，
+    // 名字按作用起（旧名 unkn0..unkn54）。发射器级：每帧改写同一 entry 的 Transform3D。字节布局只在 RE4 上核对过。
+    // 所有区间对都是 center + (2u−1)·spread；旋转是弧度。
+    // Flags：bit0-2 = 平移/旋转/缩放启用速度，bit3-5 = 速度随机正负号（需 bit0-2），
+    // bit6-8 = 用 *Start 替换 Transform3D 的平移/旋转/缩放（三个轴一起替换）。
+    public uint Flags;
+
+    // 起始值：对应组的 bit6-8 置位时替换 Transform3D 的值。
+    public CenterSpread TranslationStartX;
+    public CenterSpread TranslationStartY;
+    public CenterSpread TranslationStartZ;
+    public CenterSpread RotationStartX;
+    public CenterSpread RotationStartY;
+    public CenterSpread RotationStartZ;
+    public CenterSpread ScaleStartX;
+    public CenterSpread ScaleStartY;
+    public CenterSpread ScaleStartZ;
+
+    // 每轴 {速度, 系数}：每 1/60 秒一帧 值 += n·v，然后 v *= Coef^n（n = dt·60）。速度单位是每帧，不是每秒；缩放不夹到 0。
+    public CenterSpread TranslationVelocityX;
+    public CenterSpread TranslationVelocityXCoef;
+    public CenterSpread TranslationVelocityY;
+    public CenterSpread TranslationVelocityYCoef;
+    public CenterSpread TranslationVelocityZ;
+    public CenterSpread TranslationVelocityZCoef;
+    public CenterSpread RotationVelocityX;
+    public CenterSpread RotationVelocityXCoef;
+    public CenterSpread RotationVelocityY;
+    public CenterSpread RotationVelocityYCoef;
+    public CenterSpread RotationVelocityZ;
+    public CenterSpread RotationVelocityZCoef;
+    public CenterSpread ScaleVelocityX;
+    public CenterSpread ScaleVelocityXCoef;
+    public CenterSpread ScaleVelocityY;
+    public CenterSpread ScaleVelocityYCoef;
+    public CenterSpread ScaleVelocityZ;
+    public CenterSpread ScaleVelocityZCoef;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.PtTransform2D, EfxVersion.DMC5, EfxVersion.RE8)]

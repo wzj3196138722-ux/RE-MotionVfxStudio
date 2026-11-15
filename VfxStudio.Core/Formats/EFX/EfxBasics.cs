@@ -318,10 +318,16 @@ public partial class EFXAttributeUVSequenceModifier : EFXAttribute
 {
 	public EFXAttributeUVSequenceModifier() : base(EfxAttributeType.UVSequenceModifier) { }
 
+	// re4.exe：vtable 7a141e8，加载器 3d9c0f0，逐粒子 3d9c260。名字来自解析器。逐粒子覆盖宿主 UVSequence 的播放速度。
+	// Flags 无引擎名：bit0 = 启用；bit1 = 第三个区间是系数（1）还是帧数（0）。
 	public uint Flags;
-	public via.Range PlaySpeedInit;
-    public via.Range PlaySpeedFinal;
-    public via.Range PlaySpeedChangeTimeCoef;
+	// 出生时的播放速度，lerp(min, max, u)。
+	public MinMax PlaySpeedInit;
+	// 最终稳定的播放速度。
+    public MinMax PlaySpeedFinal;
+	// 引擎里同一对数有两个名字：PlaySpeedChangeTime（bit1 = 0，用这么多帧从 Init 线性变到 Final）/
+	// PlaySpeedChangeCoef（bit1 = 1，速度 = Final + (Init − Final)·Coef^t）。官方多为 bit1 = 1、Coef 0.94–0.995。
+    public MinMax PlaySpeedChangeTimeCoef;
 }
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.UVSequenceExpression, EfxVersion.DMC5, EfxVersion.RE4)]
 public partial class EFXAttributeUVSequenceExpression : EFXAttribute, IExpressionAttribute
