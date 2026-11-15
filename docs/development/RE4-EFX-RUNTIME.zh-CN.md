@@ -341,7 +341,7 @@ E.seed = seed
 
 | 开关 | 影响 | 状态 | 依据 |
 |---|---|---|---|
-| `[g+0xeb2]` = EffectManager LegacyMode2018（唯一写入者 setLegacyMode2018 的包装 c012c0 → e2e070） | Spawn 倒计时：关时首批在 tick `max(D,1)`、周期 `max(I,1)`，开时为 `D+1`、`I+1`（3e0e840）；ScaleAnim：开时抽样后 Add 换成 `Add/Coef`（首帧增量为 Add）；`E.state` 不再推进；Velocity3D GPU 常量另有分支（3d1abc9，未追踪） | 已确认 | FRG, SP, SCA, ORD |
+| `[g+0xeb2]` = EffectManager LegacyMode2018（写入者：setLegacyMode2018 的包装 c012c0 → e2e070；启动时从配置复制 `eb2 = cfg+0x530`（7896b12），`[g+0xeb0] = cfg+0x51d`（7896afe）；构造函数 3cdf250 先清零。发行版的实际取值需要实机读取） | Spawn 倒计时：关时首批在 tick `max(D,1)`、周期 `max(I,1)`，开时为 `D+1`、`I+1`（3e0e840）；ScaleAnim：开时抽样后 Add 换成 `Add/Coef`（首帧增量为 Add）；`E.state` 不再推进；Velocity3D GPU 常量另有分支（3d1abc9，未追踪） | 已确认 | FRG, SP, SCA, ORD |
 | `[g+0xeb0]`（推定为 LegacyMode2016） | 类型分派在积分之前（0）或碰撞之后（≠ 0） | 已确认（作用）；名字部分待确认 | ORD |
 
 两个字节在发行版中的值都未知。**折中实现**：模拟器都按 0 处理，并保留开关。
@@ -661,7 +661,7 @@ X = max(0, f(t, baseX, SizeXAdd, SizeXAddCoef));  Y、Z 同理
 ```
 
 - 每帧从基值重算，不是增量累加；与帧率无关。首帧增量为 `Add·Coef`（LegacyMode2018 = 1 时为 `Add`，§1.8）。c < 1 时收敛于 `base + Add·c/(1−c)`。
-- **Coef = 0 冻结该槽**（Add 失效，不当作 1）。Coef < 0 时 `powf` 得 NaN，夹紧挡不住。
+- **Coef = 0 冻结该槽**（Add 失效，不当作 1）。Coef < 0 时：t 恰为整数（60 fps）`powf` 有定义，尺寸逐帧振荡后收敛；t 非整数（如 50 fps）得 NaN，并写进尺寸槽，夹紧挡不住（Re4Native `exp_scaleanim.py` 原生运行）。
 - 门控：粒子标志 `[p+4] & 0x800`（碰撞冻结）时整段跳过；`[ctx+0x130] & 0x10` 跳过（推定为 GPU 模拟）；`[ctx+0x130] & 0x20` 时每 tick 重走初始化与基值捕获（动画静止），含义未知。
 - GPU 类型把 16 个 float 原样上传（3d1d730），着色器公式未读。
 
