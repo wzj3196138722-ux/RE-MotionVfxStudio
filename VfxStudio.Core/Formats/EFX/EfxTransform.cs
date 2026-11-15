@@ -319,6 +319,11 @@ public partial class EFXAttributeRotateAnim : EFXAttribute
 {
 	public EFXAttributeRotateAnim() : base(EfxAttributeType.RotateAnim) { }
 
+	// re4.exe（vtable 7a0b3a0，加载器 3d1c8e0，逐帧 3d1cb60）。字段名与文本解析器一致。
+	// 出生时每轴抽一次：v = Add.s ± Add.r（弧度/帧，1/60 秒一帧），c = Coef.s ± Coef.r。
+	// 每帧（n = dt·60）：角度 += n·v，再 v *= c^n；**c 为 0 或 1 时都不衰减**（3d1cc71 显式跳过 0）。
+	// Billboard3D 的滚转角 = X + Y（Z 不起作用）；Mesh 用三轴欧拉角。
+	// Flags 只用位 0：每轴各自 50% 概率把 Add 取反（随机方向）；其余位忽略。
 	public uint Flags;
     public via.Range RotationAddX;
     public via.Range RotationAddY;
@@ -375,6 +380,12 @@ public partial class EFXAttributeScaleAnim : EFXAttribute
 {
 	public EFXAttributeScaleAnim() : base(EfxAttributeType.ScaleAnim) { }
 
+	// re4.exe（vtable 7a0b508，加载器 3d1d520，逐帧 3d1d830）。字段名与文本解析器一致。
+	// 出生时每个范围抽一次 s ± r；以 Type 初始化后的尺寸为基准（统一尺寸 +0x80、X/Y/Z +0x84/+0x88/+0x8c）。
+	// 每帧按粒子年龄 t（帧，dt·60 累加）重算：Coef == 1 时 尺寸 = 基准 + Add·t；
+	// 否则 尺寸 = 基准 + Add·Coef·(1 − Coef^t)/(1 − Coef)，Coef < 1 时总增量收敛到 Add·Coef/(1 − Coef)。结果夹在 ≥ 0。
+	// **Coef = 0 时该通道冻结、Add 不起作用**（与 RotateAnim 不同）。统一尺寸与各轴在渲染时相乘。
+	// TypeRibbonLength 的 Y 槽就是条带长度，SizeYAdd 会拉长条带。
     public via.Range SizeScalarAdd;
     public via.Range SizeScalarCoef;
     public via.Range SizeXAdd;

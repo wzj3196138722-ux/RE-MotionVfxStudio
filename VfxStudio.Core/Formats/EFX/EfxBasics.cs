@@ -298,10 +298,17 @@ public partial class EFXAttributeUVSequence : EFXAttribute
 {
 	public EFXAttributeUVSequence() : base(EfxAttributeType.UVSequence) { }
 
+	// re4.exe（vtable 7a0b668，加载器 3d1e030）。引擎名只有 PatternNo、PlaySpeed（文本解析器）；其余沿用原名。
+	// .uvs 里第几个序列：在 [r, s) 内随机（s 不含），只存 8 位。RE4 官方全是 {0,1}。
 	public via.RangeI SequenceNo;
+	// 起始格：在 [r, s) 内随机（s 不含），只存 8 位。不要超过序列的格数。
     public via.RangeI PatternNo;
+	// 在 [s, r] 内均匀取（r 是最大值，不是幅度）；单位：每 1/60 秒前进的格数，1.0 = 60 fps 序列帧。
     public via.Range PlaySpeed;
-	public uint Flags;//<comment="0 - Show only starting frame,1 - Looped Animation, 2 - Play once and disappear after last frame, 3 - Play once and stay on last frame until end of duration in Life struct.">;
+	// 位 0-1 播放模式：0 只显示起始格（忽略 PlaySpeed）、1 循环（从第 0 格重开）、2 播一遍后粒子死亡、3 播一遍停在最后一格。
+	// 位 2-3 水平翻转、位 4-5 垂直翻转、位 6-7 倒放、位 8-9 旋转 90°：各为 0 关、1 总是、2 每粒子随机（3 未定义，别用）。
+	// 位 10 = 相邻格交叉淡入；位 11 写入发射器标志（用途未追）；更高位不读。例：21 = 循环 + 固定水平翻转 + 固定垂直翻转。
+	public uint Flags;
 	[RszInlineWString] public string? UVSPath;
 
     public override string ToString() => $"UVS path: {UVSPath}";
