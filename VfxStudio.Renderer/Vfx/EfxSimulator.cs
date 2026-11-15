@@ -495,7 +495,8 @@ public sealed class EfxSimulator
                 {
                     st.BodyKind = EfxRenderBodyKind.Billboard3D;
                     st.BaseColor0 = ColorToVec4(bb.Color, bb.ColorRange);
-                    st.BaseAlpha = bb.AlphaRate > 0f ? bb.AlphaRate : 1.0f;
+                    // 头部第 6 个 dword 原先被误命名为 AlphaRate；预览沿用它读的同一槽位，行为不变。AlphaRate 的真实作用待核。
+                    st.BaseAlpha = bb.EdgeBlendRange > 0f ? bb.EdgeBlendRange : 1.0f;
                     st.RollBillboardSize = true;
                     st.BillboardSizeX = bb.SizeX.s;
                     st.BillboardSizeXRandom = bb.SizeX.r;
@@ -582,12 +583,12 @@ public sealed class EfxSimulator
                     st.BaseAlpha = rl.AlphaRate > 0f ? rl.AlphaRate : 1.0f;
                     float sc = SampleRangeOrDefault(rng, rl.SizeScalar.s, rl.SizeScalar.r, 1.0f);
                     st.RibbonLengthVal = Math.Clamp(SampleRangeOrDefault(rng, rl.Length.s, rl.Length.r, 0.7f) * sc, 0.08f, 3.0f);
-                    st.RibbonWidth0 = Math.Clamp(SampleRangeOrDefault(rng, rl.Width.s, rl.Width.r, 0.16f) * sc, 0.02f, 1.2f);
+                    st.RibbonWidth0 = Math.Clamp(SampleRangeOrDefault(rng, rl.WidthSize.s, rl.WidthSize.r, 0.16f) * sc, 0.02f, 1.2f);
                     st.RibbonWidth1 = st.RibbonWidth0 * 0.35f;
                     Vector3 dir = new Vector3(
-                        rng.SamplePlusMinus(rl.DirectionX.s, rl.DirectionX.r),
-                        rng.SamplePlusMinus(rl.DirectionY.s, rl.DirectionY.r),
-                        rng.SamplePlusMinus(rl.DirectionZ.s, rl.DirectionZ.r));
+                        rng.SamplePlusMinus(rl.DirX.s, rl.DirX.r),
+                        rng.SamplePlusMinus(rl.DirY.s, rl.DirY.r),
+                        rng.SamplePlusMinus(rl.DirZ.s, rl.DirZ.r));
                     st.RibbonDirVal = dir.LengthSquared() > 1e-6f ? Vector3.Normalize(dir) : Vector3.UnitY;
                     st.MaxTrailPoints = Math.Clamp((int)rl.ShapeDivision, 2, 16);
                     break;
@@ -602,12 +603,12 @@ public sealed class EfxSimulator
                     st.BaseAlpha = grl.AlphaRate > 0f ? grl.AlphaRate : 1.0f;
                     float sc = SampleRangeOrDefault(rng, grl.SizeScalar.s, grl.SizeScalar.r, 1.0f);
                     st.RibbonLengthVal = Math.Clamp(SampleRangeOrDefault(rng, grl.Length.s, grl.Length.r, 0.7f) * sc, 0.08f, 3.0f);
-                    st.RibbonWidth0 = Math.Clamp(SampleRangeOrDefault(rng, grl.Width.s, grl.Width.r, 0.14f) * sc, 0.02f, 1.2f);
+                    st.RibbonWidth0 = Math.Clamp(SampleRangeOrDefault(rng, grl.WidthSize.s, grl.WidthSize.r, 0.14f) * sc, 0.02f, 1.2f);
                     st.RibbonWidth1 = st.RibbonWidth0 * 0.35f;
                     Vector3 dir = new Vector3(
-                        rng.SamplePlusMinus(grl.DirectionX.s, grl.DirectionX.r),
-                        rng.SamplePlusMinus(grl.DirectionY.s, grl.DirectionY.r),
-                        rng.SamplePlusMinus(grl.DirectionZ.s, grl.DirectionZ.r));
+                        rng.SamplePlusMinus(grl.DirX.s, grl.DirX.r),
+                        rng.SamplePlusMinus(grl.DirY.s, grl.DirY.r),
+                        rng.SamplePlusMinus(grl.DirZ.s, grl.DirZ.r));
                     st.RibbonDirVal = dir.LengthSquared() > 1e-6f ? Vector3.Normalize(dir) : Vector3.UnitY;
                     st.MaxTrailPoints = Math.Clamp((int)grl.ShapeDivision, 2, 16);
                     break;
@@ -621,7 +622,7 @@ public sealed class EfxSimulator
                     st.BaseAlpha = rf.AlphaRate > 0f ? rf.AlphaRate : 1.0f;
                     float sc = SampleRangeOrDefault(rng, rf.SizeScalar.s, rf.SizeScalar.r, 1.0f);
                     st.MaxTrailPoints = 16;
-                    st.RibbonWidth0 = Math.Clamp(SampleRangeOrDefault(rng, rf.Width.s, rf.Width.r, 0.2f) * sc, 0.03f, 1.2f);
+                    st.RibbonWidth0 = Math.Clamp(SampleRangeOrDefault(rng, rf.WidthSize.s, rf.WidthSize.r, 0.2f) * sc, 0.03f, 1.2f);
                     st.RibbonWidth1 = st.RibbonWidth0 * 0.2f;
                     break;
                 }
@@ -634,7 +635,7 @@ public sealed class EfxSimulator
                     st.BaseAlpha = rfm.AlphaRate > 0f ? rfm.AlphaRate : 1.0f;
                     float sc = SampleRangeOrDefault(rng, rfm.SizeScalar.s, rfm.SizeScalar.r, 1.0f);
                     st.MaxTrailPoints = 16;
-                    st.RibbonWidth0 = Math.Clamp(SampleRangeOrDefault(rng, rfm.Width.s, rfm.Width.r, 0.2f) * sc, 0.03f, 1.2f);
+                    st.RibbonWidth0 = Math.Clamp(SampleRangeOrDefault(rng, rfm.WidthSize.s, rfm.WidthSize.r, 0.2f) * sc, 0.03f, 1.2f);
                     st.RibbonWidth1 = st.RibbonWidth0 * 0.2f;
                     break;
                 }
@@ -655,7 +656,7 @@ public sealed class EfxSimulator
                 case EFXAttributeTypeRibbonChain rc:
                 {
                     st.BodyKind = EfxRenderBodyKind.RibbonFollow;
-                    st.BaseColor0 = ColorToVec4(rc.color1, rc.color2);
+                    st.BaseColor0 = ColorToVec4(rc.Color, rc.ColorRange);
                     st.BaseColor1 = st.BaseColor0;
                     st.BaseAlpha = 1.0f;
                     st.MaxTrailPoints = 16;
@@ -671,7 +672,7 @@ public sealed class EfxSimulator
                     st.BaseColor1 = st.BaseColor0;
                     st.BaseAlpha = rt.AlphaRate > 0f ? rt.AlphaRate : 1.0f;
                     st.MaxTrailPoints = Math.Clamp((int)(rt.Division > 2 ? rt.Division : 16), 4, 24);
-                    st.RibbonWidth0 = Math.Clamp(SampleRangeOrDefault(rng, rt.Width.s, rt.Width.r, 0.22f), 0.03f, 1.2f);
+                    st.RibbonWidth0 = Math.Clamp(SampleRangeOrDefault(rng, rt.WidthSize.s, rt.WidthSize.r, 0.22f), 0.03f, 1.2f);
                     st.RibbonWidth1 = st.RibbonWidth0 * 0.2f;
                     break;
                 }
@@ -699,10 +700,10 @@ public sealed class EfxSimulator
                     {
                         st.BaseColor0 = st.MeshMaterial.TintColor;
                     }
-                    float mul = SampleRangeOrDefault(rng, tm2.ScaleMultiplier.s, tm2.ScaleMultiplier.r, 1.0f);
-                    float sx = SampleRangeOrDefault(rng, tm2.ScaleX.s, tm2.ScaleX.r, 1.0f) * mul;
-                    float sy = SampleRangeOrDefault(rng, tm2.ScaleY.s, tm2.ScaleY.r, 1.0f) * mul;
-                    float sz = SampleRangeOrDefault(rng, tm2.ScaleZ.s, tm2.ScaleZ.r, 1.0f) * mul;
+                    float mul = SampleRangeOrDefault(rng, tm2.SizeScalar.s, tm2.SizeScalar.r, 1.0f);
+                    float sx = SampleRangeOrDefault(rng, tm2.SizeX.s, tm2.SizeX.r, 1.0f) * mul;
+                    float sy = SampleRangeOrDefault(rng, tm2.SizeY.s, tm2.SizeY.r, 1.0f) * mul;
+                    float sz = SampleRangeOrDefault(rng, tm2.SizeZ.s, tm2.SizeZ.r, 1.0f) * mul;
                     st.BodyScale = new Vector3(
                         Math.Clamp(sx, 0.02f, 5.0f),
                         Math.Clamp(sy, 0.02f, 5.0f),

@@ -19,6 +19,8 @@ public partial class EFXAttributeTypePolygon : EFXAttribute
 
     [RszVersion(EfxVersion.RE4, EndAt = nameof(Flags2))]
     public float AlphaRate;
+	// 世界朝向的四边形（re4.exe 3d6f5e0 用欧拉角 + RotationOrder 构造四元数），不朝相机。
+	// Flags2 0x40 = 朝向跟随运动方向（以 OrientDirectionUpVector 选上方向），0x80 = 锁定（中等置信）。
 	public uint Flags2;
     // [RszVersion("!=", EfxVersion.RE8, EndAt = nameof(RotationZ))]
 	public RotationOrder RotationOrder;
@@ -124,12 +126,17 @@ public partial class EFXAttributeTypePolygonTrail : EFXAttribute
 	public float ColorRate;
 
 	public float Intensity;
-	public float EdgeBlendRate;
+	// 引擎名 EdgeBlendRange（旧名 EdgeBlendRate）。
+	public float EdgeBlendRange;
 	public float AlphaRate;
+	// re4.exe（加载器 3d73330 读 0x5c 字节，每帧 3d75aa0）：沿 Axis 伸出、长 Length 的线段随运动扫出的面（挥击残影）。
+	// 位 3 = 定长：路径按等弧长重采样，最长弧 ≈ Length × 缩放 × StretchDistance，不读 IntervalFrame；
+	// 位 3 关 = 每 IntervalFrame 帧压一个样本。0x60 = 用 HeadColor/Place1/Place2 给顶点上色。名字不是引擎名（旧名 re4_unkn）。
     [RszVersion(EfxVersion.RE4)]
-	public uint re4_unkn;
+	public uint TrailFlags;
+	// 传给头部着色器参数构造，解析器名 ShadowMultiplier（旧名 sb_unkn0）。
     [RszVersion(EfxVersion.RERT)]
-	public float sb_unkn0;
+	public float ShadowMultiplier;
 
 	public AxisType Axis;
 	public via.Range Length;
@@ -214,12 +221,17 @@ public partial class EFXAttributeTypeGpuPolygon : EFXAttribute
     public via.Color ColorRange;
     public float ColorRate;
     public float Intensity;
-    public float EdgeBlendRate;
+	// 引擎名 EdgeBlendRange（旧名 EdgeBlendRate）。
+    public float EdgeBlendRange;
     public float AlphaRate;
-    [RszVersion(EfxVersion.RE4)]
-    public uint Flags;
-    [RszVersion(EfxVersion.RE4)]
+	// re4.exe（加载器 3db8d20 读 0x5c 字节）：头部之后是三个标量再接 6 个范围，与 GpuBillboard 相同的顺序：
+	// ParticleNum（传给 GPU 初始化 3e1bbc0）、Flags（2 位写入发射器标志）、re4Ukn（也传给 GPU 初始化，含义未知）。
+	// 旧代码把前两个名字写反，并把 re4Ukn 当成 RotationX.s，之后所有范围错开半个、最后一个 float 被当成 OrientDirectionUpVector。
+	// RE4 起没有 OrientDirectionUpVector。
+    [RszVersion(EfxVersion.RE4, EndAt = nameof(re4Ukn))]
     public uint ParticleNum;
+    public uint Flags;
+    public uint re4Ukn;
 
     public via.Range RotationX;
     public via.Range RotationY;
@@ -227,7 +239,6 @@ public partial class EFXAttributeTypeGpuPolygon : EFXAttribute
     public via.Range SizeScalar;
     public via.Range Width;
     public via.Range Height;
-    [RszVersion(EfxVersion.RE4)] public AxisXYZ OrientDirectionUpVector;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.TypeGpuPolygonExpression, EfxVersion.DD2)]

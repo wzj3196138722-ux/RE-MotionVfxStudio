@@ -22,7 +22,8 @@ public partial class EFXAttributeTypeBillboard2D : ReeLib.Efx.EFXAttribute
     public via.Range SizeScalar;
     public via.Range SizeX;
     public via.Range SizeY;
-    public Repeat Repeat;  // TODO verify if correct field (used in dmc5 with integer 3) - Repeat_UV?
+    // 低 2 位写入粒子标志位 30-31（re4.exe 3d1756d）；语料 0 / 3。作用在渲染侧，未追。
+    public Repeat Repeat;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.TypeBillboard2DExpression, EfxVersion.RE7, EfxVersion.RERT, EfxVersion.RE4, EfxVersion.DD2)]
@@ -64,13 +65,20 @@ public partial class EFXAttributeTypeBillboard3D : EFXAttribute
 {
 	public EFXAttributeTypeBillboard3D() : base(EfxAttributeType.TypeBillboard3D) { }
 
+	// 共用颜色头部（re4.exe 3e0eae0 原样复制 7 个 dword，3e0ebe0 上传，文本解析器 3d0e520 给出引擎名）：
+	// Flags 低 4 位 = 混合方式（BlendType：0 AlphaBlend、1 Physical、2 AddContrast、3 EdgeBlend、4 Multiply），
+	// 0x10 = 出生时颜色在 Color 与 ColorRange 间随机（一个 u 共用四通道），0x20 = 着色器开关（含义未知）。
 	public uint Flags;
 	public via.Color Color;
+	// EdgeBlend 时引擎称 EdgeOuterColor。
 	public via.Color ColorRange;
+	// 同一槽位按混合方式另有引擎名：ContrastRate / InnerIntensity / MultiplyColorRate / EmissionRate。
 	public float ColorRate;
+	// 引擎没有 "Intensity" 这个名字；该槽位按混合方式叫 BackIntensity / OuterIntensity / MultiplyBlackRate。
     public float Intensity;
-    public float AlphaRate;
+	// 头部第 6、7 个 dword 依次是 EdgeBlendRange、AlphaRate（与 Ribbon/Polygon/GpuBillboard 相同；旧代码把两者名字写反了）。
     public float EdgeBlendRange;
+    public float AlphaRate;
 
 	public via.Range Rotation;
     public via.Range SizeScalar;
@@ -79,9 +87,12 @@ public partial class EFXAttributeTypeBillboard3D : EFXAttribute
 
 	[RszVersion("<", EfxVersion.RERT)]
     public ShadowType ShadowType; // TODO verify wilds
+	// 传给头部着色器参数构造（3e0ebe0 的第三参数 → 常量 +0x178），解析器名 ShadowMultiplier。
 	[RszVersion(EfxVersion.RERT)]
-	public float unknDD2; // TODO recheck with other games
+	public float ShadowMultiplier;
 
+	// RE4 里这 4 个字节是一个 u32 位域（加载器 3d18511..）：位 0-2 未知，位 3 = 忽略发射器缩放（语料值 8），
+	// 位 4、5 写入发射器标志，含义未知。字节 1-3 在 RE4 语料里恒为 0。
     [RszVersion(EfxVersion.RERT, EndAt = nameof(Reserved))]
     public byte ParticleIgnoreScale; // TODO is byte/int in MHWs, bool in < MHWs
     public bool EnableGroupColor;
@@ -385,6 +396,9 @@ public partial class EFXAttributeTypeGpuBillboard : EFXAttribute
     public float EdgeBlendRange;
     public float AlphaRate;
 
+	// BlendFlags 规则同 Billboard3D.Flags：低 4 位 = 混合方式（3e1ab6d 存成 4 位渲染状态），0x10 = 颜色随机（3d88de0）。
+	// ParticleNum = GPU 粒子池容量，向上取整到 64 的倍数，每粒子 256 字节（3e0b5b8、3e1bc40）。
+	// Flags 位 0 = 尺寸不乘发射器缩放（3d89137）。
 	[RszVersion(EfxVersion.RE4, EndAt = nameof(Flags))]
     public uint ParticleNum;
     public uint Flags;

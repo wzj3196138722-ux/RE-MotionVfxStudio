@@ -99,20 +99,31 @@ public partial class EFXAttributeTypeMeshV2 : EFXAttribute
     public float ColorRate;
     public via.Color EmissiveColor;
     public float EmissiveRate;
+    // 以下语义来自 re4.exe（vtable 7a0c3a8，逐粒子 3d30b60）。字段名以文本解析器 3d29810 的引擎名为准。
+    // Flags：位 1 = 让 FrontAxis 对准飞行方向（3d313b0）；位 8-9 = 2 位渲染对象状态（语料 256 = 值 1）；
+    // 位 24 = 按顺序轮流取段而不是随机。
+    // MaxPartsNum = 网格序列长度（循环/结束的边界）。
     public uint MaxPartsNum;
+    // 段号取 [r, s)：r = 起始段（含），s = 结束段（不含）；位 24 关时在其中随机取。
     public via.RangeI PartsStartNo;
+    // 在 [s, r] 内均匀取值（不是 s±r），单位：段/帧；PlaySpeedCoef 每帧 powf(coef, dt·60)。
     public via.Range PlaySpeed;
     public via.Range PlaySpeedCoef;
+    // 0 暂停、1 循环、2 播完粒子死亡、3 播完停在最后一段。
     public PlayType PlayType;
     public PlayOrder PlayOrder;
     public RotationOrder RotationOrder;
+    // 弧度，出生时 s ± r 抽样。
     public via.Range RotationX;
     public via.Range RotationY;
     public via.Range RotationZ;
-    public via.Range ScaleX;
-    public via.Range ScaleY;
-    public via.Range ScaleZ;
-    public via.Range ScaleMultiplier;
+    // 各轴尺寸倍率（旧名 ScaleX/Y/Z）。
+    public via.Range SizeX;
+    public via.Range SizeY;
+    public via.Range SizeZ;
+    // 统一尺寸，写入粒子尺寸槽（ScaleAnim 作用于它；旧名 ScaleMultiplier）。
+    public via.Range SizeScalar;
+    // 0 X、1 Y、2 Z（默认 Z）；Flags 位 1 开启时对准飞行方向。
     public AxisXYZ FrontAxis;
     public uint cbSize;
     [RszVersion(EfxVersion.RE4)]
@@ -361,11 +372,16 @@ public partial class EFXAttributeTypeGpuMesh : EFXAttribute
 {
     public EFXAttributeTypeGpuMesh() : base(EfxAttributeType.TypeGpuMesh) { }
     //TODO Fix this for older games
+    // re4.exe（vtable 7a15d20，加载器 3dbb1a0，常量缓冲 3dbc5f0）：GPU 类型，CPU 只把范围交给计算着色器。
+    // 字段名以文本解析器 3dba660 为准（RotationX/Y/Z、SizeX/Y/Z、SizeScalar、PlaySpeed、PlaySpeedCoef、Color、ColorRange）。
+    // Flags：位 2-3 = 与 Mesh 位 8-9 相同的 2 位渲染状态（语料 0x08000004 = 位 2 + 位 27）。
     public uint Flags;
     public uint ParticleNum;
 	[RszVersion(EfxVersion.MHWilds, EndAt = nameof(uknWilds1))]
     public float uknWilds0;
     public uint uknWilds1;
+    // cbSize 与 unkn3 传给渲染网格构造函数的位置，正好对应 Mesh 里 cbSize 和 Flags 位 14-23 的角色，
+    // 两者名字疑似互换（推测，未改名）。
     public uint cbSize;
 	[RszVersion('<', EfxVersion.DD2)]
     public uint unkn3;
@@ -385,10 +401,11 @@ public partial class EFXAttributeTypeGpuMesh : EFXAttribute
     public via.Range RotationX;
     public via.Range RotationY;
     public via.Range RotationZ;
-    public via.Range ScaleX;
-    public via.Range ScaleY;
-    public via.Range ScaleZ;
-    public via.Range ScaleMultiplier;
+    // 引擎名 SizeX/Y/Z、SizeScalar（旧名 ScaleX/Y/Z、ScaleMultiplier）；SizeScalar 可选乘发射器缩放。
+    public via.Range SizeX;
+    public via.Range SizeY;
+    public via.Range SizeZ;
+    public via.Range SizeScalar;
 	[RszVersion(EfxVersion.RE4)]
     public AxisXYZ OrientDirectionUpVector;
     [RszVersion(EfxVersion.DD2)]

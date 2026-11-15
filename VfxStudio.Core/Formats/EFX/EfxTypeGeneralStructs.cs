@@ -10,15 +10,21 @@ public partial class EFXAttributeTypeNoDraw : EFXAttribute
 {
 	public EFXAttributeTypeNoDraw() : base(EfxAttributeType.TypeNoDraw) { }
 
+	// 不绘制；出生时写入粒子的旋转、尺寸、颜色，供子特效 / PtBehavior 使用（re4.exe 3d6bf40 / 3d6c0c0）。
+	// Flags 位 0 = 出生时颜色在 Color 与 ColorRange 间随机。
 	public uint Flags;
 	public via.Color Color;
 	public via.Color ColorRange;
 	public RotationOrder RotationOrder;
 
-	public Vector3 Rotation;
-    public Vector3 RotationRandom;
-    public Vector3 Size;
-    public Vector3 SizeRandom;
+	// 文件里是 6 个交错的 {s, r} 范围（旧代码误读为 Rotation / RotationRandom / Size / SizeRandom 四个 Vector3）。
+	// 旋转为弧度，出生时 s ± r 抽样。
+	public via.Range RotationX;
+	public via.Range RotationY;
+	public via.Range RotationZ;
+	public via.Range SizeX;
+	public via.Range SizeY;
+	public via.Range SizeZ;
 	[RszVersion(EfxVersion.MHWilds, EndAt = nameof(unkn15))]
 	public float unkn14;
 	public float unkn15;

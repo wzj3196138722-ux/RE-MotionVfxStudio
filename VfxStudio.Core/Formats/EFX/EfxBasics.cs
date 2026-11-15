@@ -29,32 +29,35 @@ public partial class EFXAttributeSpawn : EFXAttribute
 
 	public via.Int2 EmitterDelayFrame;
 
-	[RszVersion(EfxVersion.DD2, EndAt = nameof(UseRevival))]
-	public bool RingBufferMode;
-	public bool UseLoopNumRatio;
-	public bool Interpolate;
+	// RE4 起就有这一段（re4.exe 加载器 3d15720 读 UniqueID + 0x58 字节，tick 3d14c20 使用），字段顺序与 DD2 相同；
+	// RE4 的开关是 4 字节，DD2 起是 1 字节 bool，所以 RE4 用 *Int 版本（同 UseSpawnFrameInt 的约定）。
+	// RingBufferMode：仅 GPU 类型，写入位置在粒子池内循环、覆盖最旧粒子。
+	// UseLoopNumRatio：LoopNum 改为 r + s·t，t 由 SpawnExpression 给出。
+	// Interpolate：开启按距离发射（DistancePerSpawn 米一个），并把本帧粒子沿发射器路径摊开。
+	// RevivalNum：额外的轮数 = r + randint[0, s]，{0,0} = 无限；RevivalInterval：下一轮前等待的帧数 = r + randint[0, s]。
+	[RszVersion(EfxVersion.RE4, EndAt = nameof(RevivalInterval))]
+	[RszVersion('<', EfxVersion.DD2)] public uint RingBufferModeInt;
+	[RszVersion(EfxVersion.DD2)] public bool RingBufferMode;
+	[RszVersion('<', EfxVersion.DD2)] public uint UseLoopNumRatioInt;
+	[RszVersion(EfxVersion.DD2)] public bool UseLoopNumRatio;
+	[RszVersion('<', EfxVersion.DD2)] public uint InterpolateInt;
+	[RszVersion(EfxVersion.DD2)] public bool Interpolate;
 	public float DistancePerSpawn;
-	public bool UseRevival;
-    //TODO FIX Check these are correct on older games
-	[RszVersion(EfxVersion.RE4)]
-    public via.RangeI RevivalNum;
-	[RszVersion(EfxVersion.DD2)]
-    public via.RangeI RevivalInterval;
-
-
-	[RszVersionExact(EfxVersion.RE4, EndAt = nameof(re4_unkn4))] // TODO recheck
-	public uint re4_unkn0;
-	public float re4_unkn1;
-	public uint re4_unkn2;
-	public uint re4_unkn3;
-	public uint re4_unkn4; // TODO need to verify where to place these relative to SpawnChanceFrame
+	[RszVersion('<', EfxVersion.DD2)] public uint UseRevivalInt;
+	[RszVersion(EfxVersion.DD2)] public bool UseRevival;
+	public via.RangeI RevivalNum;
+	public via.RangeI RevivalInterval;
 
 	[RszVersion(EfxVersion.DD2)] public bool TrySpawnAllParticles;
 
-	[RszVersion(EfxVersion.RE8)]
+	// RE4 文件里没有下面两个字段（该位置是 RevivalInterval）；其他版本保持原样，未核对。
+	[RszVersion(EfxVersion.RE8, EndAt = nameof(SpawnChanceFrame))]
+	[RszVersion("!=", EfxVersion.RE4)]
 	public uint SpawnChanceFrame;
     [RszVersion(EfxVersion.DD2)] public bool InitializeFull;
-    [RszVersion(EfxVersion.RERT)] public uint OriginalMaxParticles;
+    [RszVersion(EfxVersion.RERT, EndAt = nameof(OriginalMaxParticles))]
+    [RszVersion("!=", EfxVersion.RE4)]
+    public uint OriginalMaxParticles;
 
     /*
 	[RszVersion(EfxVersion.RE4, EndAt = nameof(re4_unkn6))]
@@ -147,8 +150,11 @@ public partial class EFXAttributeLife : EFXAttribute
 	public via.RangeI KeepFrame;
 	public via.RangeI VanishFrame;
 	public via.RangeI KeepHoldFrame;
+	// 低 2 位是保持模式（re4.exe 3d1be80）：0 不保持（忽略 KeepHoldFrame）；1 Keep 后满 alpha 保持 KeepHoldFrame 帧，
+	// {0,0} = 直到发射器停止；2 同 1，但释放时再播一遍 Keep；3 CPU 每帧把 alpha 置 0（不要用）。
+	// 四个 *Frame 在 [r, s] 内均匀取整（不是 s±r），s = r − 1 会除以零。
 	[RszVersion(EfxVersion.RE2)]
-	public uint Flags;//VanishEvent flags
+	public uint Flags;
 
 	public EFXAttributeLife() : base(EfxAttributeType.Life) { }
 
