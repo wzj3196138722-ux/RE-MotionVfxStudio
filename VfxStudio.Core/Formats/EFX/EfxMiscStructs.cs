@@ -412,25 +412,18 @@ public partial class EFXAttributeAttractorExpression : EFXAttribute, IExpression
 
 	public EFXAttributeAttractorExpression() : base(EfxAttributeType.AttractorExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(11) { BitNameDict = new () {
-		[1] = nameof(posX),
-		[2] = nameof(posY),
-		[3] = nameof(posZ),
-		[4] = nameof(posX_2),
-		[5] = nameof(posY_2),
-		[6] = nameof(posZ_2),
-		[7] = nameof(attractionForce),
-	} };
-	public ExpressionAssignType posX;
-	public ExpressionAssignType posY;
-	public ExpressionAssignType posZ;
-	public ExpressionAssignType posX_2;
-	public ExpressionAssignType posY_2;
-	public ExpressionAssignType posZ_2;
-	public ExpressionAssignType attractionForce;
-	public ExpressionAssignType unkn8;
-	public ExpressionAssignType unkn9;
-	public ExpressionAssignType unkn10;
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；宿主模式 2 用 AttractPosition 槽，模式 0 用 AttractOffset 槽。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(11) { BitNames = [ nameof(AttractPositionX), nameof(AttractPositionY), nameof(AttractPositionZ), nameof(AttractOffsetX), nameof(AttractOffsetY), nameof(AttractOffsetZ), nameof(ForceScale), nameof(ReversalForceScale), nameof(ReversalDistance), nameof(ForceResist), nameof(unkn11_Wilds) ] };
+	public ExpressionAssignType AttractPositionX;
+	public ExpressionAssignType AttractPositionY;
+	public ExpressionAssignType AttractPositionZ;
+	public ExpressionAssignType AttractOffsetX;
+	public ExpressionAssignType AttractOffsetY;
+	public ExpressionAssignType AttractOffsetZ;
+	public ExpressionAssignType ForceScale;
+	public ExpressionAssignType ReversalForceScale;
+	public ExpressionAssignType ReversalDistance;
+	public ExpressionAssignType ForceResist;
 
 	[RszVersion(EfxVersion.MHWilds)]
 	public ExpressionAssignType unkn11_Wilds;
@@ -551,15 +544,16 @@ public partial class EFXAttributeNoiseExpression : EFXAttribute, IExpressionAttr
 
 	public EFXAttributeNoiseExpression() : base(EfxAttributeType.NoiseExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(8);
-    public ExpressionAssignType unkn1;
-    public ExpressionAssignType unkn2;
-    public ExpressionAssignType unkn3;
-    public ExpressionAssignType unkn4;
-    public ExpressionAssignType unkn5;
-    public ExpressionAssignType unkn6;
-    public ExpressionAssignType unkn7;
-    public ExpressionAssignType unkn8;
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；
+	[RszClassInstance] public BitSet expressionBits = new BitSet(8) { BitNames = [ nameof(LowFrequency), nameof(LowFrequencyRange), nameof(LowFrequencyWidth), nameof(LowFrequencyWidthRange), nameof(HighFrequency), nameof(HighFrequencyRange), nameof(HighFrequencyWidth), nameof(HighFrequencyWidthRange) ] };
+    public ExpressionAssignType LowFrequency;
+    public ExpressionAssignType LowFrequencyRange;
+    public ExpressionAssignType LowFrequencyWidth;
+    public ExpressionAssignType LowFrequencyWidthRange;
+    public ExpressionAssignType HighFrequency;
+    public ExpressionAssignType HighFrequencyRange;
+    public ExpressionAssignType HighFrequencyWidth;
+    public ExpressionAssignType HighFrequencyWidthRange;
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 
@@ -632,27 +626,22 @@ public partial class EFXAttributeVanishArea3DExpression : EFXAttribute, IExpress
 
 	public EFXAttributeVanishArea3DExpression() : base(EfxAttributeType.VanishArea3DExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(14) { BitNameDict = new() {
-		[1] = nameof(positionX),
-		[2] = nameof(positionY),
-		[3] = nameof(positionZ),
-
-		// [8] = nameof(ceilingPos),
-	} };
-	public ExpressionAssignType positionX;
-	public ExpressionAssignType positionY;
-	public ExpressionAssignType positionZ;
-	public ExpressionAssignType unkn4;
-	public ExpressionAssignType unkn5;
-	public ExpressionAssignType unkn6;
-	public ExpressionAssignType unkn7;
-	public ExpressionAssignType unkn8;
-	public ExpressionAssignType unkn9;
-	public ExpressionAssignType unkn10;
-	public ExpressionAssignType unkn11;
-	public ExpressionAssignType unkn12;
-	public ExpressionAssignType unkn13;
-	public ExpressionAssignType unkn14;
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；AreaAngle 按角度。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(14) { BitNames = [ nameof(AreaOffsetX), nameof(AreaOffsetY), nameof(AreaOffsetZ), nameof(AreaPositionX), nameof(AreaPositionY), nameof(AreaPositionZ), nameof(AreaScaleX), nameof(AreaScaleY), nameof(AreaScaleZ), nameof(AreaAngleX), nameof(AreaAngleY), nameof(AreaAngleZ), nameof(VanishFrame), nameof(VanishFrameRange) ] };
+	public ExpressionAssignType AreaOffsetX;
+	public ExpressionAssignType AreaOffsetY;
+	public ExpressionAssignType AreaOffsetZ;
+	public ExpressionAssignType AreaPositionX;
+	public ExpressionAssignType AreaPositionY;
+	public ExpressionAssignType AreaPositionZ;
+	public ExpressionAssignType AreaScaleX;
+	public ExpressionAssignType AreaScaleY;
+	public ExpressionAssignType AreaScaleZ;
+	public ExpressionAssignType AreaAngleX;
+	public ExpressionAssignType AreaAngleY;
+	public ExpressionAssignType AreaAngleZ;
+	public ExpressionAssignType VanishFrame;
+	public ExpressionAssignType VanishFrameRange;
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 

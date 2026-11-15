@@ -83,12 +83,13 @@ public partial class EFXAttributeTransform2DExpression : EFXAttribute, IExpressi
 
 	public EFXAttributeTransform2DExpression() : base(EfxAttributeType.Transform2DExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(5) { BitNames = [nameof(posX), nameof(posY), nameof(rot), nameof(scaleX), nameof(scaleY)] };
-	public ExpressionAssignType posX;
-	public ExpressionAssignType posY;
-	public ExpressionAssignType rot;
-	public ExpressionAssignType scaleX;
-	public ExpressionAssignType scaleY;
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；旋转槽按角度。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(5) { BitNames = [ nameof(LocalPositionX), nameof(LocalPositionY), nameof(LocalRotation), nameof(LocalScaleX), nameof(LocalScaleY) ] };
+	public ExpressionAssignType LocalPositionX;
+	public ExpressionAssignType LocalPositionY;
+	public ExpressionAssignType LocalRotation;
+	public ExpressionAssignType LocalScaleX;
+	public ExpressionAssignType LocalScaleY;
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 
@@ -126,27 +127,18 @@ public partial class EFXAttributeTransform3DExpression : EFXAttribute, IExpressi
 	/// <summary>
 	/// Up to 9 bits, in order: pos X/Y/Z, rot X/Y/Z, scale X/Y/Z
 	/// </summary>
-	[RszClassInstance] public BitSet expressionBits = new BitSet(9) { BitNameDict = new () {
-		[1] = nameof(translationX),
-		[2] = nameof(translationY),
-		[3] = nameof(translationZ),
-		[4] = nameof(rotationX),
-		[5] = nameof(rotationY),
-		[6] = nameof(rotationZ),
-		[7] = nameof(scaleX),
-		[8] = nameof(scaleY),
-		[9] = nameof(scaleZ),
-	} };
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；旋转槽按角度。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(9) { BitNames = [ nameof(LocalPositionX), nameof(LocalPositionY), nameof(LocalPositionZ), nameof(LocalRotationX), nameof(LocalRotationY), nameof(LocalRotationZ), nameof(LocalScaleX), nameof(LocalScaleY), nameof(LocalScaleZ) ] };
 
-	public ExpressionAssignType translationX;
-	public ExpressionAssignType translationY;
-	public ExpressionAssignType translationZ;
-	public ExpressionAssignType rotationX;
-	public ExpressionAssignType rotationY;
-	public ExpressionAssignType rotationZ;
-	public ExpressionAssignType scaleX;
-	public ExpressionAssignType scaleY;
-	public ExpressionAssignType scaleZ;
+	public ExpressionAssignType LocalPositionX;
+	public ExpressionAssignType LocalPositionY;
+	public ExpressionAssignType LocalPositionZ;
+	public ExpressionAssignType LocalRotationX;
+	public ExpressionAssignType LocalRotationY;
+	public ExpressionAssignType LocalRotationZ;
+	public ExpressionAssignType LocalScaleX;
+	public ExpressionAssignType LocalScaleY;
+	public ExpressionAssignType LocalScaleZ;
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 
@@ -334,26 +326,20 @@ public partial class EFXAttributeRotateAnimExpression : EFXAttribute, IExpressio
 
 	public EFXAttributeRotateAnimExpression() : base(EfxAttributeType.RotateAnimExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(12){ BitNameDict = new () {
-		[1] = nameof(rotateSpeedX),
-		[2] = nameof(rotateSpeedXRand),
-		[3] = nameof(rotateSpeedY),
-		[4] = nameof(rotateSpeedYRand),
-		[5] = nameof(rotateSpeedZ),
-		[6] = nameof(rotateSpeedZRand),
-	} };
-	public ExpressionAssignType rotateSpeedX;
-	public ExpressionAssignType rotateSpeedXRand;
-	public ExpressionAssignType rotateSpeedY;
-	public ExpressionAssignType rotateSpeedYRand;
-	public ExpressionAssignType rotateSpeedZ;
-	public ExpressionAssignType rotateSpeedZRand;
-	public ExpressionAssignType ukn1_7;
-	public ExpressionAssignType ukn1_8;
-	public ExpressionAssignType ukn1_9;
-	public ExpressionAssignType ukn1_10;
-	public ExpressionAssignType ukn1_11;
-	public ExpressionAssignType ukn1_12;
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；RotationAdd 槽按角度（每帧）。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(12) { BitNames = [ nameof(RotationAddX), nameof(RotationAddXRange), nameof(RotationAddY), nameof(RotationAddYRange), nameof(RotationAddZ), nameof(RotationAddZRange), nameof(RotationCoefX), nameof(RotationCoefXRange), nameof(RotationCoefY), nameof(RotationCoefYRange), nameof(RotationCoefZ), nameof(RotationCoefZRange) ] };
+	public ExpressionAssignType RotationAddX;
+	public ExpressionAssignType RotationAddXRange;
+	public ExpressionAssignType RotationAddY;
+	public ExpressionAssignType RotationAddYRange;
+	public ExpressionAssignType RotationAddZ;
+	public ExpressionAssignType RotationAddZRange;
+	public ExpressionAssignType RotationCoefX;
+	public ExpressionAssignType RotationCoefXRange;
+	public ExpressionAssignType RotationCoefY;
+	public ExpressionAssignType RotationCoefYRange;
+	public ExpressionAssignType RotationCoefZ;
+	public ExpressionAssignType RotationCoefZRange;
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 
@@ -396,19 +382,17 @@ public partial class EFXAttributeScaleAnimExpression : EFXAttribute, IExpression
 
 	public EFXAttributeScaleAnimExpression() : base(EfxAttributeType.ScaleAnimExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(8) { BitNameDict = new () {
-		[1] = nameof(scale),
-		[2] = nameof(scaleRand),
-	} };
-	public ExpressionAssignType scale;
-	public ExpressionAssignType scaleRand;
-    [RszVersion(EfxVersion.RERT, EndAt = nameof(unkn8))]
-	public ExpressionAssignType unkn3;
-	public ExpressionAssignType unkn4;
-	public ExpressionAssignType unkn5;
-	public ExpressionAssignType unkn6;
-	public ExpressionAssignType unkn7;
-	public ExpressionAssignType unkn8;
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；
+	[RszClassInstance] public BitSet expressionBits = new BitSet(8) { BitNames = [ nameof(SizeScalarAdd), nameof(SizeScalarAddRange), nameof(SizeXAdd), nameof(SizeXAddRange), nameof(SizeYAdd), nameof(SizeYAddRange), nameof(SizeZAdd), nameof(SizeZAddRange) ] };
+	public ExpressionAssignType SizeScalarAdd;
+	public ExpressionAssignType SizeScalarAddRange;
+    [RszVersion(EfxVersion.RERT, EndAt = nameof(SizeZAddRange))]
+	public ExpressionAssignType SizeXAdd;
+	public ExpressionAssignType SizeXAddRange;
+	public ExpressionAssignType SizeYAdd;
+	public ExpressionAssignType SizeYAddRange;
+	public ExpressionAssignType SizeZAdd;
+	public ExpressionAssignType SizeZAddRange;
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 

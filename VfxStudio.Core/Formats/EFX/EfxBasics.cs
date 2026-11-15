@@ -80,16 +80,17 @@ public partial class EFXAttributeSpawnExpression : EFXAttribute, IExpressionAttr
 
 	public EFXAttributeSpawnExpression() : base(EfxAttributeType.SpawnExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(7) { BitNames = [nameof(spawnNum), nameof(spawnNumRange), nameof(intervalFrame), nameof(intervalFrameRange), nameof(emitterDelayFrame), nameof(emitterDelayFrameRange), nameof(speed) ] };
-	public ExpressionAssignType spawnNum;
-	public ExpressionAssignType spawnNumRange;
-	public ExpressionAssignType intervalFrame;
-	public ExpressionAssignType intervalFrameRange;
-	[RszVersion(EfxVersion.RE3, EndAt = nameof(emitterDelayFrameRange))]
-	public ExpressionAssignType emitterDelayFrame;
-	public ExpressionAssignType emitterDelayFrameRange;
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；EmitterDelayFrame 只在第一帧生效；EmitterDelayFrame/LoopNumRatio 无引擎名。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(7) { BitNames = [ nameof(SpawnNum), nameof(SpawnNumRange), nameof(IntervalFrame), nameof(IntervalFrameRange), nameof(EmitterDelayFrame), nameof(EmitterDelayFrameRange), nameof(LoopNumRatio) ] };
+	public ExpressionAssignType SpawnNum;
+	public ExpressionAssignType SpawnNumRange;
+	public ExpressionAssignType IntervalFrame;
+	public ExpressionAssignType IntervalFrameRange;
+	[RszVersion(EfxVersion.RE3, EndAt = nameof(EmitterDelayFrameRange))]
+	public ExpressionAssignType EmitterDelayFrame;
+	public ExpressionAssignType EmitterDelayFrameRange;
     [RszVersion(EfxVersion.RERT)]
-	public ExpressionAssignType speed;
+	public ExpressionAssignType LoopNumRatio;
 
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
@@ -169,24 +170,21 @@ public partial class EFXAttributeLifeExpression : EFXAttribute, IExpressionAttri
 
 	public EFXAttributeLifeExpression() : base(EfxAttributeType.LifeExpression) { }
 
-	// re7 and dd2 have value + rand pairs: 1-2 = appear, 3-4 = keep, 5-6 = vanish
-	// rest have just singular values
-	// TODO bitset versioning
-	[RszClassInstance] public BitSet expressionBits = new BitSet(6)  { BitNameDict = new () {
-		[1] = nameof(appearLife),
-		[2] = nameof(keepLife),
-		[3] = nameof(vanishLife),
-	} };
+	// re4.exe（applier 读宿主 Life 的 RangeI {min, max}）：6 个表达式槽，bit i = 槽位 i：
+	// AppearFrame、AppearFrameRange、KeepFrame、KeepFrameRange、VanishFrame、VanishFrameRange（Range = 区间的 max，整数）。
+	// RE4 文件里只有 3 个运算类型，每对槽位共用一个；RE7 / DD2 起每个槽位各有一个。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(6) { BitNames = [
+		nameof(AppearFrame), nameof(AppearFrameRange), nameof(KeepFrame), nameof(KeepFrameRange), nameof(VanishFrame), nameof(VanishFrameRange) ] };
 
-	public ExpressionAssignType appearLife;
+	public ExpressionAssignType AppearFrame;
 	[RszVersion(nameof(Version), ">=", EfxVersion.DD2, "||", nameof(Version), "==", EfxVersion.RE7)]
-	public ExpressionAssignType appearLifeRand;
-	public ExpressionAssignType keepLife;
+	public ExpressionAssignType AppearFrameRange;
+	public ExpressionAssignType KeepFrame;
 	[RszVersion(nameof(Version), ">=", EfxVersion.DD2, "||", nameof(Version), "==", EfxVersion.RE7)]
-	public ExpressionAssignType keepLifeRand;
-	public ExpressionAssignType vanishLife;
+	public ExpressionAssignType KeepFrameRange;
+	public ExpressionAssignType VanishFrame;
 	[RszVersion(nameof(Version), ">=", EfxVersion.DD2, "||", nameof(Version), "==", EfxVersion.RE7)]
-	public ExpressionAssignType vanishLifeRand;
+	public ExpressionAssignType VanishFrameRange;
 
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
@@ -337,20 +335,14 @@ public partial class EFXAttributeUVSequenceExpression : EFXAttribute, IExpressio
 
 	public EFXAttributeUVSequenceExpression() : base(EfxAttributeType.UVSequenceExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(6) { BitNameDict = new () {
-		[1] = nameof(speed),
-		[2] = nameof(speedRand),
-		// [3] = nameof(unkn3),
-		// [4] = nameof(unkn4),
-		// [5] = nameof(unkn5),
-		// [6] = nameof(unkn6),
-	} };
-	public ExpressionAssignType speed;
-	public ExpressionAssignType speedRand;
-	public ExpressionAssignType unkn3;
-	public ExpressionAssignType unkn4;
-	public ExpressionAssignType unkn5;
-	public ExpressionAssignType unkn6;
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；SequenceNo 只在第一帧生效。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(6) { BitNames = [ nameof(PlaySpeed), nameof(PlaySpeedRange), nameof(SequenceNo), nameof(SequenceNoRange), nameof(PatternNo), nameof(PatternNoRange) ] };
+	public ExpressionAssignType PlaySpeed;
+	public ExpressionAssignType PlaySpeedRange;
+	public ExpressionAssignType SequenceNo;
+	public ExpressionAssignType SequenceNoRange;
+	public ExpressionAssignType PatternNo;
+	public ExpressionAssignType PatternNoRange;
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 

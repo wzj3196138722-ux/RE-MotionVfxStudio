@@ -60,34 +60,28 @@ public partial class EFXAttributeTypePolygonExpression : ReeLib.Efx.EFXAttribute
 
     public EFXAttributeTypePolygonExpression() : base(EfxAttributeType.TypePolygonExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(19) { BitNameDict = new () {
-		[1] = nameof(color),
-		[2] = nameof(alpha),
-		[3] = nameof(emissive),
-		[4] = nameof(colorStrength),
-		[12] = nameof(scale),
-		[14] = nameof(size),
-	} };
-    public ExpressionAssignType color;
-    public ExpressionAssignType alpha;
-    public ExpressionAssignType emissive;
-    public ExpressionAssignType colorStrength;
-    public ExpressionAssignType unkn5; // rert DistortionRate
-    public ExpressionAssignType unkn6;
-    public ExpressionAssignType unkn7;
-    public ExpressionAssignType unkn8;
-    public ExpressionAssignType unkn9;
-    public ExpressionAssignType unkn10;
-    public ExpressionAssignType unkn11;
-    public ExpressionAssignType scale;
-    public ExpressionAssignType unkn13; // dd2: emit size / range
-    public ExpressionAssignType size; // dmc5: size / width
-    public ExpressionAssignType unkn15;
-    public ExpressionAssignType unkn16; // dmc5: (spect + 2) / length
-    public ExpressionAssignType unkn17;
-    public ExpressionAssignType unkn18;
+	// re4.exe 槽位名（B 类：引擎按名字登记槽位，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；旋转槽按角度。 引擎别名：ColorRate = ColorRate/EmissionRate/ContrastRate/InnerIntensity/MultiplyColorRate，Intensity = BackIntensity/OuterIntensity/MultiplyBlackRate；*Range 在引擎里有的写作 *_Random。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(19) { BitNames = [ nameof(Color), nameof(ColorAlpha), nameof(ColorRange), nameof(ColorRangeAlpha), nameof(ColorRate), nameof(Intensity), nameof(RotationX), nameof(RotationXRange), nameof(RotationY), nameof(RotationYRange), nameof(RotationZ), nameof(RotationZRange), nameof(SizeScalar), nameof(SizeScalarRange), nameof(Width), nameof(WidthRange), nameof(Height), nameof(HeightRange), nameof(AlphaRate) ] };
+    public ExpressionAssignType Color;
+    public ExpressionAssignType ColorAlpha;
+    public ExpressionAssignType ColorRange;
+    public ExpressionAssignType ColorRangeAlpha;
+    public ExpressionAssignType ColorRate;
+    public ExpressionAssignType Intensity;
+    public ExpressionAssignType RotationX;
+    public ExpressionAssignType RotationXRange;
+    public ExpressionAssignType RotationY;
+    public ExpressionAssignType RotationYRange;
+    public ExpressionAssignType RotationZ;
+    public ExpressionAssignType RotationZRange;
+    public ExpressionAssignType SizeScalar;
+    public ExpressionAssignType SizeScalarRange;
+    public ExpressionAssignType Width;
+    public ExpressionAssignType WidthRange;
+    public ExpressionAssignType Height;
+    public ExpressionAssignType HeightRange;
 	[RszVersion(EfxVersion.RE4)]
-	public ExpressionAssignType unkn19;
+	public ExpressionAssignType AlphaRate;
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 

@@ -54,27 +54,22 @@ public partial class EFXAttributeVelocity2DExpression : EFXAttribute, IExpressio
 
 	public EFXAttributeVelocity2DExpression() : base(EfxAttributeType.Velocity2DExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(13) { BitNameDict = new () {
-		[1] = nameof(speed),
-		[2] = nameof(speedRand),
-		[4] = nameof(gravity),
-		[7] = nameof(angle),
-		[8] = nameof(angleRand),
-	}};
-    public ExpressionAssignType speed;
-    public ExpressionAssignType speedRand;
-    public ExpressionAssignType unkn3;
-    public ExpressionAssignType gravity;
-    public ExpressionAssignType unkn5;
-    public ExpressionAssignType unkn6;
-    public ExpressionAssignType angle;
-    public ExpressionAssignType angleRand;
-    [RszVersion(EfxVersion.RE4, EndAt = nameof(unkn13))]
-    public ExpressionAssignType unkn9;
-    public ExpressionAssignType unkn10;
-    public ExpressionAssignType unkn11;
-    public ExpressionAssignType unkn12;
-    public ExpressionAssignType unkn13;
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；Angle 槽按角度。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(13) { BitNames = [ nameof(Speed), nameof(SpeedRange), nameof(SpeedCoef), nameof(SpeedCoefRange), nameof(GravityRate), nameof(GravityRateRange), nameof(Angle), nameof(AngleRange), nameof(OffsetX), nameof(OffsetY), nameof(SizeX), nameof(SizeY), nameof(VelocityType) ] };
+    public ExpressionAssignType Speed;
+    public ExpressionAssignType SpeedRange;
+    public ExpressionAssignType SpeedCoef;
+    public ExpressionAssignType SpeedCoefRange;
+    public ExpressionAssignType GravityRate;
+    public ExpressionAssignType GravityRateRange;
+    public ExpressionAssignType Angle;
+    public ExpressionAssignType AngleRange;
+    [RszVersion(EfxVersion.RE4, EndAt = nameof(VelocityType))]
+    public ExpressionAssignType OffsetX;
+    public ExpressionAssignType OffsetY;
+    public ExpressionAssignType SizeX;
+    public ExpressionAssignType SizeY;
+    public ExpressionAssignType VelocityType;
 
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
@@ -130,42 +125,31 @@ public partial class EFXAttributeVelocity3DExpression : EFXAttribute, IExpressio
 	public Vector2 range2;
 	public Vector2 range3;
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(19){ BitNameDict = new () {
-		[1] = nameof(speed),
-		[2] = nameof(speedRand),
-		[7] = nameof(velocityX),
-		[8] = nameof(velocityXRandom),
-		[9] = nameof(velocityY),
-		[10] = nameof(velocityYRandom),
-		[11] = nameof(velocityZ),
-		[12] = nameof(velocityZRandom),
-		// [13] = nameof(vectorX), // direction?
-		// [14] = nameof(vectorY),
-		// [15] = nameof(vectorZ),
-	} };
-	public ExpressionAssignType speed;
-	public ExpressionAssignType speedRand;
-	public ExpressionAssignType unkn3;
-	public ExpressionAssignType unkn4;
-	public ExpressionAssignType unkn5;
-	public ExpressionAssignType unkn6;
-	public ExpressionAssignType velocityX;
-	public ExpressionAssignType velocityXRandom;
-	public ExpressionAssignType velocityY;
-	public ExpressionAssignType velocityYRandom;
-	public ExpressionAssignType velocityZ;
-	public ExpressionAssignType velocityZRandom;
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；
+	[RszClassInstance] public BitSet expressionBits = new BitSet(19) { BitNames = [ nameof(Speed), nameof(SpeedRange), nameof(SpeedCoef), nameof(SpeedCoefRange), nameof(GravityRate), nameof(GravityRateRange), nameof(DirX), nameof(DirXRange), nameof(DirY), nameof(DirYRange), nameof(DirZ), nameof(DirZRange), nameof(OffsetX), nameof(OffsetY), nameof(OffsetZ), nameof(SizeX), nameof(SizeY), nameof(SizeZ), nameof(VelocityType) ] };
+	public ExpressionAssignType Speed;
+	public ExpressionAssignType SpeedRange;
+	public ExpressionAssignType SpeedCoef;
+	public ExpressionAssignType SpeedCoefRange;
+	public ExpressionAssignType GravityRate;
+	public ExpressionAssignType GravityRateRange;
+	public ExpressionAssignType DirX;
+	public ExpressionAssignType DirXRange;
+	public ExpressionAssignType DirY;
+	public ExpressionAssignType DirYRange;
+	public ExpressionAssignType DirZ;
+	public ExpressionAssignType DirZRange;
 
-    [RszVersion(">", EfxVersion.RERT, EndAt = nameof(unkn14))]
-	public ExpressionAssignType unkn13;
-	public ExpressionAssignType unkn14;
+    [RszVersion(">", EfxVersion.RERT, EndAt = nameof(OffsetY))]
+	public ExpressionAssignType OffsetX;
+	public ExpressionAssignType OffsetY;
 
-    [RszVersion(EfxVersion.RE4, EndAt = nameof(unkn19))]
-	public ExpressionAssignType unkn15;
-	public ExpressionAssignType unkn16;
-	public ExpressionAssignType unkn17;
-	public ExpressionAssignType unkn18;
-	public ExpressionAssignType unkn19;
+    [RszVersion(EfxVersion.RE4, EndAt = nameof(VelocityType))]
+	public ExpressionAssignType OffsetZ;
+	public ExpressionAssignType SizeX;
+	public ExpressionAssignType SizeY;
+	public ExpressionAssignType SizeZ;
+	public ExpressionAssignType VelocityType;
 
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 

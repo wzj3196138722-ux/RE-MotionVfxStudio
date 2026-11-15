@@ -68,18 +68,13 @@ public partial class EFXAttributeEmitterShape2DExpression : EFXAttribute, IExpre
 
 	public EFXAttributeEmitterShape2DExpression() : base(EfxAttributeType.EmitterShape2DExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(5) { BitNameDict = new () {
-		// [1] = nameof(unkn1),
-		// [2] = nameof(unkn2),
-		[3] = nameof(size),
-		// [4] = nameof(unkn4),
-		// [5] = nameof(unkn5),
-	} };
-	public ExpressionAssignType unkn1;
-	public ExpressionAssignType unkn2;
-	public ExpressionAssignType size;
-	public ExpressionAssignType unkn4;
-	public ExpressionAssignType unkn5;
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；
+	[RszClassInstance] public BitSet expressionBits = new BitSet(5) { BitNames = [ nameof(RangeX), nameof(RangeXRange), nameof(RangeY), nameof(RangeYRange), nameof(RangeDivideNum) ] };
+	public ExpressionAssignType RangeX;
+	public ExpressionAssignType RangeXRange;
+	public ExpressionAssignType RangeY;
+	public ExpressionAssignType RangeYRange;
+	public ExpressionAssignType RangeDivideNum;
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 
@@ -123,26 +118,19 @@ public partial class EFXAttributeEmitterShape3DExpression : EFXAttribute, IExpre
 
 	public EFXAttributeEmitterShape3DExpression() : base(EfxAttributeType.EmitterShape3DExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(9) { BitNameDict = new () {
-		[1] = nameof(rangeXMin),
-		[2] = nameof(rangeXMax),
-		[3] = nameof(rangeYMin),
-		[4] = nameof(rangeYMax),
-		[5] = nameof(rangeZMin),
-		[6] = nameof(rangeZMax),
-		[7] = nameof(spawnNum),
-	} };
-	public ExpressionAssignType rangeXMin;
-	public ExpressionAssignType rangeXMax;
-	public ExpressionAssignType rangeYMin;
-	public ExpressionAssignType rangeYMax;
-	public ExpressionAssignType rangeZMin;
-	public ExpressionAssignType rangeZMax;
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；
+	[RszClassInstance] public BitSet expressionBits = new BitSet(9) { BitNames = [ nameof(RangeX), nameof(RangeXRange), nameof(RangeY), nameof(RangeYRange), nameof(RangeZ), nameof(RangeZRange), nameof(RangeDivideNum), nameof(RangeDivideHorizontalNum), nameof(RangeDivideVerticalNum) ] };
+	public ExpressionAssignType RangeX;
+	public ExpressionAssignType RangeXRange;
+	public ExpressionAssignType RangeY;
+	public ExpressionAssignType RangeYRange;
+	public ExpressionAssignType RangeZ;
+	public ExpressionAssignType RangeZRange;
 	[RszVersion(EfxVersion.RE2)]
-	public ExpressionAssignType spawnNum;
-	[RszVersion('>', EfxVersion.RE3, EndAt = nameof(unkn9))]
-	public ExpressionAssignType unkn8; // seems like an additional range parameter
-	public ExpressionAssignType unkn9;
+	public ExpressionAssignType RangeDivideNum;
+	[RszVersion('>', EfxVersion.RE3, EndAt = nameof(RangeDivideVerticalNum))]
+	public ExpressionAssignType RangeDivideHorizontalNum;
+	public ExpressionAssignType RangeDivideVerticalNum;
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 

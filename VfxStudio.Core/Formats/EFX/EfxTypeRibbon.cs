@@ -69,35 +69,31 @@ public partial class EFXAttributeTypeRibbonLengthExpression : EFXAttribute, IExp
 
 	public EFXAttributeTypeRibbonLengthExpression() : base(EfxAttributeType.TypeRibbonLengthExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(19) { BitNameDict = new () {
-		[1] = nameof(color),
-		[2] = nameof(alpha),
-		// 3,4 = size (RE7)
-		// 5, 6 = size (RERT)
-	} };
-	public ExpressionAssignType color;
-	public ExpressionAssignType alpha;
-	public ExpressionAssignType size1;
-	public ExpressionAssignType size2;
-	public ExpressionAssignType emissive;
-	[RszVersion(EfxVersion.RE2, EndAt = nameof(size))]
-	public ExpressionAssignType unkn6;
-	public ExpressionAssignType size;
-    [RszVersion(EfxVersion.RE8, EndAt = nameof(unkn9))]
-	public ExpressionAssignType unkn8;
-	public ExpressionAssignType unkn9;
-    [RszVersion(">", EfxVersion.RERT, EndAt = nameof(unkn15))]
-	public ExpressionAssignType unkn10;
-	public ExpressionAssignType unkn11;
-	public ExpressionAssignType unkn12;
-	public ExpressionAssignType unkn13;
-	public ExpressionAssignType unkn14;
-	public ExpressionAssignType unkn15;
-    [RszVersion(EfxVersion.RE4, EndAt = nameof(unkn19))]
-	public ExpressionAssignType unkn16;
-	public ExpressionAssignType unkn17;
-	public ExpressionAssignType unkn18;
-	public ExpressionAssignType unkn19;
+	// re4.exe 槽位名（B 类：引擎按名字登记槽位，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；旋转槽按角度。 引擎别名：ColorRate = ColorRate/EmissionRate/ContrastRate/InnerIntensity/MultiplyColorRate，Intensity = BackIntensity/OuterIntensity/MultiplyBlackRate；*Range 在引擎里有的写作 *_Random。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(19) { BitNames = [ nameof(Color), nameof(ColorAlpha), nameof(ColorRange), nameof(ColorRangeAlpha), nameof(ColorRate), nameof(Intensity), nameof(SizeScalar), nameof(SizeScalarRange), nameof(AlphaRate), nameof(Width), nameof(WidthRange), nameof(HeadColor), nameof(HeadAlpha), nameof(Place1Color), nameof(Place1Alpha), nameof(Place2Color), nameof(Place2Alpha), nameof(Length), nameof(LengthRange) ] };
+	public ExpressionAssignType Color;
+	public ExpressionAssignType ColorAlpha;
+	public ExpressionAssignType ColorRange;
+	public ExpressionAssignType ColorRangeAlpha;
+	public ExpressionAssignType ColorRate;
+	[RszVersion(EfxVersion.RE2, EndAt = nameof(SizeScalar))]
+	public ExpressionAssignType Intensity;
+	public ExpressionAssignType SizeScalar;
+    [RszVersion(EfxVersion.RE8, EndAt = nameof(AlphaRate))]
+	public ExpressionAssignType SizeScalarRange;
+	public ExpressionAssignType AlphaRate;
+    [RszVersion(">", EfxVersion.RERT, EndAt = nameof(Place1Alpha))]
+	public ExpressionAssignType Width;
+	public ExpressionAssignType WidthRange;
+	public ExpressionAssignType HeadColor;
+	public ExpressionAssignType HeadAlpha;
+	public ExpressionAssignType Place1Color;
+	public ExpressionAssignType Place1Alpha;
+    [RszVersion(EfxVersion.RE4, EndAt = nameof(LengthRange))]
+	public ExpressionAssignType Place2Color;
+	public ExpressionAssignType Place2Alpha;
+	public ExpressionAssignType Length;
+	public ExpressionAssignType LengthRange;
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 
@@ -1069,22 +1065,17 @@ public partial class EFXAttributeTypeGpuRibbonFollowExpression : EFXAttribute, I
 
     public EFXAttributeTypeGpuRibbonFollowExpression() : base(EfxAttributeType.TypeGpuRibbonFollowExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(9) { BitNameDict = new () {
-		[1] = nameof(color),
-		[2] = nameof(alpha),
-		[5] = nameof(colorRate),
-		[8] = nameof(size),
-		[9] = nameof(sizeRange),
-	} };
-	public ExpressionAssignType color;
-	public ExpressionAssignType alpha;
-	public ExpressionAssignType unkn3;
-	public ExpressionAssignType unkn4;
-	public ExpressionAssignType colorRate;
-	public ExpressionAssignType unkn6;
-	public ExpressionAssignType unkn7;
-	public ExpressionAssignType size;
-	public ExpressionAssignType sizeRange;
+	// re4.exe 槽位名（B 类：引擎按名字登记槽位，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；旋转槽按角度。 引擎别名：ColorRate = ColorRate/EmissionRate/ContrastRate/InnerIntensity/MultiplyColorRate，Intensity = BackIntensity/OuterIntensity/MultiplyBlackRate；*Range 在引擎里有的写作 *_Random。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(9) { BitNames = [ nameof(Color), nameof(ColorAlpha), nameof(ColorRange), nameof(ColorRangeAlpha), nameof(ColorRate), nameof(Intensity), nameof(AlphaRate), nameof(SizeScalar), nameof(SizeScalarRange) ] };
+	public ExpressionAssignType Color;
+	public ExpressionAssignType ColorAlpha;
+	public ExpressionAssignType ColorRange;
+	public ExpressionAssignType ColorRangeAlpha;
+	public ExpressionAssignType ColorRate;
+	public ExpressionAssignType Intensity;
+	public ExpressionAssignType AlphaRate;
+	public ExpressionAssignType SizeScalar;
+	public ExpressionAssignType SizeScalarRange;
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 

@@ -34,10 +34,8 @@ public partial class EFXAttributeFadeByAngleExpression : EFXAttribute, IExpressi
 
 	public EFXAttributeFadeByAngleExpression() : base(EfxAttributeType.FadeByAngleExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(2) { BitNameDict = new () {
-		[1] = nameof(Cone),
-		[2] = nameof(Spread),
-	} };
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；Cone/Spread 按角度。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(2) { BitNames = [ nameof(Cone), nameof(Spread) ] };
 	// 第一个写 Cone（块 +0x2c），第二个写 Spread（块 +0x30），见 re4.exe 3d4e430。旧名 minAngle / maxAngle。
     public ExpressionAssignType Cone;
     public ExpressionAssignType Spread;
@@ -68,11 +66,12 @@ public partial class EFXAttributeFadeByDepthExpression : EFXAttribute, IExpressi
 
 	public EFXAttributeFadeByDepthExpression() : base(EfxAttributeType.FadeByDepthExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(4) { BitNames = [ nameof(nearStart), nameof(nearEnd), nameof(farStart), nameof(farEnd) ] };
-	public ExpressionAssignType nearStart;
-	public ExpressionAssignType nearEnd;
-	public ExpressionAssignType farStart;
-	public ExpressionAssignType farEnd;
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；
+	[RszClassInstance] public BitSet expressionBits = new BitSet(4) { BitNames = [ nameof(NearStart), nameof(NearEnd), nameof(FarStart), nameof(FarEnd) ] };
+	public ExpressionAssignType NearStart;
+	public ExpressionAssignType NearEnd;
+	public ExpressionAssignType FarStart;
+	public ExpressionAssignType FarEnd;
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 

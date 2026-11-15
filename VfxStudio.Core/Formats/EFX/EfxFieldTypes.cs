@@ -46,28 +46,29 @@ public partial class EFXAttributeVectorFieldParameterExpression : EFXAttribute, 
 
 	public EFXAttributeVectorFieldParameterExpression() : base(EfxAttributeType.VectorFieldParameterExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(20);
-	public ExpressionAssignType unkn1;
-	public ExpressionAssignType unkn2;
-	public ExpressionAssignType unkn3;
-	public ExpressionAssignType unkn4;
-	public ExpressionAssignType unkn5;
-	public ExpressionAssignType unkn6;
-	public ExpressionAssignType unkn7;
-	public ExpressionAssignType unkn8;
-	public ExpressionAssignType unkn9;
-	public ExpressionAssignType unkn10;
-	public ExpressionAssignType unkn11;
-	[RszVersion('>', EfxVersion.DMC5, EndAt = nameof(unkn20))]
-	public ExpressionAssignType unkn12;
-	public ExpressionAssignType unkn13;
-	public ExpressionAssignType unkn14;
-	public ExpressionAssignType unkn15;
-	public ExpressionAssignType unkn16;
-	public ExpressionAssignType unkn17;
-	public ExpressionAssignType unkn18;
-	public ExpressionAssignType unkn19;
-	public ExpressionAssignType unkn20;
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；Rotation 按角度；Range/Detail 槽是解析器别名推断，写的位置与 Frequency/Amplitude 相同。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(20) { BitNames = [ nameof(Frequency), nameof(Amplitude), nameof(Lacunarity), nameof(Gain), nameof(VelocityBlend), nameof(OscillationRange), nameof(OscillationTime), nameof(Coefficient), nameof(CoefficientRange), nameof(Range), nameof(Detail), nameof(RotationX), nameof(RotationY), nameof(RotationZ), nameof(ScaleX), nameof(ScaleY), nameof(ScaleZ), nameof(EdgeOffset), nameof(Falloff), nameof(SmoothBlend) ] };
+	public ExpressionAssignType Frequency;
+	public ExpressionAssignType Amplitude;
+	public ExpressionAssignType Lacunarity;
+	public ExpressionAssignType Gain;
+	public ExpressionAssignType VelocityBlend;
+	public ExpressionAssignType OscillationRange;
+	public ExpressionAssignType OscillationTime;
+	public ExpressionAssignType Coefficient;
+	public ExpressionAssignType CoefficientRange;
+	public ExpressionAssignType Range;
+	public ExpressionAssignType Detail;
+	[RszVersion('>', EfxVersion.DMC5, EndAt = nameof(SmoothBlend))]
+	public ExpressionAssignType RotationX;
+	public ExpressionAssignType RotationY;
+	public ExpressionAssignType RotationZ;
+	public ExpressionAssignType ScaleX;
+	public ExpressionAssignType ScaleY;
+	public ExpressionAssignType ScaleZ;
+	public ExpressionAssignType EdgeOffset;
+	public ExpressionAssignType Falloff;
+	public ExpressionAssignType SmoothBlend;
 
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }

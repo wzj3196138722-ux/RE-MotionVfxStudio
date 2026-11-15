@@ -212,68 +212,36 @@ public partial class EFXAttributeTypeMeshExpression : EFXAttribute, IExpressionA
 	[RszVersion(nameof(Version), ">=", EfxVersion.RE3, "&&", nameof(Version), "<", EfxVersion.RE4)]
     public int indicesCount;
 
-    // dd2, likely re4 TODO versioned bitset
-	// [RszClassInstance] public BitSet expressionBits = new BitSet(25) { BitNameDict = new () {
-    //     [1] = nameof(color1),
-    //     [2] = nameof(color1Rand),
-    //     [3] = nameof(alpha),
-    //     [4] = nameof(alphaRand),
-
-    //     [16] = "scale",
-    //     [17] = "scaleRand",
-    //     [18] = "sizeX",
-    //     [19] = "sizeXRange",
-    //     [20] = "sizeY",
-    //     [21] = "sizeYRange",
-    //     [22] = "sizeY",
-    //     [23] = "sizeYRange",
-	// }};
-    // re7, dmc5:
-	[RszClassInstance] public BitSet expressionBits = new BitSet(25) { BitNameDict = new () {
-		[1] = nameof(color1),
-		[2] = nameof(color1Rand),
-		[3] = nameof(alpha),
-		[4] = nameof(alphaRand),
-		[6] = "speed",
-		[7] = "speedRand",
-
-        [14] = "scale",
-        [15] = "scaleRand",
-		[16] = "sizeX",
-        [17] = "sizeXRange",
-		[18] = "sizeY",
-		[19] = "sizeYRange",
-		[20] = "sizeY",
-		[21] = "sizeYRange",
-	}};
-    public ExpressionAssignType color1;
-    public ExpressionAssignType color1Rand;
-    public ExpressionAssignType alpha;
-    public ExpressionAssignType alphaRand;
-    public ExpressionAssignType unkn5;
-    public ExpressionAssignType unkn6;
-    public ExpressionAssignType unkn7;
-    public ExpressionAssignType unkn8;
-    public ExpressionAssignType unkn9;
-    public ExpressionAssignType unkn10;
-    public ExpressionAssignType unkn11;
-    public ExpressionAssignType unkn12;
-    public ExpressionAssignType unkn13;
-    public ExpressionAssignType unkn14;
-    public ExpressionAssignType unkn15;
-    public ExpressionAssignType unkn16;
-    public ExpressionAssignType unkn17;
-    public ExpressionAssignType unkn18;
-    public ExpressionAssignType unkn19;
-    public ExpressionAssignType unkn20;
-    public ExpressionAssignType unkn21;
-	[RszVersion(">", EfxVersion.RE3, EndAt = nameof(unkn22))]
-    public ExpressionAssignType unkn22;
+	// re4.exe 槽位名（B 类：引擎按名字登记槽位，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；旋转槽按角度。 引擎别名：ColorRate = ColorRate/EmissionRate/ContrastRate/InnerIntensity/MultiplyColorRate，Intensity = BackIntensity/OuterIntensity/MultiplyBlackRate；*Range 在引擎里有的写作 *_Random。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(25) { BitNames = [ nameof(Color), nameof(ColorRange), nameof(Alpha), nameof(AlphaRange), nameof(ColorRate), nameof(PlaySpeed), nameof(PlaySpeedRange), nameof(PlaySpeedCoef), nameof(PlaySpeedCoefRange), nameof(RotationX), nameof(RotationXRange), nameof(RotationY), nameof(RotationYRange), nameof(RotationZ), nameof(RotationZRange), nameof(SizeScalar), nameof(SizeScalarRange), nameof(SizeX), nameof(SizeXRange), nameof(SizeY), nameof(SizeYRange), nameof(SizeZ), nameof(SizeZRange), nameof(PartStartNo), nameof(PartStartNoRange) ] };
+    public ExpressionAssignType Color;
+    public ExpressionAssignType ColorRange;
+    public ExpressionAssignType Alpha;
+    public ExpressionAssignType AlphaRange;
+    public ExpressionAssignType ColorRate;
+    public ExpressionAssignType PlaySpeed;
+    public ExpressionAssignType PlaySpeedRange;
+    public ExpressionAssignType PlaySpeedCoef;
+    public ExpressionAssignType PlaySpeedCoefRange;
+    public ExpressionAssignType RotationX;
+    public ExpressionAssignType RotationXRange;
+    public ExpressionAssignType RotationY;
+    public ExpressionAssignType RotationYRange;
+    public ExpressionAssignType RotationZ;
+    public ExpressionAssignType RotationZRange;
+    public ExpressionAssignType SizeScalar;
+    public ExpressionAssignType SizeScalarRange;
+    public ExpressionAssignType SizeX;
+    public ExpressionAssignType SizeXRange;
+    public ExpressionAssignType SizeY;
+    public ExpressionAssignType SizeYRange;
+	[RszVersion(">", EfxVersion.RE3, EndAt = nameof(SizeZ))]
+    public ExpressionAssignType SizeZ;
 	[RszVersion(EfxVersion.RE8)]
-    public ExpressionAssignType unkn23;
-	[RszVersion(EfxVersion.RE4, EndAt = nameof(unkn25))]
-    public ExpressionAssignType unkn24;
-    public ExpressionAssignType unkn25;
+    public ExpressionAssignType SizeZRange;
+	[RszVersion(EfxVersion.RE4, EndAt = nameof(PartStartNoRange))]
+    public ExpressionAssignType PartStartNo;
+    public ExpressionAssignType PartStartNoRange;
 
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 
