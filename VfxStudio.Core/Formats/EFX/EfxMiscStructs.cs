@@ -43,8 +43,12 @@ public partial class EFXAttributeDistortion : EFXAttribute
 {
 	public EFXAttributeDistortion() : base(EfxAttributeType.Distortion) { }
 
+	// 名字来自 re4.exe（加载器 3d28ad0 读 UniqueID + 0x14 字节）。MHWI 的 REFRACTION 就是这个属性，
+	// MHWI 的 alphaBlend 实际是 Influence。
 	public DistortionType DistortionType;
+	// 量级随类型而变：Blur 约 5..100，Refract 0.1..3，BlurTexture ±20（语料）。
 	public float Influence;
+	// Specular* 只对 Refract 有意义；Power 0、Intensity 1、白色 = 关闭。
 
 	[RszVersion(EfxVersion.RE3, EndAt = nameof(SpecularColor))]
 	public float SpecularPower;
@@ -216,6 +220,10 @@ public partial class EFXAttributeFixRandomGenerator : EFXAttribute
 {
 	public EFXAttributeFixRandomGenerator() : base(EfxAttributeType.FixRandomGenerator) { }
 
+	// re4.exe 里没有这个属性的字段名字符串（vtable 7a12670，加载器 3d88390 读 UniqueID + 0x28 字节，构建器 3d88440），
+	// 名字是按作用起的。发射器构建时从种子表里挑一个当发射器的随机种子（E+0x110）：
+	// 槽位 = hash % useRandomSeedTableCount；种子为 -1 表示改用新的随机种子。
+	// 候选槽位数（不是抽取次数）。count > 1 且没有分组时，各发射器独立挑槽，层与层可能对不上。
 	public int useRandomSeedTableCount;
 	public int randomSeedTable0;//TODO Make this into a fixed array of 8?
 	public int randomSeedTable1;
@@ -227,6 +235,7 @@ public partial class EFXAttributeFixRandomGenerator : EFXAttribute
 	public int randomSeedTable5;
 	public int randomSeedTable6;
 	public int randomSeedTable7;
+	// 分组哈希键（-1 = 不分组），引擎把它加进挑槽用的哈希；同组的发射器挑到同一槽位。不是位掩码。
 	public int tableSelectionGroup;//This value may be incorrect for older games, could be in a different spot
 }
 
@@ -429,14 +438,22 @@ public partial class EFXAttributeBlink : EFXAttribute
 {
 	public EFXAttributeBlink() : base(EfxAttributeType.Blink) { }
 
+	// 名字来自 re4.exe（vtable 7a16c68，加载器读 UniqueID + 0x28 字节，RE4 没有 Flags；逐粒子函数 3dc7a20）。
+	// 两个通道都是三角波（0 → 宽度 → 0，永不为负），不是正弦。结果 = clamp(低频 + 高频, MinRate, MaxRate)，
+	// 乘进粒子最终 alpha（与 Life 渐隐相乘，不逐帧累积）。初相位每粒子随机 [0,1) 周期。四个区间对都在出生时按
+	// center + (2u-1)·spread 抽一次。
 	[RszVersion(EfxVersion.DD2)]
 	public uint Flags;
 	public float MinRate;
 	public float MaxRate;
-	public via.Range LowFrequency;
-    public via.Range LowFrequencyWidth;
-    public via.Range HighFrequency;
-    public via.Range HighFrequencyWidth;
+	// 每秒周期数（按真实时间 dt 推进，没有 60fps 假设）。0 = 冻结在随机初相位（alpha 恒定，不是 0）。
+	public CenterSpread LowFrequency;
+	// 低频通道峰值幅度；0 关闭该通道。
+	public CenterSpread LowFrequencyWidth;
+	// 不是时间频率：每个低频周期里的波纹数（高频相位 = fract(HighFrequency · 低频相位)）。0 = 该通道恒为 0。
+	public CenterSpread HighFrequency;
+	// 高频通道峰值幅度。
+	public CenterSpread HighFrequencyWidth;
 
 }
 

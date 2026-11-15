@@ -353,10 +353,18 @@ public partial class EFXAttributeAlphaCorrection : EFXAttribute
 {
 	public EFXAttributeAlphaCorrection() : base(EfxAttributeType.AlphaCorrection) { }
 
+	// re4.exe：加载器 3d25d60 读 UniqueID + 0x10 字节，解析器 3d25b10。CPU 只把每粒子 4 字节打包给着色器
+	// （Hi、Lo、Curve、模式），重映射公式在像素着色器里，未读到。
+	// 无引擎名（按作用起名）：低 2 位 = 模式 0 Disable / 1 AlphaCurve / 2 AlphaThreshold / 3 LifePower。
+	// 模式 3 会让 CPU 顶点 alpha 不再乘 Life 渐隐（发射器标志 0x1000）。
 	[RszVersion(EfxVersion.RE2)]
 	public uint Flags;
-	public float LowPass;
-	public float HighPass;
+	// 引擎名 HiPass（别名 Max、LifePow0）。旧名 LowPass（名字原来是反的）。模式 1/2：重映射上限，取 [0,1]，
+	// 打包成 trunc(v·255.5) 的 8 位，超出会回绕；模式 3：[0,8) 的指数。
+	public float HiPass;
+	// 引擎名 LoPass（别名 Min、LifePow1）。旧名 HighPass。模式 1/2：重映射下限（语料里模式 2 时总有 Hi > Lo）；模式 3：指数。
+	public float LoPass;
+	// 无引擎名：带符号曲线项，-3..+3（打包成 c/3·127+127.5）；模式 2 时恒为 0。对应 MHWI 的 unkn3。
 	public float CurveConst;
 }
 
