@@ -17,6 +17,12 @@ python -I -X utf8 -u pe_image.py "<re4.exe>" 3d1d830 80     # 反汇编一个 RV
 `run_all.py` 让每个实验在独立子进程中运行：fast fail（0xC0000409）或未捕获的访问违例只结束该子进程，
 汇总里记为 `CRASH`。
 
+## 离线预览（P0 / P1 / P2a）
+
+独立窗口、贴图 Billboard3D、真实 UVS、参数编辑、撤销与保存副本已接入。运行方法及当前边界见
+[RE4-EFX-PREVIEW-P2.zh-CN.md](../../docs/development/RE4-EFX-PREVIEW-P2.zh-CN.md)，
+二进制协议见 [PROTOCOL.md](PROTOCOL.md)。服务入口为 `re4host.py`，原有实验入口保持不变。
+
 ## 文件
 
 | 文件 | 内容 |

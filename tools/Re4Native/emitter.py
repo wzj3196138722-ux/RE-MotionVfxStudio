@@ -167,17 +167,20 @@ _IMG = []
 # synthetic shape: UVS_SHAPE[0] sequences of UVS_SHAPE[1] patterns each (no UV rectangles: the
 # accessor 495a6b0 then returns its default rectangle at d62f4a8).
 UVS_SHAPE = [4, 16]
+# Optional real sequence sizes, supplied by the offline preview before any resource lookup.
+UVS_COUNTS = {}
 
 
-def _uvs(img, obj):
-    nseq, npat = UVS_SHAPE
+def _uvs(img, obj, counts=None):
+    counts = counts or [UVS_SHAPE[1]] * UVS_SHAPE[0]
+    nseq = len(counts)
     hdr = img.alloc(0x40)                       # +0x50 -> file header: +8 sequence count
     rn.set_u32(hdr, 0x5556532E)
     rn.set_u32(hdr + 8, nseq)
-    rn.set_u32(hdr + 12, nseq * npat)
+    rn.set_u32(hdr + 12, sum(counts))
     rn.set_u64(obj + 0x50, hdr)
     table = img.alloc(16 * nseq)                # +0x70 -> per sequence {SequenceBlock*, patterns*}
-    for i in range(nseq):
+    for i, npat in enumerate(counts):
         blk = img.alloc(16)
         rn.set_u32(blk, npat)
         rn.set_u64(table + 16 * i, blk)
@@ -189,7 +192,7 @@ def _resource(path):
     if path not in RESOURCES:
         RESOURCES[path] = _IMG[0].alloc(0x1000)
         if path and path.lower().endswith(".uvs"):
-            _uvs(_IMG[0], RESOURCES[path])
+            _uvs(_IMG[0], RESOURCES[path], UVS_COUNTS.get(path.replace("\\", "/").lower()))
         if path and path.lower().endswith(".mesh"):   # +0x168 -> mesh data (TypeMesh slot 23, 3d306ca); empty
             rn.set_u64(RESOURCES[path] + 0x168, _IMG[0].alloc(0x1000))
         rn.set_u32(RESOURCES[path] + 0x28, 0x10000)   # reference count: release (39f73f0) never reaches 0
@@ -253,7 +256,7 @@ class Entry:
     """A root entry: header (index, nameHash, entryAssignment, attribute count) then
     [type id][UniqueID][payload] per attribute."""
 
-    def __init__(self, img, path, off, drop_types=(), header=4):
+    def __init__(self, img, path, off, drop_types=(), header=4, spawn_override=0):
         """drop_types: attribute type ids that are read (their bytes consumed) but left out of the
         entry, e.g. (1,) runs the entry without its FixRandomGenerator."""
         data = open(path, "rb").read()
@@ -288,6 +291,16 @@ class Entry:
                                    uid=struct.unpack_from("<I", data, p0)[0]))
             if not ok:
                 raise RuntimeError(f"loader {loader:#x} of type {tid} returned 0 at file offset {p0:#x}")
+            if tid == 16 and spawn_override:
+                # Apply before later attribute loaders size their per-particle tables from Spawn.
+                for offset, value in {0x28: spawn_override, 0x2c: 1, 0x30: spawn_override, 0x34: 0,
+                                      0x38: 0, 0x3c: 0, 0x40: 0, 0x4c: 0, 0x50: 0, 0x54: 0, 0x58: 0}.items():
+                    rn.set_u32(attr + offset, value)
+            if tid == 91 and spawn_override:
+                # Keep a full stress pool alive throughout the 310-tick benchmark.
+                # Life loader 3d1bb80: KeepFrame min/max at attr+0x30/+0x34.
+                rn.set_u32(attr + 0x30, 1000)
+                rn.set_u32(attr + 0x34, 1000)
             if tid == 28 and not rn.u64(attr + 0xC8):   # TypeMesh: material handle (from the .mdf2) read by slot 23 (3d309ec)
                 rn.set_u64(attr + 0xC8, img.alloc(0x100))
             if tid in drop_types:

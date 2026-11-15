@@ -34,7 +34,7 @@ internal static class ClipboardTests
         EFXEntry Entry(string name, int id, int life)
         {
             var e = new EFXEntry { Version = EfxVersion.MHWilds, name = name, index = id };
-            e.Attributes.Add(new EFXAttributeLife { Version = EfxVersion.MHWilds, UniqueID = id + 10, KeepFrame = new() { r = life, s = life } });
+            e.Attributes.Add(new EFXAttributeLife { Version = EfxVersion.MHWilds, UniqueID = id + 10, KeepFrame = new() { min = life, max = life } });
             return e;
         }
         string Write(string name, EfxFile file)
@@ -73,10 +73,10 @@ internal static class ClipboardTests
         byte[] initial = Save(); long beforeCopy = revision;
         var entryCopy = Copy(Target());
         check(revision == beforeCopy && initial.SequenceEqual(Save()), "Copy does not mutate revision or bytes");
-        Request("set", new() { ["target"] = Target(attribute: 0), ["path"] = "KeepFrame.r", ["value"] = "99" });
+        Request("set", new() { ["target"] = Target(attribute: 0), ["path"] = "KeepFrame.min", ["value"] = "99" });
         Paste(entryCopy, Target("group", 0));
         var reread = Read();
-        check(reread.Entries.Count == 3 && ((EFXAttributeLife)reread.Entries[2].Attributes[0]).KeepFrame.r == 37, "Copied snapshot survives later edits to source");
+        check(reread.Entries.Count == 3 && ((EFXAttributeLife)reread.Entries[2].Attributes[0]).KeepFrame.min == 37, "Copied snapshot survives later edits to source");
         check(reread.EffectGroups[0].efxEntryIndexes!.SequenceEqual(new[] { 1, 2 }) && reread.EffectGroups[1].efxEntryIndexes!.SequenceEqual(new[] { 0 }), "Selected duplicate-name Group receives the block without changing another Group");
         check(reread.Entries.Select(e => e.index).Distinct().Count() == 3 && reread.Entries.SelectMany(e => e.Attributes).Select(x => x.UniqueID).Distinct().Count() == 3, "Pasted entry and attributes get unique native IDs");
         reread.FileHandler.Dispose();
@@ -88,12 +88,12 @@ internal static class ClipboardTests
         Paste(attributeCopy, Target(index: 1), true, 9, false);
         var replaced = Paste(attributeCopy, Target(index: 1), true, 0);
         reread = Read();
-        check(((EFXAttributeLife)reread.Entries[1].Attributes[0]).KeepFrame.r == 37 && reread.Entries[1].Attributes[0].UniqueID == 17 && replaced["selection"]!["attributeIndex"]!.GetValue<int>() == 0, "Confirmed replacement preserves target ID and selects updated attribute");
+        check(((EFXAttributeLife)reread.Entries[1].Attributes[0]).KeepFrame.min == 37 && reread.Entries[1].Attributes[0].UniqueID == 17 && replaced["selection"]!["attributeIndex"]!.GetValue<int>() == 0, "Confirmed replacement preserves target ID and selects updated attribute");
         reread.FileHandler.Dispose(); Request("undo"); check(initial.SequenceEqual(Save()), "Replacing an attribute can be undone byte for byte");
         Request("open", new() { ["path"] = pathB });
         check(Request("status")["copyBuffer"]!["id"]!.GetValue<string>() == attributeCopy["id"]!.GetValue<string>(), "Switching files retains the copied snapshot");
         Paste(attributeCopy, Target()); reread = Read();
-        check(((EFXAttributeLife)reread.Entries[0].Attributes[0]).KeepFrame.r == 37, "Cross-file attribute paste preserves values"); reread.FileHandler.Dispose();
+        check(((EFXAttributeLife)reread.Entries[0].Attributes[0]).KeepFrame.min == 37, "Cross-file attribute paste preserves values"); reread.FileHandler.Dispose();
         Paste(entryCopy, Target(), ok: false); // Replaced clipboard ID must not target stale content.
         Request("open", new() { ["path"] = pathA });
         var nestedCopy = Copy(Target(nested: true));

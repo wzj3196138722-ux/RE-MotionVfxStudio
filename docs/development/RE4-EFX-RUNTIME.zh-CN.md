@@ -931,7 +931,7 @@ UVSequenceModifier（逐粒子，替换宿主 UVSequence 的 T；调用紧跟 UV
 ```
 出生：count = 0; acc = 0; stretch = max(FLT_MIN, rnd(StretchDistance))
 每帧（3d79cb0）：acc += step
-  sample = 粒子位置（+0x28，粒子标志 0x1000 时加 +0x34..）× 发射器矩阵 → 世界；FollowFlags 位1 时存局部坐标
+  sample = 粒子位置（+0x28，`[p+4] & 0x1000` 时加 +0x34..，3d78c6f）× 发射器矩阵 → 世界；FollowFlags 位1 时存局部坐标
   默认（位0 清零）：if acc >= IntervalFrame: 历史整体后移一格，sample 入槽 0，count = min(count+1, ShapeDivision)
                    else: 只覆盖槽 0（头部跟随粒子）
                    acc %= IntervalFrame（0 视为每帧）
@@ -1003,7 +1003,7 @@ E 推定为当前发射器 / 所有者世界矩阵（部分待确认）。释放
 出生：acc = 0; count = 1; 点 0 = 当前采样
 每帧：acc += step；if acc >= IntervalFrame: 历史后移，点 0 = 新采样，count 至多 Division+1；否则头部不更新
       acc %= IntervalFrame
-采样 = 粒子位置（+0x28，0x1000 时加 +0x34）× 3dfca50 的矩阵 → 世界坐标；历史永远在世界空间
+采样 = 粒子位置（+0x28，`[p+4] & 0x1000` 且调用方 r8b ≠ 0 时加 +0x34，3dfd040）× 3dfca50 的矩阵 → 世界坐标；历史永远在世界空间
 点数据：方向 = 指向尾部的单位向量；+0x40 = 累计长度 / 总长（推定为 V）；点颜色恒为白、alpha 1
 绘制：count ≤ 1 不画；颜色 = 粒子 RGB，A = 生命淡出字节 × 颜色 alpha；宽 X = +0x84·+0x80·+0xe8，Y = +0x88·+0x80·+0xec
 ```

@@ -6,7 +6,8 @@ return await Host.Run(args);
 
 namespace VfxStudio.LiveEditor
 {
-    internal sealed record Options(string Assets, string Mailbox, string Output, string? GameRoot, bool SelfTest, string? LogDirectory = null, string? GameId = null)
+    internal sealed record Options(string Assets, string Mailbox, string Output, string? GameRoot, bool SelfTest, string? LogDirectory = null, string? GameId = null,
+        IReadOnlyList<string>? ProtectedRoots = null)
     {
         /// <summary>Active game: --game wins, else the executable in --game-root, else MHWilds (pre-profile default).</summary>
         public VfxStudio.Core.Games.GameProfile Game => VfxStudio.Core.Games.GameProfiles.Resolve(GameId, GameRoot);
@@ -23,10 +24,13 @@ namespace VfxStudio.LiveEditor
         public static Options Parse(string[] args)
         {
             var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var protectedRoots = new List<string>();
             bool selfTest = false;
             for (int i = 0; i < args.Length; i++)
             {
                 if (args[i] == "--self-test") { selfTest = true; continue; }
+                // --protect <dir>: "save" refuses any path inside this directory (repeatable).
+                if (args[i] == "--protect" && i + 1 < args.Length) { protectedRoots.Add(Path.GetFullPath(args[++i])); continue; }
                 if (args[i] is not ("--assets" or "--mailbox" or "--output" or "--game-root" or "--log-directory" or "--game") || ++i >= args.Length)
                     throw new ArgumentException("Usage: VfxStudio.LiveEditor --assets <dir> --mailbox <dir> --output <dir> [--game-root <dir>] [--game <id>] [--self-test]");
                 values[args[i - 1]] = args[i - 1] == "--game" ? args[i] : Path.GetFullPath(args[i]);
@@ -35,7 +39,8 @@ namespace VfxStudio.LiveEditor
             return new(values.GetValueOrDefault("--assets", Path.Combine(cwd, "Assets")),
                 values.GetValueOrDefault("--mailbox", Path.Combine(cwd, "LiveEditorMailbox")),
                 values.GetValueOrDefault("--output", Path.Combine(cwd, "LiveEditorOutput")),
-                values.GetValueOrDefault("--game-root"), selfTest, values.GetValueOrDefault("--log-directory"), values.GetValueOrDefault("--game"));
+                values.GetValueOrDefault("--game-root"), selfTest, values.GetValueOrDefault("--log-directory"), values.GetValueOrDefault("--game"),
+                protectedRoots);
         }
     }
 

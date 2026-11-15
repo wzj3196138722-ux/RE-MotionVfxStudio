@@ -5,7 +5,7 @@ using Shader = VfxStudio.Renderer.Shaders.Shader;
 
 namespace VfxStudio.App.UI;
 
-internal sealed class ViewportGridRenderer : IDisposable
+public sealed class ViewportGridRenderer : IDisposable
 {
     private const string VertexSource = """
         #version 460 core
@@ -81,3 +81,4 @@ internal sealed class ViewportGridRenderer : IDisposable
         _shader.Dispose();
     }
 }
+

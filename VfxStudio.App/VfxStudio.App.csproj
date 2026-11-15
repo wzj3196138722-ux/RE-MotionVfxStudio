@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\VfxStudio.Ui\VfxStudio.Ui.csproj" />
     <ProjectReference Include="..\VfxStudio.Core\VfxStudio.Core.csproj" />
     <ProjectReference Include="..\VfxStudio.Renderer\VfxStudio.Renderer.csproj" />
   </ItemGroup>

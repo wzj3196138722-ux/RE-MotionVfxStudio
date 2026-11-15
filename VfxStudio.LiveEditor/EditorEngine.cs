@@ -86,6 +86,8 @@ internal sealed partial class EditorEngine : IDisposable
             switch (action)
             {
                 case "status": break;
+                case "configure_offline_preview": ConfigureOfflinePreview(request); break;
+                case "publish_offline_preview": break;
                 case "file_browse": response["fileBrowser"] = JsonSerializer.SerializeToNode(FileBrowser.Browse(options, request), Host.Json); break;
                 case "file_stat": response["fileStat"] = JsonSerializer.SerializeToNode(FileBrowser.Stat(Text(request, "path")), Host.Json); break;
                 case "pfb_open": case "pfb_add": case "pfb_copy": case "pfb_paste": case "pfb_set":
@@ -281,6 +283,7 @@ internal sealed partial class EditorEngine : IDisposable
                 }
                 default: throw new ArgumentException("Unknown action: " + action);
             }
+            AttachOfflinePreview(response, action == "publish_offline_preview");
         }
         catch (Exception ex)
         {
@@ -510,7 +513,35 @@ internal sealed partial class EditorEngine : IDisposable
             foreach (var edit in plan)
                 if (!actual.TryGetValue(edit.Field.Description.Path, out var field) || field.Description.Value != edit.Expected)
                     throw new InvalidDataException("Parameter group was not preserved by serialization; all changes were rolled back.");
+            RejectInvertedIntegerRanges(Resolve(target, reopened), plan.Select(p => p.Field.Description.Path));
         });
+    }
+
+    /// <summary>An edited <c>MinMaxI</c> (Life frames, Spawn counts, ...) must keep min ≤ max:
+    /// re4.exe draws <c>min + rand % (max − min + 1)</c>, so max = min − 1 divides by zero and a
+    /// smaller max yields a huge value (docs/development/RE4-EFX-RUNTIME.zh-CN.md §0.4).</summary>
+    private static void RejectInvertedIntegerRanges(object owner, IEnumerable<string> editedPaths)
+    {
+        foreach (string path in editedPaths)
+        {
+            int dot = path.LastIndexOf('.');
+            if (dot < 0 || path[(dot + 1)..] is not ("min" or "max")) continue;
+            object? value = owner;
+            foreach (string name in path[..dot].Split('.'))
+            {
+                if (value == null) break;
+                var type = value.GetType();
+                var member = (System.Reflection.MemberInfo?)type.GetField(name) ?? type.GetProperty(name);
+                value = member switch
+                {
+                    System.Reflection.FieldInfo f => f.GetValue(value),
+                    System.Reflection.PropertyInfo p => p.GetValue(value),
+                    _ => null
+                };
+            }
+            if (value is ReeLib.Efx.Structs.Common.MinMaxI range && range.max < range.min)
+                throw new ArgumentException($"{path[..dot]} 的最大值 {range.max} 小于最小值 {range.min}；区间必须满足 min ≤ max。");
+        }
     }
 
     private EffectGroup Group(int index)
@@ -618,6 +649,16 @@ internal sealed partial class EditorEngine : IDisposable
             ? Path.Combine(options.Output, session, stem + $"_edit_r{revision}_{Guid.NewGuid():N}.efx.{(int)document!.Header.Version}")
             : Path.GetFullPath(requestedPath);
         if (string.Equals(path, source, StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("The imported source is protected. Save to a new path.");
+        foreach (string root in options.ProtectedRoots ?? [])
+        {
+            string prefix = Path.TrimEndingDirectorySeparator(root) + Path.DirectorySeparatorChar;
+            if (path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) || string.Equals(path, root, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("不能保存到受保护目录（游戏目录或解包目录）：" + root);
+        }
+        if (options.ProtectedRoots is { Count: > 0 })
+            for (var folder = new DirectoryInfo(Path.GetDirectoryName(path)!); folder != null; folder = folder.Parent)
+                if (folder.Exists && folder.Attributes.HasFlag(FileAttributes.ReparsePoint))
+                    throw new InvalidOperationException("保存路径经过符号链接或目录联接，无法确认不在受保护目录内：" + folder.FullName);
         if (!path.EndsWith($".efx.{(int)document!.Header.Version}", StringComparison.OrdinalIgnoreCase))
             throw new ArgumentException("Output suffix must match the loaded EFX version.");
         WriteNewFile(path, ResolvePrecache(Validate(Require(), path), path));

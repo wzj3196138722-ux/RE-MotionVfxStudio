@@ -259,7 +259,7 @@ public class GpuTexture : IDisposable
                     gl.TexImage2D(
                         TextureTarget.Texture2D,
                         0,
-                        InternalFormat.Rgba8,
+                        format is DxgiFormat.R8G8B8A8_UNORM_SRGB or DxgiFormat.B8G8R8A8_UNORM_SRGB ? InternalFormat.Srgb8Alpha8 : InternalFormat.Rgba8,
                         (uint)matchedW,
                         (uint)matchedH,
                         0,
@@ -354,7 +354,7 @@ public class GpuTexture : IDisposable
                     gl.TexImage2D(
                         TextureTarget.Texture2D,
                         0,
-                        InternalFormat.Rgba8,
+                        format is DxgiFormat.R8G8B8A8_UNORM_SRGB or DxgiFormat.B8G8R8A8_UNORM_SRGB ? InternalFormat.Srgb8Alpha8 : InternalFormat.Rgba8,
                         mipData.width,
                         mipData.height,
                         0,
