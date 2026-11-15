@@ -674,6 +674,13 @@ public partial class EFXAttributeRgbCommon : EFXAttribute
 {
 	public EFXAttributeRgbCommon() : base(EfxAttributeType.RgbCommon) { }
 
+	// re4.exe：vtable 7a1a7d8，加载器 3dec7d0 读 UniqueID + 0x68 字节；名字与引擎反射名一致。CPU 只跑生命包络、
+	// 打包每粒子 12 字节 RgbItem；颜色计算在 primitivevfx 像素着色器（Polygon3DConstant.cbParamRgbItem3D）。
+	// 贴图 G 通道 → GreenCh 层：M = pow(G·greenLife, GreenChCurve)，Ig = GreenChColor.a·M，
+	//   颜色 = Ig·GreenChIntensity·lerp(色, 白, saturate(Ig·Intensity / GreenChSaturate)²)（越接近 Saturate 越白）。
+	// 贴图 R 通道 → RedCh 层：颜色 = lerp(R, B, RedChAlphaToB)·RedChIntensity·RedChColor.rgb，覆盖 = lerp(A, B, RedChAlphaToB)·RedChColor.a。
+	// 最终 alpha = saturate((Ig + 红层覆盖)·Alpha)。*Lighting：该层进"受光"累加（只在 Physical/EdgeBlend 混合下有区别）。
+	// 无引擎名的位：bit0 / bit1 = 绿 / 红颜色在 Color 与 ColorRange 之间随机；bit2 = AlphaToB 只影响覆盖不影响颜色。
 	public uint Flags;
 	public via.Color GreenChColor;
 	public via.Color GreenChColorRange;
@@ -687,18 +694,21 @@ public partial class EFXAttributeRgbCommon : EFXAttribute
 	public float RedChAlphaToB;
 	public float Alpha;
 
+	// 三个通道的生命包络（官方数据全部未开）：*Frame 都是 min + rand % (extra+1) 帧。LifeType：1 = 只淡入然后保持，
+	// 2 = 保持到粒子死亡；绿层乘 G 通道，红层的"生命"是让 RedChAlphaToB 在 1 和设定值之间变化（不改红层亮度）。
+	// 注意：开启生命但三段都是 0 时第一帧就进入结束状态，该层直接没了。
 	public bool UseGreenChLife;
-    public via.RangeI GreenChAppearFrame;
-    public via.RangeI GreenChKeepFrame;
-    public via.RangeI GreenChVanishFrame;
+    public MinExtraI GreenChAppearFrame;
+    public MinExtraI GreenChKeepFrame;
+    public MinExtraI GreenChVanishFrame;
 
     public bool GreenChLighting;
 	public LifeType GreenChLifeType;
 
 	public byte UseRedChLife;
-    public via.RangeI RedChAppearFrame;
-    public via.RangeI RedChKeepFrame;
-    public via.RangeI RedChVanishFrame;
+    public MinExtraI RedChAppearFrame;
+    public MinExtraI RedChKeepFrame;
+    public MinExtraI RedChVanishFrame;
 
     public bool RedChLighting;
 	public LifeType RedChLifeType;
@@ -747,11 +757,15 @@ public partial class EFXAttributeRgbCommonExpression : EFXAttribute, IExpression
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 
-[RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.RgbWater, EfxVersion.DD2, EfxVersion.MHWilds)]
+[RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.RgbWater, EfxVersion.RE4, EfxVersion.DD2, EfxVersion.MHWilds)]
 public partial class EFXAttributeRgbWater : EFXAttribute
 {
 	public EFXAttributeRgbWater() : base(EfxAttributeType.RgbWater) { }
 
+    // re4.exe：vtable 7a1aee8，加载器 3deefd0 读 UniqueID + 0x6f 字节；名字与引擎反射名一致。公式在 primitivevfx 像素着色器：
+    // 贴图 R = 高光遮罩，mix = lerp(G, B, GtoB·gtobLife) = 水面层遮罩（0 取 G，1 取 B）。
+    // rgb = (SpecularColor·R·SpecularIntensity + SheetColor·mix·SheetIntensity)/255（加法，不乘生命）；
+    // alpha = saturate(A·Alpha·(SheetColor.a·sheetLife·mix + SpecularColor.a·specLife·R)/255)。总是受光，没有 Lighting 开关。
     public via.Color SpecularColor;
     [RszVersion(EfxVersion.MHWilds)]
     public float mhws_unkn;
@@ -763,22 +777,22 @@ public partial class EFXAttributeRgbWater : EFXAttribute
 	public float Alpha;
 
 	public bool UseSpecularLife;
-	public via.RangeI SpecularAppearFrame;
-    public via.RangeI SpecularKeepFrame;
-    public via.RangeI SpecularVanishFrame;
+	public MinExtraI SpecularAppearFrame;
+    public MinExtraI SpecularKeepFrame;
+    public MinExtraI SpecularVanishFrame;
 
     public LifeType SpecularLifeType;
 
     public byte UseSheetLife;
-    public via.RangeI SheetAppearFrame;
-    public via.RangeI SheetKeepFrame;
-    public via.RangeI SheetVanishFrame;
+    public MinExtraI SheetAppearFrame;
+    public MinExtraI SheetKeepFrame;
+    public MinExtraI SheetVanishFrame;
     public LifeType SheetLifeType;
 
 	public byte UseGtoBLife;
-    public via.RangeI GtoBAppearFrame;
-    public via.RangeI GtoBKeepFrame;
-    public via.RangeI GtoBVanishFrame;
+    public MinExtraI GtoBAppearFrame;
+    public MinExtraI GtoBKeepFrame;
+    public MinExtraI GtoBVanishFrame;
     public LifeType GtoBLifeType;
 }
 
