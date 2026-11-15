@@ -97,14 +97,20 @@ def _exe_backtrace(context: int, limit: int = 32) -> tuple[int, ...]:
     ctypes.memmove(ctx, context, _CONTEXT_SIZE)
     frames = []
     base, handler_data, establisher = ctypes.c_uint64(), ctypes.c_void_p(), ctypes.c_uint64()
+    seen_exe = False
     for i in range(limit):
         rip = ctypes.c_uint64.from_address(ctx + _CTX_RIP).value
         inside = _IMAGE_SPAN[0] <= rip < _IMAGE_SPAN[1]
-        if not inside and i > 0:
-            break
+        if not inside and seen_exe:
+            break                                  # left the exe again: back in ctypes / Python
         if inside:
+            seen_exe = True
             frames.append(rip)
-        entry = _k32.RtlLookupFunctionEntry(rip, ctypes.byref(base), None) if inside else None
+        elif i > 0 and i > 8:
+            break
+        # system DLL frames (a fault inside kernel32 / ntdll called by the exe) unwind through their
+        # own registered tables; only exe frames are reported
+        entry = _k32.RtlLookupFunctionEntry(rip, ctypes.byref(base), None)
         if entry:
             _k32.RtlVirtualUnwind(0, base.value, rip, entry, ctx, ctypes.byref(handler_data),
                                   ctypes.byref(establisher), None)

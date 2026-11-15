@@ -15,12 +15,12 @@ import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-EXPERIMENTS = ["exp_map", "exp_scaleanim", "exp_blink", "exp_loader", "exp_rng", "exp_pipeline", "scan_loops"]
+EXPERIMENTS = ["exp_map", "exp_scaleanim", "exp_blink", "exp_loader", "exp_rng", "exp_pipeline", "exp_emitter", "scan_loops"]
 
 
 def run(name: str, out_dir: Path) -> dict:
     p = subprocess.run([sys.executable, "-I", "-X", "utf8", "-u", str(HERE / f"{name}.py")],
-                       cwd=str(HERE), capture_output=True, text=True, encoding="utf-8", errors="replace")
+                       cwd=str(HERE), env=dict(os.environ, RE4NATIVE_OUT=str(out_dir)), capture_output=True, text=True, encoding="utf-8", errors="replace")
     text = p.stdout + ("\n--- stderr ---\n" + p.stderr if p.stderr.strip() else "")
     (out_dir / f"{name}.txt").write_text(text, encoding="utf-8")
     results = [json.loads(l[7:]) for l in p.stdout.splitlines() if l.startswith("RESULT ")]

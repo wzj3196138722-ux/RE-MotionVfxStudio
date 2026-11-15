@@ -9,6 +9,7 @@
 ```bash
 python -I -X utf8 -u run_all.py [输出目录] [实验名 ...]     # 默认输出到 %TEMP%\re4native
 python -I -X utf8 -u exp_scaleanim.py                      # 单独运行一个实验
+python -I -X utf8 -u exp_emitter.py run bb_60               # 一个发射器场景，逐 tick 状态以 JSON 输出
 python -I -X utf8 -u pe_image.py "<re4.exe>" 3d1d830 80     # 反汇编一个 RVA
 ```
 
@@ -29,6 +30,9 @@ python -I -X utf8 -u pe_image.py "<re4.exe>" 3d1d830 80     # 反汇编一个 RV
 | `exp_rng.py` | 两个播种函数与 ScaleAnim / Blink 出生抽取对照 `refsim.py` |
 | `exp_pipeline.py` | 整个逐粒子管线 3d05350，ctx 中只挂 ScaleAnim 与 Blink |
 | `scan_loops.py` | 静态扫描 3d08480 与 3d05350 可达函数的导入、全局变量、间接调用、TLS 访问 |
+| `factory.py` | 属性工厂表：运行每个"分配 + 构造"小函数，读出 `attr+8` 的类型号与虚表，得到 240 个类型 |
+| `emitter.py` | 用引擎代码建发射器并推进：分配器入口补丁、单例与引擎服务桩、静态 TLS 垫片；`Entry` 用各类型自己的加载器读条目（每个属性读多少字节由引擎决定）；`Emitter` 由 3d06440 原地构造 E，经 3d09690 推进；`state()` 输出逐粒子状态 |
+| `exp_emitter.py` | 真实语料条目上的发射器场景，与规格比较出生时刻、Life、积分、出生速度、确定性 |
 
 ## 结果
 
@@ -44,16 +48,38 @@ python -I -X utf8 -u pe_image.py "<re4.exe>" 3d1d830 80     # 反汇编一个 RV
 | 加载器 + 构建器 | ScaleAnim（类型 87）与 Blink（类型 108）各取一个语料属性：加载器经伪造流对象各读一次（0x44 / 0x2C 字节），块内容与规格给出的顺序一致，块大小与槽 6 的公式一致；用引擎构建的块继续驱动逐粒子函数，出生抽取与逐帧值逐位一致。用游戏自己的代码解析 EFX 属性可行 | 已确认（两个属性类型） |
 | 随机数 | 3d09990 与 3d099e0 在 20,000 组随机 (salt, state, seed, key) 上与 `xs(xs(salt+state+key)+seed)` 一致；ScaleAnim 3,000 个粒子（含 |r| ≤ 1e-6 不消耗抽取的字段）与 Blink 3,000 个粒子的出生值逐位一致 | 已确认 |
 | 逐粒子管线 3d05350 | 只给 ctx 挂 ScaleAnim、Blink 两个块，另补三个指针（`[g]` 设置单例、类型上下文 `[cs+0x10]→ctx`、`ctx+0x100`），整条管线连续运行 61 次无故障；ScaleAnim、Blink 结果与单独调用一致；手动给粒子速度后位置按 `pos += vel·n` 前进 | 已确认 |
-| 发射器循环 3d08480 | 只做了静态评估，见下节 | 部分待确认 |
+| 条目解析 | 4 个语料条目（Billboard3D 两个、Mesh、RibbonLength）全部由引擎加载器读完，读到的末尾正好是下一个条目的开头 | 已确认 |
+| 发射器构造 | 3d06440 在一块内存上原地构造 E：E[0] = 条目对象，属性块依次由槽 15 构建，粒子数组与逐粒子附加数据随后；FixRandomGenerator 的种子进入 E+0x110 | 已确认 |
+| 推进 | 3d09690（状态机 → N 累加 → 3d08480）连续运行 120 tick，4 个条目都不故障。Mesh 与 RibbonLength 各 1 个粒子 | 已确认 |
+| 出生时刻 | 首批在 tick `max(D,1)`，之后每 `max(I,1)` 帧一批（I = 30：tick 1、31、61、91）；可变 dt 下按整数帧 N 倒数 | 已确认 |
+| 低帧率补发 | n = 3、IntervalFrame 0、LoopNum 3：同一 tick 出 3 个粒子，之后不再出生。批数 k = max(1, ⌊n/(I+1)⌋) 同时消耗 k 轮 LoopNum | 已确认（消耗 k 轮为观测结果） |
+| E.state | 本批粒子看到 `xs(xs(seed))`（重启置 xs(seed)，出批前推进一次） | 已确认 |
+| Life | 抽样（salt 0x29）与 `refsim` 一致；每个粒子每 tick 的阶段码与 8 位 alpha 都符合规格 §2.4.2 模式 0（含 Appear 20..40 的条目、可变 dt） | 已确认 |
+| 积分 | 每个粒子每 tick 按 `gvel += n·accel; pos += (vel + (0,1,0)·gvel)·n; vel *= powf(coef, n)` 逐位一致（世界矩阵为单位阵；60 fps 与可变 dt） | 已确认 |
+| 出生速度 | Velocity3D 抽样（salt 0x23）得到的方向·速度/60、SpeedCoef、重力加速度与 `refsim` 差 < 2e-7 | 已确认 |
+| 出生 tick | 新粒子在出生 tick 不积分：3d06d30 在 `[p] & 2` 时走 3d06da4（Interpolate 分支），标准模式下位置停在形状采样值。重启后第一批的粒子在出生 tick 年龄为 0（之后的批为 1.0） | 已确认 |
+| 确定性 | 同一条目在两个进程中逐 tick 结果相同（摘要一致） | 已确认 |
+| 无 FixRandomGenerator | 3d88690 在每个 tick 的属性遍历之后令 `E.seed = next(全局 xorshift128 d6a3150..5c)`，不止构造时一次。新映射镜像里该生成器为全 0，种子恒为 0，结果确定；给生成器设初值后每 tick 种子都变，粒子仍各自按出生 tick 的种子抽样 | 已确认 |
+| RibbonLength | 尺寸槽 U = SizeScalar、X = Width（0.8）、Y = Length（1.3）；Life Flags 1 + KeepHold {0,0} 进入阶段 6 后保持 | 已确认 |
+| UV 帧 | 粒子头 `[p]` 位 10–17 = 序列号，位 18–25 = 帧；PlaySpeed 1 时每 tick 前进 1 帧并循环 | 已确认（.uvs 为合成替身） |
+
+## 替身与桩
+
+运行发射器时，引擎外的对象全部是替身。它们决定了哪些结论可信：
+
+| 位置 | 替身 | 影响 |
+|---|---|---|
+| 分配器 3ab29d0 / 3acc670 | 固定地址上的递增分配；释放为空操作 | 无 |
+| 资源查找 39ef530 | 按路径返回清零对象（引用计数 0x10000）；.uvs 合成为 4 个序列 × 16 或 64 帧，无 UV 矩形；.mesh 只有空的数据对象 | UV 帧数与真实 .uvs 不同；Mesh 的部件、动画不可信 |
+| 渲染槽 4748b80、网格实例 4659170、网格实例设置 46565c0 / 4658830 / 4656200 | 返回清零对象或直接返回 | 只影响渲染侧 |
+| 骨骼查找 3d00f80 | 找不到 | ParentOptions 按无父级处理 |
+| 单例 d62f8f0、d62f9f0、d62f9b0、d62f8e0、d62fa38 | 清零对象；`[d62fa38]+0x4340 → +0x18` 与 `[ctx+0x100]+8`（LOD 因子 q）设 1.0 | q 为 0 时出生数按 max(·,1) 缩小 |
+| 世界矩阵（更新结构 +0x40..0x7f） | 单位阵 | 无父级运动 |
+| 静态 TLS | 新的 ThreadLocalStoragePointer 数组，re4.exe 用槽 100 | 尚无条目触及 |
 
 ## 卡点
 
-- `[g+0xeb2]`（LegacyMode2018）与 `[g+0xeb0]` 在新映射的镜像里不存在：`g = qword [d62f8f0]` 是 .bss 指针，为空。
-  该对象（0xee0 字节）由构造函数 3cdf250 清零，启动时 7896afe / 7896b12 再从配置块 `+0x51d` / `+0x530` 复制。
-  发行版的取值只能从运行中的游戏读到，本目录不读。
-- 碰撞路径 3d64580 → 3d6d280 → 3cfe610 读静态 TLS（`gs:[0x58]` 与 `_tls_index` 0xda04358）。本进程未给 re4.exe 分配 TLS 块，
-  带碰撞块运行前需要补一个 TLS 槽。
-- 3d08480 需要完整的 E（属性列表 E+0x288、粒子数组 E+0x190、Spawn 块）和更新参数结构（`rdx+0x8/0x18/0x20/0x28/0x30`）。
-  深度 3 内可达 711 个函数，导入全部可绑定，没有陷阱；需要处理的是 .bss 单例（`d62f9f0` 的 +0x3bb9 字节、`d62f8e0`、
-  `d62fa38` PtLife 事件队列、`d6edb20..28` 一组全局浮点）和引擎分配器（3d3a6e0 → 39ed9b0 → 3a85cc0 / 3a85cd0、3acc670），
-  分配器需要 physsim 那样的入口补丁。
+- `[g+0xeb2]`（LegacyMode2018）与 `[g+0xeb0]` 发行版取值未知：构造函数 3cdf250 清零，启动时 7896afe / 7896b12
+  从配置块 `+0x51d` / `+0x530` 复制。本目录按 0 运行。
+- Mesh 的模拟依赖网格资源：部件数、动画、材质句柄（attr+0xc8）都来自 .mesh / .mdf2 资源，这里是空替身。
+- 碰撞（PtCollision、PtColliderAction）、PtLife 子 Action、外部驱动 3d03fa0 的补帧路径都没有经过。

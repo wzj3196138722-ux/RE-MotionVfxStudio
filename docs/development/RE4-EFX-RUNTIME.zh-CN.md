@@ -206,8 +206,8 @@ Life 结束在 Life 自身的更新里置相位 9 并清 `[p] & 3`；被清空�
 1. slot 22：Spawn 调度决定本批，抽取下一次 SpawnNum 与 IntervalFrame，本批计数 > 0 时推进 `E.state`。
 2. 认领 3d15e60，`[p] = alive | new`，编号 `id = E.counter++`。
 3. 出生前置：**Life**（3 次抽取）→ **ParentOptions 逐粒子**（至多 3 次抽取，按槽号播种）→ TexelChannelOperator → AssignCSV → **EmitterShape3D 采样**（位置 = p_raw · R）→ ShaderSettings。
-4. `age += dt·60`。
-5. 3d05350：Noise → **类型出生抽样**（Billboard3D：颜色、SizeScalar、SizeX、SizeY、Rotation；Mesh：颜色、RotX、SizeX、RotY、SizeY、RotZ、SizeZ、SizeScalar、部件、播放速度）→ **RotateAnim 出生** → **ScaleAnim 出生** → **Velocity3D 初始化** → **同一次调用里已经执行第一步积分**（用刚设的速度和本 tick 的 n）→ 碰撞 → Blink 出生 → **UVSequence 出生** → UVSequenceModifier → AlphaCorrection → Rgb*。
+4. `age += dt·60`。例外：重启后的第一批在出生 tick 的年龄为 0，之后各批为 1（60 fps 时；Re4Native 原生运行观察到，分支位置未定位：部分待确认）。
+5. 3d05350：Noise → **类型出生抽样**（Billboard3D：颜色、SizeScalar、SizeX、SizeY、Rotation；Mesh：颜色、RotX、SizeX、RotY、SizeY、RotZ、SizeZ、SizeScalar、部件、播放速度）→ **RotateAnim 出生** → **ScaleAnim 出生** → **Velocity3D 初始化** → 积分 3d06d30 遇到"新粒子"位直接跳过（3d06da4），**出生 tick 不积分**，粒子停在形状采样位置；从下一 tick 起按速度推进（Re4Native `exp_emitter.py` 原生运行，已确认）→ 碰撞 → Blink 出生 → **UVSequence 出生** → UVSequenceModifier → AlphaCorrection → Rgb*。
 6. 后处理：ScaleAnim 基值捕获（所以基值 = Type 的抽样值）；PtLife 状态 0 / 1 触发。ScaleAnim 的逐帧求值从下一个 tick 开始（需要"存活且非新"）。
 
 `[g+0xeb0] != 0` 时类型抽样移到碰撞之后（仍在 Blink / UV 之前）；基值捕获在后处理中，两种情况相同。状态：已确认（ORD §6）。
@@ -242,7 +242,7 @@ rnd(c, r) = f32( f32( f32(u()·2.0) − 1.0 ) · r ) + c       // CenterSpread�
 - 粒子编号 = 认领时的 `E.counter`（发射器生命期内按认领顺序 0、1、2…，重启时清零），**不是槽号**。
 - 同一粒子之后再次调用同一采样函数（Velocity3D 的延迟路径、Billboard3D 每 tick、Life 每 tick）会以相同 salt 与 key 重新播种，重放相同的前几次抽取；是否真正抽取由各函数的门控决定。例如延迟到期时的速度方向与出生时相同。
 
-`E.seed`（`E+0x110`）：有 FixRandomGenerator 时取表项（§1.7）；否则 `next(G)`，G 为引擎全局 4 字生成器，不可复现。`E+0x118 / 0x11c` 不被本表任何采样函数读取。
+`E.seed`（`E+0x110`）：有 FixRandomGenerator 时取表项（§1.7）；否则 **每个 tick** 在收尾 3d88690 里重新取 `next(G)`（不只构造时取一次），G 为引擎全局 4 字生成器，不可复现；每个粒子用的是它出生那个 tick 的种子。全局生成器全零时（新映射的映像）种子恒为 0，结果确定。已确认（Re4Native 原生运行）。`E+0x118 / 0x11c` 不被本表任何采样函数读取。
 `E.state`（`E+0x120`）：构造时 1（3d066e8）→ 重启 tick 的 Spawn slot 22 置为 `xs(E.seed)`（3d15ad4）→ Spawn 调度在 slot 22 中、批次判定之后、粒子循环之前，每个本批计数 > 0 的 tick 推进一次 `xs`（3d15271）。所以本 tick 出生的粒子看到的是推进后的 state，而同一 tick 的批量抽取用的是推进前的 state。LegacyMode2018 置位时两处都跳过。
 
 状态：已确认（ORD §7.1，3d09990 / 3d09940 / 3d099e0；参考实现 `refsim.py` 尚未对照实机数值）。
@@ -487,7 +487,8 @@ RE4 文件里没有 TrySpawnAllParticles、InitializeFull、SpawnChanceFrame、O
         if Interpolate: count = max(count, 距离发射数)
         I = roll(IntervalFrame); c = I
         if 本批前有非零延迟: E+8 |= 2; ctx+0x108 = 0                  // 发射器时间清零
-        if !UseSpawnFrameInt: L -= 1
+        if !UseSpawnFrameInt: L -= 1     // 低帧率补发时按补发批数递减：n = 3 的一个 tick 出 3 批、L 减 3（Re4Native 原生运行）
+        // 批数还乘 LOD 因子（ctx+0x100 所指对象 +8 的 float）；为 0 时退化成每批 1 个粒子
   if UseSpawnFrameInt 且不在延迟中: L -= step
   if L == 0 且 R != 0（无符号，−1 也算）:
       L = 重抽; wait = roll(RevivalInterval); c = 0; if R != −1: R -= 1
