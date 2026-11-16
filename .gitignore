@@ -5,6 +5,7 @@
 **/build-cache/
 **/published/
 **/test-output/
+LiveEditorOutput/
 **/fixtures/
 **/live-ui-fixtures/
 **/node_modules/
