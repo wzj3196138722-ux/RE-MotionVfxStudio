@@ -294,7 +294,7 @@ JsonObject CompositionReport() => new()
     ["alphaRate"]=composition.AlphaRate,["sortEntries"]=composition.SortEntries,["sortWithinEntry"]=composition.SortWithinEntry,
     ["physicalGain"]=composition.PhysicalGain,
     ["textureFilter"]=composition.TextureFilter,["texelChannel"]=composition.TexelChannel,["frameBlend"]=composition.FrameBlend,
-    ["lighting"]=composition.Lighting,["ambient"]=composition.Ambient.X,["keyLight"]=composition.KeyLight,
+    ["lighting"]=composition.Lighting,["distortion"]=composition.Distortion,["ambient"]=composition.Ambient.X,["keyLight"]=composition.KeyLight,
     ["blends"]=new JsonArray(composition.Blends.Select((b,i)=>(JsonNode?)new JsonObject{["blend"]=i,["source"]=b.Source.ToString(),["destination"]=b.Destination.ToString()}).ToArray()),
     ["drawOrder"]=billboards==null||scene==null?null:new JsonArray(billboards.LastOrder.Select(t=>(JsonNode?)scene.AtTable(t)?.Position).ToArray())
 };
@@ -465,7 +465,7 @@ void BeginControl(PreviewControlRequest job)
                 ("rgbLayers",v=>composition.RgbLayers=v),("softParticles",v=>composition.SoftParticles=v),("depthBias",v=>composition.DepthBias=v),
                 ("detonemap",v=>composition.Detonemap=v),("alphaRate",v=>composition.AlphaRate=v),("sortEntries",v=>composition.SortEntries=v),
                 ("sortWithinEntry",v=>composition.SortWithinEntry=v),("textureFilter",v=>composition.TextureFilter=v),
-                ("texelChannel",v=>composition.TexelChannel=v),("frameBlend",v=>composition.FrameBlend=v),("lighting",v=>composition.Lighting=v)})
+                ("texelChannel",v=>composition.TexelChannel=v),("frameBlend",v=>composition.FrameBlend=v),("lighting",v=>composition.Lighting=v),("distortion",v=>composition.Distortion=v)})
                 if(a[name]!=null) setter(PreviewControlReports.Bool(a,name));
             if(PreviewControlReports.Float(a,"physicalGain",0,16) is float g) composition.PhysicalGain=g;
             if(PreviewControlReports.Float(a,"ambient",0,4) is float amb) composition.Ambient=new(amb);
@@ -724,6 +724,7 @@ void DrawComposition()
     composition.TextureFilter=Toggle("TextureFilter（纹素 alpha 整形）",composition.TextureFilter);
     composition.TexelChannel=Toggle("TexelChannelOperator（黑体色）",composition.TexelChannel);
     composition.FrameBlend=Toggle("FrameBlend（翻页交叉淡化）",composition.FrameBlend);
+    composition.Distortion=Toggle("Distortion（屏幕扭曲）",composition.Distortion);
     composition.Lighting=Toggle("受光粒子（预览光照）",composition.Lighting);
     ImGui.BeginDisabled(!composition.Lighting);
     float ambient=composition.Ambient.X,key=composition.KeyLight;
@@ -1005,7 +1006,7 @@ window.Render += _ =>
             if(commonBlend==null) particleDivisor=1;
             if(particleDivisor>1) particleLayer.Begin(hdr.Width,hdr.Height,particleDivisor);
             int? solo=soloSelected && SelectedTable()>=0 ? SelectedTable() : null;
-            var renderContext=new PreviewRenderContext(composition,exposure,.05f,100f,hdr.OpaqueDepthTexture);
+            var renderContext=new PreviewRenderContext(composition,exposure,.05f,100f,hdr.OpaqueDepthTexture,hdr.CaptureSceneColor);
             try {billboards?.Render(frame,view,projection,renderContext,solo);}
             catch(Exception ex) when(ex is InvalidDataException or TimeoutException) {sceneRendered=false;status="绘制失败："+ex.Message;}
             if(billboards==null || billboards.Drawn==0) sceneRendered=false;

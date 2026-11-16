@@ -87,7 +87,6 @@ public sealed class PreviewScene
             if (excluded != null && excluded.TryGetValue(position, out var known)) reason = known;
             else if (entry.TypeAttribute == null) reason = "没有 Type 属性，不产生粒子。";
             else if (PreviewDocument.KindOf(entry) == null) reason = $"类型 {type} 尚未支持。";
-            else if (entry.Attributes.Any(a => a.type == EfxAttributeType.Distortion)) reason = "Distortion（屏幕扭曲）尚未支持。";
             else if (shown >= MaxEntries) reason = $"一次最多预览 {MaxEntries} 个 entry。";
             else
             {
@@ -143,6 +142,7 @@ public sealed class PreviewSceneRenderer : IDisposable
         foreach (var r in renderers)
         {
             if (r == null) continue;
+            if (r.IsDistortion) return null;     // Distortion samples the full-resolution scene
             int b = r.Blend(frame);
             if (b is not (0 or 1)) return null;   // the reduced-resolution layer composites 0/1 only
             if (blend != null && blend != b) return null;
@@ -189,12 +189,23 @@ public sealed class PreviewSceneRenderer : IDisposable
     {
         int draws = 0, drawn = 0; double upload = 0; List<string>? skipped = null;
         lastOrder = DrawOrder(frame, view, context.Config.SortEntries);
+        // Distortion entries come last and sample a copy of everything drawn before them (captured once).
+        var ordered = lastOrder.Where(i => renderers[i]?.IsDistortion != true).Concat(lastOrder.Where(i => renderers[i]?.IsDistortion == true)).ToArray();
+        lastOrder = ordered;
+        var distortionContext = context;
+        bool captured = false;
         foreach (int i in lastOrder)
         {
             if (soloTable != null && i != soloTable) continue;
             var r = renderers[i];
             if (r == null) { (skipped ??= new()).Add($"[{Scene.Shown[i].Position}] {failures[i]}"); continue; }
-            r.Render(frame, view, projection, context);
+            if (r.IsDistortion)
+            {
+                if (!context.Config.Distortion) continue;
+                if (!captured) { distortionContext = context with { SceneColor = context.CaptureScene?.Invoke() ?? 0 }; captured = true; }
+                r.Render(frame, view, projection, distortionContext);
+            }
+            else r.Render(frame, view, projection, context);
             draws += r.DrawCalls; upload += r.UploadMs;
             if (r.Unsupported != null) (skipped ??= new()).Add($"[{Scene.Shown[r.Table].Position}] {r.Unsupported}");
             else drawn++;

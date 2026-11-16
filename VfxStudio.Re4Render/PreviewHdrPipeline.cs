@@ -96,6 +96,7 @@ public sealed unsafe class PreviewHdrPipeline : IDisposable
 
     private void Destroy()
     {
+        if (sceneCopy != 0) { gl.DeleteFramebuffer(sceneCopyFbo); gl.DeleteTexture(sceneCopy); sceneCopy = 0; sceneCopyFbo = 0; }
         gl.DeleteFramebuffer(hdrFbo); gl.DeleteFramebuffer(depthCopyFbo); gl.DeleteFramebuffer(finalFbo);
         gl.DeleteTexture(sceneColor); gl.DeleteTexture(bright); gl.DeleteTexture(depth); gl.DeleteTexture(OpaqueDepthTexture); gl.DeleteTexture(FinalColorTexture);
         for (int i = 0; i < 2; i++) { gl.DeleteFramebuffer(pingFbo[i]); gl.DeleteTexture(pingTex[i]); }
@@ -116,6 +117,28 @@ public sealed unsafe class PreviewHdrPipeline : IDisposable
         gl.ClearColor(r, g, b, a);
         gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         gl.Enable(EnableCap.DepthTest); gl.DepthFunc(DepthFunction.Lequal);
+    }
+
+    private uint sceneCopyFbo, sceneCopy;
+
+    /// <summary>Copies the scene colour drawn so far (for Distortion) and returns the copy; leaves the HDR target bound.</summary>
+    public uint CaptureSceneColor()
+    {
+        if (sceneCopy == 0)
+        {
+            sceneCopyFbo = gl.GenFramebuffer(); gl.BindFramebuffer(FramebufferTarget.Framebuffer, sceneCopyFbo);
+            sceneCopy = ColorTexture(Width, Height, InternalFormat.Rgba16f, PixelFormat.Rgba, PixelType.Float);
+            gl.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, sceneCopy, 0);
+            Check(gl, "Scene copy");
+        }
+        gl.BindFramebuffer(FramebufferTarget.ReadFramebuffer, hdrFbo);
+        gl.ReadBuffer(ReadBufferMode.ColorAttachment0);
+        gl.BindFramebuffer(FramebufferTarget.DrawFramebuffer, sceneCopyFbo);
+        gl.BlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Nearest);
+        gl.BindFramebuffer(FramebufferTarget.Framebuffer, hdrFbo);
+        DrawBufferMode[] both = [DrawBufferMode.ColorAttachment0, DrawBufferMode.ColorAttachment1];
+        gl.DrawBuffers(both);
+        return sceneCopy;
     }
 
     /// <summary>Call after the opaque pass and before particles; leaves the HDR target bound.</summary>

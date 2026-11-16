@@ -104,5 +104,5 @@ RibbonLength 不存历史，引擎的布局函数（3d7c2b0，按 BasingPoint、
 - 尚未实现：FollowFlags 位 2|3 的调试色、绳模式与 IntervalFrame 的单独核对（数据来自引擎，理论上已包含）、HeadColor / ColorPlace 渐变（逐点颜色由引擎烘焙，样本里为白色）、FadeByTwist。
 - RibbonLength 的 HeadColor / ColorPlace 渐变与 GhostStretch 未单独核对（逐点颜色由引擎写入点池）。
 - 其余条带类型（Chain、Trail、Strain）仍未绘制。
-- PolygonTrail 的 NumVerticalDivision 只取底和顶两行（中间行是线性的，形状不变，但带 Distortion 的细分没有意义——Distortion 本身也未支持）；TrailFlags 0x60 的逐顶点渐变颜色由引擎写入顶点，未单独核对。
+- PolygonTrail 的 NumVerticalDivision 只取底和顶两行（中间行是线性的，形状不变，只影响 Distortion 的采样细分）；TrailFlags 0x60 的逐顶点渐变颜色由引擎写入顶点，未单独核对。
 - RibbonFixEnd 的 HeadColor / ScalePlace 渐变（FixEndFlags &6、&0x18）由引擎写入点记录，未单独核对。

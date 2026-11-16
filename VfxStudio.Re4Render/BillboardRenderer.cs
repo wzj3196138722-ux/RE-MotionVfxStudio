@@ -240,9 +240,55 @@ public sealed unsafe class BillboardRenderer : IDisposable
         flat in float frameWeight;
         uniform sampler2D particleTexture;
         uniform sampler2D sceneDepth;
+        uniform sampler2D sceneColor;  // Distortion: the scene drawn before the distortion entries
         uniform vec2 viewportSize;
+        uniform int typeKind;
         layout(location=0) out vec4 color;
         layout(location=1) out vec4 bright;
+        const float BLUR_W[5] = float[5](0.2042, 0.1900, 0.1216, 0.0578, 0.0204);
+        const float DIR_W[9] = float[9](0.1790, 0.1733, 0.1619, 0.1454, 0.1242, 0.0990, 0.0706, 0.0400, 0.0065);
+        // RUNTIME 4.8 (primitivevfx_2 b025/b026, primitivevfx_3 b093). t = texel; soft = soft-particle factor.
+        vec4 distortion(vec4 t, float soft) {
+            uint f2 = distortionQ.y;
+            float A = (f2 & 0x1800u) != 0u ? t.a : pow(max(t.a, 0.0), 4.84);
+            if (hasFlag(512)) A = textureFilter(A, textureFilterP.xyz);
+            A *= tint.a * soft;
+            if (A < 0.01) discard;
+            vec2 px = 1.0 / viewportSize;
+            vec2 uv0 = gl_FragCoord.xy * px;
+            int type = int(distortionP.x);
+            float s = distortionP.y * A;
+            vec3 scene;
+            if (type == 1) {
+                // Refract: offset Influence*A*n metres in view space at the particle's depth, reprojected;
+                // Billboard2D: half-NDC units. GL texture and view +Y are both up.
+                vec2 n = t.xy * 2.0 - 1.0;
+                if ((f2 & 0x8000u) != 0u) n.x = -n.x;
+                vec2 off = typeKind == 2 ? 0.5 * s * n
+                    : 0.5 * s * n * vec2(uintBitsToFloat(distortionQ.z), uintBitsToFloat(distortionQ.w)) / max(viewDepth, 1e-4);
+                scene = texture(sceneColor, uv0 + off).rgb;
+            } else if (type == 0) {
+                // Blur: horizontal 9-tap gaussian, tap spacing Influence*A pixels.
+                scene = BLUR_W[0] * texture(sceneColor, uv0).rgb;
+                for (int k = 1; k <= 4; k++) {
+                    vec2 d = vec2(float(k) * s * px.x, 0.0);
+                    scene += BLUR_W[k] * (texture(sceneColor, uv0 + d).rgb + texture(sceneColor, uv0 - d).rgb);
+                }
+            } else if (type == 2) {
+                // BlurTexture: one-sided 9-tap smear along the texture-encoded direction, step Influence*A pixels.
+                vec2 d = t.xy * 2.0 - 1.0;
+                d = dot(d, d) > 1e-12 ? normalize(d) : vec2(0.0);
+                if ((f2 & 0x8000u) != 0u) d.x = -d.x;
+                scene = vec3(0.0);
+                for (int k = 0; k < 9; k++) scene += DIR_W[k] * texture(sceneColor, uv0 + float(k) * s * d * px).rgb;
+            } else scene = vec3(1.0, 0.0, 0.0);
+            vec3 spec = vec3(0.0);
+            if (distortionP.z >= 1e-6) {
+                vec4 sc = unpackUnorm4x8(distortionQ.x);
+                spec = sc.rgb * (exp2(distortionP.w) * sc.a * pow(max(t.b, 0.0), 2.2 * distortionP.z));
+            }
+            return vec4(scene * mix(vec3(1.0), tint.rgb + spec, A), 1.0);
+        }
         void main() {
             vec4 texel=texture(particleTexture,uv);
             // FrameBlend (UVSequence Flags bit 10): previous frame -> current frame by acc / T.
@@ -254,6 +300,12 @@ public sealed unsafe class BillboardRenderer : IDisposable
                 float n=viewP.y, fa=viewP.z;
                 float sceneView = 2.0*n*fa / (fa + n - z*(fa - n));
                 soft=clamp((sceneView - viewDepth) / shading.x, 0.0, 1.0);
+            }
+            if (hasFlag(8192)) {
+                color = distortion(texel, soft);
+                float lum = dot(color.rgb, vec3(.2126,.7152,.0722));
+                bright = vec4(lum > 1 ? color.rgb : vec3(0), 1.0);
+                return;
             }
             vec4 c=shade(texel, tint, soft, acBytes);
             if (modes.y == 4) { color=c; bright=c; return; }      // multiplicative: scale bloom too
@@ -272,6 +324,8 @@ public sealed unsafe class BillboardRenderer : IDisposable
     private int segmentCount;
     private const int SegmentFloats = 20;
     public EntryAppearance Appearance { get; }
+    /// <summary>The entry has a Distortion attribute: it samples the scene drawn before it.</summary>
+    public bool IsDistortion => Appearance.Distortion != null;
     /// <summary>Emitter position used by FadeByAngle: the file's Transform3D position (the emitter
     /// world matrix is identity in this preview).</summary>
     public Vector3 EmitterPosition { get; }
@@ -473,6 +527,11 @@ public sealed unsafe class BillboardRenderer : IDisposable
         Unsupported=null;
         var uniforms=EntryUniforms.Build(header,Appearance,config,EmitterPosition);
         uniforms.SetTexelChannel(state,config);
+        uniforms.SetDistortion(state,Appearance.Distortion,config);
+        uniforms.ProjectionScale=new Vector2(projection.M11,projection.M22);
+        // A Distortion entry is drawn only as a distortion: without a captured scene (or with the switch off)
+        // it draws nothing rather than falling back to an ordinary particle.
+        if(IsDistortion && (context.SceneColor==0 || !uniforms.Has(EntryUniforms.DistortionBit))) return;
         // FrameBlend needs the per-particle data written in Upload, which ribbons do not carry.
         if(document.IsRibbon || !document.FrameBlend) uniforms.Flags&=~EntryUniforms.FrameBlendBit;
         // Screen-space quads have no view depth: no fades, soft particles or depth bias.
@@ -488,13 +547,18 @@ public sealed unsafe class BillboardRenderer : IDisposable
         gl.Enable(EnableCap.Blend);
         var pair=config.Blends[header.Blend];
         gl.BlendFuncSeparate(Gl(pair.Source),Gl(pair.Destination),BlendingFactor.One,BlendingFactor.OneMinusSrcAlpha);
+        // Distortion replaces the scene where its coverage mask is set (A >= 0.01; inferred, the blend state is not read).
+        // It writes the scene colour only: the bloom target keeps what lies underneath (a cleared or overwritten
+        // bloom target would darken the background behind the distortion).
+        if(uniforms.Has(EntryUniforms.DistortionBit)) { gl.Disable(EnableCap.Blend); gl.ColorMask(1,false,false,false,false); }
         Matrix4x4.Invert(view,out var inverse);
         shader.Use();shader.SetUniform("vp",view*projection);
         shader.SetUniform("cameraRight",new Vector3(view.M11,view.M21,view.M31));
         shader.SetUniform("cameraUp",new Vector3(view.M12,view.M22,view.M32));
         shader.SetUniform("cameraPos",new Vector3(inverse.M41,inverse.M42,inverse.M43));
         shader.SetUniform("sequenceCount",document.Sequences.Count);
-        shader.SetUniform("particleTexture",0);shader.SetUniform("sceneDepth",1);
+        shader.SetUniform("particleTexture",0);shader.SetUniform("sceneDepth",1);shader.SetUniform("sceneColor",2);
+        gl.ActiveTexture(TextureUnit.Texture2);gl.BindTexture(TextureTarget.Texture2D,context.SceneColor);
         Span<int> viewport=stackalloc int[4];gl.GetInteger(GetPName.Viewport,viewport);
         shader.SetUniform("viewportSize",new Vector2(Math.Max(1,viewport[2]),Math.Max(1,viewport[3])));
         shader.SetUniform("screenSize",new Vector2(Math.Max(1,viewport[2]),Math.Max(1,viewport[3])));
@@ -514,7 +578,7 @@ public sealed unsafe class BillboardRenderer : IDisposable
                 gl.DrawArraysInstancedBaseInstance(PrimitiveType.TriangleStrip,0,4,(uint)batch.Count,(uint)batch.First);
                 DrawCalls++;
             }
-            gl.BindVertexArray(0); gl.Disable(EnableCap.Blend);gl.DepthMask(true);
+            gl.BindVertexArray(0); gl.Disable(EnableCap.Blend);gl.DepthMask(true);gl.ColorMask(1,true,true,true,true);
             return;
         }
         foreach(var batch in batches)
@@ -526,7 +590,7 @@ public sealed unsafe class BillboardRenderer : IDisposable
         // Refresh the fence even when repeatedly drawing the same paused frame.
         if(fences[currentSlot]!=0) gl.DeleteSync(fences[currentSlot]);
         fences[currentSlot]=gl.FenceSync(SyncCondition.SyncGpuCommandsComplete,SyncBehaviorFlags.None);
-        gl.BindVertexArray(0); gl.Disable(EnableCap.Blend);gl.DepthMask(true);
+        gl.BindVertexArray(0); gl.Disable(EnableCap.Blend);gl.DepthMask(true);gl.ColorMask(1,true,true,true,true);
     }
 
     private static BlendingFactor Gl(BlendFactor f) => f switch
@@ -583,7 +647,11 @@ public sealed class BillboardGpuCache(GL gl) : IDisposable
 }
 
 /// <summary>Frame-wide inputs of a billboard draw.</summary>
-public sealed record PreviewRenderContext(CompositionConfig Config, float Exposure = 1, float Near = .05f, float Far = 100, uint SceneDepth = 0)
+/// <param name="CaptureScene">Copies the scene colour drawn so far and returns the copy (Distortion entries
+/// sample it); null when the host has no scene colour to offer.</param>
+/// <param name="SceneColor">The captured scene colour, set by <see cref="PreviewSceneRenderer"/> for Distortion entries.</param>
+public sealed record PreviewRenderContext(CompositionConfig Config, float Exposure = 1, float Near = .05f, float Far = 100, uint SceneDepth = 0,
+    Func<uint>? CaptureScene = null, uint SceneColor = 0)
 {
     public static readonly PreviewRenderContext Default = new(new CompositionConfig());
 }

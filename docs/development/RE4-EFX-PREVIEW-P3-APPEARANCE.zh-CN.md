@@ -140,7 +140,7 @@ dotnet run -c Release --project tools/Re4AppearanceTests [-- --corpus]
 
 ## 未做
 
-- FadeByEmitterAngle（Billboard3D 语料中没有）、UVScroll（随 Mesh 一起做）、Distortion（783 个，属于 P5）。
+- FadeByEmitterAngle（Billboard3D 语料中没有）、UVScroll（随 Mesh 一起做）。Distortion 见 RE4-EFX-PREVIEW-P5-DISTORTION。
 - 受光粒子只有预览光照，没有场景光源、阴影和每粒子光照图集。
 - TextureFilter 的字段对应未在 exe 中确认；TCO 的 IntensityEnvelope 未实现（语料未启用）；场景曝光 `cbEvOffsetPow2` 没有对应。
 - Rgb 层的逐粒子随机色与寿命包络、小浮点量化。

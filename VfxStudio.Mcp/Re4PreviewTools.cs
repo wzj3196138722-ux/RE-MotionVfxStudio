@@ -102,6 +102,7 @@ internal sealed class Re4PreviewToolSet : IToolSet
                 ["physicalGain"] = Number("Gain on the lit part of Rgb layers under Physical.", 0, 16),
                 ["textureFilter"] = Boolean("TextureFilter alpha shaping."), ["texelChannel"] = Boolean("TexelChannelOperator (blackbody colour from the texel)."),
                 ["frameBlend"] = Boolean("UVSequence FrameBlend cross-fade."),
+                ["distortion"] = Boolean("Draw Distortion entries (screen distortion of the scene drawn before them)."),
                 ["lighting"] = Boolean("Light particles whose ShaderSettings.ParticleLighting is 1-4 with the preview light (the preview has no scene lights)."),
                 ["ambient"] = Number("Preview ambient light for lit particles.", 0, 4), ["keyLight"] = Number("Preview key light intensity for lit particles.", 0, 4),
                 ["blends"] = new JsonObject { ["type"] = "array", ["minItems"] = 1, ["maxItems"] = 5, ["description"] = "Blend factor overrides.",

@@ -40,6 +40,9 @@ public sealed record AlphaCorrectionSettings(int Mode, uint Bytes);
 public sealed record RgbCommonSettings(uint Flags, Vector4 GreenColor, float GreenIntensity, float GreenSaturate, float GreenCurve,
     Vector4 RedColor, float RedIntensity, float RedAlphaToB, float Alpha, bool GreenLighting, bool RedLighting);
 
+/// <summary>Distortion attribute (RUNTIME 4.8): 0 Blur, 1 Refract, 2 BlurTexture; SpecularColor is RGBA8.</summary>
+public sealed record DistortionSettings(int Type, float Influence, float SpecularPower, float SpecularIntensity, uint SpecularColor);
+
 public sealed record RgbWaterSettings(Vector4 SpecularColor, float SpecularIntensity, Vector4 SheetColor, float SheetIntensity, float GtoB, float Alpha);
 
 /// <summary>Per-entry rendering constants that come from the file (no runtime writer in the CPU path,
@@ -48,7 +51,7 @@ public sealed record EntryAppearance(
     float SoftParticleDistance, float DepthBias, float DistanceBias, int PriorityBias, float DetonemapRatio,
     Vector4? FadeDepth, FadeAngleSettings? FadeAngle, AlphaCorrectionSettings? AlphaCorrection,
     RgbCommonSettings? RgbCommon, RgbWaterSettings? RgbWater,
-    Vector3? TextureFilter = null, int ParticleLighting = 0, bool FrameBlend = false)
+    Vector3? TextureFilter = null, int ParticleLighting = 0, bool FrameBlend = false, DistortionSettings? Distortion = null)
 {
     /// <summary>ShaderSettings.ParticleLighting 1-4 and 6 light the particle; 0 and 5 do not (RUNTIME 4.4).</summary>
     public bool Lit => ParticleLighting is not (0 or 5);
@@ -65,6 +68,7 @@ public sealed record EntryAppearance(
         var water = entry.Attributes.OfType<EFXAttributeRgbWater>().FirstOrDefault();
         var filter = entry.Attributes.OfType<EFXAttributeTextureFilter>().FirstOrDefault();
         var uv = entry.Attributes.OfType<EFXAttributeUVSequence>().FirstOrDefault();
+        var distortion = entry.Attributes.OfType<EFXAttributeDistortion>().FirstOrDefault();
         static Vector4 Color(ReeLib.via.Color c) => new(c.R / 255f, c.G / 255f, c.B / 255f, c.A / 255f);
         return new(
             shader != null && (shader.Flags & 4) != 0 ? Math.Max(0, shader.SoftParticleDistance) : 0,
@@ -81,7 +85,9 @@ public sealed record EntryAppearance(
             // from the names and the corpus values; the writer of the constant is not located in re4.exe.
             filter == null ? null : new Vector3(filter.TexelAlphaRate, filter.TexelAlphaHPThreshold, filter.TexelAlphaHPMinValue),
             (int)(shader?.ParticleLighting ?? 0),
-            uv != null && (uv.Flags & 0x400) != 0);
+            uv != null && (uv.Flags & 0x400) != 0,
+            distortion == null ? null : new DistortionSettings((int)distortion.DistortionType & 3, distortion.Influence, distortion.SpecularPower,
+                distortion.SpecularIntensity, distortion.SpecularColor.rgba));
     }
 }
 
@@ -108,6 +114,8 @@ public sealed class CompositionConfig
     /// <summary>Light lit particles (ParticleLighting 1-4) with the preview light below. The preview has
     /// no scene lights, so this is a compromise; off draws them unlit.</summary>
     public bool Lighting { get; set; } = true;
+    /// <summary>Draw Distortion entries (screen distortion of the scene drawn before them). Off leaves them out.</summary>
+    public bool Distortion { get; set; } = true;
     public Vector3 Ambient { get; set; } = new(.45f);
     public float KeyLight { get; set; } = .75f;
     public Vector3 LightDirection { get; set; } = new(.4f, 1, .3f);

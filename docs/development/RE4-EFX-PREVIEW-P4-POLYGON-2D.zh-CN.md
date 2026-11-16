@@ -22,7 +22,7 @@
 
 - **几何（折中）**：粒子位置与尺寸视为 1080 线屏幕上的像素，原点在屏幕中心，+Y 朝上；按窗口高度缩放；画在所有物体前面，不做深度相关处理（淡出、软粒子、深度偏移关闭）。坐标系没有读码依据：UI 样本的 Transform2D.LocalPosition 为 (1100, 600)，粒子 +0x28 为相对值。
 - **颜色头**：Billboard2D 的 type block 在 ColorRange 之后不是文件布局，颜色头改取文件值。它的表达式属性（类型 22）在原生侧没有工厂函数，带表达式的 entry 加载时就被跳过，所以文件值与运行时一致。
-- **带 Distortion 的 entry** 标为“Distortion（屏幕扭曲）尚未支持”（属于 P5）。这条规则对所有 Type 生效，Billboard3D 和 Polygon 中带 Distortion 的 entry 也不再按普通面片绘制。
+- **带 Distortion 的 entry** 标为“Distortion（屏幕扭曲）尚未支持”（属于 P5）。这条规则对所有 Type 生效，Billboard3D 和 Polygon 中带 Distortion 的 entry 也不再按普通面片绘制。（后来已支持，见 RE4-EFX-PREVIEW-P5-DISTORTION。）
 - **原生侧补充**：Billboard2D 路径（3e07150 → 3d024f0）会从更新结构 U+0x18 的 +8 取一张按 ID 查找的表。模拟器原来给的是空指针，现在给一张空表，查找返回空，引擎走自己的“未找到”分支。
 
 ## 其他改动
@@ -46,4 +46,4 @@ python -I tools/Re4Native/run_all.py exp_polygon_quat
 
 - Polygon 的 Offset、Flags2 运动朝向。
 - Billboard2D 的坐标系依据、Repeat（粒子标志位 30–31）、表达式。
-- Distortion（P5）。
+- Distortion：已支持，见 RE4-EFX-PREVIEW-P5-DISTORTION。

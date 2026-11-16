@@ -8,7 +8,7 @@ public sealed class EntryUniforms
 {
     public const int FadeDepthBit = 1, FadeAngleBit = 2, AlphaCorrectionBit = 4, RgbCommonBit = 8, RgbWaterBit = 16,
         SoftBit = 32, DepthBiasBit = 64, DetonemapBit = 128, AlphaRateBit = 256, TextureFilterBit = 512, TexelChannelBit = 1024,
-        LitBit = 2048, FrameBlendBit = 4096;
+        LitBit = 2048, FrameBlendBit = 4096, DistortionBit = 8192;
     public int Flags, Blend, FadeAngleFlags, CommonFlags;
     public uint AcBytes;
     public float ColorRate, Intensity, EdgeBlendRange, AlphaRate;
@@ -28,6 +28,13 @@ public sealed class EntryUniforms
     /// direction (towards the light) and key intensity. A compromise: the preview has no scene lights.</summary>
     public Vector3 Ambient = new(.45f), LightDirection = Vector3.Normalize(new(.4f, 1, .3f));
     public float KeyLight = .75f;
+    /// <summary>Distortion (RUNTIME 4.8): type, Influence, SpecularPower, SpecularIntensity; SpecularColor RGBA8;
+    /// cbEffect3DFlags2 (bits 11-12 keep the texel alpha linear, bit 15 flips X of the offset).</summary>
+    public int DistortionType;
+    public float Influence, SpecularPower, SpecularIntensity;
+    public uint SpecularColor, Flags2;
+    /// <summary>Projection scale (P11, P22) for Refract's view-space offset.</summary>
+    public Vector2 ProjectionScale = Vector2.One;
     public bool Has(int bit) => (Flags & bit) != 0;
 
     public static EntryUniforms Build(ColorHeader header, EntryAppearance a, CompositionConfig config, Vector3 emitter)
@@ -62,6 +69,30 @@ public sealed class EntryUniforms
         return u;
     }
 
+    /// <summary>Distortion values from the live type block (the attribute's install writes Polygon3DConstant: type in
+    /// cbEffect3DFlags bits 7-8, Influence @116, SpecularPower / Intensity @448, SpecularColor @668); Billboard2D has
+    /// no such block and uses the file's values.</summary>
+    public void SetDistortion(PreviewEntryState state, DistortionSettings? file, CompositionConfig config)
+    {
+        Flags &= ~DistortionBit;
+        if (!config.Distortion || file == null) return;
+        int c = state.ConstantOffset;
+        var b = state.TypeBlock;
+        if (c >= 0 && c + 672 <= b.Length)
+        {
+            DistortionType = (int)((FrameDecoder.U32(b, c + 68) >> 7) & 3);
+            Influence = FrameDecoder.F32(b, c + 116);
+            SpecularPower = FrameDecoder.F32(b, c + 448); SpecularIntensity = FrameDecoder.F32(b, c + 452);
+            SpecularColor = FrameDecoder.U32(b, c + 668); Flags2 = FrameDecoder.U32(b, c + 444);
+        }
+        else
+        {
+            DistortionType = file.Type; Influence = file.Influence; SpecularPower = file.SpecularPower;
+            SpecularIntensity = file.SpecularIntensity; SpecularColor = file.SpecularColor; Flags2 = 0;
+        }
+        Flags |= DistortionBit;
+    }
+
     /// <summary>Takes the TexelChannelOperator constant from the live type block (the engine packs it at
     /// Polygon3DConstant +512); all-zero words mean the entry has no TexelChannelOperator.</summary>
     public void SetTexelChannel(PreviewEntryState state, CompositionConfig config)
@@ -73,7 +104,7 @@ public sealed class EntryUniforms
         if (TexelChannel.Any(w => w != 0)) Flags |= TexelChannelBit;
     }
 
-    public const int Std140Bytes = 21 * 16;
+    public const int Std140Bytes = 23 * 16;
 
     public byte[] ToStd140()
     {
@@ -104,6 +135,8 @@ public sealed class EntryUniforms
         I(unchecked((int)TexelChannel[0]), unchecked((int)TexelChannel[1]), unchecked((int)TexelChannel[2]), unchecked((int)TexelChannel[3])); // tcoP
         V(Ambient.X, Ambient.Y, Ambient.Z, KeyLight);                       // lightA
         V(LightDirection.X, LightDirection.Y, LightDirection.Z, 0);         // lightB
+        V(DistortionType, Influence, SpecularPower, SpecularIntensity);     // distortionP
+        I(unchecked((int)SpecularColor), unchecked((int)Flags2), BitConverter.SingleToInt32Bits(ProjectionScale.X), BitConverter.SingleToInt32Bits(ProjectionScale.Y)); // distortionQ
         return MemoryMarshal.AsBytes(f.AsSpan()).ToArray();
     }
 }
@@ -135,6 +168,8 @@ public static class AppearanceShaderLibrary
             uvec4 tcoP;        // packed cbTexelChannelOperatorParam
             vec4 lightA;       // ambient rgb, key intensity
             vec4 lightB;       // key light direction (towards the light)
+            vec4 distortionP;  // type, Influence, SpecularPower, SpecularIntensity
+            uvec4 distortionQ; // SpecularColor RGBA8, cbEffect3DFlags2, projection scale x / y (float bits)
         };
         bool hasFlag(int bit) { return (modes.x & bit) != 0; }
         """;
