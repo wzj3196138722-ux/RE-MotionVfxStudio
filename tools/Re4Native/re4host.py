@@ -22,6 +22,13 @@ STRIDE = 0x140
 VERSION = 3
 # Drawable Type attribute -> companion attributes allowed with it (Expression / Clip).
 DRAWABLE = {21: {22}, 23: {24}, 63: {64, 65}, 31: set(), 32: {58}, 34: {60}, 70: set()}
+# Simulated but not drawn: NoDraw entries mostly exist to carry PtLife triggers for child Actions.
+LOGIC_ONLY = {75: {76}}   # TypeNoDraw (+ TypeNoDrawExpression)
+PTLIFE_TYPE = 131
+# Instance slots per trigger whose child emitters are run (the engine's pool holds 2 x MaxParticles; slots past
+# this are left alone, so their children do not appear).
+CHILD_SLOTS = 32
+LAST_BATCH = 0x20000     # particle +4: spawned by the emitter's last batch (3d15fbd)
 # Ribbon types whose engine points are exported, all as slot * points-per-particle records of 0x54 bytes plus
 # 0x68-byte state records whose +0x18 holds the valid point count:
 # - RibbonFollow 31, RibbonLength 32: type block +0x38 points, +0x40 states (0x68 bytes) copied as they are.
@@ -109,6 +116,7 @@ class Host:
             import world
             world.RECORD[0] = False
             em.install_runtime(self.img, collision=True)
+            world.install_actions(self.img)
             em._native_table(self.img)      # runs every factory once; cached type table is static data
             self.base = Snapshot(self.img)
         else:
@@ -143,8 +151,13 @@ class Host:
             em.UVS_SHAPE[:] = scene.get('uvs', (4, 16))
         if not 1 <= len(specs) <= 64:
             raise ValueError('expected 1..64 entries')
-        self.meta = []
-        data_offset = SLOT_HEADER + ENTRY_SIZE * len(specs)
+        self.meta, self.spec_of = [], []
+        self.triggers, self.child_tables, self.runs = [], [], {}
+        # Child tables are appended after the top-level ones; reserve header room for them as well.
+        child_specs = sum(len(a.get('entries', [])) for a in cmd.get('actions', []))
+        if len(specs) + child_specs > 64:
+            raise ValueError('at most 64 entries including child Action entries')
+        data_offset = SLOT_HEADER + ENTRY_SIZE * (len(specs) + child_specs)
         skipped = []
         for i, spec in enumerate(specs):
             self.active_entry = i
@@ -155,11 +168,7 @@ class Host:
                 entry = em.Entry(self.img, spec['path'], int(spec['offset']), drop_types=spec.get('drop_types', ()), spawn_override=stress)
                 # Drawable CPU types: Billboard2D 21, Billboard3D 23, Polygon 63, each with its own
                 # Expression / Clip companions, which only rewrite the type block.
-                types = [a['type'] for a in entry.attrs if 21 <= a['type'] <= 76]
-                primary = [t for t in types if t in DRAWABLE]
-                if len(primary) != 1 or not set(types) <= {primary[0]} | DRAWABLE[primary[0]]:
-                    raise ValueError(f'requires one drawable Type attribute (Billboard2D, Billboard3D, Polygon, RibbonFollow, RibbonLength, RibbonFixEnd, PolygonTrail) with its companions; found {types}')
-                type_id = primary[0]
+                type_id = self.primary_type(entry, logic=bool(spec.get('logic')))
                 spawn = next(a for a in entry.attrs if a['type'] == 16)
                 capacity = rn.u32(spawn['attr'] + 0x28)
                 if capacity > 10000:
@@ -169,7 +178,7 @@ class Host:
                 e.play()
                 n, side = e.max_particles, rn.u32(e.E + 0x148)
                 pbytes, sbytes = n * STRIDE, n * side
-                meta = dict(entry=entry.index, type=type_id, capacity=n, stride=STRIDE,
+                meta = dict(entry=entry.index, type=type_id, logic=type_id in LOGIC_ONLY, capacity=n, stride=STRIDE,
                             side_stride=side, particles=data_offset, particle_bytes=pbytes,
                             side=data_offset + pbytes, side_bytes=sbytes, block=data_offset + pbytes + sbytes, block_bytes=0x2f8,
                             strip=0, strip_bytes=0, strip_points=0, strip_state=0, strip_state_bytes=0)
@@ -193,6 +202,7 @@ class Host:
                     data_offset += meta['strip_state_bytes']
                 self.emitters.append(e)
                 self.meta.append(meta)
+                self.spec_of.append(spec)
             except (rn.NativeFault, rn.UnresolvedImportCalled):
                 raise  # the image may be damaged: fatal
             except Exception as ex:
@@ -202,6 +212,8 @@ class Host:
                 skipped.append(dict(entry=i, kind=type(ex).__name__, message=str(ex)))
         if not self.emitters:
             raise ValueError('no entry could be built: ' + '; '.join(f"{s['entry']}: {s['message']}" for s in skipped))
+        self.top_count = len(self.emitters)
+        data_offset = self.build_children(cmd, data_offset, skipped)
         self.active_entry = None
         self.slot_bytes = (data_offset + 63) & ~63
         self.track_capacity = 36000
@@ -215,6 +227,153 @@ class Host:
                     snapshot_bytes=self.snapshot.bytes, load_ms=(time.perf_counter() - start) * 1000,
                     reused=reused, base_restore_ms=base_ms, skipped=skipped)
 
+    @staticmethod
+    def primary_type(entry, logic=False):
+        """The entry's Type attribute id, checked against what the preview runs (with its Expression / Clip
+        companions); NoDraw only when the caller asks for logic-only entries."""
+        allowed = {**DRAWABLE, **(LOGIC_ONLY if logic else {})}
+        types = [a["type"] for a in entry.attrs if 21 <= a["type"] <= 76]
+        primary = [t for t in types if t in allowed]
+        if len(primary) != 1 or not set(types) <= {primary[0]} | allowed[primary[0]]:
+            raise ValueError(f'requires one drawable Type attribute (Billboard2D, Billboard3D, Polygon, RibbonFollow, RibbonLength, RibbonFixEnd, PolygonTrail) with its companions; found {types}')
+        return primary[0]
+
+    def build_children(self, cmd, data_offset, skipped):
+        """Child Actions (PlayEmitter). cmd['actions'] = [{index, entries: [entry spec]}] lists the embedded entries
+        of each Action; a top-level spec's 'triggers' = [{type: 131, action}] names the PtLife attribute that fires
+        one. Every (Action, embedded entry) pair gets one output table holding the particles of all its running
+        instances, CHILD_SLOTS instance slots per trigger. Child emitters are built when a slot first starts (after
+        the load snapshot, so a restore drops them); one probe emitter per embedded entry is built here for the
+        table layout."""
+        templates = {}
+        for action in cmd.get('actions', []):
+            k = int(action['index'])
+            for j, spec in enumerate(action.get('entries', [])):
+                try:
+                    entry = em.Entry(self.img, spec['path'], int(spec['offset']))
+                    type_id = self.primary_type(entry)
+                    if type_id in RIBBON_POOLS:
+                        raise ValueError('ribbon entries inside child Actions are not run yet')
+                    capacity = rn.u32(next(a for a in entry.attrs if a['type'] == 16)['attr'] + 0x28)
+                    if capacity > 2000:
+                        raise ValueError('child MaxParticles exceeds 2000')
+                    e_size = max(1 << 20, capacity * 8192 + (1 << 20))
+                    probe = em.Emitter(self.img, entry, e_size=e_size)
+                    templates.setdefault(k, []).append(dict(entry=entry, type=type_id, e_size=e_size, probe=probe, index=j))
+                except (rn.NativeFault, rn.UnresolvedImportCalled):
+                    raise
+                except Exception as ex:
+                    skipped.append(dict(entry=-1, action=k, child=j, kind=type(ex).__name__, message=str(ex)))
+        for i, spec in enumerate(self.spec_of):
+            for t in spec.get('triggers', []):
+                if int(t.get('type', PTLIFE_TYPE)) != PTLIFE_TYPE or int(t['action']) not in templates:
+                    continue
+                blk = self.emitters[i].block_of(PTLIFE_TYPE)
+                if not blk:
+                    continue
+                pool = rn.u32(rn.u64(blk) + 0x38)
+                self.triggers.append(dict(parent=i, blk=blk, action=int(t['action']), slots=min(pool, CHILD_SLOTS), pool=pool))
+        for k, kids in templates.items():
+            sources = [(ti, slot) for ti, t in enumerate(self.triggers) if t['action'] == k for slot in range(t['slots'])]
+            if not sources:
+                continue
+            for child in kids:
+                probe = child['probe']
+                n, side = probe.max_particles, rn.u32(probe.E + 0x148)
+                total = n * len(sources)
+                pbytes, sbytes = total * STRIDE, total * side
+                meta = dict(entry=child['entry'].index, type=child['type'], logic=False, capacity=total, stride=STRIDE,
+                            side_stride=side, particles=data_offset, particle_bytes=pbytes,
+                            side=data_offset + pbytes, side_bytes=sbytes, block=data_offset + pbytes + sbytes, block_bytes=0x2f8,
+                            strip=0, strip_bytes=0, strip_points=0, strip_state=0, strip_state_bytes=0,
+                            action=k, child=child['index'], instances=len(sources), per_instance=n)
+                data_offset += pbytes + sbytes + 0x2f8
+                self.meta.append(meta)
+                self.child_tables.append(dict(template=child, sources=set(sources), order=sources, meta=meta))
+        return data_offset
+
+    def child_step(self, i, dt):
+        """After top-level emitter i ticked: start the instance slots its triggers marked pending, tick the
+        running ones at their slot matrix, and recycle slots whose children have finished."""
+        for ti, t in enumerate(self.triggers):
+            if t['parent'] != i:
+                continue
+            for slot in range(t['slots']):
+                inst = rn.u64(t['blk'] + 0x90 + 8 * slot)
+                if not inst:
+                    continue
+                flags = rn.u32(inst + 8)
+                key = (ti, slot)
+                run = self.runs.get(key)
+                if flags & 2:
+                    if run is None:
+                        run = self.runs[key] = dict(emitters={})
+                    for c, table in enumerate(self.child_tables):
+                        if key not in table['sources']:
+                            continue
+                        tpl = table['template']
+                        e = run['emitters'].get(c)
+                        if e is None:
+                            e = run['emitters'][c] = em.Emitter(self.img, tpl['entry'], e_size=tpl['e_size'])
+                        else:
+                            e.reset()
+                        e.play()
+                    run.update(running=True, last={}, matrix=None)
+                    rn.set_u32(inst + 8, flags & ~0xA)          # what the executor does after starting the nodes
+                if not run or not run.get('running'):
+                    continue
+                matrix = ctypes.string_at(inst + 0x10, 64)
+                if matrix != run['matrix']:
+                    rows = struct.unpack('<16f', matrix)
+                    for e in run['emitters'].values():
+                        e.set_world([rows[r:r + 4] for r in range(0, 16, 4)])
+                    run['matrix'] = matrix
+                done = True
+                for c, e in run['emitters'].items():
+                    e.tick(dt)
+                    if not run['last'].get(c):
+                        base = rn.u64(e.E + 0x190)
+                        run['last'][c] = any(rn.u32(base + STRIDE * p) & 3 and rn.u32(base + STRIDE * p + 4) & LAST_BATCH
+                                             for p in range(e.max_particles))
+                    if not run['last'][c] or rn.u32(e.E + 0x130):
+                        done = False
+                if done:
+                    run['running'] = False
+                    rn.set_u32(inst + 8, 0)                     # free the slot, as the executor recycles it
+
+    def write_child_table(self, index, table, base, address, diagnostics, hashes, alive_counts):
+        """One (Action, embedded entry) table: each instance slot's particles and side data at its own range;
+        flags and the type block come from the first running instance (the probe emitter when none runs)."""
+        meta, tpl = table['meta'], table['template']
+        n, side = meta['per_instance'], meta['side_stride']
+        c = index - self.top_count
+        ctypes.memset(address + base + meta['particles'], 0, meta['particle_bytes'])
+        if meta['side_bytes']:
+            ctypes.memset(address + base + meta['side'], 0, meta['side_bytes'])
+        source = None
+        for slot, key in enumerate(table['order']):
+            run = self.runs.get(key)
+            e = run['emitters'].get(c) if run and run.get('running') else None
+            if e is None:
+                continue
+            source = source or e
+            ctypes.memmove(address + base + meta['particles'] + slot * n * STRIDE, rn.u64(e.E + 0x190), n * STRIDE)
+            if side:
+                ctypes.memmove(address + base + meta['side'] + slot * n * side, rn.u64(e.E + 0x198), n * side)
+        source = source or tpl['probe']
+        pos = base + SLOT_HEADER + index * ENTRY_SIZE
+        flags = [rn.u32(source.E + off) for off in (0x168, 0x16c, 0x170, 0x174)]
+        struct.pack_into('<16I', self.mapping, pos, meta['entry'], meta['type'], meta['capacity'], STRIDE,
+                         meta['side_stride'], meta['capacity'], *flags, meta['particles'], meta['particle_bytes'],
+                         meta['side'], meta['side_bytes'], meta['block'], meta['block_bytes'])
+        struct.pack_into('<16f', self.mapping, pos + 64, *IDENTITY)
+        ctypes.memmove(address + base + meta['block'], source.block_of(meta['type']), meta['block_bytes'])
+        struct.pack_into('<8I', self.mapping, pos + 128, 0, 0, 0, 0, 0, 0, 0, 0)
+        if diagnostics:
+            raw = self.mapping[base + meta['particles']:base + meta['particles'] + meta['particle_bytes']]
+            hashes.append(hashlib.sha256(raw).hexdigest())
+            alive_counts.append(sum(bool(struct.unpack_from('<I', raw, k)[0] & 1) for k in range(0, len(raw), STRIDE)))
+
     def set_track(self, dts, worlds):
         if not dts or any(not math.isfinite(v) or v <= 0 or v > 1 for v in dts):
             raise ValueError('dt must be finite and in (0, 1] seconds')
@@ -225,6 +384,7 @@ class Host:
         if hasattr(self, 'snapshot'):
             self.snapshot.restore()
             self.world_written = {}
+            self.runs = {}
         self.tick, self.elapsed = 0, 0.
 
     def bind(self, cmd):
@@ -300,6 +460,7 @@ class Host:
         if target < self.tick:
             self.snapshot.restore()
             self.world_written = {}
+            self.runs = {}
             self.tick, self.elapsed = 0, 0.
             restore_ms = (time.perf_counter() - start) * 1000
         sim_start = time.perf_counter()
@@ -316,6 +477,8 @@ class Host:
                         e.set_world(rows)
                         self.world_written[i] = matrix
                     e.tick(dt)
+                    if self.triggers:
+                        self.child_step(i, dt)
                 self.tick += 1
                 self.elapsed += dt
                 em.CALLS.clear()  # service logging must not grow for the lifetime of playback
@@ -326,13 +489,14 @@ class Host:
             # snapshot so the next request replays from tick 0; the error itself stays non-fatal.
             self.snapshot.restore()
             self.world_written = {}
+            self.runs = {}
             self.tick, self.elapsed = 0, 0.
             raise RecoveredError(f'{type(ex).__name__}: {ex}; state rewound to tick 0') from ex
         self.active_entry = None
         sim_ms = (time.perf_counter() - sim_start) * 1000
         base = HEADER + slot * self.slot_bytes
         dt = self.dts[target - 1] if target else 0.
-        struct.pack_into('<IIdfI', self.mapping, base, target, len(self.emitters), self.elapsed, dt, 0)
+        struct.pack_into('<IIdfI', self.mapping, base, target, len(self.meta), self.elapsed, dt, 0)
         hashes, alive_counts = [], []
         # memmove directly into the mapping: no Python per-particle decoding on the hot path.
         address = ctypes.addressof(ctypes.c_char.from_buffer(self.mapping))
@@ -369,6 +533,8 @@ class Host:
                 raw = self.mapping[base + meta['particles']:base + meta['particles'] + meta['particle_bytes']]
                 hashes.append(hashlib.sha256(raw).hexdigest())
                 alive_counts.append(sum(bool(struct.unpack_from('<I', raw, k)[0] & 1) for k in range(0, len(raw), STRIDE)))
+        for c, table in enumerate(self.child_tables):
+            self.write_child_table(self.top_count + c, table, base, address, cmd.get('diagnostics'), hashes, alive_counts)
         return dict(tick=target, slot=slot, sim_ms=sim_ms, restore_ms=restore_ms,
                     total_ms=(time.perf_counter() - start) * 1000, hashes=hashes, alive=alive_counts)
 

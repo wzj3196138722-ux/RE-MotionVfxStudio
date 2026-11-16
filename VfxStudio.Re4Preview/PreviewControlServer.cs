@@ -79,9 +79,14 @@ internal sealed class PreviewControlServer : IDisposable
                 await server!.WaitForConnectionAsync(stop.Token);
                 await Serve(server);
             }
-            catch (OperationCanceledException) { break; }
+            catch (OperationCanceledException) when (stop.IsCancellationRequested) { break; }
+            // A request that did not arrive within its 10 s read timeout cancels only that connection; treating it as
+            // shutdown ended this loop and left the channel dead for the rest of the window's life.
+            catch (OperationCanceledException) { }
             catch (Exception ex) when (ex is IOException or ObjectDisposedException or InvalidOperationException) { }
-            try { if (server!.IsConnected) server.Disconnect(); }
+            // Also when IsConnected is already false: a client that closed first leaves the instance broken, and only
+            // Disconnect() lets WaitForConnectionAsync listen again (otherwise it throws at once, forever).
+            try { server!.Disconnect(); }
             catch (Exception ex) when (ex is IOException or ObjectDisposedException or InvalidOperationException) { }
         }
     }
@@ -128,7 +133,8 @@ internal sealed class PreviewControlServer : IDisposable
         while (true)
         {
             int count = await stream.ReadAsync(buffer, cancellationToken);
-            if (count == 0) return null;
+            // The client went away without a complete request: nobody would read a reply. Run() drops the connection.
+            if (count == 0) throw new EndOfStreamException("The client closed the connection before sending a request.");
             int end = Array.IndexOf(buffer, (byte)'\n', 0, count);
             line.Write(buffer, 0, end < 0 ? count : end);
             if (line.Length > MaximumRequestBytes) return null;

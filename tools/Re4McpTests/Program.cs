@@ -8,7 +8,8 @@ using System.Text.Json.Nodes;
 
 Console.OutputEncoding = new System.Text.UTF8Encoding(false);
 string repo = args.Length == 2 && args[0] == "--repo" ? Path.GetFullPath(args[1]) : FindRepository();
-string mcp = Path.Combine(repo, "VfxStudio.Mcp", "bin", "Release", "net8.0", "VfxStudio.Mcp.dll");
+// RE4_MCP_DLL: another build when the Release dll is held by a running MCP host.
+string mcp = Environment.GetEnvironmentVariable("RE4_MCP_DLL") ?? Path.Combine(repo, "VfxStudio.Mcp", "bin", "Release", "net8.0", "VfxStudio.Mcp.dll");
 if (!File.Exists(mcp)) { Console.Error.WriteLine("Build VfxStudio.Mcp -c Release first: " + mcp); return 2; }
 string pipe = "MotionVfx.Re4Preview.Test." + Guid.NewGuid().ToString("N")[..8];
 string output = Path.Combine(repo, "test-output", "re4-mcp-" + DateTime.Now.ToString("yyyyMMdd_HHmmss"));
@@ -57,7 +58,7 @@ try
     await server.StandardInput.WriteLineAsync(new JsonObject { ["jsonrpc"] = "2.0", ["method"] = "notifications/initialized" }.ToJsonString());
     var list = await Rpc("tools/list");
     var names = list["result"]!["tools"]!.AsArray().Select(t => t!["name"]!.GetValue<string>()).ToArray();
-    Check(names.Length == 21 && names.All(n => n.StartsWith("re4preview_")), "tools/list returns the 21 preview tools", string.Join(",", names));
+    Check(names.Length == 26 && names.All(n => n.StartsWith("re4preview_")), "tools/list returns the 26 preview tools", string.Join(",", names));
 
     var (error, outcome, _) = await Tool("status");
     Check(error && Code(outcome) == "preview_not_running", "status without a window reports preview_not_running", outcome.ToJsonString());
@@ -277,6 +278,43 @@ try
     for (int i = 0; i < 2; i++) { (error, outcome, _) = await Tool("undo", new JsonObject { ["expectedRevision"] = rev }); rev = error ? rev : Revision(outcome); }
     var back = await Status();
     Check(back["document"]!["attributes"]!.AsArray().Count == attributeCount && IndexOf(back["document"]!.AsObject(), "Life") == lifeIndex, "undo walks back paste and remove");
+
+    // Entry-level tools: add, duplicate, copy/paste and remove whole entries, then undo all of it.
+    {
+        int Entries(JsonObject o) => o["result"]?["preview"]?["entries"]?.AsArray().Count ?? -1;
+        int Selected(JsonObject o) => o["result"]?["document"]?["entryPosition"]?.GetValue<int>() ?? -1;
+        var entryStatus = await Status();
+        int entryCount = entryStatus["preview"]!["entries"]!.AsArray().Count;
+        (error, outcome, _) = await Tool("add_entry", new JsonObject { ["type"] = "TypeBillboard3D", ["expectedRevision"] = rev });
+        int created = entryCount;
+        Check(!error && Revision(outcome) == rev + 1 && Entries(outcome) == entryCount + 1 && Selected(outcome) == created &&
+            IndexOf(outcome["result"]!["document"]!.AsObject(), "UVSequence") >= 0, "add_entry appends a Billboard3D entry from the template and selects it", outcome.ToJsonString()[..Math.Min(400, outcome.ToJsonString().Length)]);
+        rev = error ? rev : Revision(outcome);
+        (error, outcome, _) = await Tool("frame", new JsonObject { ["tick"] = 45, ["entryPosition"] = created });
+        Check(!error && outcome["result"]?["alive"]?.GetValue<int>() > 0, "the new entry has particles at tick 45", outcome["result"]?["alive"]);
+        (error, outcome, _) = await Tool("duplicate_entry", new JsonObject { ["entryPosition"] = created, ["expectedRevision"] = rev });
+        Check(!error && Entries(outcome) == entryCount + 2 && Selected(outcome) == created + 1, "duplicate_entry appends a copy and selects it");
+        rev = error ? rev : Revision(outcome);
+        (error, outcome, _) = await Tool("copy_entry", new JsonObject { ["entryPosition"] = 13 });
+        string? entryClip = outcome["result"]?["copyBuffer"]?["id"]?.GetValue<string>();
+        Check(!error && outcome["result"]?["copyBuffer"]?["kind"]?.GetValue<string>() == "entry" && Revision(outcome) == rev, "copy_entry fills the copy buffer without a new revision");
+        (error, outcome, _) = await Tool("paste_entry", new JsonObject { ["clipboardId"] = entryClip ?? "", ["expectedRevision"] = rev });
+        Check(!error && Entries(outcome) == entryCount + 3 && Selected(outcome) == entryCount + 2, "paste_entry appends the copied entry and selects it");
+        rev = error ? rev : Revision(outcome);
+        (error, outcome, _) = await Tool("remove_entry", new JsonObject { ["entryPosition"] = entryCount + 2, ["expectedRevision"] = rev - 1 });
+        Check(error, "remove_entry with a stale revision is refused", outcome.ToJsonString());
+        (error, outcome, _) = await Tool("remove_entry", new JsonObject { ["entryPosition"] = entryCount + 2, ["expectedRevision"] = rev });
+        Check(!error && Entries(outcome) == entryCount + 2 && Selected(outcome) == entryCount + 1 && outcome["result"]?["previewError"] == null,
+            "remove_entry on the selected entry moves the selection to the nearest entry", outcome.ToJsonString()[..Math.Min(400, outcome.ToJsonString().Length)]);
+        rev = error ? rev : Revision(outcome);
+        for (int i = 0; i < 4; i++) { (error, outcome, _) = await Tool("undo", new JsonObject { ["expectedRevision"] = rev }); rev = error ? rev : Revision(outcome); }
+        (error, outcome, _) = await Tool("select_entry", new JsonObject { ["entryPosition"] = 13 });
+        Check(!error && Entries(outcome) == entryCount && Selected(outcome) == 13 && outcome["result"]?["previewError"] == null, "undo removes the four entry edits; entry 13 is selected again", Entries(outcome));
+        rev = error ? rev : Revision(outcome);
+        // copy_entry replaced the copied Life that the cross-file check below pastes: copy it again.
+        (error, outcome, _) = await Tool("copy_attribute", new JsonObject { ["attributeIndex"] = lifeIndex });
+        clip = outcome["result"]?["copyBuffer"]?["id"]?.GetValue<string>();
+    }
 
     string exe = Environment.GetEnvironmentVariable("RE4_EXE") ?? @"E:\Program\Steam\steamapps\common\RESIDENT EVIL 4  BIOHAZARD RE4\re4.exe";
     string forbidden = Path.Combine(Path.GetDirectoryName(exe)!, "mcp-test-should-not-exist.efx.3539837");

@@ -96,9 +96,12 @@ internal static class PreviewControlReports
         result["entries"] = new JsonArray(tables.Select(t =>
         {
             var e = scene?.AtTable(t);
+            if (e?.Logic == true)       // NoDraw trigger carrier: simulated, nothing drawn
+                return (JsonNode?)new JsonObject { ["position"] = e.Position, ["index"] = states[t].Index, ["name"] = e.Name, ["alive"] = states[t].Count,
+                    ["type"] = e.Type, ["logicOnly"] = true };
             var h = ColorHeader.From(states[t], e?.Document);
             var a = e?.Document == null ? EntryAppearance.None : EntryAppearance.From(e.Document.Entry);
-            return (JsonNode?)new JsonObject { ["position"] = e?.Position, ["index"] = states[t].Index, ["name"] = e?.Name, ["alive"] = states[t].Count,
+            return (JsonNode?)new JsonObject { ["position"] = e?.Position, ["label"] = e?.Label, ["index"] = states[t].Index, ["name"] = e?.Name, ["alive"] = states[t].Count,
                 ["type"] = e?.Type, ["blend"] = h.Blend, ["colorRate"] = Finite(h.ColorRate), ["intensity"] = Finite(h.Intensity), ["edgeBlendRange"] = Finite(h.EdgeBlendRange),
                 ["appearance"] = new JsonObject
                 {
@@ -117,6 +120,7 @@ internal static class PreviewControlReports
         {
             var state = states[t];
             var e = scene?.AtTable(t);
+            if (e?.Logic == true) continue;      // carriers are not drawn: keep them out of the size statistics
             uint uvFlags = e?.Document?.UvFlags ?? 0;
             var kind = e?.Document?.Kind ?? PreviewTypeKind.Billboard3D;
             for (int i = state.First; i < state.First + state.Count; i++)
@@ -158,7 +162,15 @@ internal static class PreviewControlReports
     public static JsonArray SceneEntries(PreviewScene scene, int? selected) => new(scene.Entries.Select(e => (JsonNode?)new JsonObject
     {
         ["position"] = e.Position, ["index"] = e.Index, ["name"] = e.Name, ["type"] = e.Type,
-        ["shown"] = e.Shown, ["selected"] = e.Position == selected, ["excluded"] = e.Excluded
+        ["shown"] = e.Shown, ["selected"] = e.Position == selected, ["excluded"] = e.Excluded,
+        ["logicOnly"] = e.Logic ? true : null, ["firesActions"] = e.Actions == null ? null : new JsonArray(e.Actions.Select(a => (JsonNode?)a).ToArray())
+    }).ToArray());
+
+    /// <summary>Entries embedded in child Actions: which Action plays them and whether the preview runs them.</summary>
+    public static JsonArray SceneChildren(PreviewScene scene) => new(scene.Children.Select(e => (JsonNode?)new JsonObject
+    {
+        ["action"] = e.Action, ["child"] = e.Child, ["label"] = e.Label, ["index"] = e.Index, ["name"] = e.Name, ["type"] = e.Type,
+        ["shown"] = e.Shown, ["table"] = e.Shown ? scene.Shown.ToList().IndexOf(e) : null, ["excluded"] = e.Excluded
     }).ToArray());
 
     public static JsonObject Inspection(JsonObject reply, int attributeIndex) => new()

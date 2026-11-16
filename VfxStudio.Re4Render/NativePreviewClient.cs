@@ -50,6 +50,8 @@ public sealed class NativePreviewClient : IDisposable
     /// <summary>Entries the last load left out without ending the worker (Python-level refusals such as
     /// an attribute with no native factory), by load-order position, with the worker's message.</summary>
     public IReadOnlyList<(int Entry, string Message)> LastLoadSkipped { get; private set; } = [];
+    /// <summary>Entries of child Actions the worker could not build, by Action and position in the embedded file.</summary>
+    public IReadOnlyList<(int Action, int Child, string Message)> LastLoadSkippedChildren { get; private set; } = [];
 
     public NativePreviewClient(string python, string script, string exe, bool testFaults = false)
     { this.python = python; this.script = Path.GetFullPath(script); this.exe = exe; this.testFaults = testFaults; }
@@ -152,8 +154,12 @@ public sealed class NativePreviewClient : IDisposable
         else { view?.Dispose(); view = null; mapping?.Dispose(); mapping = null; }
         var metadata = await Send(loadCommand);
         LastLoadReused = metadata.TryGetProperty("reused", out var reused) && reused.GetBoolean();
+        LastLoadSkippedChildren = metadata.TryGetProperty("skipped", out var skippedChildren) && skippedChildren.ValueKind == JsonValueKind.Array
+            ? skippedChildren.EnumerateArray().Where(x => x.TryGetProperty("action", out _))
+                .Select(x => (x.GetProperty("action").GetInt32(), x.GetProperty("child").GetInt32(), x.GetProperty("message").GetString() ?? "")).ToArray()
+            : [];
         LastLoadSkipped = metadata.TryGetProperty("skipped", out var skipped) && skipped.ValueKind == JsonValueKind.Array
-            ? skipped.EnumerateArray().Select(x => (x.GetProperty("entry").GetInt32(), x.GetProperty("message").GetString() ?? "")).ToArray()
+            ? skipped.EnumerateArray().Where(x => !x.TryGetProperty("action", out _)).Select(x => (x.GetProperty("entry").GetInt32(), x.GetProperty("message").GetString() ?? "")).ToArray()
             : [];
         slotBytes = metadata.GetProperty("slot_bytes").GetInt32();
         int bytes = metadata.GetProperty("mapping_bytes").GetInt32();

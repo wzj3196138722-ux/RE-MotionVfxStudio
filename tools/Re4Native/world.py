@@ -215,3 +215,12 @@ def instance_matrices_blk(blk):
             out.append(dict(instance=k, flags=rn.u32(i + 8),
                             matrix=list(struct.unpack("<16f", ctypes.string_at(i + 0x10, 64)))))
     return out
+
+
+def install_actions(img):
+    """The offline preview runs PtLife's child Actions itself (re4host.Host): PtLife's per-emitter Action step
+    3d3e0a0 returns at once, so fired instances stay in their pool slot with flag 2 ("start pending") until the
+    host starts that slot's child emitters and clears it. The shared executor 3d122b0 keeps running for
+    PtColliderAction (its emitter step 3d62230 calls it per instance; without it the per-particle step reads
+    instance state that was never set up, 3d62ce8)."""
+    ctypes.memmove(B + 0x3D3E0A0, b"\xC3", 1)

@@ -112,6 +112,37 @@ public sealed class PreviewAttributeCatalog
         return new(owners, document.RootElement.GetProperty("files").GetInt32());
     }
 
+    private Dictionary<string, KeyValuePair<string, string>[]>? defaults;
+
+    /// <summary>Initial field values for a new attribute of this type (set_fields paths and text), taken from one
+    /// RE4 attribute of that type (tools/Re4AttributeCatalog); empty when none are known.</summary>
+    public IReadOnlyList<KeyValuePair<string, string>> Defaults(string type)
+    {
+        if (defaults == null)
+        {
+            using var stream = typeof(PreviewAttributeCatalog).Assembly.GetManifestResourceStream("VfxStudio.Re4Render.re4-attribute-defaults.json");
+            var loaded = new Dictionary<string, KeyValuePair<string, string>[]>(StringComparer.Ordinal);
+            if (stream != null)
+            {
+                using var document = JsonDocument.Parse(stream);
+                foreach (var t in document.RootElement.GetProperty("types").EnumerateObject())
+                    loaded[t.Name] = t.Value.GetProperty("fields").EnumerateObject().Select(f => KeyValuePair.Create(f.Name, f.Value.GetString() ?? "")).ToArray();
+            }
+            defaults = loaded;
+        }
+        return defaults.GetValueOrDefault(type) ?? [];
+    }
+
+    /// <summary>Attributes of the entry that need <paramref name="type"/> as their base (the backend would have
+    /// refused them without it), so removing it would leave them orphaned.</summary>
+    public IReadOnlyList<string> Dependents(string type, IEnumerable<string> existing) =>
+        existing.Where(e => requiredBases.TryGetValue(e, out var bases) && bases.Contains(type)).ToArray();
+
+    /// <summary>Attributes for a new entry of a Type: the Type and what at least 95 % of RE4 entries with it have,
+    /// in the order the backend keeps them.</summary>
+    public IReadOnlyList<string> Template(string entryType) =>
+        new[] { entryType }.Concat(For(entryType, []).Where(i => i.Usual && i.CanAdd).Select(i => i.Type)).Distinct().ToArray();
+
     /// <summary>Every attribute type of the RE4 version (unknown placeholders only when the corpus uses them).</summary>
     public IReadOnlyList<string> Types => types;
 

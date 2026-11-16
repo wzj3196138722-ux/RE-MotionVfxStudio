@@ -38,10 +38,14 @@ dotnet <仓库>/VfxStudio.Mcp/bin/Release/net8.0/VfxStudio.Mcp.dll --re4-preview
 | `inspect` | 不带参数列属性；带 `attributeIndex` 返回字段、颜色组和曲线（路径、通道、关键帧） |
 | `set_fields` | 一个属性的 1–64 个字段，作为一个修订、一步撤销 |
 | `attribute_types` | 当前 EFX 版本可添加的属性类型名；`catalog` 给出当前 entry 的属性目录（能否添加、RE4 同 Type entry 的使用比例，见 RE4-EFX-PREVIEW-CATALOG） |
-| `add_attribute` | 按类型添加一个默认值属性；后台拒绝重复类型、第二个 Type 属性和缺少基础属性的情况 |
+| `add_attribute` | 按类型添加一个属性，字段取自 RE4 里同类属性的典型值（与窗口相同）；后台拒绝重复类型、第二个 Type 属性和缺少基础属性的情况 |
 | `remove_attribute` | 删除一个属性；其他属性和分组回读不一致时整笔回滚 |
 | `copy_attribute` | 把一个属性复制到后台的复制缓冲区；缓冲区是快照，`open` 换文档后仍保留 |
 | `paste_attribute` | 粘贴到当前发射器；已有同类型属性时需传 `replaceAttributeIndex` 指定替换对象。来源与目标的文件级表达式／变量表不同时拒绝 |
+| `add_entry` | 追加一个新 entry（Type 限预览能画的六种），带同 Type 在 RE4 里 95% 以上都有的属性，字段取典型值；新 entry 成为当前 entry，不加入 effect group |
+| `duplicate_entry` | 在文件末尾追加一个 entry 的副本，预览能画时选中它 |
+| `remove_entry` | 删除一个 entry；删的是当前 entry 时先改选位置最近的可预览 entry，没有可选的则拒绝。后面的 entry 位置前移 |
+| `copy_entry` / `paste_entry` | 把 entry 复制进复制缓冲区（打开其他文件后仍在），再追加到当前文件（名字加 `_copy`）。表达式／变量表不同时拒绝 |
 | `curve_key` | 在已有曲线通道上增、改、删一个关键帧；不改变通道数量和映射，通道至少保留一个关键帧，Bezier 需给全四个切线值 |
 | `undo` / `redo` | 需要 `expectedRevision` |
 | `save_copy` | 省略路径时存到会话目录；游戏目录和解包目录拒绝写入 |
@@ -76,6 +80,9 @@ dotnet <仓库>/VfxStudio.Mcp/bin/Release/net8.0/VfxStudio.Mcp.dll --re4-preview
 窗口启动参数：`--ai-pipe <名称>` 改用其他管道名，`--no-ai-control` 关闭控制通道。`--smoke` 和 `--benchmark` 模式不开启控制通道。
 
 `launch` 启动的窗口不继承 MCP 服务器的标准输入输出，输出写入 `runtime/re4-preview/mcp-launch-*.log`。MCP 服务器退出后，窗口继续运行。
+
+- 控制管道：客户端连上后没发请求就断开（或 10 秒内没发完），服务端只丢弃这次连接。以前这种情况会让管道停在“断开但未重置”的状态，或把读超时当成窗口关闭而退出循环，之后整个窗口生命周期里 AI 都连不上。
+- `Re4McpTests` 可用环境变量 `RE4_MCP_DLL` 指定另一份 MCP 构建（Release 的 dll 被正在运行的 MCP 进程占用时用 Debug 版）。
 
 ## 验证
 

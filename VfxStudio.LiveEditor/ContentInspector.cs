@@ -364,3 +364,36 @@ internal sealed class Condition
         return value == null ? throw new FormatException("Unknown condition member: " + token) : Convert.ToInt64(value, CultureInfo.InvariantCulture);
     }
 }
+
+/// <summary>Editable field values of an EFX object as path/value text, the same paths and formatting as
+/// set_fields. Used to build and apply initial values for new attributes.</summary>
+public static class EfxFieldValues
+{
+    /// <summary>Editable scalar fields of <paramref name="root"/>, in model order.</summary>
+    public static IReadOnlyList<KeyValuePair<string, string>> Editable(object root, EfxVersion version) =>
+        ContentInspector.Describe(root, version).Where(f => f.Description.Editable && f.Set != null)
+            .Select(f => KeyValuePair.Create(f.Description.Path, f.Description.Value)).ToArray();
+
+    /// <summary>Writes the values whose paths exist and are editable. Some fields select which nested object
+    /// exists (and so which paths follow), so the walk repeats until nothing changes.</summary>
+    /// <returns>Paths written, and paths that were not present or editable after the last pass.</returns>
+    public static (int Written, string[] Skipped) Apply(object root, EfxVersion version, IReadOnlyList<KeyValuePair<string, string>> values)
+    {
+        var pending = values.ToDictionary(v => v.Key, v => v.Value, StringComparer.Ordinal);
+        int written = 0;
+        for (int guard = 0; pending.Count > 0 && guard < 10000; guard++)
+        {
+            bool wrote = false;
+            foreach (var field in ContentInspector.Describe(root, version))
+            {
+                if (!field.Description.Editable || field.Set == null || !pending.Remove(field.Description.Path, out var text)) continue;
+                var value = ContentInspector.Parse(text, field.ValueType);
+                if (ContentInspector.Format(value) == field.Description.Value) continue;
+                field.Set(value); written++; wrote = true;
+                break;   // the field list can change after a write: describe again
+            }
+            if (!wrote) break;
+        }
+        return (written, pending.Keys.ToArray());
+    }
+}

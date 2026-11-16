@@ -28,7 +28,7 @@ internal sealed partial class EditorEngine
             position = candidates[0].index;
         }
         if (position < 0 || position >= file.Entries.Count || !Previewable(file.Entries[position]))
-            throw new NotSupportedException("请选择一个 Billboard3D、Polygon、Billboard2D、RibbonFollow 或 RibbonLength 发射器。");
+            throw new NotSupportedException("请选择一个 Billboard3D、Polygon、Billboard2D、RibbonFollow、RibbonLength、RibbonFixEnd、PolygonTrail 或 NoDraw 发射器。");
         offlinePreviewEntry = position;
         offlinePreviewEntryId = file.Entries[position].index;
         offlinePreviewDocument = documentSessionKey;
@@ -37,7 +37,8 @@ internal sealed partial class EditorEngine
 
     /// <summary>Type attributes the offline preview draws.</summary>
     private static bool Previewable(EFXEntry entry) =>
-        entry.TypeAttribute is EFXAttributeTypeBillboard3D or EFXAttributeTypePolygon or EFXAttributeTypeBillboard2D or EFXAttributeTypeRibbonFollow or EFXAttributeTypeRibbonLength
+        // NoDraw draws nothing itself, but its particles fire child Actions the preview runs; it can be the edited entry.
+        entry.TypeAttribute is EFXAttributeTypeNoDraw or EFXAttributeTypeBillboard3D or EFXAttributeTypePolygon or EFXAttributeTypeBillboard2D or EFXAttributeTypeRibbonFollow or EFXAttributeTypeRibbonLength
             or EFXAttributeTypePolygonTrail || entry.TypeAttribute is EFXAttributeTypeRibbonFixEnd { ShapeDivision: >= 2 };
 
     private void AttachOfflinePreview(JsonObject response, bool force)
@@ -53,7 +54,19 @@ internal sealed partial class EditorEngine
         {
             var entries=Require().Entries;
             if(offlinePreviewEntry.Value>=entries.Count || entries[offlinePreviewEntry.Value].index!=offlinePreviewEntryId)
-                throw new InvalidOperationException("预览目标已变化，请重新选择发射器。");
+            {
+                // Entries added, removed or restored before the target shift its position: follow its ID.
+                var moved=entries.Select((entry,index)=>(entry,index)).Where(x=>x.entry.index==offlinePreviewEntryId).ToArray();
+                if(moved.Length>1) throw new InvalidOperationException("预览目标已变化，请重新选择发射器。");
+                // The target itself is gone (for example undoing the paste or duplicate that created it):
+                // continue with the previewable entry nearest to where it was.
+                int fallback=moved.Length==1?moved[0].index:entries.Select((entry,index)=>(entry,index)).Where(x=>Previewable(x.entry))
+                    .OrderBy(x=>Math.Abs(x.index-offlinePreviewEntry.Value)).Select(x=>x.index).DefaultIfEmpty(-1).First();
+                if(fallback<0) throw new InvalidOperationException("预览目标已删除，文件里没有其他可预览的发射器。");
+                offlinePreviewEntry=fallback;
+                offlinePreviewEntryId=entries[fallback].index;
+                offlinePreviewRevision=-1;
+            }
             var selectedEntry = entries[offlinePreviewEntry.Value];
             var billboard = selectedEntry.Attributes.OfType<EFXAttributeTypeBillboard3D>().SingleOrDefault();
             var life = selectedEntry.Attributes.OfType<EFXAttributeLife>().SingleOrDefault();

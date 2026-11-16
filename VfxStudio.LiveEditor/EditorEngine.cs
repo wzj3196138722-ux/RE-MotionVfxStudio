@@ -247,20 +247,29 @@ internal sealed partial class EditorEngine : IDisposable
                     response["message"] = "已还原当前特效块；其他特效块保持不变。请应用到角色资源以更新游戏。";
                     break;
                 case "add_entry":
-                    Mutate(() => { var entry = new EFXEntry { Version = Require().Header.Version, name = OptionalText(request, "name") ?? "New effect", entryAssignment = EfxEntryEnum.NoAssignment }; service.AddEntry(Require(), entry); entry.index = AllocateEntryId(); });
+                {
+                    // Optional "attributes": [{type, fields?}] are created and checked before the entry is added,
+                    // so the entry and its attributes are one revision.
+                    var version = Require().Header.Version;
+                    var entry = new EFXEntry { Version = version, name = OptionalText(request, "name") ?? "New effect", entryAssignment = EfxEntryEnum.NoAssignment };
+                    if (request["attributes"] is JsonArray initial)
+                        foreach (var item in initial)
+                        {
+                            var spec = item as JsonObject ?? throw new ArgumentException("Each attribute needs a type.");
+                            if (!entry.AddAttribute(NewAttribute(version, Text(spec, "type"), spec["fields"] as JsonArray)))
+                                throw new InvalidOperationException("Attribute cannot be added to the new entry: " + Text(spec, "type"));
+                        }
+                    else if (request["attributes"] != null) throw new ArgumentException("attributes must be an array.");
+                    Mutate(() => { service.AddEntry(Require(), entry); entry.index = AllocateEntryId(); });
+                    response["selection"] = new JsonObject { ["kind"] = "entry", ["index"] = Require().Entries.Count - 1 };
                     break;
+                }
                 case "add_attribute":
                     Mutate(() =>
                     {
                         var target = Target.From(request) with { AttributeIndex = null };
                         var container = (EFXEntryBase)Resolve(target);
-                        string name = Text(request, "type");
-                        if (!Enum.TryParse<EfxAttributeType>(name, ignoreCase: false, out var type) || !Enum.IsDefined(type))
-                            throw new ArgumentException("Unknown attribute type: " + name);
-                        var version = ResolveTargetFile(target).Header.Version;
-                        var attribute = EFXAttribute.Create(version, type);
-                        attribute.Version = version;
-                        attribute.UniqueID = NextAttributeId();
+                        var attribute = NewAttribute(ResolveTargetFile(target).Header.Version, Text(request, "type"), request["fields"] as JsonArray);
                         if (!service.AddAttributeToEntry(container, attribute))
                             throw new InvalidOperationException("Attribute cannot be added: it may already exist, require a matching base attribute, or be invalid for this entry kind.");
                     });
@@ -450,6 +459,24 @@ internal sealed partial class EditorEngine : IDisposable
         g.groupName + ":" + string.Join(',', g.efxEntryIndexes ?? [])));
 
     private static string EmbeddedGroupsFingerprint(EfxFile file, EFXAttribute? removed = null) => string.Join("\n", EnumerateEmbeddedFiles(file, removed).Select(GroupsFingerprint));
+
+    /// <summary>A new attribute with default values, then the optional initial "fields" ([{path, value}] as in
+    /// set_fields). Every given path must exist and be editable.</summary>
+    private EFXAttribute NewAttribute(EfxVersion version, string name, JsonArray? fields)
+    {
+        if (!Enum.TryParse<EfxAttributeType>(name, ignoreCase: false, out var type) || !Enum.IsDefined(type))
+            throw new ArgumentException("Unknown attribute type: " + name);
+        var attribute = EFXAttribute.Create(version, type);
+        attribute.Version = version;
+        attribute.UniqueID = NextAttributeId();
+        if (fields != null)
+        {
+            var values = fields.Select(f => f is JsonObject o ? KeyValuePair.Create(Text(o, "path"), Text(o, "value")) : throw new ArgumentException("Each field needs path and value.")).ToArray();
+            var (_, skipped) = EfxFieldValues.Apply(attribute, version, values);
+            if (skipped.Length > 0) throw new ArgumentException($"{name}: initial fields not present or not editable: " + string.Join(", ", skipped.Take(5)));
+        }
+        return attribute;
+    }
 
     private void RemoveEntry(int index, JsonObject response)
     {

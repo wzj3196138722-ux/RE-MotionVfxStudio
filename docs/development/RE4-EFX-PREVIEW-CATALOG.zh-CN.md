@@ -63,4 +63,4 @@ dotnet run -c Release --project tools/Re4AttributeCatalog
 
 - 给 Action 和内嵌 entry 添加属性（后端支持 `embeddedPath`，窗口还没有选中它们的方式）。
 - 新建 entry、在节点图里拖出新 Action。
-- 新加属性的字段是编辑器库默认构造的值（多为 0），不是 RE4 里常见的值。按语料给出常用默认值还没做。
+- （已完成）新加属性的字段改为取自 RE4 的实际属性，见 RE4-EFX-PREVIEW-STRUCTURE。

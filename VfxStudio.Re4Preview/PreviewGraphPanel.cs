@@ -22,6 +22,11 @@ internal sealed class PreviewGraphPanel : IDisposable
     public bool Visible = true;
     /// <summary>An attribute dropped from the catalogue onto an emitter during the last <see cref="Draw"/>.</summary>
     public PreviewAddRequest? Dropped { get; private set; }
+    /// <summary>A structural edit chosen from a right-click menu during the last <see cref="Draw"/>.</summary>
+    public PreviewStructureRequest? Requested { get; private set; }
+    /// <summary>The backend copy buffer, for the paste items: kind ("attribute" / "entry") and display name.</summary>
+    public string? ClipboardKind, ClipboardName;
+    private (PreviewGraphNode Node, PreviewGraphRow? Row)? menuTarget;
     /// <summary>ImNodes has no zoom: text is scaled with the window font scale, style sizes with it, and
     /// node positions are rescaled about the mouse when the zoom changes.</summary>
     private float zoom = 1;
@@ -46,8 +51,9 @@ internal sealed class PreviewGraphPanel : IDisposable
     public PreviewGraphPick? Draw(PreviewEffectGraph? graph, string? documentId, string? sourceName,
         int? selectedEntry, int selectedAttribute, string? locked)
     {
-        Dropped = null;
+        Dropped = null; Requested = null;
         if (!Visible) return null;
+        (PreviewGraphNode Node, PreviewGraphRow Row)? hoveredRow = null;
         PreviewGraphPick? pick = null;
         // Right of the property panel (x 850..1260) when the window is wide enough, else along the bottom.
         var display = ImGui.GetIO().DisplaySize;
@@ -129,7 +135,9 @@ internal sealed class PreviewGraphPanel : IDisposable
                 ImNodes.EndInputAttribute();
             }
             else if (node.Subtitle != null) ImGui.TextDisabled(node.Subtitle);
-            if (node.Kind == PreviewGraphNodeKind.Emitter && !node.Previewable) ImGui.TextDisabled("（预览暂不支持此类型，只能查看）");
+            if (node.Kind == PreviewGraphNodeKind.Emitter && !node.Previewable)
+                ImGui.TextDisabled("（预览暂不支持此类型，只能查看）");
+            if (node.EntryType == "TypeNoDraw") ImGui.TextDisabled("（NoDraw：不绘制，用来触发子 Action）");
 
             if (folded) ImGui.TextDisabled($"  已收起 {node.Rows.Count - VisibleRows(node).Count()} 项");
             foreach (var r in VisibleRows(node))
@@ -146,11 +154,12 @@ internal sealed class PreviewGraphPanel : IDisposable
                 };
                 ImGui.TextColored(color, (current ? "> " : "  ") + r.Label);
                 bool clickable = node.Kind == PreviewGraphNodeKind.Emitter && node.Previewable && r.AttributeIndex is int && locked == null;
+                if (ImGui.IsItemHovered()) hoveredRow = (node, r);
                 if (ImGui.IsItemHovered())
                 {
                     string tip = r.Tooltip ?? (node.Kind == PreviewGraphNodeKind.Emitter
                         ? node.Previewable ? locked ?? "点击在属性面板中打开" : "此类型的 entry 预览暂不支持，不能在面板中编辑。"
-                        : node.Kind == PreviewGraphNodeKind.EmbeddedEmitter ? "Action 内嵌的 entry，预览还不模拟子 Action，暂只能查看。" : "");
+                        : node.Kind == PreviewGraphNodeKind.EmbeddedEmitter ? "Action 内嵌的 entry：触发时预览会运行它（Billboard3D / Polygon / Billboard2D），还不能在窗口里编辑。" : "");
                     if (tip.Length > 0) ImGui.SetTooltip(tip);
                     if (clickable && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
                         pick = new PreviewGraphPick(node.EntryPosition!.Value, r.AttributeIndex!.Value);
@@ -190,6 +199,21 @@ internal sealed class PreviewGraphPanel : IDisposable
         var mouse = io.MousePos;
         bool overCanvas = ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows) &&
             mouse.X >= canvasMin.X && mouse.Y >= canvasMin.Y && mouse.X < canvasMin.X + canvasSize.X && mouse.Y < canvasMin.Y + canvasSize.Y;
+        // Right click: a menu for the attribute row, the emitter, or the file (empty canvas).
+        if (overCanvas && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+        {
+            int hoveredNode = 0;
+            menuTarget = hoveredRow is { } hr ? (hr.Node, hr.Row)
+                : ImNodes.IsNodeHovered(ref hoveredNode) && graph.Find(hoveredNode) is { } n ? (n, null)
+                : null;
+            ImGui.OpenPopup("节点图菜单");
+        }
+        if (ImGui.BeginPopup("节点图菜单"))
+        {
+            if (locked != null) ImGui.TextDisabled(locked);
+            else Requested = Menu(menuTarget);
+            ImGui.EndPopup();
+        }
         if (overCanvas && io.MouseWheel != 0)
             Rescale(graph, Math.Clamp(zoom * MathF.Pow(1.15f, io.MouseWheel), MinZoom, MaxZoom), io.MousePos);
         else if (requestedZoom is float z) Rescale(graph, z, canvasMin + canvasSize / 2);
@@ -231,6 +255,30 @@ internal sealed class PreviewGraphPanel : IDisposable
             if (placed.Contains(node.Id))
                 ImNodes.SetNodeScreenSpacePos(node.Id, origin + (ImNodes.GetNodeScreenSpacePos(node.Id) - min) * k);
         zoom = next;
+    }
+
+    private PreviewStructureRequest? Menu((PreviewGraphNode Node, PreviewGraphRow? Row)? target)
+    {
+        if (target is not { } t || t.Node.Kind == PreviewGraphNodeKind.Root) return PreviewStructureMenu.FileItems(ClipboardKind, ClipboardName);
+        var node = t.Node;
+        if (node.Kind != PreviewGraphNodeKind.Emitter)
+        {
+            ImGui.TextDisabled(node.Kind == PreviewGraphNodeKind.Action ? "Action 还不能在窗口里编辑" : "Action 内嵌的 entry 还不能在窗口里编辑");
+            return null;
+        }
+        int entry = node.EntryPosition!.Value;
+        PreviewStructureRequest? chosen = null;
+        if (t.Row is { AttributeIndex: int attribute } row && node.AttributeTypes is { } types && attribute < types.Count)
+        {
+            if (node.Previewable) chosen = PreviewStructureMenu.AttributeItems(entry, attribute, types[attribute], types);
+            else ImGui.TextDisabled(types[attribute] + "（预览不支持此 entry，不能编辑属性）");
+            ImGui.Separator();
+        }
+        ImGui.TextDisabled(node.Title);
+        chosen ??= PreviewStructureMenu.EntryItems(entry, ClipboardKind, ClipboardName, node.Previewable);
+        ImGui.Separator();
+        chosen ??= PreviewStructureMenu.FileItems(ClipboardKind, ClipboardName);
+        return chosen;
     }
 
     private static bool Collapsible(PreviewGraphNode node) => node.Kind != PreviewGraphNodeKind.Root;

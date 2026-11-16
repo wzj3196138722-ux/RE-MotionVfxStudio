@@ -333,34 +333,52 @@ class Emitter:
     def __init__(self, img, entry, e_size=1 << 20):
         self.img = img
         self.entry = entry
+        self.e_size = e_size
         self.E = img.alloc(e_size)
-        rn.set_u64(self.E, entry.obj)          # E[0] = entry (3dfc900, 3d08480 read the attribute list through it)
         self.element = img.alloc(0x1000)     # -> E+8  (reads +0x6c flags, +0x90/+0x94)
         self.effect = img.alloc(0x1000)      # -> E+0x10 (reads +0x1c4; +0x10 -> parent object, +0x20 its transform)
-        parent = img.alloc(0x1000)
-        rn.set_u64(self.effect + 0x10, parent)
-        rn.set_u64(parent + 0x20, img.alloc(0x1000))   # the parent's transform (no joints, no parent: +0x60 = 0)
-        args = img.alloc(0x40)
-        rn.set_u64(args + 0x10, self.E)
-        rn.set_u64(args + 0x18, self.element)
-        rn.set_u64(args + 0x20, self.effect)
-        img.call(img.function(0x3D06440, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p), entry.obj, args)
+        self.parent = img.alloc(0x1000)
+        self.parent_transform = img.alloc(0x1000)
+        self.args = img.alloc(0x40)
         self.owner = img.alloc(0x1000)       # rcx of 3d09690 / 3d08480 (stored at ctx+0x118)
         self.U = img.alloc(0x200)            # update struct (rdx of 3d09690)
-        rn.set_u64(self.U + 0x0, img.alloc(0x400))
+        self.u_buffers = [(0x0, img.alloc(0x400), 0x400)] + [(off, img.alloc(0x1000), 0x1000) for off in (0x10, 0x18, 0x20, 0x28)]
+        self.lookup = img.alloc(0x40)
+        self.ctor = img.function(0x3D06440, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p)
+        self.drv = img.function(0x3D09690, ctypes.c_uint8, ctypes.c_void_p, ctypes.c_void_p)
+        self._construct()
+
+    def _construct(self):
+        rn.set_u64(self.E, self.entry.obj)     # E[0] = entry (3dfc900, 3d08480 read the attribute list through it)
+        rn.set_u64(self.effect + 0x10, self.parent)
+        rn.set_u64(self.parent + 0x20, self.parent_transform)   # the parent's transform (no joints, no parent: +0x60 = 0)
+        rn.set_u64(self.args + 0x10, self.E)
+        rn.set_u64(self.args + 0x18, self.element)
+        rn.set_u64(self.args + 0x20, self.effect)
+        self.img.call(self.ctor, self.entry.obj, self.args)
         rn.set_u64(self.U + 0x8, self.E)
-        for off in (0x10, 0x18, 0x20, 0x28):
-            rn.set_u64(self.U + off, img.alloc(0x1000))
+        for off, buf, _ in self.u_buffers:
+            rn.set_u64(self.U + off, buf)
         # U+0x18 -> ctx+0xf8: +8 points to a {array, count} table that 3d024f0 searches by id (reached
         # from 3e07150 on the Billboard2D path). An empty table makes the lookup return null, which the
         # engine handles; a null table pointer faults.
-        rn.set_u64(rn.u64(self.U + 0x18) + 8, img.alloc(0x40))
+        rn.set_u64(rn.u64(self.U + 0x18) + 8, self.lookup)
         # U+0x20 -> ctx+0x100: +1 byte gates 3dfa810; float +8 is the effect's LOD factor q that Spawn
         # multiplies its counts by at (re)start (3d15b1d -> 3d154d0); 1.0 = full counts
         rn.set_f32(rn.u64(self.U + 0x20) + 8, 1.0)
         rn.set_u64(self.U + 0x30, self.effect)
         self.set_world(((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1)))
-        self.drv = img.function(0x3D09690, ctypes.c_uint8, ctypes.c_void_p, ctypes.c_void_p)
+
+    def reset(self):
+        """Back to the freshly built state, reusing this emitter's memory: every buffer is cleared and the
+        entry is placement-constructed again (a child Action restarting in the same instance slot)."""
+        for ptr, size in ((self.E, self.e_size), (self.element, 0x1000), (self.effect, 0x1000), (self.parent, 0x1000),
+                          (self.parent_transform, 0x1000), (self.args, 0x40), (self.owner, 0x1000), (self.U, 0x200),
+                          (self.lookup, 0x40)):
+            ctypes.memset(ptr, 0, size)
+        for _, buf, size in self.u_buffers:
+            ctypes.memset(buf, 0, size)
+        self._construct()
 
     def set_world(self, rows):
         """U+0x40..0x7f: the effect's world matrix (rows: X, Y, Z axes, translation), copied into ctx by 3d08480."""

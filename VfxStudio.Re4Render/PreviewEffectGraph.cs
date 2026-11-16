@@ -3,6 +3,7 @@ using ReeLib.Efx;
 using ReeLib.Efx.Enums;
 using ReeLib.Efx.Structs.Basic;
 using ReeLib.Efx.Structs.Pt;
+using ReeLib.Efx.Structs.Main;
 
 namespace VfxStudio.Re4Render;
 
@@ -30,7 +31,8 @@ public sealed record PreviewGraphRow(string Label, PreviewGraphRowRole Role, int
 /// <param name="Column">Layer of the default layout: 0 Root, 1 emitters, 2 Actions, 3 embedded emitters.</param>
 /// <param name="EntryPosition">For a top-level emitter: its position in the file's entry list.</param>
 /// <param name="ActionIndex">For an Action: its index in the file's Action list; for an embedded emitter: the owning Action.</param>
-/// <param name="Previewable">A top-level emitter whose Type the offline preview draws, so the editor can select it.</param>
+/// <param name="Previewable">A top-level emitter the editor can select: a Type the offline preview draws, or NoDraw
+/// (not drawn; its triggers fire child Actions the preview runs).</param>
 /// <param name="EntryType">For emitters: the Type* attribute, or null when the entry has none.</param>
 /// <param name="AttributeTypes">For emitters: the attribute types the entry has, in order.</param>
 public sealed record PreviewGraphNode(int Id, PreviewGraphNodeKind Kind, string Title, string? Subtitle, int Column,
@@ -95,7 +97,7 @@ public sealed class PreviewEffectGraph
             string groups = entry.Groups.Count > 0 ? " · 组 " + string.Join("/", entry.Groups) : "";
             nodes.Add(new(id, PreviewGraphNodeKind.Emitter, $"[{position}] {Name(entry.name, position)}",
                 $"{entry.TypeAttribute?.type.ToString() ?? "无 Type"} · {entry.entryAssignment}{groups}", 1, InputPinOf(id), rows,
-                EntryPosition: position, Previewable: PreviewDocument.KindOf(entry) != null,
+                EntryPosition: position, Previewable: PreviewDocument.KindOf(entry) != null || entry.TypeAttribute is EFXAttributeTypeNoDraw,
                 EntryType: entry.TypeAttribute?.type.ToString(), AttributeTypes: entry.Attributes.Select(a => a.type.ToString()).ToArray()));
             links.Add(new(linkId++, RootId, rootPin, id, InputPinOf(id), ""));
             foreach (var (row, action, label) in triggers)

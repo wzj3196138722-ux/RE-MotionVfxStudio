@@ -364,7 +364,38 @@ using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == deadSc
     Check(disagreements.Count == 0, "catalogue verdicts match EFXEntryBase.AddAttribute for every attribute type", string.Join("; ", disagreements.Take(6)));
 }
 
-// 11. Optional: large official files.
+// 11. Child Actions: ground_walk's NoDraw entries fire PtLife (Keep) into Actions 0-2, each a PlayEmitter with two
+// Billboard3D entries. The NoDraw carriers run without a renderer; each (Action, embedded entry) is one table whose
+// particles sit at the fired instances' matrices; replay after a rewind is identical.
+{
+    string walk = Path.Combine(stm, @"_anotherorder\vfx\effecteditor\efd_character\efd_ao_chfb\efd_0015_ao_chfb_0001_ground_walk_0000.efx.3539837");
+    var ex = new Dictionary<int, string>();
+    var s = await PreviewSceneLoader.LoadAsync(client, walk, resources, ex);
+    var logic = s.Shown.Where(e => e.Logic).ToArray();
+    var kids = s.Shown.Select((e, t) => (e, t)).Where(x => x.e.Embedded).ToArray();
+    Check(logic.Length == 7 && kids.Length == 6 && kids.All(k => k.e.Document?.Kind == PreviewTypeKind.Billboard3D) && ex.Count == 0,
+        "ground_walk: 7 NoDraw trigger carriers run without a renderer; Actions 0-2 add six embedded Billboard3D tables",
+        $"logic {logic.Length}, children {string.Join(",", kids.Select(k => k.e.Label))}, exclusions {ex.Count}");
+    using var f120 = await client.FrameAsync(120);
+    var childAlive = kids.Select(k => f120.EntryStates![k.t].Count).ToArray();
+    var carriers = s.Shown.Select((e, t) => (e, t)).Where(x => x.e.Logic).Select(x => x.t).ToArray();
+    // Each child particle's reference matrix is a fired instance matrix: its translation equals a carrier particle's.
+    var carrierOrigins = carriers.SelectMany(t => Enumerable.Range(f120.EntryStates![t].First, f120.EntryStates[t].Count))
+        .Select(i => new System.Numerics.Vector3(FrameDecoder.F32(f120.Particles[i].Raw.Span, 0x130), FrameDecoder.F32(f120.Particles[i].Raw.Span, 0x134), FrameDecoder.F32(f120.Particles[i].Raw.Span, 0x138))).ToArray();
+    var childOrigins = kids.SelectMany(k => Enumerable.Range(f120.EntryStates![k.t].First, f120.EntryStates[k.t].Count))
+        .Select(i => new System.Numerics.Vector3(FrameDecoder.F32(f120.Particles[i].Raw.Span, 0x130), FrameDecoder.F32(f120.Particles[i].Raw.Span, 0x134), FrameDecoder.F32(f120.Particles[i].Raw.Span, 0x138))).ToArray();
+    bool anchored = childOrigins.Length > 0 && carrierOrigins.Length > 0 && childOrigins.All(c => carrierOrigins.Any(o => System.Numerics.Vector3.Distance(o, c) < 1e-3f));
+    Check(childAlive.Sum() > 0 && childOrigins.All(c => float.IsFinite(c.X) && float.IsFinite(c.Y) && float.IsFinite(c.Z)),
+        "child Action entries have particles at tick 120", string.Join(",", childAlive));
+    string h1 = string.Join(",", kids.Select(k => Digest(f120.Particles.Skip(f120.EntryStates![k.t].First).Take(f120.EntryStates[k.t].Count).SelectMany(p => p.Raw.ToArray()).ToArray())));
+    using (await client.FrameAsync(30)) { }
+    using var replay = await client.FrameAsync(120);
+    string h2 = string.Join(",", kids.Select(k => Digest(replay.Particles.Skip(replay.EntryStates![k.t].First).Take(replay.EntryStates[k.t].Count).SelectMany(p => p.Raw.ToArray()).ToArray())));
+    Check(anchored, "child particles sit at the carrier particles' transforms (the fired instance matrices)", $"{childOrigins.FirstOrDefault()} vs {carrierOrigins.FirstOrDefault()}");
+    Check(h1 == h2, "child Actions replay identically after a rewind", h1 == h2 ? "" : $"{h1} vs {h2}");
+}
+
+// 12. Optional: large official files.
 if (args.Contains("--corpus"))
 {
     var corpus = new[]

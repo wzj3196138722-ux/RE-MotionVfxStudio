@@ -8,7 +8,7 @@ namespace VfxStudio.Re4Preview;
 
 internal sealed record PreviewEditCommand(string Action,long Revision=0,BillboardEdit? Billboard=null,
     LifeEdit? Life=null,string? SavePath=null,PreviewFieldBatch? Batch=null,int AttributeIndex=-1,string? DocumentId=null,int EntryPosition=-1,
-    System.Text.Json.Nodes.JsonObject? Body=null);
+    System.Text.Json.Nodes.JsonObject? Body=null,object? Tag=null);
 
 internal sealed class PreviewEditPanel
 {
@@ -67,8 +67,9 @@ internal sealed class PreviewEditPanel
         return new("inspect",state.Revision,AttributeIndex:selected,DocumentId:documentId);
     }
 
+    /// <param name="clipboardKind">The backend copy buffer's kind ("attribute" or "entry"), or null.</param>
     public PreviewEditCommand? Draw(PreviewEditorState? state,OfflinePreviewManifest? displayed,bool busy,
-        bool stressMode,string sessionDirectory,string? error)
+        bool stressMode,string sessionDirectory,string? error,string? clipboardKind=null,string? clipboardType=null)
     {
         if(state!=null) Reset(state);
         PreviewEditCommand? command=null;
@@ -104,7 +105,24 @@ internal sealed class PreviewEditPanel
         if(ImGui.Button("撤销")) command=new("undo");
         ImGui.EndDisabled();ImGui.SameLine();ImGui.BeginDisabled(state?.CanRedo!=true);
         if(ImGui.Button("重做")) command=new("redo");
-        ImGui.EndDisabled();ImGui.EndDisabled();
+        ImGui.EndDisabled();
+        // Structure: copy, paste and remove the selected attribute (each one revision, undoable).
+        if(attribute!=null && state?.Manifest is {} m)
+        {
+            var existing=state.Attributes!.Select(a=>a.Type).ToArray();
+            if(ImGui.Button("复制属性")) command=Structure(new("copy_attribute",m.EntryPosition,attribute.Index));
+            ImGui.SameLine();ImGui.BeginDisabled(clipboardKind!="attribute");
+            if(ImGui.Button(clipboardKind=="attribute"?"粘贴 "+clipboardType:"粘贴属性")) command=Structure(new("paste_attribute",m.EntryPosition));
+            ImGui.EndDisabled();
+            if(clipboardKind!="attribute" && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip("先复制一个属性（可以来自其他文件）");
+            ImGui.SameLine();
+            string? refusal=PreviewStructureMenu.RemoveRefusal(attribute.Type,existing);
+            ImGui.BeginDisabled(refusal!=null);
+            if(ImGui.Button("删除属性")) command=Structure(new("remove_attribute",m.EntryPosition,attribute.Index));
+            ImGui.EndDisabled();
+            if(refusal!=null && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip(refusal);
+        }
+        ImGui.EndDisabled();
         if(dirty)
         {
             if(ImGui.Button(current?"放弃草稿":"丢弃草稿并刷新") && state!=null) {draft=null;command=Inspect(state);}
@@ -177,10 +195,12 @@ internal sealed class PreviewEditPanel
             var min=ImGui.GetWindowPos();
             if(PreviewCatalogPanel.DropTarget(min,min+ImGui.GetWindowSize(),ImGui.GetID("属性目录拖放"),
                 t=>busy?"编辑器忙，稍候再试":stressMode?"压力模式下不能编辑":dirty?"先应用或放弃属性草稿":PreviewCatalogPanel.Refusal(t,entryType,existing)) is {} dropped)
-                command=new("add_attribute",state.Revision,EntryPosition:entryPosition,Body:new(){["type"]=dropped});
+                command=Structure(new("add_attribute",entryPosition,Type:dropped));
         }
         ImGui.End();return command;
     }
+
+    private static PreviewEditCommand Structure(PreviewStructureRequest request) => new("structure",Tag:request);
 
     private static void DrawColor(PreviewPropertyDraft draft,PreviewColorGroup color)
     {
