@@ -31,8 +31,11 @@ public sealed record PreviewGraphRow(string Label, PreviewGraphRowRole Role, int
 /// <param name="EntryPosition">For a top-level emitter: its position in the file's entry list.</param>
 /// <param name="ActionIndex">For an Action: its index in the file's Action list; for an embedded emitter: the owning Action.</param>
 /// <param name="Previewable">A top-level emitter whose Type the offline preview draws, so the editor can select it.</param>
+/// <param name="EntryType">For emitters: the Type* attribute, or null when the entry has none.</param>
+/// <param name="AttributeTypes">For emitters: the attribute types the entry has, in order.</param>
 public sealed record PreviewGraphNode(int Id, PreviewGraphNodeKind Kind, string Title, string? Subtitle, int Column,
-    int? InputPin, IReadOnlyList<PreviewGraphRow> Rows, int? EntryPosition = null, int? ActionIndex = null, bool Previewable = false);
+    int? InputPin, IReadOnlyList<PreviewGraphRow> Rows, int? EntryPosition = null, int? ActionIndex = null, bool Previewable = false,
+    string? EntryType = null, IReadOnlyList<string>? AttributeTypes = null);
 
 public sealed record PreviewGraphLink(int Id, int FromNode, int FromPin, int ToNode, int ToPin, string Label);
 
@@ -92,7 +95,8 @@ public sealed class PreviewEffectGraph
             string groups = entry.Groups.Count > 0 ? " · 组 " + string.Join("/", entry.Groups) : "";
             nodes.Add(new(id, PreviewGraphNodeKind.Emitter, $"[{position}] {Name(entry.name, position)}",
                 $"{entry.TypeAttribute?.type.ToString() ?? "无 Type"} · {entry.entryAssignment}{groups}", 1, InputPinOf(id), rows,
-                EntryPosition: position, Previewable: PreviewDocument.KindOf(entry) != null));
+                EntryPosition: position, Previewable: PreviewDocument.KindOf(entry) != null,
+                EntryType: entry.TypeAttribute?.type.ToString(), AttributeTypes: entry.Attributes.Select(a => a.type.ToString()).ToArray()));
             links.Add(new(linkId++, RootId, rootPin, id, InputPinOf(id), ""));
             foreach (var (row, action, label) in triggers)
             {
@@ -147,7 +151,8 @@ public sealed class PreviewEffectGraph
                     if (embedded.Actions.Count > 0)
                         childRows.Add(new($"内嵌文件另有 {embedded.Actions.Count} 个 Action，未展开", PreviewGraphRowRole.Note, null, null));
                     nodes.Add(new(child, PreviewGraphNodeKind.EmbeddedEmitter, $"[{position}] {Name(entry.name, position)}",
-                        $"内嵌 · {entry.TypeAttribute?.type.ToString() ?? "无 Type"} · 属性 {attribute}", 3, InputPinOf(child), childRows, ActionIndex: index));
+                        $"内嵌 · {entry.TypeAttribute?.type.ToString() ?? "无 Type"} · 属性 {attribute}", 3, InputPinOf(child), childRows, ActionIndex: index,
+                        EntryType: entry.TypeAttribute?.type.ToString(), AttributeTypes: entry.Attributes.Select(a => a.type.ToString()).ToArray()));
                     links.Add(new(linkId++, id, rows[row].OutputPin!.Value, child, InputPinOf(child), ""));
                 }
         }

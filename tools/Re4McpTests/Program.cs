@@ -232,6 +232,10 @@ try
     (error, outcome, _) = await Tool("attribute_types");
     var types = outcome["result"]?["types"]?.AsArray().Select(t => t!.GetValue<string>()).ToArray() ?? [];
     Check(!error && types.Contains("Life") && types.Contains("TypeBillboard3D"), "attribute_types lists RE4 attribute types", types.Length);
+    var catalog = outcome["result"]?["catalog"]?["items"]?.AsArray().OfType<JsonObject>().ToDictionary(i => i["type"]!.GetValue<string>(), i => i["status"]!.GetValue<string>()) ?? [];
+    Check(!error && catalog.GetValueOrDefault("Life") == "present" && catalog.GetValueOrDefault("PlayEmitter") == "actionOnly" &&
+        catalog.GetValueOrDefault("TypeMesh") == "secondType" && outcome["result"]?["catalog"]?["entryType"]?.GetValue<string>() == "TypeBillboard3D",
+        "attribute_types reports the catalogue for the current entry", $"{catalog.Count} items, Life={catalog.GetValueOrDefault("Life")}");
 
     int lifeIndex = IndexOf(status0["document"]!.AsObject(), "Life");
     (error, outcome, _) = await Tool("copy_attribute", new JsonObject { ["attributeIndex"] = lifeIndex });

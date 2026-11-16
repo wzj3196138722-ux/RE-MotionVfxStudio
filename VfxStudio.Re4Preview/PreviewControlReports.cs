@@ -34,6 +34,30 @@ internal static class PreviewControlReports
         };
     }
 
+    /// <summary>The attribute catalogue for the current entry: what can be added, with RE4 usage counts.</summary>
+    public static JsonObject Catalog(PreviewEditorState? state)
+    {
+        var existing = (state?.Attributes ?? []).Select(a => a.Type).ToArray();
+        string? entryType = existing.FirstOrDefault(PreviewAttributeCatalog.IsTypeAttribute);
+        var catalog = PreviewAttributeCatalog.Re4;
+        return new JsonObject
+        {
+            ["entryType"] = entryType,
+            ["sameTypeEntries"] = catalog.OwnerCount(entryType),
+            ["corpusFiles"] = catalog.Files,
+            ["items"] = new JsonArray(catalog.For(entryType, existing).Select(i => (JsonNode?)new JsonObject
+            {
+                ["type"] = i.Type,
+                ["category"] = i.Category,
+                ["status"] = JsonNamingPolicy.CamelCase.ConvertName(i.Status.ToString()),
+                ["canAdd"] = i.CanAdd,
+                ["uses"] = i.Uses,
+                ["usual"] = i.Usual,
+                ["base"] = i.Base,
+            }).ToArray()),
+        };
+    }
+
     public static JsonObject Particle(ParticleRecord particle, PreviewEntryState entry, uint uvFlags, PreviewTypeKind kind = PreviewTypeKind.Billboard3D)
     {
         var instance = BillboardInstance.Decode(particle, entry, uvFlags, kind);

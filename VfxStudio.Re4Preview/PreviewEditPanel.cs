@@ -169,6 +169,16 @@ internal sealed class PreviewEditPanel
         ImGui.EndDisabled();
         ImGui.TextWrapped("保存只包含已应用参数；能保存的字段可能尚未参与当前预览渲染。");
         ImGui.TextDisabled("会话目录（悬停查看）");if(ImGui.IsItemHovered()) ImGui.SetTooltip(sessionDirectory);
+        // The whole panel accepts attributes dragged from the catalogue, for the current entry.
+        if(state?.Manifest!=null && state.Attributes is {} attributes)
+        {
+            var existing=attributes.Select(a=>a.Type).ToArray();
+            string? entryType=existing.FirstOrDefault(PreviewAttributeCatalog.IsTypeAttribute);
+            var min=ImGui.GetWindowPos();
+            if(PreviewCatalogPanel.DropTarget(min,min+ImGui.GetWindowSize(),ImGui.GetID("属性目录拖放"),
+                t=>busy?"编辑器忙，稍候再试":stressMode?"压力模式下不能编辑":dirty?"先应用或放弃属性草稿":PreviewCatalogPanel.Refusal(t,entryType,existing)) is {} dropped)
+                command=new("add_attribute",state.Revision,EntryPosition:entryPosition,Body:new(){["type"]=dropped});
+        }
         ImGui.End();return command;
     }
 

@@ -37,7 +37,7 @@ dotnet <仓库>/VfxStudio.Mcp/bin/Release/net8.0/VfxStudio.Mcp.dll --re4-preview
 | `select_entry` | 切换编辑对象（Billboard3D、Polygon 或 Billboard2D entry）；不重载，不改变 tick |
 | `inspect` | 不带参数列属性；带 `attributeIndex` 返回字段、颜色组和曲线（路径、通道、关键帧） |
 | `set_fields` | 一个属性的 1–64 个字段，作为一个修订、一步撤销 |
-| `attribute_types` | 当前 EFX 版本可添加的属性类型名 |
+| `attribute_types` | 当前 EFX 版本可添加的属性类型名；`catalog` 给出当前 entry 的属性目录（能否添加、RE4 同 Type entry 的使用比例，见 RE4-EFX-PREVIEW-CATALOG） |
 | `add_attribute` | 按类型添加一个默认值属性；后台拒绝重复类型、第二个 Type 属性和缺少基础属性的情况 |
 | `remove_attribute` | 删除一个属性；其他属性和分组回读不一致时整笔回滚 |
 | `copy_attribute` | 把一个属性复制到后台的复制缓冲区；缓冲区是快照，`open` 换文档后仍保留 |

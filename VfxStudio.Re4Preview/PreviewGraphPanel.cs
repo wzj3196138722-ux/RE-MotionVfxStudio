@@ -20,6 +20,8 @@ internal sealed class PreviewGraphPanel : IDisposable
     private string? placedDocument;
     private int? focusNode;
     public bool Visible = true;
+    /// <summary>An attribute dropped from the catalogue onto an emitter during the last <see cref="Draw"/>.</summary>
+    public PreviewAddRequest? Dropped { get; private set; }
     /// <summary>ImNodes has no zoom: text is scaled with the window font scale, style sizes with it, and
     /// node positions are rescaled about the mouse when the zoom changes.</summary>
     private float zoom = 1;
@@ -44,6 +46,7 @@ internal sealed class PreviewGraphPanel : IDisposable
     public PreviewGraphPick? Draw(PreviewEffectGraph? graph, string? documentId, string? sourceName,
         int? selectedEntry, int selectedAttribute, string? locked)
     {
+        Dropped = null;
         if (!Visible) return null;
         PreviewGraphPick? pick = null;
         // Right of the property panel (x 850..1260) when the window is wide enough, else along the bottom.
@@ -74,7 +77,7 @@ internal sealed class PreviewGraphPanel : IDisposable
         ImGui.SameLine();
         if (ImGui.SmallButton("100%")) requestedZoom = 1;
         ImGui.SameLine();
-        ImGui.TextDisabled($"{zoom * 100:F0}% · " + (locked ?? "点 item 在属性面板中打开 · 滚轮缩放 · 中键拖动画布"));
+        ImGui.TextDisabled($"{zoom * 100:F0}%% · " + (locked ?? "点 item 在属性面板中打开 · 滚轮缩放 · 中键拖动画布"));
         if (graph.Warnings.Count > 0)
         {
             ImGui.SameLine();
@@ -162,6 +165,24 @@ internal sealed class PreviewGraphPanel : IDisposable
         ImNodes.EndNodeEditor();
         ImNodes.PopStyleVar(5);
         ImGui.PopFont();
+
+        // Catalogue items dropped onto a top-level emitter add the attribute to that entry.
+        if (PreviewCatalogPanel.Dragging != null && placed.Count > 0)
+            foreach (var node in graph.Nodes)
+            {
+                if (!placed.Contains(node.Id) || node.Kind is PreviewGraphNodeKind.Root) continue;
+                var min = ImNodes.GetNodeScreenSpacePos(node.Id);
+                var max = Vector2.Min(min + ImNodes.GetNodeDimensions(node.Id), canvasMin + canvasSize);
+                min = Vector2.Max(min, canvasMin);
+                if (max.X <= min.X || max.Y <= min.Y) continue;
+                var target = node;
+                if (PreviewCatalogPanel.DropTarget(min, max, (uint)node.Id, t =>
+                        target.Kind == PreviewGraphNodeKind.Action ? "Action 的属性还不能在窗口里添加"
+                        : target.Kind == PreviewGraphNodeKind.EmbeddedEmitter ? "Action 内嵌的 entry 还不能在窗口里编辑"
+                        : !target.Previewable ? "预览暂不支持这个 entry 的类型，不能选中编辑"
+                        : locked ?? PreviewCatalogPanel.Refusal(t, target.EntryType, target.AttributeTypes ?? [])) is { } dropped)
+                    Dropped = new PreviewAddRequest(node.EntryPosition!.Value, dropped);
+            }
 
         var io = ImGui.GetIO();
         // Not ImNodes.IsEditorHovered(): after EndNodeEditor it tests the outer window, which is neither

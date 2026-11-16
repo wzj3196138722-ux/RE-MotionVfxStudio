@@ -326,7 +326,45 @@ using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == deadSc
         string.Join("; ", bad.Take(4)) + (holdOk ? "" : " discrete hold differs"));
 }
 
-// 10. Optional: large official files.
+// 10. Attribute catalogue: corpus counts, and its add / refuse verdicts agree with the backend's own
+// EFXEntryBase.AddAttribute for every RE4 attribute type, on a Billboard3D entry and on an entry without Type.
+{
+    var catalog = PreviewAttributeCatalog.Re4;
+    string[] bb = ["TypeBillboard3D", "Transform3D", "ParentOptions", "Life", "Spawn", "PtColor"];
+    var items = catalog.For("TypeBillboard3D", bb).ToDictionary(i => i.Type);
+    Check(catalog.Files > 3000 && catalog.OwnerCount("TypeBillboard3D") > 20000 &&
+          items["UVSequence"] is { Status: PreviewCatalogStatus.Common, Usual: true } && items["Life"].Status == PreviewCatalogStatus.Present &&
+          items["PtColorClip"].Status == PreviewCatalogStatus.Common && items["EmitterColorClip"].Status == PreviewCatalogStatus.MissingBase &&
+          items["TypeMesh"].Status == PreviewCatalogStatus.SecondType && items["PlayEmitter"].Status == PreviewCatalogStatus.ActionOnly &&
+          items["MeshEmitter"].Status == PreviewCatalogStatus.Unseen && items["FakeDoF"].Status == PreviewCatalogStatus.Unused &&
+          items["TypePolygonTrailExpression"].Status == PreviewCatalogStatus.NotCreatable,
+        "catalogue statuses for a Billboard3D entry: " + string.Join(", ", new[] { "UVSequence", "Life", "PtColorClip", "EmitterColorClip", "TypeMesh", "PlayEmitter", "MeshEmitter", "FakeDoF", "TypePolygonTrailExpression" }.Select(t => $"{t} {items[t].Status}")),
+        $"files {catalog.Files}, BB3D {catalog.OwnerCount("TypeBillboard3D")}, UVSequence {items["UVSequence"].Uses}/{items["UVSequence"].OwnerCount}");
+    var noType = catalog.For(null, ["UnitCulling"]).ToDictionary(i => i.Type);
+    Check(noType["TypeBillboard3D"] is { Status: PreviewCatalogStatus.Common, Uses: > 20000 } && noType["EmitterPriority"].Status == PreviewCatalogStatus.Common,
+        "an entry without Type is offered Type attributes, ranked by how many entries use them", noType["TypeBillboard3D"].Uses);
+    var uncategorised = catalog.Types.Where(t => PreviewAttributeCatalog.CategoryOf(t) == "其他").ToArray();
+    Check(uncategorised.All(t => t.StartsWith("Unknown", StringComparison.Ordinal)), "every named attribute type has a category", string.Join(", ", uncategorised));
+
+    var disagreements = new List<string>();
+    foreach (var (entryType, existing) in new[] { ("TypeBillboard3D", bb), ((string?)null, new[] { "UnitCulling" }) })
+        foreach (var item in catalog.For(entryType, existing))
+        {
+            if (item.Status == PreviewCatalogStatus.NotCreatable)
+            {
+                if (ReeLib.Efx.EfxAttributeTypeRemapper.Create(Enum.Parse<ReeLib.Efx.EfxAttributeType>(item.Type), ReeLib.Efx.EfxVersion.RE4) != null)
+                    disagreements.Add(item.Type + ": catalogue says not creatable");
+                continue;
+            }
+            var entry = new ReeLib.Efx.EFXEntry { Version = ReeLib.Efx.EfxVersion.RE4 };
+            foreach (var name in existing) entry.AddAttribute(Enum.Parse<ReeLib.Efx.EfxAttributeType>(name));
+            bool accepted = entry.AddAttribute(ReeLib.Efx.EFXAttribute.Create(ReeLib.Efx.EfxVersion.RE4, Enum.Parse<ReeLib.Efx.EfxAttributeType>(item.Type)));
+            if (accepted != item.CanAdd) disagreements.Add($"{entryType ?? "no Type"}/{item.Type}: catalogue {item.Status}, backend {(accepted ? "accepts" : "refuses")}");
+        }
+    Check(disagreements.Count == 0, "catalogue verdicts match EFXEntryBase.AddAttribute for every attribute type", string.Join("; ", disagreements.Take(6)));
+}
+
+// 11. Optional: large official files.
 if (args.Contains("--corpus"))
 {
     var corpus = new[]

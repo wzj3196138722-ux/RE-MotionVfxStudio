@@ -69,6 +69,9 @@ if(idleBenchmark!=null && (latencyBenchmark!=null || options.ContainsKey("benchm
 var editPanel = new PreviewEditPanel();
 PreviewGraphPanel? graphPanel = null;
 var curvePanel = new PreviewCurvePanel();
+var catalogPanel = new PreviewCatalogPanel();
+string? addedAttributeType = null;   // the type the window's last add_attribute added, to open it afterwards
+bool dockCatalog = false;            // a saved layout from before the catalogue existed: dock it once next to the main panel
 // A file dropped on the window: waiting (pendingOpen), or waiting for the user to discard unsaved edits (dropConfirm).
 string? pendingOpen = null, dropConfirm = null;
 bool dropDiscardAccepted = false;
@@ -260,6 +263,25 @@ async Task<PreviewEditorState> SendCurveKey(PreviewEditCommand command)
     try { return (await editor.SendRawAsync("curve_key",command.Body!,command.Revision)).State; }
     catch(PreviewBackendException ex) { throw new InvalidOperationException("曲线修改失败："+ex.Message); }
 }
+async Task<PreviewEditorState> AddAttribute(PreviewEditCommand command)
+{
+    string type=command.Body!["type"]!.GetValue<string>();
+    try
+    {
+        // Another entry (dropped on its node in the graph) becomes the edited one first, so the new
+        // attribute opens in the property panel.
+        if(editor.State?.Manifest?.EntryPosition!=command.EntryPosition) await editor.SelectEntryAsync(command.EntryPosition);
+        var body=new JsonObject{["target"]=new JsonObject{["kind"]="entry",["index"]=command.EntryPosition},["type"]=type};
+        return (await editor.SendRawAsync("add_attribute",body,editor.State?.Revision??command.Revision)).State;
+    }
+    catch(PreviewBackendException ex) { throw new InvalidOperationException($"添加 {type} 失败："+ex.Message); }
+}
+void RequestAdd(PreviewAddRequest request)
+{
+    if(editorState==null || editTask!=null || editPanel.HasUnappliedChanges || stress!=0) return;
+    addedAttributeType=request.Type;
+    StartEditorCommand(new PreviewEditCommand("add_attribute",editorState.Revision,EntryPosition:request.EntryPosition,Body:new JsonObject{["type"]=request.Type}));
+}
 void StartEditorCommand(PreviewEditCommand command, bool warmup=false)
 {
     if(editTask!=null) return;
@@ -275,6 +297,7 @@ void StartEditorCommand(PreviewEditCommand command, bool warmup=false)
         "open_saved" => editor.OpenSavedAsync(),
         "select_entry" => editor.SelectEntryAsync(command.EntryPosition),
         "curve_key" => SendCurveKey(command),
+        "add_attribute" => AddAttribute(command),
         "open_source" => OpenOriginal(),
         _ => editor.CommandAsync(command.Action,command.SavePath)
     });
@@ -632,7 +655,8 @@ void ContinueControl(PreviewControlRequest job)
             }
             else if(job.Action=="save_copy") job.Succeed(new JsonObject{["savedPath"]=state.SavedPath,["document"]=PreviewControlReports.Document(state)});
             else if(job.Action=="attribute_types")
-                job.Succeed(new JsonObject{["types"]=job.BackendReply?["document"]?["attributeTypes"]?.DeepClone()??new JsonArray(),["document"]=PreviewControlReports.Document(state)});
+                job.Succeed(new JsonObject{["types"]=job.BackendReply?["document"]?["attributeTypes"]?.DeepClone()??new JsonArray(),
+                    ["catalog"]=PreviewControlReports.Catalog(state),["document"]=PreviewControlReports.Document(state)});
             else if(job.Action=="copy_attribute")
                 job.Succeed(new JsonObject{["copyBuffer"]=job.BackendReply?["copyBuffer"]?.DeepClone(),["document"]=PreviewControlReports.Document(state)});
             else job.Phase=4;
@@ -794,9 +818,10 @@ void DrawEntrySelector()
     ImGui.Checkbox("只显示所选 entry",ref soloSelected);
     if(graphPanel!=null) {ImGui.SameLine();ImGui.Checkbox("节点图",ref graphPanel.Visible);}
     ImGui.SameLine();ImGui.Checkbox("曲线时间轴",ref curvePanel.Visible);
+    ImGui.SameLine();ImGui.Checkbox("属性目录",ref catalogPanel.Visible);
     if(docking)
     {
-        if(ImGui.SmallButton("重置布局")) {resetLayout=true;curvePanel.Visible=true;if(graphPanel!=null) graphPanel.Visible=true;}
+        if(ImGui.SmallButton("重置布局")) {resetLayout=true;curvePanel.Visible=true;catalogPanel.Visible=true;if(graphPanel!=null) graphPanel.Visible=true;}
         if(ImGui.IsItemHovered()) ImGui.SetTooltip("面板可拖到窗口四边停靠，拖动标题栏离开即可浮动；这里恢复默认停靠布局。");
     }
     ImGui.TextDisabled("把 .efx 文件拖进窗口即可打开");
@@ -822,6 +847,7 @@ window.Load += () =>
         io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
         Directory.CreateDirectory(Path.GetDirectoryName(layoutFile)!);
         resetLayout=!File.Exists(layoutFile);
+        dockCatalog=!resetLayout && !File.ReadAllText(layoutFile).Contains("[Window][属性目录]");
         // ImGui keeps the pointer: allocated once for the window's lifetime.
         layoutFileName=System.Runtime.InteropServices.Marshal.StringToCoTaskMemUTF8(layoutFile);
         io.IniFilename=(byte*)layoutFileName;
@@ -863,7 +889,11 @@ window.Update += dt =>
             if(editAction is "billboard" or "life" or "fields" or "undo" or "redo" or "publish_offline_preview") latency?.Responded(editorState);
             // AI edits ("ai:*") never discard the panel's draft; mutations are refused while one exists.
             // Structural edits shift attribute indices, so the panel starts over on the new list.
-            if(editAction is "ai:add_attribute" or "ai:remove_attribute" or "ai:paste_attribute") editPanel=new PreviewEditPanel();
+            if(editAction is "ai:add_attribute" or "ai:remove_attribute" or "ai:paste_attribute" or "add_attribute") editPanel=new PreviewEditPanel();
+            // An attribute added from the catalogue opens in the property panel.
+            if(editAction=="add_attribute" && editorState.Manifest is {} added &&
+                editorState.Attributes?.FirstOrDefault(a=>a.Type==addedAttributeType) is {} addedAttribute)
+                editPanel.Focus(new PreviewGraphPick(added.EntryPosition,addedAttribute.Index));
             editPanel.Reset(editorState,discardDraft:editAction is "fields" or "billboard" or "life" or "open" or "open_source" or "open_saved" or "ai:open" or "curve_key");
             if(editorState.Manifest is { } manifest && manifest.Revision==editorState.Revision)
                 QueuePreview(manifest,editAction switch { "open" or "open_source" or "ai:open" => false, "open_saved" => true, _ => (bool?)null },force:editAction is "publish_offline_preview" or "open_source",restart:editAction is "open" or "open_source" or "open_saved" or "ai:open");
@@ -1016,20 +1046,30 @@ unsafe void UpdateDockspace()
     if(resetLayout)
     {
         resetLayout=false;
-        // Default: main panel left, property panel right, node graph and curve timeline along the bottom.
+        // Default: main panel left above the attribute catalogue, property panel right, node graph and curve
+        // timeline along the bottom.
         ImGuiP.DockBuilderRemoveNode(dockspace);
         ImGuiP.DockBuilderAddNode(dockspace,(ImGuiDockNodeFlags)(1<<10)|ImGuiDockNodeFlags.PassthruCentralNode);   // 1<<10 = DockSpace
         ImGuiP.DockBuilderSetNodeSize(dockspace,viewport.Size);
-        uint left,rest,right,center,bottom,middle,bottomLeft,bottomRight;
+        uint left,rest,right,center,bottom,middle,bottomLeft,bottomRight,leftTop,leftBottom;
         ImGuiP.DockBuilderSplitNode(dockspace,ImGuiDir.Left,.24f,&left,&rest);
+        ImGuiP.DockBuilderSplitNode(left,ImGuiDir.Down,.45f,&leftBottom,&leftTop);
         ImGuiP.DockBuilderSplitNode(rest,ImGuiDir.Right,.34f,&right,&center);
         ImGuiP.DockBuilderSplitNode(center,ImGuiDir.Down,.36f,&bottom,&middle);
         ImGuiP.DockBuilderSplitNode(bottom,ImGuiDir.Left,.5f,&bottomLeft,&bottomRight);
-        ImGuiP.DockBuilderDockWindow("RE4 原生预览 · P2",left);
+        ImGuiP.DockBuilderDockWindow("RE4 原生预览 · P2",leftTop);
+        ImGuiP.DockBuilderDockWindow("属性目录",leftBottom);
         ImGuiP.DockBuilderDockWindow("EFX 属性编辑",right);
         ImGuiP.DockBuilderDockWindow("EFX 节点图",bottomLeft);
         ImGuiP.DockBuilderDockWindow("曲线时间轴",bottomRight);
         ImGuiP.DockBuilderFinish(dockspace);
+        dockCatalog=false;
+    }
+    else if(dockCatalog && ImGuiP.FindWindowByName("RE4 原生预览 · P2") is {IsNull:false} main && main.DockId!=0)
+    {
+        // Same tab bar as the main panel; dragging it elsewhere is saved as usual.
+        ImGuiP.DockBuilderDockWindow("属性目录",main.DockId);
+        dockCatalog=false;
     }
     ImGui.DockSpaceOverViewport(dockspace,viewport,ImGuiDockNodeFlags.PassthruCentralNode);
     // The scene fills the central node (what docked panels leave free), in framebuffer pixels.
@@ -1202,7 +1242,8 @@ window.Render += _ =>
     ImGui.End();
     HandleDroppedFile();
     var editCommand=editPanel.Draw(editorState,displayedManifest,editTask!=null,stress!=0,editor.Directory,editError);
-    if(editCommand!=null) StartEditorCommand(editCommand);
+    if(editCommand is {Action:"add_attribute"} dropOnPanel) RequestAdd(new PreviewAddRequest(dropOnPanel.EntryPosition,dropOnPanel.Body!["type"]!.GetValue<string>()));
+    else if(editCommand!=null) StartEditorCommand(editCommand);
     string? graphLock=editTask!=null?"编辑器忙，稍候再选":editPanel.HasUnappliedChanges?"先应用或放弃属性草稿，再从节点图选择":stress!=0?"压力模式下不能编辑":null;
     var manifest=editorState?.Manifest;
     var inspected=editorState?.Inspection;
@@ -1217,6 +1258,12 @@ window.Render += _ =>
     if(graphPanel?.Draw(scene?.Graph,manifest?.DocumentId,manifest==null?null:Path.GetFileName(manifest.Source),manifest?.EntryPosition,
         editPanel.SelectedAttribute,graphLock) is {} pick && editorState!=null && editPanel.Focus(pick) && pick.EntryPosition!=manifest?.EntryPosition)
         StartEditorCommand(new PreviewEditCommand("select_entry",editorState.Revision,EntryPosition:pick.EntryPosition));
+    if(graphPanel?.Dropped is {} dropOnGraph) RequestAdd(dropOnGraph);
+    var catalogTypes=manifest==null?null:editorState?.Attributes?.Select(a=>a.Type).ToArray();
+    string? addLock=editTask!=null?"编辑器忙，稍候再添加":editPanel.HasUnappliedChanges?"先应用或放弃属性草稿，再添加属性":stress!=0?"压力模式下不能编辑":null;
+    if(catalogPanel.Draw(manifest?.EntryPosition,manifest==null?null:scene?.Entries.FirstOrDefault(e=>e.Position==manifest.EntryPosition)?.Name,
+        catalogTypes?.FirstOrDefault(PreviewAttributeCatalog.IsTypeAttribute),catalogTypes,addLock) is {} doubleClicked)
+        RequestAdd(doubleClicked);
     gl.Viewport(0,0,(uint)Math.Max(1,window.FramebufferSize.X),(uint)Math.Max(1,window.FramebufferSize.Y));   // the scene left it at the central node
     gui.Render();
     if(frame!=null && displayedManifest!=null && sceneRendered)
