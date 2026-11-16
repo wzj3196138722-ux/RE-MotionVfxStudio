@@ -27,7 +27,9 @@ public sealed record PreviewEntryState(int Index, uint Flags16c, uint Flags174, 
         StripPoints.Span.Slice(slot * StripPointsPerParticle * FrameDecoder.PointStride, StripPointsPerParticle * FrameDecoder.PointStride);
     /// <summary>Where Polygon3DConstant starts in the type block: +0x54 for Billboard3D (builder 3d18580,
     /// uploader 3e0ebe0), +0x58 for Polygon. Billboard2D does not hold this layout (-1).</summary>
-    public int ConstantOffset => Type switch { 23 => 0x54, 63 => 0x58, 31 or 32 => 0x50, _ => -1 };
+    /// <summary>Polygon3DConstant in the type block: located by the file's ColorRate (block + offset + 0x10c)
+    /// and the blend / TextureFilter words next to it.</summary>
+    public int ConstantOffset => Type switch { 23 => 0x54, 63 => 0x58, 31 or 32 or 34 => 0x50, 70 => 0x48, _ => -1 };
     public int Blend => ConstantOffset < 0 ? -1 : (int)((FrameDecoder.U32(TypeBlock,ConstantOffset+0x44) >> 11) & 15);
     public float ColorRate => ConstantOffset < 0 ? float.NaN : FrameDecoder.F32(TypeBlock,ConstantOffset+0x10c);
 }

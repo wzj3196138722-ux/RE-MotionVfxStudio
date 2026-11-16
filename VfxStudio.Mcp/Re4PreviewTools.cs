@@ -91,6 +91,7 @@ internal sealed class Re4PreviewToolSet : IToolSet
                 ["distance"] = Number("Camera distance.", 0.3, 25), ["yaw"] = Number("Yaw in radians.", -100, 100), ["pitch"] = Number("Pitch in radians.", -1.5707963, 1.5707963),
                 ["exposure"] = Number("Exposure.", 0.1, 5), ["bloom"] = Number("Bloom intensity.", 0, 2),
                 ["showPoints"] = Boolean("Draw particle points instead of billboards."),
+                ["demoMotion"] = Boolean("Swing the emitter (1 m arm, +-60 degrees, once per second) so PolygonTrail sweeps form; reloads the document."),
                 ["soloSelected"] = Boolean("Draw only the selected entry."),
                 ["quality"] = Choice("Particle render resolution.", "auto", "full", "half", "quarter") }, [], false, true),
         Define("composition", "Read or change the colour-chain switches (RENDER-HOST 6.9): fades, AlphaCorrection, Rgb layers, soft particles, depth bias, detonemap, header AlphaRate, entry sorting, in-entry depth sorting, Physical gain, TextureFilter, TexelChannelOperator, FrameBlend, the preview light for lit particles, and the blend factors per BlendType 0-4. Omitted values stay unchanged. The result also lists the last draw order (entry positions).",

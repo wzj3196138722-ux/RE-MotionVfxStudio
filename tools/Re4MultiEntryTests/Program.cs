@@ -215,7 +215,86 @@ using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == muzzle
         $"{samples} samples, weight {minW:F3}..{maxW:F3}; {firstBad}");
 }
 
-// 8. Optional: large official files.
+// 8. RibbonFixEnd and PolygonTrail from the engine's own points.
+{
+    string fixEndFile = Path.Combine(stm, @"_anotherorder\vfx\effecteditor\efd_character\efd_ao_chd3\efd_0015_ao_chd3_fall_to_water_0000.efx.3539837");
+    var fx = await PreviewSceneLoader.LoadAsync(client, fixEndFile, resources, new Dictionary<int, string>());
+    var fixTables = Enumerable.Range(0, fx.Shown.Count).Where(t => fx.Shown[t].Document!.Kind == PreviewTypeKind.RibbonFixEnd).ToArray();
+    int strips = 0, full = 0; bool layout = true; float worstHead = 0; string? problem = null;
+    var previous = new Dictionary<(int, int), System.Numerics.Vector3>();
+    for (int tick = 1; tick <= 60 && fixTables.Length > 0; tick++)
+    {
+        using var f = await client.FrameAsync(tick);
+        foreach (int t in fixTables)
+        {
+            var st = f.EntryStates![t]; int per = fx.Shown[t].Document!.RibbonPointsPerParticle;
+            for (int i = st.First; i < st.First + st.Count; i++)
+            {
+                var p = f.Particles[i]; int valid = st.ValidPoints(p.Slot);
+                var pts = st.PointsOf(p.Slot).ToArray();
+                var head = new System.Numerics.Vector3(FrameDecoder.F32(pts, 0), FrameDecoder.F32(pts, 4), FrameDecoder.F32(pts, 8));
+                bool ok = valid >= 1 && valid <= per && float.IsFinite(head.X + head.Y + head.Z) && FrameDecoder.F32(pts, 0x40) == 0;
+                if (valid == per && per >= 2)
+                {
+                    // V is the normalised length along the strip: defined only once the two ends separate.
+                    int tail = (per - 1) * FrameDecoder.PointStride;
+                    var end = new System.Numerics.Vector3(FrameDecoder.F32(pts, tail), FrameDecoder.F32(pts, tail + 4), FrameDecoder.F32(pts, tail + 8));
+                    if (System.Numerics.Vector3.Distance(head, end) > 1e-3f) { full++; ok &= MathF.Abs(FrameDecoder.F32(pts, tail + 0x40) - 1) < 1e-4f; }
+                }
+                if (previous.TryGetValue((t, p.Slot), out var before))
+                    worstHead = MathF.Max(worstHead, MathF.Min(System.Numerics.Vector3.Distance(head, before), System.Numerics.Vector3.Distance(head, p.Position)));
+                previous[(t, p.Slot)] = p.Position;
+                if (!ok) { layout = false; problem ??= $"tick {tick} slot {p.Slot}: valid {valid}/{per} head {head} V0 {FrameDecoder.F32(pts, 0x40)}"; }
+                strips++;
+            }
+        }
+    }
+    Check(fixTables.Length > 0 && strips > 20 && full > 0 && layout && worstHead < 1e-3f,
+        $"RibbonFixEnd: {fixTables.Length} entries, valid count 1..N, head V 0 on the particle, tail V 1 when full",
+        $"{strips} strips, {full} full, head distance {worstHead:G3}; {problem}");
+
+    // PolygonTrail follows a bone in the game: swing the emitter so the sweep forms.
+    string trailFile = Path.Combine(stm, @"_chainsaw\vfx\effecteditor\efd_character\efd_chf4\efd_0015_chf4_attack_0000_strike_near_l_vera_0000.efx.3539837");
+    client.WorldTrack = PreviewMotion.Swing(PreviewPlaybackController.LastTick);
+    try
+    {
+        var tr = await PreviewSceneLoader.LoadAsync(client, trailFile, resources, new Dictionary<int, string>());
+        var trailTables = Enumerable.Range(0, tr.Shown.Count).Where(t => tr.Shown[t].Document!.Kind == PreviewTypeKind.PolygonTrail).ToArray();
+        int sheets = 0, maxColumns = 0; bool sheetOk = true; float worstBase = 0, lengthSpread = 0; string? sheetProblem = null;
+        for (int tick = 1; tick <= 30 && trailTables.Length > 0; tick++)
+        {
+            using var f = await client.FrameAsync(tick);
+            foreach (int t in trailTables)
+            {
+                var st = f.EntryStates![t];
+                for (int i = st.First; i < st.First + st.Count; i++)
+                {
+                    var p = f.Particles[i]; int valid = st.ValidPoints(p.Slot);
+                    if (valid < 2) continue;
+                    var pts = st.PointsOf(p.Slot).ToArray();
+                    System.Numerics.Vector3 At(int c, int o) => new(FrameDecoder.F32(pts, c * FrameDecoder.PointStride + o), FrameDecoder.F32(pts, c * FrameDecoder.PointStride + o + 4), FrameDecoder.F32(pts, c * FrameDecoder.PointStride + o + 8));
+                    float minLen = float.MaxValue, maxLen = 0;
+                    for (int c = 0; c < valid; c++)
+                    {
+                        var b = At(c, 0); var tip = At(c, 0x18); float len = System.Numerics.Vector3.Distance(b, tip);
+                        if (!float.IsFinite(len)) { sheetOk = false; sheetProblem ??= $"tick {tick} column {c} not finite"; }
+                        minLen = MathF.Min(minLen, len); maxLen = MathF.Max(maxLen, len);
+                    }
+                    lengthSpread = MathF.Max(lengthSpread, (maxLen - minLen) / MathF.Max(maxLen, 1e-6f));
+                    worstBase = MathF.Max(worstBase, System.Numerics.Vector3.Distance(At(0, 0), p.Position));
+                    maxColumns = Math.Max(maxColumns, valid);
+                    sheets++;
+                }
+            }
+        }
+        Check(trailTables.Length > 0 && sheets > 10 && maxColumns > 20 && sheetOk && worstBase < 1e-3f && lengthSpread < 1e-3f,
+            $"PolygonTrail (swinging emitter): sheet columns from the engine's vertex grid, head column on the particle, equal segment length",
+            $"{sheets} sheets, up to {maxColumns} columns, head distance {worstBase:G3}, length spread {lengthSpread:G3}; {sheetProblem}");
+    }
+    finally { client.WorldTrack = null; }
+}
+
+// 9. Optional: large official files.
 if (args.Contains("--corpus"))
 {
     var corpus = new[]

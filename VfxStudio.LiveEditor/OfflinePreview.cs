@@ -37,7 +37,8 @@ internal sealed partial class EditorEngine
 
     /// <summary>Type attributes the offline preview draws.</summary>
     private static bool Previewable(EFXEntry entry) =>
-        entry.TypeAttribute is EFXAttributeTypeBillboard3D or EFXAttributeTypePolygon or EFXAttributeTypeBillboard2D or EFXAttributeTypeRibbonFollow or EFXAttributeTypeRibbonLength;
+        entry.TypeAttribute is EFXAttributeTypeBillboard3D or EFXAttributeTypePolygon or EFXAttributeTypeBillboard2D or EFXAttributeTypeRibbonFollow or EFXAttributeTypeRibbonLength
+            or EFXAttributeTypePolygonTrail || entry.TypeAttribute is EFXAttributeTypeRibbonFixEnd { ShapeDivision: >= 2 };
 
     private void AttachOfflinePreview(JsonObject response, bool force)
     {

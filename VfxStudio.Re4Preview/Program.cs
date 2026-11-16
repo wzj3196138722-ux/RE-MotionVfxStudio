@@ -105,6 +105,14 @@ int quality=options.GetValueOrDefault("quality","auto") switch { "full"=>1,"half
 int particleDivisor=1;
 uint presentFbo=0;
 bool showPoints=false;
+bool demoMotion=false;
+void SetDemoMotion(bool on)
+{
+    if(demoMotion==on) return;
+    demoMotion=on;
+    client.WorldTrack=on ? PreviewMotion.Swing(PreviewPlaybackController.LastTick) : null;
+    Reload();   // the worker applies the matrix track on the next load
+}
 float exposure=1f, bloomIntensity=.8f;
 var benchmarkClock=new Stopwatch();
 var intervals=new List<double>();
@@ -293,7 +301,7 @@ JsonObject CompositionReport() => new()
 JsonObject ViewReport() => new()
 {
     ["target"]=PreviewControlReports.Vector(camera.Target),["yaw"]=camera.Yaw,["pitch"]=camera.Pitch,["distance"]=camera.Distance,
-    ["exposure"]=exposure,["bloom"]=bloomIntensity,["showPoints"]=showPoints,["soloSelected"]=soloSelected,
+    ["exposure"]=exposure,["bloom"]=bloomIntensity,["showPoints"]=showPoints,["soloSelected"]=soloSelected,["demoMotion"]=demoMotion,
     ["quality"]=quality switch {1=>"full",2=>"half",3=>"quarter",_=>"auto"},["particleDivisor"]=particleDivisor
 };
 JsonObject StatusReport() => new()
@@ -421,6 +429,7 @@ void BeginControl(PreviewControlRequest job)
             if(PreviewControlReports.Float(a,"bloom",0,2) is float b) bloomIntensity=b;
             if(a["showPoints"]!=null) showPoints=PreviewControlReports.Bool(a,"showPoints");
             if(a["soloSelected"]!=null) soloSelected=PreviewControlReports.Bool(a,"soloSelected");
+            if(a["demoMotion"]!=null) SetDemoMotion(PreviewControlReports.Bool(a,"demoMotion"));
             if(PreviewControlReports.String(a,"quality") is {} q)
                 quality=q switch {"auto"=>0,"full"=>1,"half"=>2,"quarter"=>3,_=>throw new ArgumentException("quality 应为 auto、full、half 或 quarter。")};
             job.Succeed(ViewReport()); return;
@@ -1067,6 +1076,11 @@ window.Render += _ =>
     }
     ImGui.EndDisabled();
     ImGui.Checkbox("粒子点对照",ref showPoints);
+    bool motion=demoMotion;
+    if(ImGui.Checkbox("演示运动（发射器摆动）",ref motion)) SetDemoMotion(motion);
+    if(ImGui.IsItemHovered()) ImGui.SetTooltip("发射器绕竖直轴摆动（1 m 臂长、±60°、每秒一次）。PolygonTrail 在游戏里跟随骨骼挥动，发射器静止时不会形成拖尾。");
+    if(!demoMotion && scene?.Shown.Any(e=>e.Document?.Kind==PreviewTypeKind.PolygonTrail)==true)
+        ImGui.TextColored(new Vector4(1,.75f,.35f,1),"有 PolygonTrail：勾选演示运动才会形成拖尾。");
     ImGui.Combo("粒子精度",ref quality,"自动\0完整\0一半\0四分之一\0");
     ImGui.Text($"当前粒子分辨率：1/{particleDivisor}");
     ImGui.SliderFloat("曝光",ref exposure,.1f,5f);

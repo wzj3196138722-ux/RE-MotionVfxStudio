@@ -21,11 +21,15 @@ ENTRY_SIZE = 160
 STRIDE = 0x140
 VERSION = 3
 # Drawable Type attribute -> companion attributes allowed with it (Expression / Clip).
-DRAWABLE = {21: {22}, 23: {24}, 63: {64, 65}, 31: set(), 32: {58}}
-# Ribbon types whose engine point pool is exported (RibbonFollow 31, RibbonLength 32): type block +0x38 -> points (0x54 bytes each,
-# slot * points-per-particle), +0x40 -> per-particle state records (0x68 bytes; +0x18 valid points).
-RIBBON_POOLS = {31, 32}
-POINT_STRIDE, RIBBON_STATE_STRIDE = 0x54, 0x68
+DRAWABLE = {21: {22}, 23: {24}, 63: {64, 65}, 31: set(), 32: {58}, 34: {60}, 70: set()}
+# Ribbon types whose engine points are exported, all as slot * points-per-particle records of 0x54 bytes plus
+# 0x68-byte state records whose +0x18 holds the valid point count:
+# - RibbonFollow 31, RibbonLength 32: type block +0x38 points, +0x40 states (0x68 bytes) copied as they are.
+# - RibbonFixEnd 34: +0x40 states are 0x70 bytes (+0x08 point pointer, +0x18 live count); re-packed.
+# - PolygonTrail 70: built from the engine's vertex grid (see trail_columns).
+RIBBON_POOLS = {31, 32, 34, 70}
+POINT_STRIDE, RIBBON_STATE_STRIDE, FIXEND_STATE_STRIDE = 0x54, 0x68, 0x70
+TRAIL_VERTEX_STRIDE = 48
 IDENTITY = (1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.)
 
 
@@ -150,7 +154,7 @@ class Host:
                 types = [a['type'] for a in entry.attrs if 21 <= a['type'] <= 76]
                 primary = [t for t in types if t in DRAWABLE]
                 if len(primary) != 1 or not set(types) <= {primary[0]} | DRAWABLE[primary[0]]:
-                    raise ValueError(f'requires one of Billboard2D (21), Billboard3D (23), Polygon (63) with its companions; found {types}')
+                    raise ValueError(f'requires one drawable Type attribute (Billboard2D, Billboard3D, Polygon, RibbonFollow, RibbonLength, RibbonFixEnd, PolygonTrail) with its companions; found {types}')
                 type_id = primary[0]
                 spawn = next(a for a in entry.attrs if a['type'] == 16)
                 capacity = rn.u32(spawn['attr'] + 0x28)
@@ -172,6 +176,13 @@ class Host:
                     per = int(spec.get('ribbon_points', 0))
                     if not 2 <= per <= 1000 * 1000:
                         raise ValueError('ribbon entries need ribbon_points (points per particle)')
+                    if type_id == 70:
+                        # PolygonTrail: type block +0x308 = vertex grid, +0x310 vertices per particle (the column count
+                        # at +0x33c is written only by the first update, so the file's column count is used).
+                        vertices = rn.u32(e.block_of(70) + 0x310)
+                        if vertices % per or vertices // per < 2:
+                            raise ValueError(f'PolygonTrail grid of {vertices} vertices does not split into {per} columns')
+                        meta.update(trail_vertices=vertices)
                     meta.update(strip=data_offset, strip_bytes=n * per * POINT_STRIDE, strip_points=per)
                     data_offset += meta['strip_bytes']
                     meta.update(strip_state=data_offset, strip_state_bytes=n * RIBBON_STATE_STRIDE)
@@ -229,6 +240,51 @@ class Host:
             worlds = [struct.unpack_from('<16f', self.mapping, self.input_offset + self.track_capacity * 4 + i * 64) for i in range(n)]
         self.set_track(dts, worlds)
         return dict(length=n)
+
+    @staticmethod
+    def fixend_points(block, meta, out):
+        # RibbonFixEnd: state +0x08 -> that particle's points, +0x18 live count c (1 at spawn, capped at N).
+        n, per = meta['capacity'], meta['strip_points']
+        ctypes.memset(out + meta['strip_state'], 0, meta['strip_state_bytes'])
+        states = rn.u64(block + 0x40)
+        if not states:
+            return
+        for i in range(n):
+            st = states + FIXEND_STATE_STRIDE * i
+            ptr, count = rn.u64(st + 8), rn.u32(st + 0x18)
+            if not ptr:
+                continue
+            ctypes.memmove(out + meta['strip'] + i * per * POINT_STRIDE, ptr, per * POINT_STRIDE)
+            struct.pack_into('<I', (ctypes.c_char * 4).from_address(out + meta['strip_state'] + i * RIBBON_STATE_STRIDE + 0x18), 0, min(count, per))
+
+    @staticmethod
+    def trail_columns(block, meta, out):
+        # PolygonTrail: the engine's vertex grid (+0x308, slot * vertices, column-major with `rows` vertices per
+        # column; vertex +0x00 world position, +0x0c row / (rows-1), +0x10 U along the trail, +0x14 RGBA8).
+        # Rows between the first and the last are linear (RUNTIME 4.3.9), so each column is exported as one point
+        # record: +0x00 base (row 0), +0x18 tip (last row), +0x40 U, +0x44 colour, +0x48 = 1. The live column
+        # count is not stored per particle; the last live column is the first with U = 1.0.
+        n, columns, vertices = meta['capacity'], meta['strip_points'], meta['trail_vertices']
+        rows = vertices // columns
+        grid = rn.u64(block + 0x308)
+        ctypes.memset(out + meta['strip_state'], 0, meta['strip_state_bytes'])
+        if not grid:
+            return
+        points = (ctypes.c_char * meta['strip_bytes']).from_address(out + meta['strip'])
+        states = (ctypes.c_char * meta['strip_state_bytes']).from_address(out + meta['strip_state'])
+        for i in range(n):
+            raw = ctypes.string_at(grid + i * vertices * TRAIL_VERTEX_STRIDE, vertices * TRAIL_VERTEX_STRIDE)
+            live = 0
+            for c in range(columns):
+                b, t = c * rows * TRAIL_VERTEX_STRIDE, (c * rows + rows - 1) * TRAIL_VERTEX_STRIDE
+                at = (i * columns + c) * POINT_STRIDE
+                u = struct.unpack_from('<f', raw, b + 0x10)[0]
+                points[at:at + 12] = raw[b:b + 12]
+                points[at + 0x18:at + 0x24] = raw[t:t + 12]
+                struct.pack_into('<fIf', points, at + 0x40, u, struct.unpack_from('<I', raw, b + 0x14)[0], 1.0)
+                if u == 1.0 and not live:
+                    live = c + 1
+            struct.pack_into('<I', states, i * RIBBON_STATE_STRIDE + 0x18, live if live >= 2 else 0)
 
     def frame(self, cmd):
         self.active_entry = None
@@ -294,12 +350,17 @@ class Host:
                              meta['strip_points'], meta['strip_state'], meta['strip_state_bytes'],
                              RIBBON_STATE_STRIDE if meta['strip_state_bytes'] else 0, 0)
             if meta['strip_bytes']:
-                points, states = rn.u64(block + 0x38), rn.u64(block + 0x40)
-                if points and states:
-                    ctypes.memmove(address + base + meta['strip'], points, meta['strip_bytes'])
-                    ctypes.memmove(address + base + meta['strip_state'], states, meta['strip_state_bytes'])
+                if meta['type'] == 70:
+                    self.trail_columns(block, meta, address + base)
+                elif meta['type'] == 34:
+                    self.fixend_points(block, meta, address + base)
                 else:
-                    ctypes.memset(address + base + meta['strip_state'], 0, meta['strip_state_bytes'])
+                    points, states = rn.u64(block + 0x38), rn.u64(block + 0x40)
+                    if points and states:
+                        ctypes.memmove(address + base + meta['strip'], points, meta['strip_bytes'])
+                        ctypes.memmove(address + base + meta['strip_state'], states, meta['strip_state_bytes'])
+                    else:
+                        ctypes.memset(address + base + meta['strip_state'], 0, meta['strip_state_bytes'])
             if cmd.get('diagnostics'):
                 raw = self.mapping[base + meta['particles']:base + meta['particles'] + meta['particle_bytes']]
                 hashes.append(hashlib.sha256(raw).hexdigest())

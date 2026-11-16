@@ -10,7 +10,7 @@ namespace VfxStudio.Re4Render;
 public sealed record PreviewTexture(string Path, string Source, byte[] Bytes);
 public sealed record UvFrame(Vector4 Rect, int Texture);
 /// <summary>Drawable Type attributes. The value is the vertex shader's typeKind.</summary>
-public enum PreviewTypeKind { Billboard3D = 0, Polygon = 1, Billboard2D = 2, RibbonFollow = 3, RibbonLength = 4 }
+public enum PreviewTypeKind { Billboard3D = 0, Polygon = 1, Billboard2D = 2, RibbonFollow = 3, RibbonLength = 4, RibbonFixEnd = 5, PolygonTrail = 6 }
 public sealed record PreviewDocument(string Path, int Offset, EFXEntry Entry, string UvsPath, uint UvFlags,
     IReadOnlyList<UvFrame[]> Sequences, IReadOnlyList<PreviewTexture> Textures)
 {
@@ -25,10 +25,15 @@ public sealed record PreviewDocument(string Path, int Offset, EFXEntry Entry, st
         EFXAttributeTypeBillboard2D => PreviewTypeKind.Billboard2D,
         EFXAttributeTypeRibbonFollow => PreviewTypeKind.RibbonFollow,
         EFXAttributeTypeRibbonLength => PreviewTypeKind.RibbonLength,
+        EFXAttributeTypeRibbonFixEnd f when f.ShapeDivision >= 2 => PreviewTypeKind.RibbonFixEnd,
+        EFXAttributeTypePolygonTrail => PreviewTypeKind.PolygonTrail,
         _ => null
     };
     /// <summary>Ribbon types drawn from the engine's point pool.</summary>
-    public bool IsRibbon => Kind is PreviewTypeKind.RibbonFollow or PreviewTypeKind.RibbonLength;
+    public bool IsRibbon => Kind is PreviewTypeKind.RibbonFollow or PreviewTypeKind.RibbonLength or PreviewTypeKind.RibbonFixEnd or PreviewTypeKind.PolygonTrail;
+    /// <summary>PolygonTrail: each exported point is one column of the engine's swept sheet (base and tip),
+    /// drawn as quads between neighbouring columns instead of being widened.</summary>
+    public bool IsSheet => Kind == PreviewTypeKind.PolygonTrail;
     /// <summary>UVSequence Flags bit 10: cross-fade the previous frame into the current one.</summary>
     public bool FrameBlend => (UvFlags & 0x400) != 0;
     /// <summary>Engine points per particle of a ribbon: (ShapeDivision-1)*SplineDivision + ShapeDivision,
@@ -38,12 +43,17 @@ public sealed record PreviewDocument(string Path, int Offset, EFXEntry Entry, st
     {
         EFXAttributeTypeRibbonFollow r => checked((int)((Math.Clamp(r.ShapeDivision, 2u, 1000u) - 1) * r.SplineDivision + Math.Clamp(r.ShapeDivision, 2u, 1000u))),
         EFXAttributeTypeRibbonLength l => (int)Math.Clamp(l.ShapeDivision, 2u, 1000u),
+        // RibbonFixEnd: N = ShapeDivision points, buffer N * 0x54 (RUNTIME 4.3.7; not clamped by the loader).
+        EFXAttributeTypeRibbonFixEnd f => (int)f.ShapeDivision,
+        // PolygonTrail: columns of the vertex grid, (N+1)*S + N+2 with N = NumTrailDivision, S = NumSplineDivision (4.3.9).
+        EFXAttributeTypePolygonTrail t => checked((int)((t.NumTrailDivision + 1) * t.NumSplineDivision + t.NumTrailDivision + 2)),
         _ => 0
     };
     private static uint FlagsOf(EFXAttribute? type) => type switch
     {
         EFXAttributeTypeBillboard3D b => b.Flags, EFXAttributeTypePolygon p => p.Flags, EFXAttributeTypeBillboard2D b2 => b2.Flags,
-        EFXAttributeTypeRibbonFollow r => r.BlendFlags, EFXAttributeTypeRibbonLength l => l.BlendFlags, _ => 0
+        EFXAttributeTypeRibbonFollow r => r.BlendFlags, EFXAttributeTypeRibbonLength l => l.BlendFlags,
+        EFXAttributeTypeRibbonFixEnd f => f.BlendFlags, EFXAttributeTypePolygonTrail t => t.Flags, _ => 0
     };
     public object LoadCommand(int stressParticles = 0) => new
     {

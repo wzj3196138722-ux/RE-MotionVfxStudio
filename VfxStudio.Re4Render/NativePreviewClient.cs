@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Numerics;
 using System.Buffers;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.Versioning;
@@ -173,8 +174,12 @@ public sealed class NativePreviewClient : IDisposable
             FrameDecoder.U32(header,16) != slotBytes || FrameDecoder.U32(header,28) != bytes)
             throw new InvalidDataException("Worker protocol/build mismatch");
         slot = 0;
-        if (track != null) await UploadTrack();
+        if (track != null || WorldTrack != null) await UploadTrack();
     }
+
+    /// <summary>Emitter world matrix per tick (tick t uses element t-1), kept across loads and applied on the next
+    /// load or reload; null keeps the identity matrix. Uploaded with the dt track (1/60 per tick unless set).</summary>
+    public Matrix4x4[]? WorldTrack { get; set; }
 
     public async Task SetTrackAsync(float[] values)
     {
@@ -192,8 +197,26 @@ public sealed class NativePreviewClient : IDisposable
 
     private async Task UploadTrack()
     {
-        view!.WriteArray(inputOffset, track!, 0, track!.Length);
-        await Send(new { command = "track", length = track.Length });
+        var worlds = WorldTrack;
+        if (worlds != null && (worlds.Length < 1 || worlds.Length > trackCapacity))
+            throw new ArgumentException("Invalid world matrix track length");
+        var dts = track ?? Enumerable.Repeat(1f / 60, worlds!.Length).ToArray();
+        if (worlds != null && worlds.Length != dts.Length)
+            dts = Enumerable.Range(0, worlds.Length).Select(i => i < dts.Length ? dts[i] : 1f / 60).ToArray();
+        view!.WriteArray(inputOffset, dts, 0, dts.Length);
+        if (worlds != null)
+        {
+            // Row-major 4x4 per tick after the dt array (PROTOCOL.md "Input").
+            var values = new float[worlds.Length * 16];
+            for (int i = 0; i < worlds.Length; i++)
+            {
+                var m = worlds[i];
+                new[] { m.M11, m.M12, m.M13, m.M14, m.M21, m.M22, m.M23, m.M24, m.M31, m.M32, m.M33, m.M34, m.M41, m.M42, m.M43, m.M44 }
+                    .CopyTo(values, i * 16);
+            }
+            view.WriteArray(inputOffset + trackCapacity * 4L, values, 0, values.Length);
+        }
+        await Send(new { command = "track", length = dts.Length, matrices = worlds != null });
     }
 
     public async Task<PreviewFrame> FrameAsync(int tick)

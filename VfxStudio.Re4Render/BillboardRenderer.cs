@@ -96,7 +96,7 @@ public sealed unsafe class BillboardRenderer : IDisposable
         uniform mat4 vp;
         uniform vec3 cameraRight, cameraUp, cameraPos;
         uniform int sequenceCount;
-        uniform int typeKind;          // 0 Billboard3D, 1 Polygon, 2 Billboard2D, 3 ribbon segment
+        uniform int typeKind;          // 0 Billboard3D, 1 Polygon, 2 Billboard2D, 3 ribbon segment, 4 sheet segment (PolygonTrail)
         uniform vec2 screenSize;       // pixels, for Billboard2D
         // One ribbon segment: two engine points (world position + V, tangent + half width) and
         // (colour at each end, UV sequence | frame << 8, life byte).
@@ -114,20 +114,31 @@ public sealed unsafe class BillboardRenderer : IDisposable
             float side = float(gl_VertexID & 1);
             bool tail = ((gl_VertexID >> 1) & 1) != 0;
             vec3 P = tail ? g.b.xyz : g.a.xyz;
-            vec3 T = tail ? g.d.xyz : g.c.xyz;
-            float halfWidth = tail ? g.d.w : g.c.w;
             float V = tail ? g.b.w : g.a.w;
-            if (dot(T,T) < 1e-12) T = g.b.xyz - g.a.xyz;
-            // RENDER-HOST 5.4 (compromise for CPU ribbons): widen across view direction x tangent.
-            vec3 w = cross(normalize(P - cameraPos), T);
-            w = dot(w,w) < 1e-12 ? cameraRight : normalize(w);
-            vec3 pos = P + (side * 2.0 - 1.0) * halfWidth * w;
+            vec3 pos;
+            if (typeKind == 4) {
+                // PolygonTrail: the engine's sheet column, base (c/d = tip) to tip; no widening.
+                pos = mix(P, tail ? g.d.xyz : g.c.xyz, side);
+            } else {
+                vec3 T = tail ? g.d.xyz : g.c.xyz;
+                float halfWidth = tail ? g.d.w : g.c.w;
+                if (dot(T,T) < 1e-12) T = g.b.xyz - g.a.xyz;
+                // RENDER-HOST 5.4 (compromise for CPU ribbons): widen across view direction x tangent.
+                vec3 w = cross(normalize(P - cameraPos), T);
+                w = dot(w,w) < 1e-12 ? cameraRight : normalize(w);
+                pos = P + (side * 2.0 - 1.0) * halfWidth * w;
+            }
             vec4 clip = vp * vec4(pos,1);
             float factor = 1.0;
             if (hasFlag(1)) factor *= fadeDepth((vp * vec4(P,1)).w, fadeDepthP);
             if (hasFlag(2)) factor *= fadeAngle(coneDir.xyz, emitterPos.xyz, P, cameraPos, modes.z, fadeAngleP.x, fadeAngleP.y, fadeAngleP.z);
             if (factor < CULL) { gl_Position=vec4(2.0,2.0,2.0,1.0); uv=vec2(0); tint=vec4(0); viewDepth=0; acBytes=0u; lightIn=vec3(1); uvPrevious=vec2(0); frameWeight=1.0; return; }
-            lightIn = hasFlag(2048) ? previewLight(normalize(cameraPos - P)) : vec3(1.0);
+            vec3 n = normalize(cameraPos - P);
+            if (typeKind == 4) {
+                vec3 c = cross(g.c.xyz - g.a.xyz, g.b.xyz - g.a.xyz);
+                if (dot(c,c) > 1e-12) { c = normalize(c); n = dot(c, n) < 0.0 ? -c : c; }
+            }
+            lightIn = hasFlag(2048) ? previewLight(n) : vec3(1.0);
             uvPrevious = vec2(0); frameWeight = 1.0;
             if (hasFlag(64)) {
                 vec4 biased = vp * vec4(pos + normalize(cameraPos - pos) * (-shading.y), 1);
@@ -146,7 +157,7 @@ public sealed unsafe class BillboardRenderer : IDisposable
             if (((acBytes >> 24) & 3u) == 3u) acBytes = (acBytes & 0xff00ffffu) | (g.e.w << 16);
         }
         void main() {
-            if (typeKind == 3) { ribbon(); return; }
+            if (typeKind >= 3) { ribbon(); return; }
             Instance p = particles[gl_BaseInstance + gl_InstanceID];
             uint s = min(p.data.y & 255u, uint(sequenceCount-1));
             uvec2 range = ranges[s];
@@ -372,9 +383,12 @@ public sealed unsafe class BillboardRenderer : IDisposable
                     o[8+c]=FrameDecoder.F32(r0,0x18+4*c); o[12+c]=FrameDecoder.F32(r1,0x18+4*c);
                     finite&=float.IsFinite(o[c]) && float.IsFinite(o[4+c]);
                 }
+                if(document.IsSheet)
+                    for(int c=8;c<15;c++) finite&=c is 11 || float.IsFinite(o[c]);   // tips (exported in the tangent slot)
                 if(!finite) continue;
                 o[3]=FrameDecoder.F32(r0,0x40); o[7]=FrameDecoder.F32(r1,0x40);
-                o[11]=.5f*item.Size.X*FrameDecoder.F32(r0,0x48); o[15]=.5f*item.Size.X*FrameDecoder.F32(r1,0x48);
+                if(document.IsSheet) { o[11]=0; o[15]=0; }
+                else { o[11]=.5f*item.Size.X*FrameDecoder.F32(r0,0x48); o[15]=.5f*item.Size.X*FrameDecoder.F32(r1,0x48); }
                 var w=words.Slice(count*SegmentFloats+16,4);
                 w[0]=Mul(item.Color,FrameDecoder.U32(r0,0x44)); w[1]=Mul(item.Color,FrameDecoder.U32(r1,0x44));
                 w[2]=(item.Uv&255)|(((item.Uv>>8)&255)<<8); w[3]=life;
@@ -484,7 +498,7 @@ public sealed unsafe class BillboardRenderer : IDisposable
         Span<int> viewport=stackalloc int[4];gl.GetInteger(GetPName.Viewport,viewport);
         shader.SetUniform("viewportSize",new Vector2(Math.Max(1,viewport[2]),Math.Max(1,viewport[3])));
         shader.SetUniform("screenSize",new Vector2(Math.Max(1,viewport[2]),Math.Max(1,viewport[3])));
-        shader.SetUniform("typeKind",document.IsRibbon ? 3 : (int)document.Kind);
+        shader.SetUniform("typeKind",document.IsSheet ? 4 : document.IsRibbon ? 3 : (int)document.Kind);
         gl.ActiveTexture(TextureUnit.Texture1);gl.BindTexture(TextureTarget.Texture2D,context.SceneDepth);
         gl.ActiveTexture(TextureUnit.Texture0);
         gl.BindVertexArray(vao);
