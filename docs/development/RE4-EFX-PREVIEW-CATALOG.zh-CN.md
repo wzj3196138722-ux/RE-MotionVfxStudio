@@ -36,7 +36,7 @@ dotnet run -c Release --project tools/Re4AttributeCatalog
 
 ## 界面
 
-- 类别：类型、发射、变换与运动、生命与动画、外观、UV、淡化与遮挡、粒子行为与碰撞、Action、其他。Expression、Clip、DelayFrame、Modifier 变体缩进显示，跟在同一类别里。
+- 类别：类型、发射、变换与运动、生命与动画、外观、UV、淡化与遮挡、粒子行为与碰撞、Action、其他。Expression、Clip、DelayFrame、Modifier 变体按名字归到基础属性下（去掉后缀，例如 Transform3DModifier → Transform3D），和基础属性同一类别，紧跟在它后面缩进显示。类别内按组排序：组里用得最多的那个属性的次数决定组的位置，基础属性排在组首。以前变体按自己的次数单独排序，会落到无关属性下面（例如 Transform3DModifier 显示在 Attractor 下）。
 - 搜索框按名字过滤，搜索时列出所有匹配项（包括不能添加的）。“RE4 未用的组合”“不可添加的”两个勾选框控制默认隐藏的条目。
 - 悬停显示原因：使用比例、缺哪个基础属性、为什么不能加。
 - 拖动：属性面板整个窗口都可以放下，加到当前 entry。节点图里放到顶层 entry 的节点上，加到那个 entry，并把它切换为当前 entry。放不下的地方（Action、内嵌 entry、预览不支持的类型、目录判定不能加的属性）拖到上面时提示原因。

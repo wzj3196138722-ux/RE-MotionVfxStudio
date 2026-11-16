@@ -177,7 +177,7 @@ using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == deadSc
         "graph: rage_0000 PlayEmitter nodes link to their 4 and 8 embedded emitters");
 
     // Every official file builds. No trigger points past its Action list (the two "-1" indices mean "never").
-    int files = 0, warnings = 0, broken = 0; string? firstBroken = null;
+    int files = 0, warnings = 0, broken = 0, priority = 0; string? firstBroken = null;
     foreach (var path in Directory.EnumerateFiles(stm, "*.efx.3539837", SearchOption.AllDirectories))
     {
         ReeLib.EfxFile file;
@@ -188,10 +188,20 @@ using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == deadSc
             if (!file.Read()) continue;
         }
         catch (Exception) { continue; }   // files the EFX reader cannot read are not the graph's concern
-        try { var g = PreviewEffectGraph.Build(file, Path.GetFileName(path)); files++; warnings += g.Warnings.Count; if (!PinsResolve(g)) { broken++; firstBroken ??= path; } }
+        try { var g = PreviewEffectGraph.Build(file, Path.GetFileName(path)); files++; warnings += g.Warnings.Count; if (g.EmitterPriority) priority++; if (!PinsResolve(g)) { broken++; firstBroken ??= path; } }
         catch (Exception e) { broken++; firstBroken ??= path + ": " + e.GetBaseException().Message; }
     }
     Check(files > 3900 && broken == 0 && warnings == 0, $"graph builds for {files} official files with consistent pins", $"warnings {warnings}, broken {broken} {firstBroken}");
+    Check(priority == 573, "EmitterPriority found on the Root entry (entry 0, no Type) of the 573 RE4 files that use it", priority);
+
+    // EmitterPriority: entries draw in file order (later on top) instead of far to near.
+    string smoke = Path.Combine(stm, @"_anotherorder\vfx\effecteditor\efd_character\efd_ao_chfb\efd_0015_ao_chfb_0001_smoke_0000.efx.3539837");
+    var g3 = PreviewEffectGraph.Read(smoke);
+    (int, float)[] keys = [(0, 1f), (0, 5f), (0, 3f), (1, 9f)];
+    Check(g3 is { RootEntry: 0, EmitterPriority: true } && g1 is { EmitterPriority: false } &&
+          PreviewSceneRenderer.Order(keys, fileOrder: true).SequenceEqual([0, 1, 2, 3]) && PreviewSceneRenderer.Order(keys, fileOrder: false).SequenceEqual([1, 2, 0, 3]),
+        "EmitterPriority: smoke_0000's Root has it and draws in file order; without it entries go far to near (PriorityBias first either way)",
+        g3.Nodes[0].Rows[1].Label);
 }
 
 // 7. FrameBlend: the blend weight (+0xe4, acc/T) stays in [0, 1] and moves, and the previous frame is
@@ -345,6 +355,18 @@ using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == deadSc
         "an entry without Type is offered Type attributes, ranked by how many entries use them", noType["TypeBillboard3D"].Uses);
     var uncategorised = catalog.Types.Where(t => PreviewAttributeCatalog.CategoryOf(t) == "其他").ToArray();
     Check(uncategorised.All(t => t.StartsWith("Unknown", StringComparison.Ordinal)), "every named attribute type has a category", string.Join(", ", uncategorised));
+    // Variants follow their base: each group (base and its Expression / Clip / Modifier ...) is contiguous, base first.
+    var ordered = catalog.For("TypeBillboard3D", bb).ToArray();
+    var misplaced = new List<string>();
+    for (int i = 0; i < ordered.Length; i++)
+    {
+        string group = catalog.GroupOf(ordered[i]);
+        if (group == ordered[i].Type) continue;
+        int baseAt = Array.FindIndex(ordered, x => x.Type == group);
+        if (baseAt < 0 || baseAt > i || ordered[(baseAt + 1)..i].Any(x => catalog.GroupOf(x) != group)) misplaced.Add(ordered[i].Type);
+    }
+    Check(misplaced.Count == 0 && Array.FindIndex(ordered, x => x.Type == "Transform3DModifier") > Array.FindIndex(ordered, x => x.Type == "Transform3D"),
+        "catalogue lists each Expression / Clip / Modifier right after its base", string.Join(", ", misplaced.Take(8)));
 
     var disagreements = new List<string>();
     foreach (var (entryType, existing) in new[] { ("TypeBillboard3D", bb), ((string?)null, new[] { "UnitCulling" }) })

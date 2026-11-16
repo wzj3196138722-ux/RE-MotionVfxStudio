@@ -119,7 +119,9 @@ bool showPoints=false;
 // dockspace's central node. Automated runs keep the old full-window layout so their measurements stay comparable.
 bool docking=!(options.ContainsKey("smoke") || options.ContainsKey("benchmark") || latencyBenchmark!=null || idleBenchmark!=null);
 bool resetLayout=false;
-string layoutFile=Path.Combine(repo,"runtime","re4-preview","imgui-layout.ini");
+int selectGraphTab=0;   // frames left to bring the node graph tab to the front after a layout reset
+// v2: bottom row layout. A new name applies the new default once and leaves the old file as it was.
+string layoutFile=Path.Combine(repo,"runtime","re4-preview","imgui-layout-v2.ini");
 IntPtr layoutFileName=IntPtr.Zero;
 (int X,int Y,int W,int H) sceneRect=(0,0,1,1);   // framebuffer pixels, GL origin (bottom left)
 bool demoMotion=false;
@@ -303,7 +305,8 @@ async Task<PreviewEditorState> Structure(PreviewEditCommand command)
     string label=request.Op switch
     {
         "add_attribute"=>"添加 "+request.Type,"remove_attribute"=>"删除属性","copy_attribute"=>"复制属性","paste_attribute"=>"粘贴属性",
-        "copy_entry"=>"复制 entry","paste_entry"=>"粘贴 entry","add_entry"=>"新建 entry","duplicate_entry"=>"创建副本","remove_entry"=>"删除 entry",_=>request.Op
+        "copy_entry"=>"复制 entry","paste_entry"=>"粘贴 entry","add_entry"=>"新建 entry","duplicate_entry"=>"创建副本","remove_entry"=>"删除 entry",
+        "emitter_priority"=>request.AttributeIndex>=0?"关闭 EmitterPriority":"开启 EmitterPriority",_=>request.Op
     };
     try
     {
@@ -317,6 +320,11 @@ async Task<PreviewEditorState> Structure(PreviewEditCommand command)
                 return await Send("remove_attribute",new(){["target"]=Target(request.AttributeIndex)});
             case "copy_attribute":
                 return await Send("copy_efx",new(){["target"]=Target(request.AttributeIndex)},mutation:false);
+            case "emitter_priority":
+                // On the Root entry, which has no Type and cannot be the edited entry: no selection change.
+                return request.AttributeIndex>=0
+                    ? await Send("remove_attribute",new(){["target"]=Target(request.AttributeIndex)})
+                    : await Send("add_attribute",new(){["target"]=Target(),["type"]="EmitterPriority",["fields"]=new JsonArray()});
             case "copy_entry":
                 return await Send("copy_efx",new(){["target"]=Target()},mutation:false);
             case "paste_attribute":
@@ -947,7 +955,8 @@ void DrawComposition()
     composition.DepthBias=Toggle("深度偏移",composition.DepthBias);
     composition.Detonemap=Toggle("反色调映射（DetonemapRatio）",composition.Detonemap);
     composition.AlphaRate=Toggle("alpha 乘颜色头 AlphaRate",composition.AlphaRate);
-    composition.SortEntries=Toggle("entry 按距离排序",composition.SortEntries);
+    composition.SortEntries=Toggle(scene?.Graph.EmitterPriority==true?"entry 排序（EmitterPriority：按文件顺序）":"entry 按距离排序",composition.SortEntries);
+    if(ImGui.IsItemHovered()) ImGui.SetTooltip("文件的 Root entry 带 EmitterPriority 时按 entry 顺序绘制（靠后的在上面），否则按到相机的距离从远到近。关闭则一律按文件顺序。");
     composition.SortWithinEntry=Toggle("entry 内按深度排序",composition.SortWithinEntry);
     composition.TextureFilter=Toggle("TextureFilter（纹素 alpha 整形）",composition.TextureFilter);
     composition.TexelChannel=Toggle("TexelChannelOperator（黑体色）",composition.TexelChannel);
@@ -1242,7 +1251,7 @@ window.Update += dt =>
         var delta = mouse.Position - previousMouse; previousMouse = mouse.Position;
         if (!ImGui.GetIO().WantCaptureMouse)
         {
-            if (mouse.IsButtonPressed(MouseButton.Right)) camera.Rotate(-delta.X * .006f, -delta.Y * .006f);
+            if (mouse.IsButtonPressed(MouseButton.Right)) camera.Rotate(-delta.X * .006f, delta.Y * .006f);
             if (mouse.IsButtonPressed(MouseButton.Middle)) camera.Pan(delta.X, delta.Y);
         }
     }
@@ -1267,23 +1276,23 @@ unsafe void UpdateDockspace()
     if(resetLayout)
     {
         resetLayout=false;
-        // Default: main panel left above the attribute catalogue, property panel right, node graph and curve
-        // timeline along the bottom.
+        // Default: main panel top left beside the scene; the attribute catalogue, node graph (curve timeline as a
+        // tab behind it) and property panel share the whole bottom.
         ImGuiP.DockBuilderRemoveNode(dockspace);
         ImGuiP.DockBuilderAddNode(dockspace,(ImGuiDockNodeFlags)(1<<10)|ImGuiDockNodeFlags.PassthruCentralNode);   // 1<<10 = DockSpace
         ImGuiP.DockBuilderSetNodeSize(dockspace,viewport.Size);
-        uint left,rest,right,center,bottom,middle,bottomLeft,bottomRight,leftTop,leftBottom;
-        ImGuiP.DockBuilderSplitNode(dockspace,ImGuiDir.Left,.24f,&left,&rest);
-        ImGuiP.DockBuilderSplitNode(left,ImGuiDir.Down,.45f,&leftBottom,&leftTop);
-        ImGuiP.DockBuilderSplitNode(rest,ImGuiDir.Right,.34f,&right,&center);
-        ImGuiP.DockBuilderSplitNode(center,ImGuiDir.Down,.36f,&bottom,&middle);
-        ImGuiP.DockBuilderSplitNode(bottom,ImGuiDir.Left,.5f,&bottomLeft,&bottomRight);
-        ImGuiP.DockBuilderDockWindow("RE4 原生预览 · P2",leftTop);
-        ImGuiP.DockBuilderDockWindow("属性目录",leftBottom);
-        ImGuiP.DockBuilderDockWindow("EFX 属性编辑",right);
-        ImGuiP.DockBuilderDockWindow("EFX 节点图",bottomLeft);
-        ImGuiP.DockBuilderDockWindow("曲线时间轴",bottomRight);
+        uint upper,bottom,left,center,catalog,rest,property,graph;
+        ImGuiP.DockBuilderSplitNode(dockspace,ImGuiDir.Down,.46f,&bottom,&upper);
+        ImGuiP.DockBuilderSplitNode(upper,ImGuiDir.Left,.24f,&left,&center);
+        ImGuiP.DockBuilderSplitNode(bottom,ImGuiDir.Left,.22f,&catalog,&rest);
+        ImGuiP.DockBuilderSplitNode(rest,ImGuiDir.Right,.45f,&property,&graph);
+        ImGuiP.DockBuilderDockWindow("RE4 原生预览 · P2",left);
+        ImGuiP.DockBuilderDockWindow("属性目录",catalog);
+        ImGuiP.DockBuilderDockWindow("EFX 属性编辑",property);
+        ImGuiP.DockBuilderDockWindow("EFX 节点图",graph);
+        ImGuiP.DockBuilderDockWindow("曲线时间轴",graph);
         ImGuiP.DockBuilderFinish(dockspace);
+        selectGraphTab=10;
         dockCatalog=false;
     }
     else if(dockCatalog && ImGuiP.FindWindowByName("RE4 原生预览 · P2") is {IsNull:false} main && main.DockId!=0)
@@ -1291,6 +1300,15 @@ unsafe void UpdateDockspace()
         // Same tab bar as the main panel; dragging it elsewhere is saved as usual.
         ImGuiP.DockBuilderDockWindow("属性目录",main.DockId);
         dockCatalog=false;
+    }
+    // After a reset the node graph, not the curve timeline, is the tab in front. Selecting it while building is
+    // overridden when the panels first appear, so ask the tab bar once both exist.
+    if(selectGraphTab>0)
+    {
+        selectGraphTab--;
+        var graphWindow=ImGuiP.FindWindowByName("EFX 节点图");
+        if(!graphWindow.IsNull && !graphWindow.DockNode.IsNull && !graphWindow.DockNode.TabBar.IsNull)
+        {graphWindow.DockNode.TabBar.NextSelectedTabId=graphWindow.TabId;selectGraphTab=0;}
     }
     ImGui.DockSpaceOverViewport(dockspace,viewport,ImGuiDockNodeFlags.PassthruCentralNode);
     // The scene fills the central node (what docked panels leave free), in framebuffer pixels.
@@ -1387,11 +1405,8 @@ window.Render += _ =>
     ImGui.Begin("RE4 原生预览 · P2");
     ImGui.TextWrapped(status);
     if (client.LastRecovery.Length > 0) ImGui.TextWrapped("已重启辅助进程：" + client.LastRecovery);
-    ImGui.Text($"已显示 tick: {frame?.Tick ?? 0} / 请求: {playback.TargetTick}");
-    ImGui.Text($"加载 {client.LoadMs:F1} ms · 快照 {client.SnapshotBytes / 1048576.0:F1} MB");
-    if(latency!=null) ImGui.TextWrapped("最近修改耗时："+(latency.LastResult??"等待测量"));
     if(control?.Error is {} controlError) ImGui.TextColored(new Vector4(1,.45f,.35f,1),controlError);
-    else if(control!=null) ImGui.TextDisabled(activeControl==null?"AI 控制通道："+control.PipeName:"AI 正在执行："+activeControl.Action);
+    else if(control!=null && activeControl!=null) ImGui.TextDisabled("AI 正在执行："+activeControl.Action);
     // Frame work must never disable transport controls between mouse-down and mouse-up.
     ImGui.BeginDisabled(!playback.IsReady);
     if (ImGui.Button(playback.IsPlaying ? "暂停" : "播放")) playback.TogglePlayback();
@@ -1399,12 +1414,16 @@ window.Render += _ =>
     if (ImGui.Button("前进一步")) playback.Step();
     ImGui.SameLine();
     if (ImGui.Button("回到起点")) playback.Seek(0);
-    int seek = playback.TargetTick;
-    if (ImGui.SliderInt("tick", ref seek, 0, PreviewPlaybackController.LastTick)) playback.Seek(seek);
     ImGui.EndDisabled();
+    ImGui.SameLine();
     ImGui.BeginDisabled(desiredManifest==null || faultTask!=null);
     if (ImGui.Button("重载并重播")) Reload();
     ImGui.EndDisabled();
+    ImGui.BeginDisabled(!playback.IsReady);
+    int seek = playback.TargetTick;
+    if (ImGui.SliderInt("tick", ref seek, 0, PreviewPlaybackController.LastTick)) playback.Seek(seek);
+    ImGui.EndDisabled();
+    if(frame!=null) ImGui.TextDisabled($"存活 {frame.Particles.Count} · 时间 {frame.Time:F3} s · 右键旋转 · 中键平移 · 滚轮缩放");
     ImGui.BeginDisabled(!playback.IsReady || playback.IsBusy || playback.HasQueuedRequest || faultTask!=null);
     if (options.ContainsKey("test-faults"))
     {
@@ -1413,51 +1432,65 @@ window.Render += _ =>
         if (ImGui.Button("测试进程退出")) { playback.BeginLoad(autoplay:false); faultTask = Task.Run(() => client.InjectFaultAsync(true)); }
     }
     ImGui.EndDisabled();
-    ImGui.Checkbox("粒子点对照",ref showPoints);
     bool motion=demoMotion;
     if(ImGui.Checkbox("演示运动（发射器摆动）",ref motion)) SetDemoMotion(motion);
     if(ImGui.IsItemHovered()) ImGui.SetTooltip("发射器绕竖直轴摆动（1 m 臂长、±60°、每秒一次）。PolygonTrail 在游戏里跟随骨骼挥动，发射器静止时不会形成拖尾。");
     if(!demoMotion && scene?.Shown.Any(e=>e.Document?.Kind==PreviewTypeKind.PolygonTrail)==true)
         ImGui.TextColored(new Vector4(1,.75f,.35f,1),"有 PolygonTrail：勾选演示运动才会形成拖尾。");
-    ImGui.Combo("粒子精度",ref quality,"自动\0完整\0一半\0四分之一\0");
-    ImGui.Text($"当前粒子分辨率：1/{particleDivisor}");
+    ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X*.5f);
     ImGui.SliderFloat("曝光",ref exposure,.1f,5f);
+    ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X*.5f);
     ImGui.SliderFloat("辉光",ref bloomIntensity,0,2);
     DrawComposition();
     if(scene!=null)
     {
         DrawEntrySelector();
-        if(scene.AtTable(SelectedTable())?.Document is {} selectedDocument)
-            ImGui.Text($"所选 entry 的 UV 帧数：{string.Join(", ",selectedDocument.Sequences.Select(s=>s.Length))}");
-        ImGui.Text($"贴图 {billboards?.TextureCount} · 绘制 {billboards?.DrawCalls} 次");
-        ImGui.Text($"实例上传 {billboards?.UploadMs:F3} ms");
         if(billboards?.Unsupported is { } unsupported) ImGui.TextColored(new Vector4(1,.45f,.35f,1),unsupported);
     }
-    ImGui.TextWrapped("右键旋转 · 中键平移 · 滚轮缩放");
-    if (frame != null)
+    // Timings, render quality and the particle inspector: for debugging, closed by default.
+    if(ImGui.CollapsingHeader("调试信息"))
     {
-        ImGui.Separator();
-        ImGui.Text($"存活 {frame.Particles.Count} · 时间 {frame.Time:F4} s");
-        ImGui.Text($"原生 {frame.SimulationMs:F3} ms · 恢复 {frame.RestoreMs:F3} ms");
-        ImGui.Text($"辅助进程总计 {frame.TotalMs:F3} ms · 读取/解码 {frame.DecodeMs:F3} ms");
-        if (frame.Particles.Count > 0)
+        ImGui.Text($"已显示 tick: {frame?.Tick ?? 0} / 请求: {playback.TargetTick}");
+        ImGui.Text($"加载 {client.LoadMs:F1} ms · 快照 {client.SnapshotBytes / 1048576.0:F1} MB");
+        if(latency!=null) ImGui.TextWrapped("最近修改耗时："+(latency.LastResult??"等待测量"));
+        if(control!=null && control.Error==null) ImGui.TextDisabled("AI 控制通道："+control.PipeName);
+        ImGui.Checkbox("粒子点对照",ref showPoints);
+        ImGui.Combo("粒子精度",ref quality,"自动\0完整\0一半\0四分之一\0");
+        ImGui.Text($"当前粒子分辨率：1/{particleDivisor}");
+        if(scene!=null)
         {
-            selection = Math.Clamp(selection, 0, frame.Particles.Count - 1);
-            ImGui.SliderInt("粒子", ref selection, 0, frame.Particles.Count - 1);
-            var particle = frame.Particles[selection];
-            ImGui.Text($"entry {particle.Entry} · 槽 {particle.Slot} · 编号 {particle.Id}");
-            ImGui.Text($"年龄 {particle.Age:F3} · life alpha {particle.LifeAlpha}");
-            int particleTable=TableOfParticle(frame,selection);
-            var particleEntry=scene?.AtTable(particleTable);
-            if(particleEntry!=null) ImGui.Text($"entry 位置 [{particleEntry.Position}] {particleEntry.Name}");
-            var instance=BillboardInstance.Decode(particle,frame.EntryStates![Math.Max(0,particleTable)],particleEntry?.Document?.UvFlags??0,particleEntry?.Document?.Kind??PreviewTypeKind.Billboard3D);
-            ImGui.Text($"宽高 {instance.Size.X:F4} × {instance.Size.Y:F4} · 滚转 {instance.PositionRoll.W:F3}");
-            ImGui.Text($"UV 序列 {instance.Uv&255} / 帧 {(instance.Uv>>8)&255} · 顶点 alpha {instance.Color>>24}");
-            ImGui.Text($"位置 {particle.Position.X:F5}, {particle.Position.Y:F5}, {particle.Position.Z:F5}");
-            ImGui.SliderInt("原始记录偏移", ref rawOffset, 0, 0x13c);
-            ImGui.Text($"+0x{rawOffset:X3}: u32={FrameDecoder.U32(particle.Raw.Span, rawOffset)} float={FrameDecoder.F32(particle.Raw.Span, rawOffset):G9}");
-            for (int row = 0; row < 20; row++)
-                ImGui.Text($"{row*16:X3}  {Convert.ToHexString(particle.Raw.Span.Slice(row*16,16))}");
+            if(scene.AtTable(SelectedTable())?.Document is {} selectedDocument)
+                ImGui.Text($"所选 entry 的 UV 帧数：{string.Join(", ",selectedDocument.Sequences.Select(s=>s.Length))}");
+            ImGui.Text($"贴图 {billboards?.TextureCount} · 绘制 {billboards?.DrawCalls} 次 · 实例上传 {billboards?.UploadMs:F3} ms");
+        }
+        if (frame != null)
+        {
+            ImGui.Text($"原生 {frame.SimulationMs:F3} ms · 恢复 {frame.RestoreMs:F3} ms");
+            ImGui.Text($"辅助进程总计 {frame.TotalMs:F3} ms · 读取/解码 {frame.DecodeMs:F3} ms");
+            if (frame.Particles.Count > 0 && ImGui.TreeNode("粒子细则"))
+            {
+                selection = Math.Clamp(selection, 0, frame.Particles.Count - 1);
+                ImGui.SliderInt("粒子", ref selection, 0, frame.Particles.Count - 1);
+                var particle = frame.Particles[selection];
+                ImGui.Text($"entry {particle.Entry} · 槽 {particle.Slot} · 编号 {particle.Id}");
+                ImGui.Text($"年龄 {particle.Age:F3} · life alpha {particle.LifeAlpha}");
+                int particleTable=TableOfParticle(frame,selection);
+                var particleEntry=scene?.AtTable(particleTable);
+                if(particleEntry!=null) ImGui.Text($"entry 位置 [{particleEntry.Position}] {particleEntry.Name}");
+                var instance=BillboardInstance.Decode(particle,frame.EntryStates![Math.Max(0,particleTable)],particleEntry?.Document?.UvFlags??0,particleEntry?.Document?.Kind??PreviewTypeKind.Billboard3D);
+                ImGui.Text($"宽高 {instance.Size.X:F4} × {instance.Size.Y:F4} · 滚转 {instance.PositionRoll.W:F3}");
+                ImGui.Text($"UV 序列 {instance.Uv&255} / 帧 {(instance.Uv>>8)&255} · 顶点 alpha {instance.Color>>24}");
+                ImGui.Text($"位置 {particle.Position.X:F5}, {particle.Position.Y:F5}, {particle.Position.Z:F5}");
+                if(ImGui.TreeNode("原始记录"))
+                {
+                    ImGui.SliderInt("原始记录偏移", ref rawOffset, 0, 0x13c);
+                    ImGui.Text($"+0x{rawOffset:X3}: u32={FrameDecoder.U32(particle.Raw.Span, rawOffset)} float={FrameDecoder.F32(particle.Raw.Span, rawOffset):G9}");
+                    for (int row = 0; row < 20; row++)
+                        ImGui.Text($"{row*16:X3}  {Convert.ToHexString(particle.Raw.Span.Slice(row*16,16))}");
+                    ImGui.TreePop();
+                }
+                ImGui.TreePop();
+            }
         }
     }
     ImGui.End();

@@ -58,11 +58,20 @@ public sealed class PreviewEffectGraph
     public IReadOnlyList<PreviewGraphLink> Links { get; }
     /// <summary>Problems found while building, for example a trigger pointing past the Action list.</summary>
     public IReadOnlyList<string> Warnings { get; }
+    /// <summary>Position of the file's Root entry: entry 0 when it has no Type attribute (the RE Engine editor's
+    /// Root node), else null. RE4 keeps EmitterPriority, UnitCulling and similar file-wide attributes there.</summary>
+    public int? RootEntry { get; }
+    /// <summary>Index of EmitterPriority in the Root entry's attributes, or null when the file does not use it.</summary>
+    public int? EmitterPriorityAttribute { get; }
 
-    private PreviewEffectGraph(List<PreviewGraphNode> nodes, List<PreviewGraphLink> links, List<string> warnings)
+    private PreviewEffectGraph(List<PreviewGraphNode> nodes, List<PreviewGraphLink> links, List<string> warnings, int? rootEntry, int? emitterPriority)
     {
-        Nodes = nodes; Links = links; Warnings = warnings;
+        Nodes = nodes; Links = links; Warnings = warnings; RootEntry = rootEntry; EmitterPriorityAttribute = emitterPriority;
     }
+
+    /// <summary>EmitterPriority on the Root entry: emitters draw in entry order (later entries on top) instead of
+    /// being sorted by distance. All 573 RE4 files that use it carry it on entry 0, a Root without Type.</summary>
+    public bool EmitterPriority => EmitterPriorityAttribute != null;
 
     public PreviewGraphNode? Find(int id) => Nodes.FirstOrDefault(n => n.Id == id);
     public PreviewGraphNode? EmitterAt(int position) => Find(EmitterBase + position);
@@ -86,8 +95,15 @@ public sealed class PreviewEffectGraph
         int linkId = 1;
 
         int rootPin = RowPin(RootId, 0);
+        int? rootEntry = file.Entries.Count > 0 && file.Entries[0].TypeAttribute == null ? 0 : null;
+        int? priority = rootEntry == null ? null : file.Entries[0].Attributes.FindIndex(a => a.type == EfxAttributeType.EmitterPriority) is int p and >= 0 ? p : null;
         nodes.Add(new(RootId, PreviewGraphNodeKind.Root, "Root · " + title, null, 0, null,
-            [new($"{file.Entries.Count} 个 entry · {file.Actions.Count} 个 Action", PreviewGraphRowRole.Note, null, rootPin)]));
+            [new($"{file.Entries.Count} 个 entry · {file.Actions.Count} 个 Action", PreviewGraphRowRole.Note, null, rootPin),
+             new(priority != null ? "[x] EmitterPriority：按 entry 顺序绘制" : "[ ] EmitterPriority：按距离排序", PreviewGraphRowRole.Note, null, null,
+                 (priority != null
+                    ? "Root entry 带 EmitterPriority：entry 按文件顺序绘制，靠后的画在上面，不看距离。"
+                    : "没有 EmitterPriority：entry 按到相机的距离从远到近绘制，近的在上面。") +
+                 (rootEntry == null ? "\n这个文件没有 Root entry（第 0 个 entry 有 Type），不能在这里开启。" : "\n右键 Root 切换。"))]));
 
         for (int position = 0; position < file.Entries.Count; position++)
         {
@@ -158,7 +174,7 @@ public sealed class PreviewEffectGraph
                     links.Add(new(linkId++, id, rows[row].OutputPin!.Value, child, InputPinOf(child), ""));
                 }
         }
-        return new(nodes, links, warnings);
+        return new(nodes, links, warnings, rootEntry, priority);
     }
 
     private static string Name(string? name, int position) => string.IsNullOrEmpty(name) ? $"Entry {position}" : name;
@@ -219,6 +235,32 @@ public sealed class PreviewEffectGraph
             int column = Math.Clamp(node.Column, 0, 3);
             result.Add(new(node.Id, column, next[column]));
             next[column] += 2 + (visibleRows?.Invoke(node) ?? node.Rows.Count) + 1.5f;
+        }
+        return result;
+    }
+
+    /// <summary>Horizontal layout: each layer (Root, emitters, Actions, embedded emitters) in rows of up to
+    /// <paramref name="wrap"/> nodes, layers top to bottom. <see cref="PreviewGraphPlacement.Column"/> is the slot in
+    /// the row and <see cref="PreviewGraphPlacement.Row"/> the row's top, in text rows.</summary>
+    public IReadOnlyList<PreviewGraphPlacement> LayoutRows(int wrap, Func<PreviewGraphNode, int>? visibleRows = null)
+    {
+        wrap = Math.Max(1, wrap);
+        var result = new List<PreviewGraphPlacement>(Nodes.Count);
+        float top = 0;
+        for (int layer = 0; layer < 4; layer++)
+        {
+            var nodes = Nodes.Where(n => Math.Clamp(n.Column, 0, 3) == layer).ToArray();
+            for (int i = 0; i < nodes.Length; i += wrap)
+            {
+                float height = 0;
+                for (int k = 0; k < wrap && i + k < nodes.Length; k++)
+                {
+                    var node = nodes[i + k];
+                    result.Add(new(node.Id, k, top));
+                    height = Math.Max(height, 2 + (visibleRows?.Invoke(node) ?? node.Rows.Count));
+                }
+                top += height + 1.5f;
+            }
         }
         return result;
     }

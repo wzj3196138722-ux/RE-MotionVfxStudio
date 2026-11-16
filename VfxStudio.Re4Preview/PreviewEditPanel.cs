@@ -18,17 +18,23 @@ internal sealed class PreviewEditPanel
     private string filter="",savePath="",cachedFilter="";
     private bool showReadOnly=true,cachedShowReadOnly;
     private PropertyRow[] rows=[],filtered=[];
-    private sealed record PropertyRow(string Path,string Group,bool Editable,PreviewFieldInfo? Field=null,PreviewColorGroup? Color=null);
+    /// <summary>One table row: a field, an RGBA8 colour, or sibling components (X/Y/Z, min/max, center/spread)
+    /// edited side by side.</summary>
+    private sealed record PropertyRow(string Path,string Group,bool Editable,PreviewFieldInfo? Field=null,PreviewColorGroup? Color=null,
+        PreviewFieldInfo[]? Parts=null);
+    private static readonly string[][] ComponentSets=[["X","Y","Z","W"],["x","y","z","w"],["min","max"],["center","spread"],["R","G","B","A"],["r","g","b","a"]];
     public bool HasUnappliedChanges=>draft?.Dirty==true;
     public int SelectedAttribute=>selected;
     private PreviewGraphPick? pendingFocus;
 
     /// <summary>Opens an attribute (from the node graph). For another entry the attribute is kept until
-    /// that entry becomes current. Refused while a draft has unapplied changes.</summary>
+    /// that entry becomes current. AttributeIndex -1 opens the entry itself: its Type attribute, or for the
+    /// current entry the attribute already open. Refused while a draft has unapplied changes.</summary>
     public bool Focus(PreviewGraphPick pick)
     {
         if(HasUnappliedChanges) return false;
         if(pick.EntryPosition!=entryPosition) {pendingFocus=pick;return true;}
+        if(pick.AttributeIndex<0) return true;
         if(selected!=pick.AttributeIndex) {selected=pick.AttributeIndex;draft=null;attemptedInspection=null;page=0;filter="";}
         return true;
     }
@@ -57,10 +63,40 @@ internal sealed class PreviewEditPanel
             c.Channels.All(ch=>inspection.Fields.Any(f=>f.Path==ch.Path))).ToArray();
         var hidden=colors.SelectMany(c=>c.Channels.Select(ch=>ch.Path).Append(c.Path.Length==0?"rgba":c.Path+".rgba")).ToHashSet(StringComparer.Ordinal);
         string Group(string path) {int i=path.IndexOfAny(['.','[']);return i>0?path[..i]:"基本字段";}
-        rows=colors.Select(c=>new PropertyRow(c.Path,"颜色",c.Editable,Color:c))
-            .Concat(inspection.Fields.Where(f=>!hidden.Contains(f.Path)).Select(f=>new PropertyRow(f.Path,Group(f.Path),f.Editable,Field:f))).ToArray();
+        var list=colors.Select(c=>new PropertyRow(c.Path,Group(c.Path),c.Editable,Color:c)).ToList();
+        var fields=inspection.Fields.Where(f=>!hidden.Contains(f.Path)).ToArray();
+        for(int i=0;i<fields.Length;)
+        {
+            // Consecutive siblings named like components of one value (LocalScale.X/.Y/.Z, KeepFrame.min/.max)
+            // share a row, as in the MHW:IB EFX editor.
+            int n=Components(fields,i);
+            if(n>=2)
+            {
+                var parts=fields[i..(i+n)];string prefix=parts[0].Path[..parts[0].Path.LastIndexOf('.')];
+                list.Add(new PropertyRow(prefix,Group(prefix),parts.Any(f=>f.Editable),Parts:parts));i+=n;
+            }
+            else {list.Add(new PropertyRow(fields[i].Path,Group(fields[i].Path),fields[i].Editable,Field:fields[i]));i++;}
+        }
+        rows=list.ToArray();
         cachedFilter="\0";page=0;
     }
+    /// <summary>How many fields from <paramref name="start"/> form one component row (0 or 1 when none).</summary>
+    private static int Components(PreviewFieldInfo[] fields,int start)
+    {
+        static (string Prefix,string Leaf)? Split(PreviewFieldInfo f)
+        {
+            int dot=f.Path.LastIndexOf('.');
+            if(dot<=0 || f.Choices is {Length:>0} || f.Type=="System.Boolean") return null;
+            return (f.Path[..dot],f.Path[(dot+1)..]);
+        }
+        if(Split(fields[start]) is not {} first) return 0;
+        var set=ComponentSets.FirstOrDefault(c=>c[0]==first.Leaf);
+        if(set==null) return 0;
+        int n=1;
+        while(n<set.Length && start+n<fields.Length && Split(fields[start+n]) is {} next && next.Prefix==first.Prefix && next.Leaf==set[n]) n++;
+        return n;
+    }
+
     private PreviewEditCommand Inspect(PreviewEditorState state)
     {
         attemptedInspection=$"{documentId}:{state.Revision}:{selected}";
@@ -77,16 +113,21 @@ internal sealed class PreviewEditPanel
         ImGui.SetNextWindowPos(new Vector2(850,12),ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSize(new Vector2(410,760),ImGuiCond.FirstUseEver);
         ImGui.Begin("EFX 属性编辑");
-        ImGui.TextWrapped("选择已有属性编辑参数；应用后保留 tick 和播放／暂停状态。");
-        ImGui.Text(state==null?"文档：准备中":$"文档 r{state.Revision} · {(state.Dirty?"有未保存修改":"已保存 / 原始状态")}");
-        ImGui.Text(displayed==null?"画面：尚未加载":"画面：r"+displayed.Revision);
-        ImGui.Text("预览状态："+(state?.Manifest?.Revision==state?.Revision && displayed?.Key==state?.Manifest?.Key?"已同步":"等待更新 / 可重试"));
-        ImGui.BeginChild("提示",new Vector2(0,50));
-        if(error!=null) ImGui.TextWrapped(error);
-        if(state?.PublicationError!=null) ImGui.TextWrapped("预览发布失败："+state.PublicationError);
-        if(stressMode) ImGui.TextWrapped("压力模式下参数编辑暂不开放。");
-        if(dirty && !current) ImGui.TextWrapped("草稿来自旧修订，已保留原值。请丢弃草稿并刷新后再编辑。");
-        ImGui.EndChild();
+        // One status line; what each part means is in its tooltip.
+        bool synced=state?.Manifest?.Revision==state?.Revision && displayed?.Key==state?.Manifest?.Key;
+        ImGui.TextDisabled(state==null?"文档准备中":
+            $"r{state.Revision}{(state.Dirty?" · 有未保存修改":"")} · 画面 {(displayed==null?"未加载":"r"+displayed.Revision)}{(synced?"":" · 等待更新")}");
+        if(ImGui.IsItemHovered()) ImGui.SetTooltip("r 是文档修订号，每应用一次修改加 1；“有未保存修改”指已应用的修改还没保存成 EFX 副本。\n"+
+            "画面是 3D 视图正在显示的修订。应用修改后保留 tick 和播放状态。\n从属性目录把属性拖到这个面板上可以添加。");
+        var notes=new List<string>();
+        if(error!=null) notes.Add(error);
+        if(state?.PublicationError!=null) notes.Add("预览发布失败："+state.PublicationError);
+        if(stressMode) notes.Add("压力模式下参数编辑暂不开放。");
+        if(dirty && !current) notes.Add("草稿来自旧修订，已保留原值。请丢弃草稿并刷新后再编辑。");
+        foreach(var note in notes)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text,new Vector4(1,.75f,.35f,1));ImGui.TextWrapped(note.Replace("%","%%"));ImGui.PopStyleColor();
+        }
 
         bool unavailable=busy || stressMode || state?.Manifest==null || state.Attributes?.Length is not >0;
         ImGui.BeginDisabled(unavailable);
@@ -100,42 +141,45 @@ internal sealed class PreviewEditPanel
                 {selected=a.Index;draft=null;attemptedInspection=null;page=0;filter="";}
             ImGui.EndCombo();
         }
-        if(ImGui.Button("刷新属性") && state!=null) {draft=null;command=Inspect(state);}
-        ImGui.SameLine();ImGui.BeginDisabled(state?.CanUndo!=true);
+        // Toolbar: undo/redo, then the selected attribute's structure edits (each one revision, undoable).
+        ImGui.BeginDisabled(state?.CanUndo!=true);
         if(ImGui.Button("撤销")) command=new("undo");
         ImGui.EndDisabled();ImGui.SameLine();ImGui.BeginDisabled(state?.CanRedo!=true);
         if(ImGui.Button("重做")) command=new("redo");
         ImGui.EndDisabled();
-        // Structure: copy, paste and remove the selected attribute (each one revision, undoable).
         if(attribute!=null && state?.Manifest is {} m)
         {
             var existing=state.Attributes!.Select(a=>a.Type).ToArray();
-            if(ImGui.Button("复制属性")) command=Structure(new("copy_attribute",m.EntryPosition,attribute.Index));
+            ImGui.SameLine();ImGui.TextDisabled("|");ImGui.SameLine();
+            if(ImGui.Button("复制")) command=Structure(new("copy_attribute",m.EntryPosition,attribute.Index));
+            if(ImGui.IsItemHovered()) ImGui.SetTooltip("复制这个属性（可以粘贴到其他 entry 或其他文件）");
             ImGui.SameLine();ImGui.BeginDisabled(clipboardKind!="attribute");
-            if(ImGui.Button(clipboardKind=="attribute"?"粘贴 "+clipboardType:"粘贴属性")) command=Structure(new("paste_attribute",m.EntryPosition));
+            if(ImGui.Button("粘贴")) command=Structure(new("paste_attribute",m.EntryPosition));
             ImGui.EndDisabled();
-            if(clipboardKind!="attribute" && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip("先复制一个属性（可以来自其他文件）");
+            if(ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip(clipboardKind=="attribute"?"粘贴 "+clipboardType:"先复制一个属性（可以来自其他文件）");
             ImGui.SameLine();
             string? refusal=PreviewStructureMenu.RemoveRefusal(attribute.Type,existing);
             ImGui.BeginDisabled(refusal!=null);
-            if(ImGui.Button("删除属性")) command=Structure(new("remove_attribute",m.EntryPosition,attribute.Index));
+            if(ImGui.Button("删除")) command=Structure(new("remove_attribute",m.EntryPosition,attribute.Index));
             ImGui.EndDisabled();
-            if(refusal!=null && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip(refusal);
+            if(ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip(refusal??"删除这个属性");
         }
+        ImGui.SameLine();
+        if(ImGui.Button("刷新") && state!=null) {draft=null;command=Inspect(state);}
+        if(ImGui.IsItemHovered()) ImGui.SetTooltip("重新读取这个属性的字段");
         ImGui.EndDisabled();
+        var changes=draft?.Changes()??[];
         if(dirty)
         {
+            ImGui.BeginDisabled(!current || changes.Length is <1 or >64);
+            if(ImGui.Button($"应用修改（{changes.Length}）") && draft!=null) command=new("fields",Batch:new(draft.Inspection,changes));
+            ImGui.EndDisabled();ImGui.SameLine();
             if(ImGui.Button(current?"放弃草稿":"丢弃草稿并刷新") && state!=null) {draft=null;command=Inspect(state);}
-            ImGui.SameLine();
+            ImGui.SameLine();ImGui.TextDisabled(changes.Length>64?"一次最多 64 项":"切换属性前请应用或放弃");
         }
-        var changes=draft?.Changes()??[];
-        ImGui.BeginDisabled(!current || changes.Length is <1 or >64);
-        if(ImGui.Button("应用本属性修改") && draft!=null) command=new("fields",Batch:new(draft.Inspection,changes));
-        ImGui.EndDisabled();
-        ImGui.Text(changes.Length>64?"超过单次 64 字段限制，请减少本次修改。":$"草稿修改 {changes.Length} 项；切换属性前请应用或放弃。");
-        ImGui.SetNextItemWidth(160);ImGui.InputText("搜索字段",ref filter,256);
-        ImGui.SameLine();if(ImGui.SmallButton("清空")) filter="";
-        ImGui.SameLine();ImGui.Checkbox("显示只读",ref showReadOnly);
+        ImGui.SetNextItemWidth(Math.Max(80,ImGui.GetContentRegionAvail().X-110));ImGui.InputTextWithHint("##搜索字段","搜索字段",ref filter,256);
+        ImGui.SameLine();ImGui.Checkbox("只读",ref showReadOnly);
+        if(ImGui.IsItemHovered()) ImGui.SetTooltip("也显示只读字段");
         ImGui.EndDisabled();
 
         // Inspect once per target/revision; failed reads wait for an explicit refresh.
@@ -150,43 +194,94 @@ internal sealed class PreviewEditPanel
                 cachedFilter=filter;cachedShowReadOnly=showReadOnly;page=0;
             }
             int pages=Math.Max(1,(filtered.Length+63)/64);page=Math.Clamp(page,0,pages-1);
-            if(ImGui.SmallButton("上一页")) page=Math.Max(0,page-1);
-            ImGui.SameLine();if(ImGui.SmallButton("下一页")) page=Math.Min(pages-1,page+1);
-            ImGui.SameLine();ImGui.Text($"{page+1}/{pages} 页 · {filtered.Length} 项");
+            if(pages>1)
+            {
+                if(ImGui.SmallButton("上一页")) page=Math.Max(0,page-1);
+                ImGui.SameLine();if(ImGui.SmallButton("下一页")) page=Math.Min(pages-1,page+1);
+                ImGui.SameLine();ImGui.Text($"{page+1}/{pages} 页 · {filtered.Length} 项");
+            }
         }
-        ImGui.BeginChild("属性字段",new Vector2(0,Math.Max(160,ImGui.GetContentRegionAvail().Y-190)));
+        float footer=ImGui.GetFrameHeightWithSpacing()+ImGui.GetStyle().ItemSpacing.Y*2+(state?.SavedPath!=null?ImGui.GetTextLineHeightWithSpacing():0);
+        ImGui.BeginChild("属性字段",new Vector2(0,Math.Max(120,ImGui.GetContentRegionAvail().Y-footer)));
         ImGui.BeginDisabled(unavailable || !current);
         if(draft==null) ImGui.TextWrapped(busy?"正在读取属性…":"选择或刷新属性以读取字段。");
         else
         {
             if(filtered.Length==0) ImGui.TextWrapped("没有匹配字段，请清空搜索或显示只读字段。");
+            // Label | value table. A first path segment with several rows (a struct, an array) gets a header;
+            // single rows stay flat with their full name.
             foreach(var group in filtered.Skip(page*64).Take(64).GroupBy(r=>r.Group))
-                if(ImGui.CollapsingHeader(group.Key,ImGuiTreeNodeFlags.DefaultOpen))
-                    foreach(var row in group)
+            {
+                var members=group.ToArray();
+                bool header=members.Length>1 && group.Key!="基本字段";
+                if(header && !ImGui.TreeNodeEx(group.Key,ImGuiTreeNodeFlags.DefaultOpen|ImGuiTreeNodeFlags.SpanAvailWidth)) continue;
+                if(ImGui.BeginTable("##字段表",2,ImGuiTableFlags.Resizable|ImGuiTableFlags.BordersInnerV|ImGuiTableFlags.RowBg))
+                {
+                    ImGui.TableSetupColumn("名称",ImGuiTableColumnFlags.WidthStretch,.4f);
+                    ImGui.TableSetupColumn("值",ImGuiTableColumnFlags.WidthStretch,.6f);
+                    foreach(var row in members)
                     {
                         ImGui.PushID(row.Path);
+                        ImGui.TableNextRow();ImGui.TableNextColumn();
+                        string label=header && row.Path.StartsWith(group.Key,StringComparison.Ordinal) && row.Path.Length>group.Key.Length
+                            ? row.Path[group.Key.Length..].TrimStart('.') : row.Path;
+                        if(row.Color is {} c && c.Label.Length>0) label=c.Label;
+                        if(row.Parts is {} ps && ps[0].Path.EndsWith(".center",StringComparison.Ordinal)) label+=" (中心 ±范围)";
+                        else if(row.Parts is {} pm && pm[0].Path.EndsWith(".min",StringComparison.Ordinal)) label+=" (最小~最大)";
+                        ImGui.AlignTextToFramePadding();
+                        if(row.Editable) ImGui.TextUnformatted(label);
+                        else {ImGui.PushStyleColor(ImGuiCol.Text,ImGui.GetStyle().Colors[(int)ImGuiCol.TextDisabled]);ImGui.TextUnformatted(label);ImGui.PopStyleColor();}
+                        if(ImGui.IsItemHovered()) ImGui.SetTooltip(row.Field is {} tf ? tf.Path+"\n"+tf.Type+(tf.OwnerType==null?"":"\n"+tf.OwnerType)
+                            : row.Parts is {} tp ? string.Join("\n",tp.Select(p=>p.Path+"  "+p.Type)) : row.Path);
+                        ImGui.TableNextColumn();
                         if(row.Color is {} color) DrawColor(draft,color);
+                        else if(row.Parts is {} parts) DrawParts(draft,parts);
                         else if(row.Field is {} field) DrawField(draft,field,attribute?.Type);
                         ImGui.PopID();
                     }
+                    ImGui.EndTable();
+                }
+                if(header) ImGui.TreePop();
+            }
             if(draft.Inspection.CurveCount>0) ImGui.TextWrapped("现有曲线可编辑字段值；图形曲线编辑后续加入。");
         }
         ImGui.EndDisabled();ImGui.EndChild();
 
+        // Saving writes the whole EFX file (every entry), never the source: see the tooltip.
         ImGui.Separator();
         ImGui.BeginDisabled(busy || state?.Manifest==null || stressMode);
-        ImGui.SetNextItemWidth(240);ImGui.InputText("另存路径",ref savePath,1024);
-        if(ImGui.Button("保存副本")) command=new("save",SavePath:string.IsNullOrWhiteSpace(savePath)?null:savePath);
-        ImGui.SameLine();ImGui.BeginDisabled(state?.SavedPath==null || HasUnappliedChanges);
-        if(ImGui.Button("打开已存副本")) command=new("open_saved");
+        if(ImGui.Button("保存整个 EFX 为副本")) command=new("save",SavePath:string.IsNullOrWhiteSpace(savePath)?null:savePath);
         ImGui.EndDisabled();
-        if(state?.SavedPath is {} saved) {ImGui.SetNextItemWidth(280);ImGui.InputText("已保存",ref saved,(uint)Encoding.UTF8.GetByteCount(saved)+1,ImGuiInputTextFlags.ReadOnly);}
-        if(ImGui.Button("重试预览")) command=new("publish_offline_preview");
-        ImGui.EndDisabled();ImGui.SameLine();ImGui.BeginDisabled(busy || HasUnappliedChanges);
-        if(ImGui.Button("重新打开源文件")) command=new("open_source");
+        if(ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip(
+            "把整个 EFX 文件（所有 entry 已应用的修改，不含没应用的草稿）写成一个新文件。\n"+
+            "不会覆盖源文件，也不能写进游戏目录或解包目录。每次保存都生成一个新文件。\n"+
+            "路径在“更多…”里设置；留空时存到会话目录，文件名带修订号。");
+        ImGui.SameLine();ImGui.BeginDisabled(busy || state?.SavedPath==null || HasUnappliedChanges);
+        if(ImGui.Button("打开副本")) command=new("open_saved");
         ImGui.EndDisabled();
-        ImGui.TextWrapped("保存只包含已应用参数；能保存的字段可能尚未参与当前预览渲染。");
-        ImGui.TextDisabled("会话目录（悬停查看）");if(ImGui.IsItemHovered()) ImGui.SetTooltip(sessionDirectory);
+        if(ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip("把上次保存的副本作为当前文档打开，确认它能正确读回");
+        ImGui.SameLine();
+        if(ImGui.Button("更多…")) ImGui.OpenPopup("文件操作");
+        if(ImGui.BeginPopup("文件操作"))
+        {
+            ImGui.SetNextItemWidth(360);ImGui.InputTextWithHint("另存路径","留空 = 会话目录",ref savePath,1024);
+            if(state?.SavedPath is {} savedFull) {ImGui.SetNextItemWidth(360);ImGui.InputText("上次保存",ref savedFull,(uint)Encoding.UTF8.GetByteCount(savedFull)+1,ImGuiInputTextFlags.ReadOnly);}
+            ImGui.BeginDisabled(busy || state?.Manifest==null || stressMode);
+            if(ImGui.Button("重试预览")) {command=new("publish_offline_preview");ImGui.CloseCurrentPopup();}
+            ImGui.EndDisabled();
+            if(ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip("预览发布失败时，用当前修订重新生成 3D 视图");
+            ImGui.SameLine();ImGui.BeginDisabled(busy || HasUnappliedChanges);
+            if(ImGui.Button("重新打开源文件")) {command=new("open_source");ImGui.CloseCurrentPopup();}
+            ImGui.EndDisabled();
+            if(ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip("放弃当前文档，从源文件重新打开");
+            ImGui.TextDisabled("会话目录（悬停查看）");if(ImGui.IsItemHovered()) ImGui.SetTooltip(sessionDirectory);
+            ImGui.EndPopup();
+        }
+        if(state?.SavedPath is {} saved)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text,ImGui.GetStyle().Colors[(int)ImGuiCol.TextDisabled]);ImGui.TextUnformatted("已保存："+Path.GetFileName(saved));ImGui.PopStyleColor();
+            if(ImGui.IsItemHovered()) ImGui.SetTooltip(saved);
+        }
         // The whole panel accepts attributes dragged from the catalogue, for the current entry.
         if(state?.Manifest!=null && state.Attributes is {} attributes)
         {
@@ -204,25 +299,41 @@ internal sealed class PreviewEditPanel
 
     private static void DrawColor(PreviewPropertyDraft draft,PreviewColorGroup color)
     {
-        ImGui.TextUnformatted(color.Label);
         ImGui.BeginDisabled(!color.Editable);
         float[] c=color.Channels.Select(ch=>int.Parse(draft.Value(ch.Path),CultureInfo.InvariantCulture)/255f).ToArray();
         var value=new Vector4(c[0],c[1],c[2],c[3]);
-        if(ImGui.ColorEdit4("RGBA",ref value)) draft.SetColor(color,[value.X,value.Y,value.Z,value.W]);
+        ImGui.SetNextItemWidth(-1);
+        if(ImGui.ColorEdit4("##RGBA",ref value)) draft.SetColor(color,[value.X,value.Y,value.Z,value.W]);
         ImGui.EndDisabled();
-        if(!color.Editable) ImGui.TextWrapped("只读："+(color.Reason??"后台不允许编辑。"));
+        if(!color.Editable && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip("只读："+(color.Reason??"后台不允许编辑。"));
+    }
+
+    /// <summary>Components of one value side by side, each as exact text.</summary>
+    private static void DrawParts(PreviewPropertyDraft draft,PreviewFieldInfo[] parts)
+    {
+        float spacing=ImGui.GetStyle().ItemInnerSpacing.X;
+        float width=(ImGui.GetContentRegionAvail().X-spacing*(parts.Length-1))/parts.Length;
+        for(int i=0;i<parts.Length;i++)
+        {
+            var part=parts[i];
+            if(i>0) ImGui.SameLine(0,spacing);
+            ImGui.PushID(i);
+            string value=draft.Value(part.Path);
+            ImGui.SetNextItemWidth(Math.Max(20,width));
+            if(ImGui.InputText("##值",ref value,512,part.Editable?ImGuiInputTextFlags.None:ImGuiInputTextFlags.ReadOnly) && part.Editable) draft.Set(part.Path,value);
+            if(ImGui.IsItemHovered()) ImGui.SetTooltip(part.Path[(part.Path.LastIndexOf('.')+1)..]+(part.Editable?"":"\n只读："+(part.Reason??"后台不允许编辑。")));
+            ImGui.PopID();
+        }
     }
 
     private static void DrawField(PreviewPropertyDraft draft,PreviewFieldInfo field,string? attributeType)
     {
-        ImGui.TextWrapped(field.Path);
-        if(ImGui.IsItemHovered()) ImGui.SetTooltip(field.Type+(field.OwnerType==null?"":"\n"+field.OwnerType));
         string value=draft.Value(field.Path);
         if(!field.Editable)
         {
             ImGui.SetNextItemWidth(-1);
             ImGui.InputText("##值",ref value,(uint)Math.Max(256,Encoding.UTF8.GetByteCount(value)+1),ImGuiInputTextFlags.ReadOnly);
-            ImGui.TextWrapped("只读："+(field.Reason??"后台不允许编辑。"));return;
+            if(ImGui.IsItemHovered()) ImGui.SetTooltip("只读："+(field.Reason??"后台不允许编辑。"));return;
         }
         if(field.Type=="System.Boolean")
         {

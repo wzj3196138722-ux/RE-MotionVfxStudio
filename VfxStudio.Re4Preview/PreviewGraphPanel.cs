@@ -20,6 +20,13 @@ internal sealed class PreviewGraphPanel : IDisposable
     private string? placedDocument;
     private int? focusNode;
     public bool Visible = true;
+    /// <summary>Left press on a node (row attribute or null for the node itself) and where it happened: a release
+    /// close to it opens the node; a drag (moving the node or the canvas) does not.</summary>
+    private (int Node, int? Attribute, Vector2 At)? press;
+    private const float ClickSlop = 4;
+    /// <summary>Rows of nodes wrapped to the panel's shape (default), or the layered columns (Root | emitters |
+    /// Actions | embedded) stacked top to bottom.</summary>
+    private bool horizontal = true;
     /// <summary>An attribute dropped from the catalogue onto an emitter during the last <see cref="Draw"/>.</summary>
     public PreviewAddRequest? Dropped { get; private set; }
     /// <summary>A structural edit chosen from a right-click menu during the last <see cref="Draw"/>.</summary>
@@ -51,7 +58,7 @@ internal sealed class PreviewGraphPanel : IDisposable
     public PreviewGraphPick? Draw(PreviewEffectGraph? graph, string? documentId, string? sourceName,
         int? selectedEntry, int selectedAttribute, string? locked)
     {
-        Dropped = null; Requested = null;
+        Dropped = null; Requested = null; this.graph = graph;
         if (!Visible) return null;
         (PreviewGraphNode Node, PreviewGraphRow Row)? hoveredRow = null;
         PreviewGraphPick? pick = null;
@@ -75,6 +82,11 @@ internal sealed class PreviewGraphPanel : IDisposable
         ImGui.SameLine();
         if (ImGui.SmallButton("全部展开")) { collapsed.Clear(); placed.Clear(); fitRequested = true; }
         ImGui.SameLine();
+        if (ImGui.SmallButton(horizontal ? "横向排列" : "纵向排列")) { horizontal = !horizontal; placed.Clear(); fitRequested = true; }
+        if (ImGui.IsItemHovered()) ImGui.SetTooltip(horizontal
+            ? "横向：entry 按文件顺序从左到右排成多行，按面板形状换行；Action 和内嵌 entry 在下面。点击切换为纵向。"
+            : "纵向：Root、entry、Action、内嵌 entry 各占一列，从上到下排。点击切换为横向。");
+        ImGui.SameLine();
         if (ImGui.SmallButton("重新排列")) placed.Clear();
         ImGui.SameLine();
         if (ImGui.SmallButton("适配全部")) fitRequested = true;
@@ -83,7 +95,7 @@ internal sealed class PreviewGraphPanel : IDisposable
         ImGui.SameLine();
         if (ImGui.SmallButton("100%")) requestedZoom = 1;
         ImGui.SameLine();
-        ImGui.TextDisabled($"{zoom * 100:F0}%% · " + (locked ?? "点 item 在属性面板中打开 · 滚轮缩放 · 中键拖动画布"));
+        ImGui.TextDisabled($"{zoom * 100:F0}%% · " + (locked ?? "单击节点或属性行打开编辑 · 滚轮缩放 · 中键拖动画布"));
         if (graph.Warnings.Count > 0)
         {
             ImGui.SameLine();
@@ -106,7 +118,18 @@ internal sealed class PreviewGraphPanel : IDisposable
         ImNodes.PushStyleVar(ImNodesStyleVar.NodeCornerRounding, 4 * zoom);
         ImNodes.BeginNodeEditor();
         float row = ImGui.GetTextLineHeightWithSpacing();
-        var layout = graph.Layout(n => VisibleRows(n).Count() + (collapsed.Contains(n.Id) ? 1 : 0));
+        Func<PreviewGraphNode, int> rowsOf = n => VisibleRows(n).Count() + (collapsed.Contains(n.Id) ? 1 : 0);
+        IReadOnlyList<PreviewGraphPlacement> layout;
+        if (horizontal)
+        {
+            // K columns give a grid about K * width wide and total / K tall: pick K so it matches the panel's shape.
+            float total = graph.Nodes.Sum(n => (2 + rowsOf(n) + 1.5f) * row);
+            float aspect = canvasSize.X / Math.Max(1, canvasSize.Y);
+            int widest = Enumerable.Range(0, 4).Max(c => graph.Nodes.Count(n => Math.Clamp(n.Column, 0, 3) == c));
+            int wrap = Math.Clamp((int)MathF.Round(MathF.Sqrt(aspect * total / (ColumnWidth * zoom))), 1, Math.Max(1, widest));
+            layout = graph.LayoutRows(wrap, rowsOf);
+        }
+        else layout = graph.Layout(rowsOf);
         foreach (var placement in layout)
             if (placed.Add(placement.Node))
                 ImNodes.SetNodeGridSpacePos(placement.Node, new Vector2(20 + placement.Column * ColumnWidth * zoom, 20 + placement.Row * row));
@@ -153,16 +176,13 @@ internal sealed class PreviewGraphPanel : IDisposable
                     _ => new Vector4(.9f, .9f, .9f, 1),
                 };
                 ImGui.TextColored(color, (current ? "> " : "  ") + r.Label);
-                bool clickable = node.Kind == PreviewGraphNodeKind.Emitter && node.Previewable && r.AttributeIndex is int && locked == null;
                 if (ImGui.IsItemHovered()) hoveredRow = (node, r);
                 if (ImGui.IsItemHovered())
                 {
                     string tip = r.Tooltip ?? (node.Kind == PreviewGraphNodeKind.Emitter
-                        ? node.Previewable ? locked ?? "点击在属性面板中打开" : "此类型的 entry 预览暂不支持，不能在面板中编辑。"
+                        ? node.Previewable ? locked ?? "单击在属性面板中打开" : "此类型的 entry 预览暂不支持，不能在面板中编辑。"
                         : node.Kind == PreviewGraphNodeKind.EmbeddedEmitter ? "Action 内嵌的 entry：触发时预览会运行它（Billboard3D / Polygon / Billboard2D），还不能在窗口里编辑。" : "");
                     if (tip.Length > 0) ImGui.SetTooltip(tip);
-                    if (clickable && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
-                        pick = new PreviewGraphPick(node.EntryPosition!.Value, r.AttributeIndex!.Value);
                 }
                 if (r.OutputPin is not null) ImNodes.EndOutputAttribute();
             }
@@ -200,6 +220,20 @@ internal sealed class PreviewGraphPanel : IDisposable
         bool overCanvas = ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows) &&
             mouse.X >= canvasMin.X && mouse.Y >= canvasMin.Y && mouse.X < canvasMin.X + canvasSize.X && mouse.Y < canvasMin.Y + canvasSize.Y;
         // Right click: a menu for the attribute row, the emitter, or the file (empty canvas).
+        // Single click (press and release without moving): a row opens that attribute, the rest of a node its entry.
+        if (overCanvas && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+        {
+            int pressedNode = 0;
+            press = hoveredRow is { } pr ? (pr.Node.Id, pr.Row.AttributeIndex, mouse)
+                : ImNodes.IsNodeHovered(ref pressedNode) ? (pressedNode, null, mouse) : null;
+        }
+        if (ImGui.IsMouseReleased(ImGuiMouseButton.Left) && press is { } pressed)
+        {
+            press = null;
+            if (Vector2.Distance(mouse, pressed.At) <= ClickSlop && locked == null && graph.Find(pressed.Node) is
+                { Kind: PreviewGraphNodeKind.Emitter, Previewable: true, EntryPosition: int clickedEntry })
+                pick = new PreviewGraphPick(clickedEntry, pressed.Attribute ?? -1);
+        }
         if (overCanvas && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
         {
             int hoveredNode = 0;
@@ -257,9 +291,26 @@ internal sealed class PreviewGraphPanel : IDisposable
         zoom = next;
     }
 
+    private PreviewEffectGraph? graph;
+
     private PreviewStructureRequest? Menu((PreviewGraphNode Node, PreviewGraphRow? Row)? target)
     {
-        if (target is not { } t || t.Node.Kind == PreviewGraphNodeKind.Root) return PreviewStructureMenu.FileItems(ClipboardKind, ClipboardName);
+        if (target is not { } t || t.Node.Kind == PreviewGraphNodeKind.Root)
+        {
+            // The canvas and the Root node: file items, then the Root entry's EmitterPriority switch.
+            var chosenRoot = PreviewStructureMenu.FileItems(ClipboardKind, ClipboardName);
+            if (graph != null)
+            {
+                ImGui.Separator();
+                bool on = graph.EmitterPriority;
+                if (ImGui.MenuItem("EmitterPriority（按 entry 顺序绘制）", (string?)null, on, graph.RootEntry != null) && graph.RootEntry is int root)
+                    chosenRoot = new("emitter_priority", root, graph.EmitterPriorityAttribute ?? -1);
+                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip(graph.RootEntry == null
+                    ? "这个文件没有 Root entry（第 0 个 entry 有 Type），EmitterPriority 没有地方放。"
+                    : on ? "关闭后 entry 按到相机的距离排序。" : "开启后 entry 按文件顺序绘制，靠后的画在上面。");
+            }
+            return chosenRoot;
+        }
         var node = t.Node;
         if (node.Kind != PreviewGraphNodeKind.Emitter)
         {

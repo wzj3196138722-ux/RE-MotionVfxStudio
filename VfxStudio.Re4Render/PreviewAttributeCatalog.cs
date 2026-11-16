@@ -157,7 +157,7 @@ public sealed class PreviewAttributeCatalog
         var have = existing.ToHashSet(StringComparer.Ordinal);
         var (count, uses) = Owner(entryType);
         int usualAt = Math.Max(1, (int)Math.Ceiling(count * .95));
-        return types.Select(type =>
+        var all = types.Select(type =>
             {
                 int n = uses.GetValueOrDefault(type);
                 string? required = requiredBases.GetValueOrDefault(type)?.FirstOrDefault(b => !have.Contains(b));
@@ -178,8 +178,17 @@ public sealed class PreviewAttributeCatalog
                 return new PreviewCatalogItem(type, CategoryOf(type), required ?? BaseOf(type), status, n, isType && entryType == null ? n : count,
                     totals.GetValueOrDefault(type), count > 0 && n >= usualAt && !isType);
             })
-            .OrderBy(i => Array.IndexOf(Categories, i.Category)).ThenByDescending(i => i.Uses).ThenBy(i => i.Type, StringComparer.Ordinal).ToArray();
+            .ToArray();
+        // Variants (Expression, Clip, Modifier, ...) follow their base: groups rank by their most used member, the
+        // base leads its group. Sorting variants by their own count put them under unrelated attributes.
+        var groupUses = all.GroupBy(GroupOf).ToDictionary(g => g.Key, g => g.Max(i => i.Uses), StringComparer.Ordinal);
+        return all.OrderBy(i => Array.IndexOf(Categories, i.Category)).ThenByDescending(i => groupUses[GroupOf(i)])
+            .ThenBy(GroupOf, StringComparer.Ordinal).ThenBy(i => GroupOf(i) == i.Type ? 0 : 1)
+            .ThenByDescending(i => i.Uses).ThenBy(i => i.Type, StringComparer.Ordinal).ToArray();
     }
+
+    /// <summary>The attribute a catalogue row is listed under: its base when that is an RE4 type, else itself.</summary>
+    public string GroupOf(PreviewCatalogItem item) => BaseOf(item.Type) is { } b && types.Contains(b, StringComparer.Ordinal) ? b : item.Type;
 
     /// <summary>Checks one type for an entry: the catalogue item, or null for a name that is not an RE4 attribute type.</summary>
     public PreviewCatalogItem? Check(string type, string? entryType, IEnumerable<string> existing)

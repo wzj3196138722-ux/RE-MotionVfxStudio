@@ -226,11 +226,13 @@ public sealed class PreviewSceneRenderer : IDisposable
     private int[] lastOrder = [];
 
     /// <summary>Entry order (RENDER-HOST §6.3, compromise): PriorityBias ascending, then far to near
-    /// by the distance from the camera to the entry's particle centroid plus DistanceBias.</summary>
+    /// by the distance from the camera to the entry's particle centroid plus DistanceBias. With EmitterPriority
+    /// on the Root entry, file order (table order) replaces the distance.</summary>
     public int[] DrawOrder(PreviewFrame frame, Matrix4x4 view, bool sort)
     {
-        var order = Enumerable.Range(0, renderers.Length).ToArray();
-        if (!sort || frame.EntryStates == null) return order;
+        if (!sort || frame.EntryStates == null) return Enumerable.Range(0, renderers.Length).ToArray();
+        // EmitterPriority on the Root entry: entry order (later on top) replaces the distance key.
+        bool fileOrder = Scene.Graph.EmitterPriority;
         Matrix4x4.Invert(view, out var inverse);
         var camera = new Vector3(inverse.M41, inverse.M42, inverse.M43);
         var keys = new (int Priority, float Distance)[renderers.Length];
@@ -247,9 +249,13 @@ public sealed class PreviewSceneRenderer : IDisposable
             var appearance = renderers[i]?.Appearance ?? EntryAppearance.None;
             keys[i] = (appearance.PriorityBias, n == 0 ? 0 : Vector3.Distance(sum / n, camera) + appearance.DistanceBias);
         }
-        // Stable: equal keys keep file order.
-        return order.OrderBy(i => keys[i].Priority).ThenByDescending(i => keys[i].Distance).ToArray();
+        return Order(keys, fileOrder);
     }
+
+    /// <summary>Draw order from per-table keys: PriorityBias ascending, then far to near, or table order when
+    /// <paramref name="fileOrder"/> (EmitterPriority). Stable: equal keys keep table order.</summary>
+    public static int[] Order(IReadOnlyList<(int Priority, float Distance)> keys, bool fileOrder) =>
+        Enumerable.Range(0, keys.Count).OrderBy(i => keys[i].Priority).ThenByDescending(i => fileOrder ? 0 : keys[i].Distance).ToArray();
 
     public void Render(PreviewFrame frame, Matrix4x4 view, Matrix4x4 projection, PreviewRenderContext context, int? soloTable = null)
     {

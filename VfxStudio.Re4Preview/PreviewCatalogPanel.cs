@@ -61,8 +61,13 @@ internal sealed class PreviewCatalogPanel
             if (shown.Length == 0) continue;
             int addable = shown.Count(i => i.CanAdd);
             if (!ImGui.CollapsingHeader($"{category}（{addable}）###{category}", category is "类型" or "Action" ? ImGuiTreeNodeFlags.None : ImGuiTreeNodeFlags.DefaultOpen)) continue;
+            string? lastGroup = null;
             foreach (var item in shown)
             {
+                // Indent a variant only when its base is the row group just above it (a filter can hide the base).
+                string group = catalog.GroupOf(item);
+                bool child = group != item.Type && lastGroup == group;
+                if (group == item.Type) lastGroup = group; else if (!child) lastGroup = null;
                 ImGui.PushID(item.Type);
                 bool enabled = item.CanAdd && locked == null;
                 var color = item.Status switch
@@ -73,7 +78,7 @@ internal sealed class PreviewCatalogPanel
                     PreviewCatalogStatus.Unused => new Vector4(.7f, .6f, .45f, 1),
                     _ => new Vector4(.5f, .5f, .5f, 1),
                 };
-                string mark = item.Status switch { PreviewCatalogStatus.Present => "(已有) ", PreviewCatalogStatus.Unseen or PreviewCatalogStatus.Unused => "? ", _ => item.Base != null ? "  └ " : "" };
+                string mark = (child ? "  └ " : "") + item.Status switch { PreviewCatalogStatus.Present => "(已有) ", PreviewCatalogStatus.Unseen or PreviewCatalogStatus.Unused => "? ", _ => "" };
                 float right = ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X;
                 ImGui.PushStyleColor(ImGuiCol.Text, color);
                 bool clicked = ImGui.Selectable(mark + item.Type, false, ImGuiSelectableFlags.AllowDoubleClick);

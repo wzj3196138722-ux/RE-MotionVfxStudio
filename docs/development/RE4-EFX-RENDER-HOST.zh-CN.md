@@ -364,7 +364,7 @@ GPU 类型的出生、运动、寿命都在计算着色器中（规格 §4.3.12�
 | 3 EdgeBlend | `SrcAlpha, OneMinusSrcAlpha` |
 | 4 Multiply | `DstColor, Zero`（颜色已按 §6.2 预先向 1 插值） |
 
-排序：发射器级按 (PriorityBias, 到相机距离 + DistanceBias) 从远到近；发射器内按槽号顺序，不排序。游戏的排序键与发射器内是否排序都未读（ShaderSettings 的 DistanceBias 单位为推定，规格 §4.4），折中实现；检查器提供"发射器内按深度排序"开关用于对照。粒子写深度测试、不写深度。
+排序：发射器级按 (PriorityBias, 到相机距离 + DistanceBias) 从远到近；文件的 Root entry（第 0 个、没有 Type 的 entry）带 EmitterPriority 时，第二个键换成文件顺序：靠后的 entry 画在上面，不看距离。RE4 有 573 个文件用它，全部放在 Root entry 上；这和 RE Engine 编辑器的演示一致（RE:2023 讲座：Root 节点勾选 EmitterPriority 后，按节点列表的 Priority 顺序绘制，不再按远近）。节点图的 Root 节点显示这个开关，右键 Root 可以开启或关闭（在 Root entry 上添加或删除 EmitterPriority；文件没有 Root entry 时不可用）。发射器内按槽号顺序，不排序。游戏的排序键与发射器内是否排序都未读（ShaderSettings 的 DistanceBias 单位为推定，规格 §4.4），折中实现；检查器提供"发射器内按深度排序"开关用于对照。粒子写深度测试、不写深度。
 
 ### 6.4 ShaderSettings
 
