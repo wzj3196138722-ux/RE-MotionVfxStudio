@@ -20,8 +20,11 @@ internal sealed class PreviewEditPanel
     private PropertyRow[] rows=[],filtered=[];
     /// <summary>One table row: a field, an RGBA8 colour, or sibling components (X/Y/Z, min/max, center/spread)
     /// edited side by side.</summary>
+    /// <param name="Label">Name shown instead of the path (PtBehavior parameters show their parameter name).</param>
+    /// <param name="Order">Sort key: PtBehavior parameters keep the script's parameter order.</param>
     private sealed record PropertyRow(string Path,string Group,bool Editable,PreviewFieldInfo? Field=null,PreviewColorGroup? Color=null,
-        PreviewFieldInfo[]? Parts=null);
+        PreviewFieldInfo[]? Parts=null,string? Label=null,int Order=0);
+    private const string BehaviorParameters="脚本参数",BehaviorStructure="参数结构（只读）";
     private static readonly string[][] ComponentSets=[["X","Y","Z","W"],["x","y","z","w"],["min","max"],["center","spread"],["R","G","B","A"],["r","g","b","a"]];
     public bool HasUnappliedChanges=>draft?.Dirty==true;
     public int SelectedAttribute=>selected;
@@ -62,8 +65,29 @@ internal sealed class PreviewEditPanel
         var colors=inspection.ColorGroups.Where(c=>c.Storage=="rgba8" && c.Scale==255 && !c.Hdr && c.Channels.Length==4 &&
             c.Channels.All(ch=>inspection.Fields.Any(f=>f.Path==ch.Path))).ToArray();
         var hidden=colors.SelectMany(c=>c.Channels.Select(ch=>ch.Path).Append(c.Path.Length==0?"rgba":c.Path+".rgba")).ToHashSet(StringComparer.Ordinal);
-        string Group(string path) {int i=path.IndexOfAny(['.','[']);return i>0?path[..i]:"基本字段";}
-        var list=colors.Select(c=>new PropertyRow(c.Path,Group(c.Path),c.Editable,Color:c)).ToList();
+        // PtBehavior: parameters are properties[i] with the name in behaviorProperty and the value under variable.
+        // Values are listed by parameter name, in parameter order; names, types and lengths go to a closed group.
+        var names=new Dictionary<string,string>(StringComparer.Ordinal);
+        foreach(var f in inspection.Fields)
+            if(System.Text.RegularExpressions.Regex.Match(f.Path,@"^(properties\[\d+\])\.behaviorProperty$") is {Success:true} m) names[m.Groups[1].Value]=f.Value;
+        (string Group,string? Label,int Order) Place(string path)
+        {
+            var m=System.Text.RegularExpressions.Regex.Match(path,@"^(properties\[(\d+)\])\.(.*)$");
+            if(names.Count>0 && m.Success && names.TryGetValue(m.Groups[1].Value,out var name))
+            {
+                int index=int.Parse(m.Groups[2].Value);
+                string rest=m.Groups[3].Value;
+                bool value=rest.StartsWith("variable.",StringComparison.Ordinal) &&
+                    rest is not ("variable.unkn" or "variable.size" or "variable.re4_unkn0" or "variable.re4_unkn1") && !rest.StartsWith("variable.restData",StringComparison.Ordinal);
+                return value ? (BehaviorParameters,name,index) : (BehaviorStructure,$"{name} · {rest}",100000+index);
+            }
+            int i=path.IndexOfAny(['.','[']);
+            return (i>0?path[..i]:"基本字段",null,-1);
+        }
+        string Group(string path)=>Place(path).Group;
+        PropertyRow Row(string path,bool editable,PreviewFieldInfo? field=null,PreviewColorGroup? color=null,PreviewFieldInfo[]? parts=null)
+        {var (group,label,order)=Place(path);return new(path,group,editable,field,color,parts,label,order);}
+        var list=colors.Select(c=>Row(c.Path,c.Editable,color:c)).ToList();
         var fields=inspection.Fields.Where(f=>!hidden.Contains(f.Path)).ToArray();
         for(int i=0;i<fields.Length;)
         {
@@ -73,11 +97,11 @@ internal sealed class PreviewEditPanel
             if(n>=2)
             {
                 var parts=fields[i..(i+n)];string prefix=parts[0].Path[..parts[0].Path.LastIndexOf('.')];
-                list.Add(new PropertyRow(prefix,Group(prefix),parts.Any(f=>f.Editable),Parts:parts));i+=n;
+                list.Add(Row(prefix,parts.Any(f=>f.Editable),parts:parts));i+=n;
             }
-            else {list.Add(new PropertyRow(fields[i].Path,Group(fields[i].Path),fields[i].Editable,Field:fields[i]));i++;}
+            else {list.Add(Row(fields[i].Path,fields[i].Editable,field:fields[i]));i++;}
         }
-        rows=list.ToArray();
+        rows=list.OrderBy(r=>r.Order).ToArray();   // stable: other rows keep the inspector's order
         cachedFilter="\0";page=0;
     }
     /// <summary>How many fields from <paramref name="start"/> form one component row (0 or 1 when none).</summary>
@@ -213,8 +237,8 @@ internal sealed class PreviewEditPanel
             foreach(var group in filtered.Skip(page*64).Take(64).GroupBy(r=>r.Group))
             {
                 var members=group.ToArray();
-                bool header=members.Length>1 && group.Key!="基本字段";
-                if(header && !ImGui.TreeNodeEx(group.Key,ImGuiTreeNodeFlags.DefaultOpen|ImGuiTreeNodeFlags.SpanAvailWidth)) continue;
+                bool header=(members.Length>1 && group.Key!="基本字段") || group.Key is BehaviorParameters or BehaviorStructure;
+                if(header && !ImGui.TreeNodeEx(group.Key,(group.Key==BehaviorStructure?0:ImGuiTreeNodeFlags.DefaultOpen)|ImGuiTreeNodeFlags.SpanAvailWidth)) continue;
                 if(ImGui.BeginTable("##字段表",2,ImGuiTableFlags.Resizable|ImGuiTableFlags.BordersInnerV|ImGuiTableFlags.RowBg))
                 {
                     ImGui.TableSetupColumn("名称",ImGuiTableColumnFlags.WidthStretch,.4f);
@@ -223,9 +247,9 @@ internal sealed class PreviewEditPanel
                     {
                         ImGui.PushID(row.Path);
                         ImGui.TableNextRow();ImGui.TableNextColumn();
-                        string label=header && row.Path.StartsWith(group.Key,StringComparison.Ordinal) && row.Path.Length>group.Key.Length
-                            ? row.Path[group.Key.Length..].TrimStart('.') : row.Path;
-                        if(row.Color is {} c && c.Label.Length>0) label=c.Label;
+                        string label=row.Label ?? (header && row.Path.StartsWith(group.Key,StringComparison.Ordinal) && row.Path.Length>group.Key.Length
+                            ? row.Path[group.Key.Length..].TrimStart('.') : row.Path);
+                        if(row.Label==null && row.Color is {} c && c.Label.Length>0) label=c.Label;
                         if(row.Parts is {} ps && ps[0].Path.EndsWith(".center",StringComparison.Ordinal)) label+=" (中心 ±范围)";
                         else if(row.Parts is {} pm && pm[0].Path.EndsWith(".min",StringComparison.Ordinal)) label+=" (最小~最大)";
                         ImGui.AlignTextToFramePadding();

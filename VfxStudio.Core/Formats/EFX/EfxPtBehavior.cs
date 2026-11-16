@@ -5,8 +5,12 @@ using ReeLib.InternalAttributes;
 
 namespace ReeLib.Efx.Structs.Pt;
 
+// Payloads measured over the RE4 corpus (2065 PtBehavior attributes): Uint, 3 and 22 are 4-byte integers (3: RadialBlur
+// Priority = 1; 22: LensFlare AxisType / RotationOrder, enum-like), Range is two floats (min, max: EffectDecal Alpha0 =
+// 0 ~ 0.1), Wstring2 is a UTF-16 string like WstringName (FlowTexture paths). 20 (ShakeCamera Period, one use) stays raw.
 public enum PtBehaviorPropType
 {
+    PropType3 = 3,
     PropUint = 4,
     PropFloat = 9,
     PropRange = 10,
@@ -17,7 +21,9 @@ public enum PtBehaviorPropType
     PropPrefabpath = 17,
     PropEnum = 18,
     PropFloat2 = 19,
+    PropType20 = 20,
     PropWstring2 = 21,
+    PropType22 = 22,
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion))]
@@ -62,6 +68,30 @@ public partial class PtBehaviorVariableInteger : PtBehaviorVariableDataBase
 
     protected override bool DoRead(FileHandler handler) => base.DoRead(handler) && DefaultRead(handler);
     protected override bool DoWrite(FileHandler handler) => EnsureMinimumSize(4) && base.DoWrite(handler) && DefaultWrite(handler);
+}
+
+[RszGenerate, RszVersionedObject(typeof(EfxVersion))]
+public partial class PtBehaviorVariableUInt : PtBehaviorVariableDataBase
+{
+	public PtBehaviorVariableUInt(EfxVersion version) : base(version) { }
+
+	public uint value;
+	[RszFixedSizeArray(nameof(size), - 4)] public byte[]? restData;
+
+    protected override bool DoRead(FileHandler handler) => base.DoRead(handler) && DefaultRead(handler);
+    protected override bool DoWrite(FileHandler handler) => EnsureMinimumSize(4) && base.DoWrite(handler) && DefaultWrite(handler);
+}
+
+[RszGenerate, RszVersionedObject(typeof(EfxVersion))]
+public partial class PtBehaviorVariableRange : PtBehaviorVariableDataBase
+{
+	public PtBehaviorVariableRange(EfxVersion version) : base(version) { }
+
+	public MinMax range;
+	[RszFixedSizeArray(nameof(size), - 8)] public byte[]? restData;
+
+    protected override bool DoRead(FileHandler handler) => base.DoRead(handler) && DefaultRead(handler);
+    protected override bool DoWrite(FileHandler handler) => EnsureMinimumSize(8) && base.DoWrite(handler) && DefaultWrite(handler);
 }
 
 public partial class PtBehaviorVariableEnum : PtBehaviorVariableInteger
@@ -163,6 +193,11 @@ public partial class PtBehaviorVariable : BaseModel
 		nameof(dataType), "==", PtBehaviorPropType.PropFloat2, typeof(PtBehaviorVariableFloat2),
 		nameof(dataType), "==", PtBehaviorPropType.PropFloat3, typeof(PtBehaviorVariableFloat3),
 		nameof(dataType), "==", PtBehaviorPropType.PropWstringName, typeof(PtBehaviorVariableDataWString),
+		nameof(dataType), "==", PtBehaviorPropType.PropWstring2, typeof(PtBehaviorVariableDataWString),
+		nameof(dataType), "==", PtBehaviorPropType.PropUint, typeof(PtBehaviorVariableUInt),
+		nameof(dataType), "==", PtBehaviorPropType.PropType3, typeof(PtBehaviorVariableUInt),
+		nameof(dataType), "==", PtBehaviorPropType.PropType22, typeof(PtBehaviorVariableUInt),
+		nameof(dataType), "==", PtBehaviorPropType.PropRange, typeof(PtBehaviorVariableRange),
 		typeof(PtBehaviorVariableDataPrefabUnknown)
 	)]
 	public PtBehaviorVariableDataBase? variable;

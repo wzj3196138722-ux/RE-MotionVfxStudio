@@ -196,6 +196,16 @@ public sealed class PreviewEffectGraph
                 EFXAttributePtColliderAction hit => (hit.linkedAction == uint.MaxValue ? -1 : (int)Math.Min(hit.linkedAction, int.MaxValue), "命中"),
                 _ => null,
             };
+            if (attribute is EFXAttributePtBehavior behavior)
+            {
+                // The script class it calls, short name in the row (as the RE Engine editor shows it), full name and
+                // parameters in the tooltip.
+                string cls = behavior.behaviorString ?? "";
+                rows.Add(new($"PtBehavior [{cls[(cls.LastIndexOf('.') + 1)..]}]", PreviewGraphRowRole.Item, a, null,
+                    $"调用游戏脚本 {cls}\n参数：{string.Join("、", behavior.properties.Select(p => p.behaviorProperty))}\n" +
+                    "预览不运行游戏的 C# 脚本，这个属性对画面没有影响。"));
+                continue;
+            }
             if (trigger is not { } t)
             {
                 bool isType = type.StartsWith("Type", StringComparison.Ordinal) && !type.EndsWith("Expression", StringComparison.Ordinal) &&

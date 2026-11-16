@@ -154,6 +154,7 @@ internal static class ContentInspector
                 }
                 string? reason = spans.FirstOrDefault(s => !s.Active).Reason;
                 spans.RemoveAll(s => s.End == field.Name);
+                if (owner == typeof(EFXAttribute) && field.Name == "ExpectedByteSize") reason = "读取时记下的属性字节数，不写回文件。";
                 if (field.Name == "Version" || (owner == typeof(EFXAttribute) && field.Name is "type" or "UniqueID") ||
                     (instance is EFXEntryBase && field.Name is "index" or "nameHash")) reason = "Structural identity or derived metadata.";
                 if (instance is EfxHeader && field.Name != "dimensionType") reason = "File identity or derived structure count; managed by the serializer.";
@@ -170,6 +171,16 @@ internal static class ContentInspector
                     if (field.Name is "rawValue" or "mdfPropertyIndex" && material.parameterType == MaterialParameterType.Texture) reason = "Texture binding metadata; edit texturePath or the active TextureValue fields.";
                 }
                 if (instance is EfxClipHeader && field.Name == "frameCount") reason = "Curve segment frame count; changing it requires resizing and remapping the keyframe collection.";
+                // PtBehavior: the script class defines each parameter's name, type and length, and varSize / size are
+                // stored, not recalculated. Only parameter values are editable.
+                if (instance is ReeLib.Efx.Structs.Pt.EFXAttributePtBehavior && field.Name is "behaviorString" or "unkn1")
+                    reason = "脚本类名决定整组参数；换脚本需要换掉全部参数，这里不能直接改。";
+                if (instance is ReeLib.Efx.Structs.Pt.PtBehaviorVariable && field.Name is "varSize" or "dataType" or "behaviorProperty")
+                    reason = "参数的名称、类型和长度由脚本类定义，改了游戏会找不到这个参数。";
+                if (instance is ReeLib.Efx.Structs.Pt.PtBehaviorVariableDataBase && field.Name is "unkn" or "size" or "re4_unkn0" or "re4_unkn1" or "restData" or "data")
+                    reason = "参数的存储信息（长度、序号、未解析的字节），由文件结构决定。";
+                if (instance is ReeLib.Efx.Structs.Pt.PtBehaviorVariableDataWString && field.Name == "str")
+                    reason = "字符串长度决定参数长度，改它要同时更新 size 和 varSize，暂不支持。";
                 if (field.IsInitOnly) reason ??= "Read-only member.";
                 if (field.IsDefined(typeof(RszIgnoreAttribute)) && !ManualField(instance, field.Name))
                     reason ??= "Runtime-only/cache member; no verified serialization writer.";

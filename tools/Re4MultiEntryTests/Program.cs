@@ -417,7 +417,72 @@ using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == deadSc
     Check(h1 == h2, "child Actions replay identically after a rewind", h1 == h2 ? "" : $"{h1} vs {h2}");
 }
 
-// 12. Optional: large official files.
+// 12. PtBehavior (calls a game C# script; the preview does not run it): every parameter decodes except type 20, files
+// with it write back byte for byte (in memory only), only parameter values are editable, the graph names the class.
+{
+    int behaviors = 0, raw = 0, files = 0, differ = 0; string? firstRaw = null;
+    ReeLib.Efx.Structs.Pt.EFXAttributePtBehavior? decal = null;
+    ReeLib.EfxFile? decalFile = null; string? decalPath = null;
+    foreach (var path in Directory.EnumerateFiles(stm, "*.efx.3539837", SearchOption.AllDirectories))
+    {
+        byte[] bytes = File.ReadAllBytes(path);
+        ReeLib.EfxFile file;
+        try
+        {
+            file = new ReeLib.EfxFile(new ReeLib.FileHandler(new MemoryStream(bytes), path) { FileVersion = (int)ReeLib.Efx.EfxVersion.RE4 });
+            if (!file.Read()) continue;
+        }
+        catch (Exception) { continue; }
+        var found = new List<ReeLib.Efx.Structs.Pt.EFXAttributePtBehavior>();
+        void Collect(ReeLib.EfxFile f)
+        {
+            foreach (var owner in f.Entries.Cast<ReeLib.Efx.EFXEntryBase>().Concat(f.Actions))
+                foreach (var a in owner.Attributes)
+                {
+                    if (a is ReeLib.Efx.Structs.Pt.EFXAttributePtBehavior b) found.Add(b);
+                    if (a is ReeLib.Efx.Structs.Basic.EFXAttributePlayEmitter { efxrData: { } inner }) Collect(inner);
+                }
+        }
+        Collect(file);
+        if (found.Count == 0) continue;
+        behaviors += found.Count;
+        foreach (var p in found.SelectMany(b => b.properties))
+            if (p.variable is ReeLib.Efx.Structs.Pt.PtBehaviorVariableDataPrefabUnknown && p.dataType != ReeLib.Efx.Structs.Pt.PtBehaviorPropType.PropType20)
+            { raw++; firstRaw ??= $"{p.behaviorProperty}:{p.dataType}"; }
+        if (decal == null && found.FirstOrDefault(b => b.behaviorString == "via.effect.script.EffectDecal" && b.properties.Count >= 10) is { } d)
+        { decal = d; decalFile = file; decalPath = path; }
+        files++;
+        using var written = new MemoryStream();
+        file.WriteTo(new ReeLib.FileHandler(written, path) { FileVersion = (int)ReeLib.Efx.EfxVersion.RE4 }, false);   // never back to the source
+        if (!written.ToArray().AsSpan().SequenceEqual(bytes)) differ++;
+    }
+    Check(behaviors == 2193 && raw == 0 && differ == 0,
+        $"PtBehavior: {behaviors} attributes in {files} files; every parameter decodes but type 20; all files write back byte for byte",
+        $"raw {raw} {firstRaw}, differ {differ}");
+    var editable = VfxStudio.LiveEditor.EfxFieldValues.Editable(decal!, ReeLib.Efx.EfxVersion.RE4).Select(kv => kv.Key).ToArray();
+    var notValues = editable.Where(k => !System.Text.RegularExpressions.Regex.IsMatch(k, @"^properties\[\d+\]\.variable\.(value|vec|Vec|color|range)\b")).ToArray();
+    Check(editable.Length > 0 && notValues.Length == 0,
+        "PtBehavior: only parameter values are editable (not names, types, lengths or strings)", $"{editable.Length} editable; others: {string.Join(", ", notValues.Take(6))}");
+    // Edit one value of each kind through the backend's own field writer, write the file to memory, read it back.
+    int extent = decal!.properties.FindIndex(p => p.behaviorProperty == "Extent"), roll = decal.properties.FindIndex(p => p.behaviorProperty == "RandomRollRange");
+    var (applied, skipped) = VfxStudio.LiveEditor.EfxFieldValues.Apply(decal, ReeLib.Efx.EfxVersion.RE4,
+        [KeyValuePair.Create($"properties[{extent}].variable.vec.Y", "0.5"), KeyValuePair.Create($"properties[{roll}].variable.value", "45")]);
+    using var edited = new MemoryStream();
+    decalFile!.WriteTo(new ReeLib.FileHandler(edited, decalPath!) { FileVersion = (int)ReeLib.Efx.EfxVersion.RE4 }, false);   // memory only
+    var reread = new ReeLib.EfxFile(new ReeLib.FileHandler(new MemoryStream(edited.ToArray()), decalPath!) { FileVersion = (int)ReeLib.Efx.EfxVersion.RE4 });
+    var back = reread.Read() ? reread.Entries.SelectMany(e => e.Attributes).OfType<ReeLib.Efx.Structs.Pt.EFXAttributePtBehavior>()
+        .FirstOrDefault(b => b.behaviorString == decal.behaviorString && b.properties.Count == decal.properties.Count) : null;
+    float y = (back?.properties[extent].variable as ReeLib.Efx.Structs.Pt.PtBehaviorVariableFloat3)?.vec.Y ?? float.NaN;
+    float r = (back?.properties[roll].variable as ReeLib.Efx.Structs.Pt.PtBehaviorVariableFloat)?.value ?? float.NaN;
+    Check(applied == 2 && skipped.Length == 0 && y == .5f && r == 45f, "PtBehavior: edited Extent.Y and RandomRollRange survive a write and read back",
+        $"written {applied}, Extent.Y {y}, RandomRollRange {r}, {Path.GetFileName(decalPath)}");
+    string roar = Directory.EnumerateFiles(stm, "efd_0015_ao_wp5826_roar_0000.efx.3539837", SearchOption.AllDirectories).First();
+    var row = PreviewEffectGraph.Read(roar).Nodes.SelectMany(n => n.Rows).FirstOrDefault(r => r.Label.StartsWith("PtBehavior", StringComparison.Ordinal));
+    Check(row is { Label: "PtBehavior [EffectRadialBlur]" } && row.Tooltip!.Contains("BlurPower"),
+        "graph: a PtBehavior row names its script class and lists the parameters in the tooltip", row?.Label);
+}
+
+// 13. Optional: large official files.
 if (args.Contains("--corpus"))
 {
     var corpus = new[]
