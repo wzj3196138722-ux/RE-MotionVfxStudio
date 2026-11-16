@@ -261,7 +261,9 @@ public sealed class PreviewEditorSession : IDisposable
             var inspection=new PreviewInspection(documentId,state.Revision,manifest.EntryPosition,attributeIndex,
                 lastReply!["fields"]?.Deserialize<PreviewFieldInfo[]>(Json)??[],
                 lastReply["colorGroups"]?.Deserialize<PreviewColorGroup[]>(Json)??[],
-                (lastReply["curves"] as JsonArray)?.Count??0);
+                (lastReply["curves"] as JsonArray)?.Count??0,
+                lastReply["curves"]?.Deserialize<PreviewCurveInfo[]>(Json)??[],
+                lastReply["clipChannels"]?.Deserialize<string[]>(Json));
             State=state with {Inspection=inspection};return State;
         }
         finally {gate.Release();}

@@ -306,7 +306,27 @@ using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == deadSc
     finally { client.WorldTrack = null; }
 }
 
-// 9. Optional: large official files.
+// 9. Clip evaluation against re4.exe: sakebi's EmitterColorClip alpha (keys 0:0 L, 5:255 L, 200:255 L,
+// 215:0 Discrete, 300:0 L) as the native emulator wrote it to emitter +0x137 after ticks 1-8, 196-216 and 296-305.
+{
+    var keys = new PreviewCurveMath.Key[] { new(0, 0, "Type2"), new(5, 255, "Type2"), new(200, 255, "Type2"), new(215, 0, "Type1"), new(300, 0, "Type2") };
+    var measured = new Dictionary<int, int>();
+    int[] start = [0, 51, 102, 153, 204, 255, 255, 255];
+    for (int i = 0; i < start.Length; i++) measured[1 + i] = start[i];
+    int[] fall = [255, 255, 255, 255, 255, 255, 238, 221, 204, 187, 170, 153, 136, 119, 102, 85, 68, 51, 34, 17, 0, 0];
+    for (int i = 0; i < fall.Length; i++) measured[196 + i] = fall[i];
+    int[] wrap = [0, 0, 0, 0, 0, 0, 0, 51, 102, 153];   // ticks 296-305: t 295..300, then 0, 1, 2, 3
+    for (int i = 0; i < wrap.Length; i++) measured[296 + i] = wrap[i];
+    // Discrete measured separately: with the key at 300 set to 255, alpha held 0 through t 299 and was 255 at t 300.
+    var held = keys.ToArray(); held[4] = held[4] with { Value = 255 };
+    bool holdOk = PreviewCurveMath.Evaluate(held, 299) == 0 && PreviewCurveMath.Evaluate(held, 300) == 255 && PreviewCurveMath.Evaluate(held, 250) == 0;
+    var bad = measured.Where(m => (int)MathF.Round(PreviewCurveMath.Evaluate(keys, PreviewCurveMath.EmitterClipTime(m.Key, 300))) != m.Value)
+        .Select(m => $"tick {m.Key}: {PreviewCurveMath.Evaluate(keys, PreviewCurveMath.EmitterClipTime(m.Key, 300)):0.#} vs {m.Value}").ToArray();
+    Check(bad.Length == 0 && holdOk, "clip evaluation (linear, discrete, loop of duration + 1 frames) matches re4.exe on EmitterColorClip",
+        string.Join("; ", bad.Take(4)) + (holdOk ? "" : " discrete hold differs"));
+}
+
+// 10. Optional: large official files.
 if (args.Contains("--corpus"))
 {
     var corpus = new[]

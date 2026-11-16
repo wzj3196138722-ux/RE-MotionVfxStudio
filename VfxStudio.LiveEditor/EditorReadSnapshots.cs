@@ -44,6 +44,10 @@ internal sealed partial class EditorEngine
             {
                 fields = analysis.Fields.Select(x => x.Description),
                 curves = analysis.Curves.Select(CurveEditor.Inspect),
+                // Names of the clip's animated components in channel order (set ClipBits, lowest bit first).
+                clipChannels = selected is ReeLib.Efx.IClipAttribute clip && clip.ClipBits != null
+                    ? Enumerable.Range(0, clip.ClipBits.BitCount).Where(clip.ClipBits.HasBit).Select(b => clip.ClipBits.GetBitName(b) ?? $"bit {b}").ToArray()
+                    : null,
                 expressionCurves = ExpressionInspector.Inspect(selected),
                 colorGroups = ColorEditor.Inspect(selected, analysis.Fields)
             }, Host.Json)!.AsObject();
@@ -62,8 +66,8 @@ internal sealed partial class EditorEngine
                 inspectionSnapshots.Add(key, cached); inspectionSnapshotBytes += size;
             }
         }
-        foreach (string field in new[] { "fields", "curves", "expressionCurves", "colorGroups" })
-            response[field] = cached.Snapshot[field]!.DeepClone();
+        foreach (string field in new[] { "fields", "curves", "expressionCurves", "colorGroups", "clipChannels" })
+            response[field] = cached.Snapshot[field]?.DeepClone();   // clipChannels is null for non-clip attributes
     }
 
     private JsonNode? DocumentInfo()

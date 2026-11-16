@@ -143,7 +143,9 @@ internal static class PreviewControlReports
         ["revision"] = reply["revision"]?.DeepClone(),
         ["fields"] = reply["fields"]?.DeepClone() ?? new JsonArray(),
         ["colorGroups"] = reply["colorGroups"]?.DeepClone() ?? new JsonArray(),
-        ["curves"] = reply["curves"]?.DeepClone() ?? new JsonArray()
+        ["curves"] = reply["curves"]?.DeepClone() ?? new JsonArray(),
+        // Clip attributes: the animated component of each curve channel, in channel order (for example ["A"]).
+        ["clipChannels"] = reply["clipChannels"]?.DeepClone()
     };
 
     public static JsonArray Vector(Vector3 value) => new(Finite(value.X), Finite(value.Y), Finite(value.Z));

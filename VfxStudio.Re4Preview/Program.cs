@@ -68,6 +68,7 @@ if(idleBenchmark!=null && (latencyBenchmark!=null || options.ContainsKey("benchm
     throw new ArgumentException("空闲测量不能与其他自动测量模式同时启用。");
 var editPanel = new PreviewEditPanel();
 PreviewGraphPanel? graphPanel = null;
+var curvePanel = new PreviewCurvePanel();
 // A file dropped on the window: waiting (pendingOpen), or waiting for the user to discard unsaved edits (dropConfirm).
 string? pendingOpen = null, dropConfirm = null;
 bool dropDiscardAccepted = false;
@@ -105,6 +106,13 @@ int quality=options.GetValueOrDefault("quality","auto") switch { "full"=>1,"half
 int particleDivisor=1;
 uint presentFbo=0;
 bool showPoints=false;
+// Docking: panels dock to the window edges (and float again when dragged off); the scene renders into the
+// dockspace's central node. Automated runs keep the old full-window layout so their measurements stay comparable.
+bool docking=!(options.ContainsKey("smoke") || options.ContainsKey("benchmark") || latencyBenchmark!=null || idleBenchmark!=null);
+bool resetLayout=false;
+string layoutFile=Path.Combine(repo,"runtime","re4-preview","imgui-layout.ini");
+IntPtr layoutFileName=IntPtr.Zero;
+(int X,int Y,int W,int H) sceneRect=(0,0,1,1);   // framebuffer pixels, GL origin (bottom left)
 bool demoMotion=false;
 void SetDemoMotion(bool on)
 {
@@ -247,6 +255,11 @@ void HandleDroppedFile()
         ImGui.EndPopup();
     }
 }
+async Task<PreviewEditorState> SendCurveKey(PreviewEditCommand command)
+{
+    try { return (await editor.SendRawAsync("curve_key",command.Body!,command.Revision)).State; }
+    catch(PreviewBackendException ex) { throw new InvalidOperationException("曲线修改失败："+ex.Message); }
+}
 void StartEditorCommand(PreviewEditCommand command, bool warmup=false)
 {
     if(editTask!=null) return;
@@ -261,6 +274,7 @@ void StartEditorCommand(PreviewEditCommand command, bool warmup=false)
         "inspect" => editor.InspectAsync(command.DocumentId!,command.Revision,command.AttributeIndex),
         "open_saved" => editor.OpenSavedAsync(),
         "select_entry" => editor.SelectEntryAsync(command.EntryPosition),
+        "curve_key" => SendCurveKey(command),
         "open_source" => OpenOriginal(),
         _ => editor.CommandAsync(command.Action,command.SavePath)
     });
@@ -609,8 +623,11 @@ void ContinueControl(PreviewControlRequest job)
             var state=job.EditTask.Result;
             if(job.Action=="inspect")
             {
-                var result=PreviewControlReports.Inspection(job.BackendReply!,PreviewControlReports.Int(a,"attributeIndex",0,4096));
+                int inspectedAttribute=PreviewControlReports.Int(a,"attributeIndex",0,4096);
+                var result=PreviewControlReports.Inspection(job.BackendReply!,inspectedAttribute);
                 result["document"]=PreviewControlReports.Document(state);
+                // The window's property panel and curve timeline follow what the AI looks at (never over a draft).
+                if(state.Manifest is {} m) result["windowFocused"]=editPanel.Focus(new PreviewGraphPick(m.EntryPosition,inspectedAttribute));
                 job.Succeed(result);
             }
             else if(job.Action=="save_copy") job.Succeed(new JsonObject{["savedPath"]=state.SavedPath,["document"]=PreviewControlReports.Document(state)});
@@ -776,6 +793,12 @@ void DrawEntrySelector()
     if(editPanel.HasUnappliedChanges && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip("先应用或放弃属性草稿，再切换 entry。");
     ImGui.Checkbox("只显示所选 entry",ref soloSelected);
     if(graphPanel!=null) {ImGui.SameLine();ImGui.Checkbox("节点图",ref graphPanel.Visible);}
+    ImGui.SameLine();ImGui.Checkbox("曲线时间轴",ref curvePanel.Visible);
+    if(docking)
+    {
+        if(ImGui.SmallButton("重置布局")) {resetLayout=true;curvePanel.Visible=true;if(graphPanel!=null) graphPanel.Visible=true;}
+        if(ImGui.IsItemHovered()) ImGui.SetTooltip("面板可拖到窗口四边停靠，拖动标题栏离开即可浮动；这里恢复默认停靠布局。");
+    }
     ImGui.TextDisabled("把 .efx 文件拖进窗口即可打开");
     if(current?.Excluded is {} reason) ImGui.TextColored(new Vector4(1,.75f,.35f,1),"所选 entry 未显示："+reason);
     var native=scene.Entries.Where(e=>e.Excluded?.StartsWith("原生模拟器")==true).ToArray();
@@ -790,10 +813,23 @@ window.Load += () =>
 {
     gl = GL.GetApi(window);
     input = window.CreateInput();
-    gui = new ImGuiController(gl, window, input);
+    // Runs before the controller's first NewFrame: docking and the layout file must be set by then.
+    unsafe void ConfigureImGui()
+    {
+        var io = ImGui.GetIO();
+        io.IniFilename = null;
+        if(!docking) return;
+        io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
+        Directory.CreateDirectory(Path.GetDirectoryName(layoutFile)!);
+        resetLayout=!File.Exists(layoutFile);
+        // ImGui keeps the pointer: allocated once for the window's lifetime.
+        layoutFileName=System.Runtime.InteropServices.Marshal.StringToCoTaskMemUTF8(layoutFile);
+        io.IniFilename=(byte*)layoutFileName;
+    }
+    gui = new ImGuiController(gl, window, input, ConfigureImGui);
     graphPanel = new PreviewGraphPanel();
     window.FileDrop += files => { if (files.Length > 0) { pendingOpen = files[0]; dropDiscardAccepted = false; } };
-    unsafe { var io = ImGui.GetIO(); io.IniFilename = null; }
+
     grid = new ViewportGridRenderer(gl);
     points = new ParticlePointRenderer(gl);
     hdr=new PreviewHdrPipeline(gl,window.FramebufferSize.X,window.FramebufferSize.Y);
@@ -828,7 +864,7 @@ window.Update += dt =>
             // AI edits ("ai:*") never discard the panel's draft; mutations are refused while one exists.
             // Structural edits shift attribute indices, so the panel starts over on the new list.
             if(editAction is "ai:add_attribute" or "ai:remove_attribute" or "ai:paste_attribute") editPanel=new PreviewEditPanel();
-            editPanel.Reset(editorState,discardDraft:editAction is "fields" or "billboard" or "life" or "open" or "open_source" or "open_saved" or "ai:open");
+            editPanel.Reset(editorState,discardDraft:editAction is "fields" or "billboard" or "life" or "open" or "open_source" or "open_saved" or "ai:open" or "curve_key");
             if(editorState.Manifest is { } manifest && manifest.Revision==editorState.Revision)
                 QueuePreview(manifest,editAction switch { "open" or "open_source" or "ai:open" => false, "open_saved" => true, _ => (bool?)null },force:editAction is "publish_offline_preview" or "open_source",restart:editAction is "open" or "open_source" or "open_saved" or "ai:open");
             if(editorState.PublicationError!=null) editError="文档已保留，预览发布失败，可重试或撤销。";
@@ -973,14 +1009,49 @@ window.Update += dt =>
     UpdateControl();
     if(closeRequested) window.Close();
 };
+unsafe void UpdateDockspace()
+{
+    var viewport=ImGui.GetMainViewport();
+    uint dockspace=ImGui.GetID("Re4PreviewDockspace");
+    if(resetLayout)
+    {
+        resetLayout=false;
+        // Default: main panel left, property panel right, node graph and curve timeline along the bottom.
+        ImGuiP.DockBuilderRemoveNode(dockspace);
+        ImGuiP.DockBuilderAddNode(dockspace,(ImGuiDockNodeFlags)(1<<10)|ImGuiDockNodeFlags.PassthruCentralNode);   // 1<<10 = DockSpace
+        ImGuiP.DockBuilderSetNodeSize(dockspace,viewport.Size);
+        uint left,rest,right,center,bottom,middle,bottomLeft,bottomRight;
+        ImGuiP.DockBuilderSplitNode(dockspace,ImGuiDir.Left,.24f,&left,&rest);
+        ImGuiP.DockBuilderSplitNode(rest,ImGuiDir.Right,.34f,&right,&center);
+        ImGuiP.DockBuilderSplitNode(center,ImGuiDir.Down,.36f,&bottom,&middle);
+        ImGuiP.DockBuilderSplitNode(bottom,ImGuiDir.Left,.5f,&bottomLeft,&bottomRight);
+        ImGuiP.DockBuilderDockWindow("RE4 原生预览 · P2",left);
+        ImGuiP.DockBuilderDockWindow("EFX 属性编辑",right);
+        ImGuiP.DockBuilderDockWindow("EFX 节点图",bottomLeft);
+        ImGuiP.DockBuilderDockWindow("曲线时间轴",bottomRight);
+        ImGuiP.DockBuilderFinish(dockspace);
+    }
+    ImGui.DockSpaceOverViewport(dockspace,viewport,ImGuiDockNodeFlags.PassthruCentralNode);
+    // The scene fills the central node (what docked panels leave free), in framebuffer pixels.
+    var central=ImGuiP.DockBuilderGetCentralNode(dockspace);
+    var scale=ImGui.GetIO().DisplayFramebufferScale;
+    int fbW=Math.Max(1,window.FramebufferSize.X), fbH=Math.Max(1,window.FramebufferSize.Y);
+    if(central.IsNull || central.Size.X<16 || central.Size.Y<16) {sceneRect=(0,0,fbW,fbH);return;}
+    var pos=central.Pos-viewport.Pos;
+    int x=Math.Clamp((int)MathF.Round(pos.X*scale.X),0,fbW-1), top=Math.Clamp((int)MathF.Round(pos.Y*scale.Y),0,fbH-1);
+    int w=Math.Clamp((int)MathF.Round(central.Size.X*scale.X),1,fbW-x), h=Math.Clamp((int)MathF.Round(central.Size.Y*scale.Y),1,fbH-top);
+    sceneRect=(x,fbH-top-h,w,h);
+}
 window.Render += _ =>
 {
+    if(docking) UpdateDockspace();
+    else sceneRect=(0,0,Math.Max(1,window.FramebufferSize.X),Math.Max(1,window.FramebufferSize.Y));
     gl.Viewport(0, 0, (uint)window.FramebufferSize.X, (uint)window.FramebufferSize.Y);
-    hdr.Resize(Math.Max(1,window.FramebufferSize.X),Math.Max(1,window.FramebufferSize.Y));
+    hdr.Resize(sceneRect.W,sceneRect.H);
     hdr.BeginScene(.0025f,.0035f,.006f,1);
     gl.Enable(EnableCap.DepthTest);
     var view = camera.GetViewMatrix();
-    var projection = camera.GetProjectionMatrix(window.FramebufferSize.X / (float)Math.Max(1, window.FramebufferSize.Y));
+    var projection = camera.GetProjectionMatrix(sceneRect.W / (float)Math.Max(1, sceneRect.H));
     grid.Render(view, projection);
     // Soft particles sample the opaque scene's depth; particles still depth-test against the attachment.
     hdr.CopyOpaqueDepth();
@@ -1032,7 +1103,12 @@ window.Render += _ =>
     gl.FramebufferTexture2D(FramebufferTarget.ReadFramebuffer,FramebufferAttachment.ColorAttachment0,TextureTarget.Texture2D,hdr.FinalColorTexture,0);
     gl.ReadBuffer(ReadBufferMode.ColorAttachment0);
     gl.BindFramebuffer(FramebufferTarget.DrawFramebuffer,0);
-    gl.BlitFramebuffer(0,0,hdr.Width,hdr.Height,0,0,window.FramebufferSize.X,window.FramebufferSize.Y,ClearBufferMask.ColorBufferBit,BlitFramebufferFilter.Linear);
+    if(docking)
+    {
+        // Behind docked panels (and any gap) the window shows the scene's background colour.
+        gl.ClearColor(.03f,.035f,.05f,1); gl.Clear(ClearBufferMask.ColorBufferBit);
+    }
+    gl.BlitFramebuffer(0,0,hdr.Width,hdr.Height,sceneRect.X,sceneRect.Y,sceneRect.X+sceneRect.W,sceneRect.Y+sceneRect.H,ClearBufferMask.ColorBufferBit,BlitFramebufferFilter.Linear);
     if(captureRequest is {Pixels:null} shot && frame!=null && sceneRendered && frame.Tick==shot.Tick)
     {
         // The tone-mapped scene without the UI; presentFbo is still bound for reading.
@@ -1129,9 +1205,19 @@ window.Render += _ =>
     if(editCommand!=null) StartEditorCommand(editCommand);
     string? graphLock=editTask!=null?"编辑器忙，稍候再选":editPanel.HasUnappliedChanges?"先应用或放弃属性草稿，再从节点图选择":stress!=0?"压力模式下不能编辑":null;
     var manifest=editorState?.Manifest;
+    var inspected=editorState?.Inspection;
+    if(inspected!=null && (manifest==null || inspected.DocumentId!=manifest.DocumentId || inspected.EntryPosition!=manifest.EntryPosition ||
+        inspected.AttributeIndex!=editPanel.SelectedAttribute || inspected.Revision!=editorState!.Revision)) inspected=null;
+    string? curveAttributeType=editorState?.Attributes?.FirstOrDefault(a=>a.Index==editPanel.SelectedAttribute)?.Type;
+    if(curvePanel.Draw(inspected,curveAttributeType,playback.DisplayedTick,graphLock) is {} curveBody && editorState!=null)
+    {
+        curveBody["target"]=AttributeTarget(editPanel.SelectedAttribute);
+        StartEditorCommand(new PreviewEditCommand("curve_key",editorState.Revision,Body:curveBody));
+    }
     if(graphPanel?.Draw(scene?.Graph,manifest?.DocumentId,manifest==null?null:Path.GetFileName(manifest.Source),manifest?.EntryPosition,
         editPanel.SelectedAttribute,graphLock) is {} pick && editorState!=null && editPanel.Focus(pick) && pick.EntryPosition!=manifest?.EntryPosition)
         StartEditorCommand(new PreviewEditCommand("select_entry",editorState.Revision,EntryPosition:pick.EntryPosition));
+    gl.Viewport(0,0,(uint)Math.Max(1,window.FramebufferSize.X),(uint)Math.Max(1,window.FramebufferSize.Y));   // the scene left it at the central node
     gui.Render();
     if(frame!=null && displayedManifest!=null && sceneRendered)
         latency?.Rendered(displayedManifest.Key,frame.Tick,playback.IsPlaying,()=>gl.Finish());

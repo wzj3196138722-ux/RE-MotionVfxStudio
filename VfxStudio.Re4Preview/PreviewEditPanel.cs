@@ -7,7 +7,8 @@ using VfxStudio.Re4Render;
 namespace VfxStudio.Re4Preview;
 
 internal sealed record PreviewEditCommand(string Action,long Revision=0,BillboardEdit? Billboard=null,
-    LifeEdit? Life=null,string? SavePath=null,PreviewFieldBatch? Batch=null,int AttributeIndex=-1,string? DocumentId=null,int EntryPosition=-1);
+    LifeEdit? Life=null,string? SavePath=null,PreviewFieldBatch? Batch=null,int AttributeIndex=-1,string? DocumentId=null,int EntryPosition=-1,
+    System.Text.Json.Nodes.JsonObject? Body=null);
 
 internal sealed class PreviewEditPanel
 {

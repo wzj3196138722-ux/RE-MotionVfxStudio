@@ -9,7 +9,14 @@ public sealed record PreviewColorChannel(string Component, string Path, int Valu
 public sealed record PreviewColorGroup(string Path, string Label, string Storage, int Scale, bool Hdr,
     bool Editable, string? Reason, PreviewColorChannel[] Channels);
 public sealed record PreviewInspection(string DocumentId, long Revision, int EntryPosition, int AttributeIndex,
-    PreviewFieldInfo[] Fields, PreviewColorGroup[] ColorGroups, int CurveCount);
+    PreviewFieldInfo[] Fields, PreviewColorGroup[] ColorGroups, int CurveCount,
+    PreviewCurveInfo[]? Curves = null, string[]? ClipChannels = null);
+/// <summary>A curve key as the backend reports it (exact protocol text). Interpolation: Type1 holds the value until
+/// the next key, Type2 is linear (both measured in re4.exe); Bezier carries tangents.</summary>
+public sealed record PreviewCurveKey(int Index, string Time, string Value, string Interpolation,
+    string? OutX = null, string? OutY = null, string? InX = null, string? InY = null);
+public sealed record PreviewCurveChannel(int Index, string ValueType, PreviewCurveKey[] Keys);
+public sealed record PreviewCurveInfo(string Path, bool Editable, string? Reason, string Duration, PreviewCurveChannel[] Channels);
 public sealed record PreviewFieldEdit(string Path, string Value);
 public sealed record PreviewFieldBatch(PreviewInspection Inspection, PreviewFieldEdit[] Fields);
 
