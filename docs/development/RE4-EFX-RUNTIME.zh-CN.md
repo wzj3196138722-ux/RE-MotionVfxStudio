@@ -1296,7 +1296,7 @@ lit / unlit 按 BlendType：0、2、4 直接相加；1 Physical：lit 乘增益 
 | 3 | Blink 系数 `blink` = p[+0x50]（默认 1.0） | 已确认 | BL |
 | 4 | 顶点颜色：RGB = 粒子 RGB；`A = trunc(粒子A · life/255 · blink)`（Billboard3D 3d16a62；条带 3d03ad0 同式） | 已确认 | BL, RT |
 | 5 | 顶点着色器：A ×= `dof · FadeByDepth k · max(FadeByAngle, FadeByEmitterAngle)`；< 2⁻²³ 剔除 | 已确认（GpuParticleVS）；CPU 家族部分待确认 | FBD, FBA, SFD |
-| 6 | 像素着色器：纹素采样（UVSequence 矩形、FrameBlend、UVScroll）、TextureFilter 整形 | 部分待确认 | SFD, UVS |
+| 6 | 像素着色器：纹素采样（UVSequence 矩形、FrameBlend、UVScroll）；TexelChannelOperator 把纹素换成黑体色（Krystek 色度近似 → sRGB，乘 EmissiveRate·(T·4e-4)⁴，色相偏移、去饱和、加阴影色；常量 cbTexelChannelOperatorParam @512 由 CPU 打包）；TextureFilter 整形 `a' = (t²(3−2t)·a)^x`，`t = saturate((a−z)/(y−z))`，(x,y,z) = cbTextureFilter @432，无该属性时为恒等的 (1,0,0)，字段对应推定为 (TexelAlphaRate, HPThreshold, HPMinValue)；细节见 RE4-EFX-PREVIEW-P3-APPEARANCE | TCO 与 TextureFilter 公式已确认（pv4 b013、pv0 b020）；TextureFilter 字段对应、FrameBlend 采样部分待确认 | SFD, UVS, pv0/pv4 着色器 |
 | 7 | AlphaCorrection 按模式重映射 alpha | 已确认（GPU Billboard）；CPU 家族部分待确认 | AC |
 | 8 | RgbCommon / RgbWater 替换颜色计算（若存在） | 已确认（pv0/b020） | RW |
 | 9 | ColorRate、Intensity、EdgeBlendRange、AlphaRate、ShaderSettings.DetonemapRatio 进入最终颜色的方式 | 未读 | SHE, SS |

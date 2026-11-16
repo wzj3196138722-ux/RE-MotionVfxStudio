@@ -17,9 +17,15 @@ import re4native as rn
 
 HEADER = 256
 SLOT_HEADER = 64
-ENTRY_SIZE = 128
+ENTRY_SIZE = 160
 STRIDE = 0x140
-VERSION = 2
+VERSION = 3
+# Drawable Type attribute -> companion attributes allowed with it (Expression / Clip).
+DRAWABLE = {21: {22}, 23: {24}, 63: {64, 65}, 31: set(), 32: {58}}
+# Ribbon types whose engine point pool is exported (RibbonFollow 31, RibbonLength 32): type block +0x38 -> points (0x54 bytes each,
+# slot * points-per-particle), +0x40 -> per-particle state records (0x68 bytes; +0x18 valid points).
+RIBBON_POOLS = {31, 32}
+POINT_STRIDE, RIBBON_STATE_STRIDE = 0x54, 0x68
 IDENTITY = (1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.)
 
 
@@ -80,13 +86,40 @@ class Host:
         self.dts = []
         self.worlds = []
         self.active_entry = None
+        self.world_written = {}
 
     def load(self, cmd):
-        if self.img is not None:
-            raise ValueError('load is once per process; restart for a new document')
+        """First load maps the exe, installs the runtime and records the base snapshot (no emitter
+        yet). Every later load restores that base instead of restarting the process, so a new
+        document costs only the engine's entry parse, emitter build and the load snapshot."""
         start = time.perf_counter()
-        self.img = rn.load(self.args.exe)
-        em.install_runtime(self.img, global_seed=cmd.get('global_seed'))
+        reused = self.img is not None
+        base_ms = 0.
+        if self.mapping is not None:        # the client binds a fresh mapping after every load
+            self.mapping.close()
+            self.mapping = None
+        if not reused:
+            self.img = rn.load(self.args.exe)
+            em.install_runtime(self.img)
+            em._native_table(self.img)      # runs every factory once; cached type table is static data
+            self.base = Snapshot(self.img)
+        else:
+            base_start = time.perf_counter()
+            self.emitters, self.meta = [], []
+            if hasattr(self, 'snapshot'):
+                del self.snapshot
+            self.base.restore()
+            self.world_written = {}
+            base_ms = (time.perf_counter() - base_start) * 1000
+        em.UVS_COUNTS.clear()
+        em.UVS_SHAPE[:] = [4, 16]
+        # The engine's global generator (d6a3150..5c) is zero in a fresh image; the base snapshot
+        # holds that zero state, so a given seed is written the same way on first and later loads.
+        seed = cmd.get('global_seed') or [0, 0, 0, 0]
+        if len(seed) != 4:
+            raise ValueError('global_seed must have 4 values')
+        for i, v in enumerate(seed):
+            rn.set_u32(rn.IMAGE_BASE + 0xD6A3150 + 4 * i, int(v) & 0xFFFFFFFF)
         for path, counts in cmd.get('uvs_resources', {}).items():
             if not counts or len(counts) > 256 or any(not isinstance(n, int) or not 1 <= n <= 256 for n in counts):
                 raise ValueError('UVS sequence sizes must be in 1..256')
@@ -104,40 +137,68 @@ class Host:
             raise ValueError('expected 1..64 entries')
         self.meta = []
         data_offset = SLOT_HEADER + ENTRY_SIZE * len(specs)
+        skipped = []
         for i, spec in enumerate(specs):
             self.active_entry = i
-            stress = int(spec.get('stress_particles', 0))
-            if not 0 <= stress <= 10000:
-                raise ValueError('stress_particles must be 0..10000')
-            entry = em.Entry(self.img, spec['path'], int(spec['offset']), drop_types=spec.get('drop_types', ()), spawn_override=stress)
-            # P0 is deliberately limited to CPU Billboard3D fixtures / entries.
-            types = [a['type'] for a in entry.attrs if 21 <= a['type'] <= 76]
-            if types != [23]:
-                raise ValueError(f'P0 requires TypeBillboard3D (23), found {types}')
-            spawn = next(a for a in entry.attrs if a['type'] == 16)
-            capacity = rn.u32(spawn['attr'] + 0x28)
-            if capacity > 10000:
-                raise ValueError('MaxParticles exceeds P0 safety limit 10000')
-            # Size the placement buffer conservatively: side data and attribute blocks also live here.
-            e = em.Emitter(self.img, entry, e_size=max(1 << 20, capacity * 8192 + (1 << 20)))
-            e.play()
-            self.emitters.append(e)
-            n, side = e.max_particles, rn.u32(e.E + 0x148)
-            pbytes, sbytes = n * STRIDE, n * side
-            self.meta.append(dict(entry=entry.index, type=23, capacity=n, stride=STRIDE,
-                                  side_stride=side, particles=data_offset, particle_bytes=pbytes,
-                                  side=data_offset + pbytes, side_bytes=sbytes, block=data_offset + pbytes + sbytes, block_bytes=0x2f8))
-            data_offset += pbytes + sbytes + 0x2f8
+            try:
+                stress = int(spec.get('stress_particles', 0))
+                if not 0 <= stress <= 10000:
+                    raise ValueError('stress_particles must be 0..10000')
+                entry = em.Entry(self.img, spec['path'], int(spec['offset']), drop_types=spec.get('drop_types', ()), spawn_override=stress)
+                # Drawable CPU types: Billboard2D 21, Billboard3D 23, Polygon 63, each with its own
+                # Expression / Clip companions, which only rewrite the type block.
+                types = [a['type'] for a in entry.attrs if 21 <= a['type'] <= 76]
+                primary = [t for t in types if t in DRAWABLE]
+                if len(primary) != 1 or not set(types) <= {primary[0]} | DRAWABLE[primary[0]]:
+                    raise ValueError(f'requires one of Billboard2D (21), Billboard3D (23), Polygon (63) with its companions; found {types}')
+                type_id = primary[0]
+                spawn = next(a for a in entry.attrs if a['type'] == 16)
+                capacity = rn.u32(spawn['attr'] + 0x28)
+                if capacity > 10000:
+                    raise ValueError('MaxParticles exceeds P0 safety limit 10000')
+                # Size the placement buffer conservatively: side data and attribute blocks also live here.
+                e = em.Emitter(self.img, entry, e_size=max(1 << 20, capacity * 8192 + (1 << 20)))
+                e.play()
+                n, side = e.max_particles, rn.u32(e.E + 0x148)
+                pbytes, sbytes = n * STRIDE, n * side
+                meta = dict(entry=entry.index, type=type_id, capacity=n, stride=STRIDE,
+                            side_stride=side, particles=data_offset, particle_bytes=pbytes,
+                            side=data_offset + pbytes, side_bytes=sbytes, block=data_offset + pbytes + sbytes, block_bytes=0x2f8,
+                            strip=0, strip_bytes=0, strip_points=0, strip_state=0, strip_state_bytes=0)
+                data_offset += pbytes + sbytes + 0x2f8
+                if type_id in RIBBON_POOLS:
+                    # Points per particle come from the file ((ShapeDivision-1)*SplineDivision + ShapeDivision);
+                    # the state records are only filled on the first update, after this snapshot.
+                    per = int(spec.get('ribbon_points', 0))
+                    if not 2 <= per <= 1000 * 1000:
+                        raise ValueError('ribbon entries need ribbon_points (points per particle)')
+                    meta.update(strip=data_offset, strip_bytes=n * per * POINT_STRIDE, strip_points=per)
+                    data_offset += meta['strip_bytes']
+                    meta.update(strip_state=data_offset, strip_state_bytes=n * RIBBON_STATE_STRIDE)
+                    data_offset += meta['strip_state_bytes']
+                self.emitters.append(e)
+                self.meta.append(meta)
+            except (rn.NativeFault, rn.UnresolvedImportCalled):
+                raise  # the image may be damaged: fatal
+            except Exception as ex:
+                # A Python-level refusal (unsupported attribute, missing factory, bad value) leaves the
+                # image intact: skip this entry and keep loading the rest. Its arena allocations stay
+                # until the next base-snapshot restore.
+                skipped.append(dict(entry=i, kind=type(ex).__name__, message=str(ex)))
+        if not self.emitters:
+            raise ValueError('no entry could be built: ' + '; '.join(f"{s['entry']}: {s['message']}" for s in skipped))
         self.active_entry = None
         self.slot_bytes = (data_offset + 63) & ~63
         self.track_capacity = 36000
         self.input_offset = HEADER + 3 * self.slot_bytes
         self.mapping_bytes = self.input_offset + self.track_capacity * 68
         self.snapshot = Snapshot(self.img)
+        self.world_written = {}
         self.set_track([1 / 60] * 3600, [])
         return dict(entries=self.meta, slot_bytes=self.slot_bytes, mapping_bytes=self.mapping_bytes,
                     input_offset=self.input_offset, track_capacity=self.track_capacity,
-                    snapshot_bytes=self.snapshot.bytes, load_ms=(time.perf_counter() - start) * 1000)
+                    snapshot_bytes=self.snapshot.bytes, load_ms=(time.perf_counter() - start) * 1000,
+                    reused=reused, base_restore_ms=base_ms, skipped=skipped)
 
     def set_track(self, dts, worlds):
         if not dts or any(not math.isfinite(v) or v <= 0 or v > 1 for v in dts):
@@ -148,6 +209,7 @@ class Host:
         self.worlds = worlds
         if hasattr(self, 'snapshot'):
             self.snapshot.restore()
+            self.world_written = {}
         self.tick, self.elapsed = 0, 0.
 
     def bind(self, cmd):
@@ -177,6 +239,7 @@ class Host:
         restore_ms = 0.
         if target < self.tick:
             self.snapshot.restore()
+            self.world_written = {}
             self.tick, self.elapsed = 0, 0.
             restore_ms = (time.perf_counter() - start) * 1000
         sim_start = time.perf_counter()
@@ -187,7 +250,11 @@ class Host:
                 rows = [matrix[i:i + 4] for i in range(0, 16, 4)]
                 for i, e in enumerate(self.emitters):
                     self.active_entry = i
-                    e.set_world(rows)
+                    # U+0x40 is only written here: skip the write while the matrix is unchanged.
+                    # A snapshot restore rewinds U as well, so the cache is cleared with it.
+                    if self.world_written.get(i) != matrix:
+                        e.set_world(rows)
+                        self.world_written[i] = matrix
                     e.tick(dt)
                 self.tick += 1
                 self.elapsed += dt
@@ -198,6 +265,7 @@ class Host:
             # Some emitters of this tick may have advanced and others not. Rewind to the load
             # snapshot so the next request replays from tick 0; the error itself stays non-fatal.
             self.snapshot.restore()
+            self.world_written = {}
             self.tick, self.elapsed = 0, 0.
             raise RecoveredError(f'{type(ex).__name__}: {ex}; state rewound to tick 0') from ex
         self.active_entry = None
@@ -220,7 +288,18 @@ class Host:
                 length = meta['particle_bytes' if key == 'particles' else 'side_bytes']
                 if length:
                     ctypes.memmove(address + base + meta[key], ptr, length)
-            ctypes.memmove(address + base + meta['block'], e.block_of(23), meta['block_bytes'])
+            block = e.block_of(meta['type'])
+            ctypes.memmove(address + base + meta['block'], block, meta['block_bytes'])
+            struct.pack_into('<8I', self.mapping, pos + 128, meta['strip'], meta['strip_bytes'], POINT_STRIDE if meta['strip_bytes'] else 0,
+                             meta['strip_points'], meta['strip_state'], meta['strip_state_bytes'],
+                             RIBBON_STATE_STRIDE if meta['strip_state_bytes'] else 0, 0)
+            if meta['strip_bytes']:
+                points, states = rn.u64(block + 0x38), rn.u64(block + 0x40)
+                if points and states:
+                    ctypes.memmove(address + base + meta['strip'], points, meta['strip_bytes'])
+                    ctypes.memmove(address + base + meta['strip_state'], states, meta['strip_state_bytes'])
+                else:
+                    ctypes.memset(address + base + meta['strip_state'], 0, meta['strip_state_bytes'])
             if cmd.get('diagnostics'):
                 raw = self.mapping[base + meta['particles']:base + meta['particles'] + meta['particle_bytes']]
                 hashes.append(hashlib.sha256(raw).hexdigest())

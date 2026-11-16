@@ -49,8 +49,9 @@ foreach (var test in new[] { ("bb", "60", false), ("bb", "var", false), ("bb2", 
             Check(actual.Age == p.GetProperty("age").GetSingle(), "Age mismatch");
             var xyz = p.GetProperty("pos").EnumerateArray().Select(v=>v.GetSingle()).ToArray();
             for (int k=0;k<3;k++) Check(FrameDecoder.F32(actual.Raw.Span,0x28+k*4) == xyz[k], "Position mismatch");
-            // Decoded world position (identity emitter matrix), not only the raw +0x28 field.
-            Check(actual.Position == new System.Numerics.Vector3(xyz[0],xyz[1],xyz[2]), "Decoded position mismatch");
+            // Decoded world position = local x the particle's reference matrix P (+0x100).
+            var P = ReferenceMatrix(actual.Raw);
+            Check(P.M44 == 1 && actual.Position == System.Numerics.Vector3.Transform(new System.Numerics.Vector3(xyz[0],xyz[1],xyz[2]), P), "Decoded position mismatch");
         }
         hashes.Add(Convert.ToHexString(SHA256.HashData(frame.Arrays[0].Span)));
         costs.Add(frame.SimulationMs);
@@ -82,14 +83,51 @@ foreach (var test in new[] { ("bb", "60", false), ("bb", "var", false), ("bb2", 
     results.Add(new { scene,clock,globalRandom,ticks=reference.Length,replays=2,client.LoadMs,client.SnapshotBytes,restore_ms=restore,mean_tick_ms=costs.Average(),mean_read_decode_ms=decodeCosts.Average(),max_tick_ms=costs.Max(),status="PASS" });
     Console.WriteLine($"PASS {scenario}: direct comparison + two complete replays");
 }
+// Same-process reload: a document loaded into a reused worker (base snapshot restore) must give
+// the same per-tick particle arrays as the same document in a fresh worker.
+{
+    async Task<List<string>> Digests(NativePreviewClient c, int ticks)
+    {
+        var list = new List<string>();
+        for (int tick = 1; tick <= ticks; tick++)
+        {
+            using var f = await c.FrameAsync(tick);
+            list.Add(Convert.ToHexString(SHA256.HashData(f.Arrays[0].Span)));
+        }
+        return list;
+    }
+    object Load(string fixture, bool noFrg) => new { command = "load", fixture,
+        drop_types = noFrg ? new[] { 1 } : Array.Empty<int>(), global_seed = noFrg ? new[] { 1, 2, 3, 4 } : null };
+    var fresh = new Dictionary<string, List<string>>();
+    foreach (var (fixture, noFrg) in new[] { ("bb2", false), ("bb", false), ("bb", true) })
+    {
+        using var c = new NativePreviewClient(python, script, exe);
+        await c.LoadAsync(Load(fixture, noFrg));
+        Check(!c.LastLoadReused, "First load must start a worker");
+        fresh[fixture + noFrg] = await Digests(c, 120);
+    }
+    using var reused = new NativePreviewClient(python, script, exe);
+    await reused.LoadAsync(Load("bb2", false));
+    var reloads = new List<double>();
+    foreach (var (fixture, noFrg) in new[] { ("bb", false), ("bb", true), ("bb2", false), ("bb2", false), ("bb", false) })
+    {
+        await reused.LoadAsync(Load(fixture, noFrg));
+        Check(reused.LastLoadReused, $"{fixture}: reload did not reuse the worker ({reused.LastRecovery})");
+        reloads.Add(reused.LastLoadWallMs);
+        var digests = await Digests(reused, 120);
+        Check(digests.SequenceEqual(fresh[fixture + noFrg]), $"{fixture} nofrg={noFrg}: reused-worker load differs from a fresh worker");
+    }
+    results.Add(new { check = "same_process_reload", reloads = reloads.Count, mean_reload_ms = reloads.Average(), max_reload_ms = reloads.Max(), status = "PASS" });
+    Console.WriteLine($"PASS same-process reload = fresh worker for bb/bb2/no-FRG; reload {reloads.Average():F0} ms mean, {reloads.Max():F0} ms max");
+}
 // [p+0] bit 12 belongs to the UV sequence number (bits 10-17). Sequences 4-7, 12-15, ... set it;
 // the decoded billboard position must still be +0x28 x emitter matrix, without the +0x34 offset.
 {
-    var packet = new byte[64 + 128 + 2*0x140 + 0x2f8];
+    var packet = new byte[64 + FrameDecoder.EntrySize + 2*0x140 + 0x2f8];
     void W32(int at, uint v) => System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(packet.AsSpan(at), v);
     void WF(int at, float v) => W32(at, (uint)BitConverter.SingleToInt32Bits(v));
     W32(0, 5); W32(4, 1); WF(16, 1f/60);
-    int e = 64, particles = 64 + 128, block = particles + 2*0x140;
+    int e = 64, particles = 64 + FrameDecoder.EntrySize, block = particles + 2*0x140;
     W32(e+8, 2); W32(e+12, 0x140); W32(e+40, (uint)particles); W32(e+44, 2*0x140); W32(e+56, (uint)block); W32(e+60, 0x2f8);
     float[] world = { 1,0,0,0, 0,1,0,0, 0,0,1,0, 5,6,7,1 };
     for (int i = 0; i < 16; i++) WF(e+64+i*4, world[i]);
@@ -109,6 +147,26 @@ foreach (var test in new[] { ("bb", "60", false), ("bb", "var", false), ("bb2", 
     }
 }
 Console.WriteLine("PASS non-zero UV sequence does not offset decoded position");
+// World position = local (+0x28) x the particle's reference matrix P (+0x100); a record without a
+// valid P (w != 1) keeps the entry matrix, as above.
+{
+    var packet = new byte[64 + FrameDecoder.EntrySize + 0x140 + 0x2f8];
+    void W32(int at, uint v) => System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(packet.AsSpan(at), v);
+    void WF(int at, float v) => W32(at, (uint)BitConverter.SingleToInt32Bits(v));
+    W32(0, 5); W32(4, 1);
+    int e = 64, particle = 64 + FrameDecoder.EntrySize, block = particle + 0x140;
+    W32(e+8, 1); W32(e+12, 0x140); W32(e+40, (uint)particle); W32(e+44, 0x140); W32(e+56, (uint)block); W32(e+60, 0x2f8);
+    float[] world = { 1,0,0,0, 0,1,0,0, 0,0,1,0, 5,6,7,1 };
+    for (int i = 0; i < 16; i++) WF(e+64+i*4, world[i]);
+    W32(particle, 1); WF(particle+0x28, 1); WF(particle+0x2c, 2); WF(particle+0x30, 3);
+    // P: 90 degrees about Z (x -> y), then translate (0, -0.5, 0)
+    float[] P = { 0,1,0,0, -1,0,0,0, 0,0,1,0, 0,-0.5f,0,1 };
+    for (int i = 0; i < 16; i++) WF(particle+0x100+i*4, P[i]);
+    using var f = FrameDecoder.Decode(packet, 0, 0, 0);
+    var pos = f.Particles[0].Position;
+    Check(System.Numerics.Vector3.Distance(pos, new System.Numerics.Vector3(-2, 0.5f, 3)) < 1e-5f, $"Position must be local x P, got {pos}");
+}
+Console.WriteLine("PASS decoded position uses the particle reference matrix P");
 // Decoder rejects corrupted/truncated frames instead of interpreting arbitrary memory.
 try { FrameDecoder.Decode(new byte[64],0,0,0); throw new Exception("Corrupt frame accepted"); }
 catch (InvalidDataException) { }
@@ -118,3 +176,13 @@ Console.WriteLine("PASS decoder bounds; native access violation and abrupt exit 
 
 }
 catch(Exception ex) { Console.Error.WriteLine(ex); Environment.ExitCode=1; }
+
+static System.Numerics.Matrix4x4 ReferenceMatrix(ReadOnlyMemory<byte> record)
+{
+    var raw = record.Span;
+    return new System.Numerics.Matrix4x4(
+        FrameDecoder.F32(raw,0x100),FrameDecoder.F32(raw,0x104),FrameDecoder.F32(raw,0x108),FrameDecoder.F32(raw,0x10c),
+        FrameDecoder.F32(raw,0x110),FrameDecoder.F32(raw,0x114),FrameDecoder.F32(raw,0x118),FrameDecoder.F32(raw,0x11c),
+        FrameDecoder.F32(raw,0x120),FrameDecoder.F32(raw,0x124),FrameDecoder.F32(raw,0x128),FrameDecoder.F32(raw,0x12c),
+        FrameDecoder.F32(raw,0x130),FrameDecoder.F32(raw,0x134),FrameDecoder.F32(raw,0x138),FrameDecoder.F32(raw,0x13c));
+}

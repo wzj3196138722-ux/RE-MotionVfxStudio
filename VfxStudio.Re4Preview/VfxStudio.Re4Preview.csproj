@@ -4,5 +4,6 @@
     <ProjectReference Include="../VfxStudio.Re4Render/VfxStudio.Re4Render.csproj" />
     <ProjectReference Include="../VfxStudio.Ui/VfxStudio.Ui.csproj" />
     <PackageReference Include="Silk.NET.Input.Glfw" Version="2.22.0" />
+    <PackageReference Include="Hexa.NET.ImNodes" Version="2.2.9" />
   </ItemGroup>
 </Project>

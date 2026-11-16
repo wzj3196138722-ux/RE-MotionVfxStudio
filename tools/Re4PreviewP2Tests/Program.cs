@@ -51,8 +51,12 @@ try
     var input=Edit(originalParameters) with {Color=Vector4.One,ColorRange=Vector4.One,ColorRate=1f,SizeScalar=new(originalParameters.SizeScalar[0]*2,originalParameters.SizeScalar[1]*2)};
     var watch=System.Diagnostics.Stopwatch.StartNew();
     state=await editor.ApplyBillboardAsync(input,state.Revision);
+    double applyMs=watch.Elapsed.TotalMilliseconds;
     Check(state.Revision==initial.Revision+1 && state.CanUndo && state.Dirty && state.Manifest!.Revision==state.Revision,"Billboard transaction revision/history mismatch");
+    var frameWatch=System.Diagnostics.Stopwatch.StartNew();
     using var changed=await Frame(state.Manifest!,45);
+    double frameMs=frameWatch.Elapsed.TotalMilliseconds;
+    Check(native.LastLoadReused,"Edit reload did not reuse the native worker: "+native.LastRecovery);
     Check(changed.Particles.Count==baseline.Particles.Count,"Size/color edit changed births");
     for(int i=0;i<changed.Particles.Count;i++)
     {
@@ -62,7 +66,9 @@ try
         Check(FrameDecoder.U32(changed.Particles[i].Raw.Span,0x4c)==uint.MaxValue,"Native birth color did not change to white");
     }
     Check(changed.EntryStates!.Single().ColorRate==1,"Native live ColorRate did not update");
-    reports.Add(new{check="color_size_native",status="PASS",edit_to_frame_ms=watch.Elapsed.TotalMilliseconds});
+    reports.Add(new{check="color_size_native",status="PASS",edit_to_frame_ms=watch.Elapsed.TotalMilliseconds,
+        backend_apply_ms=applyMs,native_load_ms=native.LastLoadWallMs,load_and_frame45_ms=frameMs});
+    Console.WriteLine($"TIMING edit->frame {watch.Elapsed.TotalMilliseconds:F0} ms = backend apply {applyMs:F0} + native load {native.LastLoadWallMs:F0} + frame 45 {frameMs-native.LastLoadWallMs:F0}");
     var service=new EfxEditorService("3539837");
     using(var before=service.Load(initial.Path))
     using(var after=service.Load(state.Manifest!.Path))

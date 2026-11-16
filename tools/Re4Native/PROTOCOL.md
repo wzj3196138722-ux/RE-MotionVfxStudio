@@ -1,4 +1,4 @@
-# Re4Native render-host protocol v2 (P0/P1)
+# Re4Native render-host protocol v3
 
 Start `python -I -X utf8 -u re4host.py --exe <re4.exe>`. stdin/stdout are UTF-8 JSON lines; stderr is reserved for logs. Every command can carry `id`, echoed in the reply. Success: `{id, ok:true, ...}`. Error: `{id, ok:false, fatal, error:{kind,message,entry,rva?,backtrace?}}`. After a fatal error the worker exits and its image must never be reused. `load` errors are fatal. Unknown / invalid commands are nonfatal. A non-native error while `frame` advances the emitters rewinds the worker to the load snapshot (the next frame replays from tick 0) and is reported as nonfatal `RecoveredError`; if the rewind itself fails the error is fatal. The host assigns the worker to a kill-on-close job object, so the worker ends with the host even while it is busy.
 
@@ -6,14 +6,16 @@ One command is in flight at a time. The client owns clock and slot selection.
 
 | Command | Request | Response fields |
 |---|---|---|
-| load | `fixture:"bb"/"bb2"` or `entries:[{path,offset,drop_types?}]` (offset is a byte offset), optional `uvs_resources:{path:[frameCount,...]}`, `global_seed:[u32,u32,u32,u32]`; fixture mode also accepts `drop_types` | `entries`, `slot_bytes`, `mapping_bytes`, `input_offset`, `track_capacity`, `snapshot_bytes`, `load_ms` |
+| load | `fixture:"bb"/"bb2"` or `entries:[{path,offset,drop_types?}]` (offset is a byte offset), optional `uvs_resources:{path:[frameCount,...]}`, `global_seed:[u32,u32,u32,u32]`; fixture mode also accepts `drop_types` | `entries`, `slot_bytes`, `mapping_bytes`, `input_offset`, `track_capacity`, `snapshot_bytes`, `load_ms`, `reused`, `base_restore_ms`, `skipped` |
 | bind | `name` of mapping already created by client, size from load | `bound:true` |
 | track | `length`, `matrices:false/true` after writing shared input | `length`; resets simulation to loaded state |
 | frame | `tick` in 0..track length, `slot` in 0..2, optional `diagnostics:true` | `tick,slot,sim_ms,restore_ms,total_ms,hashes,alive`; last two arrays populated only with diagnostics |
 | shutdown | none | exits after successful response |
 | test_fault | `exit:false/true`, only with `--allow-test-faults` | native fault response then exit, or immediate exit code 73 |
 
-`load` is once per worker. To load new bytes, restart worker. Fixed default track: 3600 float32 values of 1/60. Maximum track length: 36000. Ticks are the number of completed native updates; tick 0 is the loaded, play-requested state. Backward seeks restore and replay the exact float32 track. World matrix tracks are service-level plumbing; P0 UI uses identity. New documents currently rebuild all entries.
+Each entry must have exactly one drawable Type: Billboard2D (21, optionally with 22), Billboard3D (23, optionally with 24), Polygon (63, optionally with 64/65) RibbonFollow (31) or RibbonLength (32, optionally with 58); the two ribbon types need `ribbon_points` in their spec. The frame entry's `attribute type` field carries that id and the exported block is that Type's block (0x2f8 bytes copied; Polygon3DConstant at +0x54 for Billboard3D, +0x58 for Polygon; Billboard2D has no such layout). An entry whose build fails at the Python level (an attribute without a native factory, an unsupported Type, a bad value) is left out and listed in `skipped:[{entry, kind, message}]`, where `entry` is its position in the request; the frame entry table then has only the built entries, in request order. A native fault while building is still fatal. The load fails only when no entry could be built.
+
+`load` may be repeated. The first load maps the exe, installs the runtime, builds the factory table and records a base snapshot (no emitter). A later load restores that base snapshot (writable sections, arena, kept ctypes buffers, resource cache), resets the UVS tables and the global generator (zero, or `global_seed`), then parses and builds the new entries and takes a new load snapshot; the reply has `reused:true`. Each load closes the previous shared mapping: the client creates and binds a new one before the next `track` or `frame`. A load error is still fatal; the client then retries once in a new worker. Fixed default track: 3600 float32 values of 1/60. Maximum track length: 36000. Ticks are the number of completed native updates; tick 0 is the loaded, play-requested state. Backward seeks restore and replay the exact float32 track. World matrix tracks are service-level plumbing; P0 UI uses identity. New documents currently rebuild all entries.
 
 All binary fields are little endian. Raw block copies may contain opaque pointer values; the client never dereferences them. Offsets inside frame entries are relative to their slot start. `type` in v2 is the EFX **attribute** type ID, not ephemeral ctx[0].
 
@@ -22,7 +24,7 @@ All binary fields are little endian. Raw block copies may contain opaque pointer
 | Offset | Field |
 |---|---|
 | 0 | 4-byte magic R4FX |
-| 4 | u32 protocol version 2 |
+| 4 | u32 protocol version 3 |
 | 8 | u32 exe timestamp 0x69A8F652 |
 | 12 | u32 slot count 3 |
 | 16 | u32 slot bytes |
@@ -35,13 +37,15 @@ Slots immediately follow header; slot i starts at `256+i*slot_bytes`.
 
 ## Frame slot
 
-Header: tick u32 at +0, entry count u32 at +4, elapsed seconds f64 at +8, last dt f32 at +16, reserved zero through +63. Entry table begins +64, stride 128. Data follows table, with slot padded to 64 bytes.
+Header: tick u32 at +0, entry count u32 at +4, elapsed seconds f64 at +8, last dt f32 at +16, reserved zero through +63. Entry table begins +64, stride 160. Data follows table, with slot padded to 64 bytes.
 
 Each entry contains 16 u32 fields (64 bytes):
 
 `entry index, attribute type, capacity, particle stride (320), side stride, E+0x100, E+0x168, E+0x16c, E+0x170, E+0x174, particle offset, particle bytes, side offset, side bytes, TypeBillboard3D block offset, block bytes (0x2f8)`.
 
-Then 16 f32 values (64 bytes): row-major emitter world matrix, translation in row 4. Entry index is the file's stored entry index; it is not inferred from fixture comments or offset order.
+Then 16 f32 values (64 bytes): row-major world matrix of the track, translation in row 4. Particle world positions use each particle's reference matrix P at +0x100 instead (world = +0x28 · P); this matrix is the fallback for records without a valid P. Entry index is the file's stored entry index; it is not inferred from fixture comments or offset order.
+
+Then 8 u32 (32 bytes, v3): ribbon point pool offset, bytes, point stride (0x54), points per particle, state offset, bytes, state stride (0x68), reserved. All zero for entries without ribbon data. For RibbonFollow (31) and RibbonLength (32) the pool is a copy of type block +0x38 (capacity × points-per-particle records: +0x00 world position, +0x18 tangent, +0x40 V, +0x44 RGBA8, +0x48 size factor) and the states a copy of type block +0x40 (capacity × 0x68; +0x18 valid points). Points per particle come from the load spec's `ribbon_points` (RibbonFollow: (ShapeDivision−1)·SplineDivision + ShapeDivision; RibbonLength: ShapeDivision), because the state records are filled only on the first update.
 
 Particle bytes include all capacity slots, including empty ones. Side bytes include all capacity slots at E+0x148 stride. Raw data are copied with memmove directly into the mapping. P1 additionally exports the complete 0x2f8-byte Billboard3D type block every frame. Strip buffers, other attribute blocks, ctx[0] and n/N remain unexported.
 

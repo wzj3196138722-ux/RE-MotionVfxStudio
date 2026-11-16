@@ -52,6 +52,41 @@ try
     Check(Begin(playback).Tick == 73, "Reload lost displayed timeline position");
     Console.WriteLine("PASS busy pause/reset/seek, stale result rejection, rapid steps, reload ordering");
 
+    // Parameter edits and external revisions use the same preserving load path.
+    foreach (bool wasPlaying in new[] { false, true })
+    {
+        var c = new PreviewPlaybackController();
+        c.BeginLoad(); c.FinishLoad(); c.CompleteRequest(Begin(c));
+        c.Seek(45); c.CompleteRequest(Begin(c));
+        if (wasPlaying) c.TogglePlayback();
+        c.Advance(1.0 / 60);
+        PreviewFrameRequest? obsolete = wasPlaying ? Begin(c) : null;
+        c.BeginLoad();
+        c.BeginLoad(); c.BeginLoad(); // Coalesced revisions must not capture the temporary pause.
+        Check(!c.IsPlaying && !c.TryBeginRequest(out _), "Playback advanced while loading revisions");
+        if (obsolete.HasValue) Check(!c.CompleteRequest(obsolete.Value), "Reload accepted an in-flight old revision");
+        c.FinishLoad();
+        var restored = Begin(c);
+        Check(restored.Tick == 45 && c.CompleteRequest(restored), "Revision load lost the displayed tick");
+        Check(c.IsPlaying == wasPlaying, "Revision load changed the playback/pause state");
+        c.Advance(1.0 / 60);
+        Check(c.HasQueuedRequest == wasPlaying, "Restored playback clock ignored the retained state");
+        if (wasPlaying) Check(c.CompleteRequest(Begin(c)), "Playback did not continue after reload");
+        // Fault recovery explicitly pauses, including when it supersedes a playing revision load.
+        c.BeginLoad(); c.BeginLoad(autoplay:false); c.BeginLoad(); c.FinishLoad();
+        Check(!c.IsPlaying && c.CompleteRequest(Begin(c)), "Fault recovery resumed playback");
+        c.BeginLoad(restart:true,autoplay:true); c.BeginLoad(); c.FinishLoad();
+        Check(c.IsPlaying && Begin(c).Tick == 0, "Explicit replay lost its play intent during loading");
+    }
+    {
+        var c = new PreviewPlaybackController();
+        c.BeginLoad(); c.FinishLoad(); c.CompleteRequest(Begin(c));
+        c.Seek(PreviewPlaybackController.LastTick); c.CompleteRequest(Begin(c));
+        c.BeginLoad(); c.FinishLoad();
+        Check(!c.IsPlaying && Begin(c).Tick == PreviewPlaybackController.LastTick, "Paused end-of-timeline revision restarted playback");
+    }
+    Console.WriteLine("PASS revision reload retains play/pause and tick, coalesced revisions, explicit replay/fault overrides, paused final tick");
+
     // Failure and recovery paths used by the preview window.
     {
         var c = new PreviewPlaybackController();
@@ -100,6 +135,21 @@ try
             Check(state.CompleteRequest(restore) && f.Tick==45,"Native pause did not keep tick 45");
             Check(Convert.ToHexString(SHA256.HashData(f.Arrays[0].Span))==hash45,"Paused restore changed particles");
         }
+        foreach (bool wasPlaying in new[] { false, true })
+        {
+            if (wasPlaying) state.TogglePlayback();
+            state.BeginLoad(); state.BeginLoad();
+            await client.LoadAsync(new { command="load", fixture="bb2" });
+            Check(client.LastLoadReused, "Playback-state reload did not reuse the native worker");
+            state.FinishLoad(); var retained = Begin(state);
+            using (var f = await client.FrameAsync(retained.Tick))
+            {
+                Check(state.CompleteRequest(retained) && f.Tick == 45 && state.IsPlaying == wasPlaying, "Native reload changed tick or play/pause state");
+                Check(Convert.ToHexString(SHA256.HashData(f.Arrays[0].Span)) == hash45, "State-preserving native reload changed particles");
+            }
+            state.Pause();
+        }
+        Console.WriteLine("PASS real native reload retains paused/playing state, tick 45 and particle digest");
         state.Seek(200); var forward=Begin(state); pending=client.FrameAsync(forward.Tick);
         state.Seek(0);
         using(var obsolete=await pending) Check(!state.CompleteRequest(forward),"In-flight seek escaped reset");

@@ -11,6 +11,9 @@ public sealed record OfflinePreviewManifest(int Schema, string DocumentId, long 
     string Sha256, int EntryPosition, int EntryId, int Offset, string Source, bool Restart)
 {
     public string Key => $"{DocumentId}:{Revision}:{Sha256}:{EntryPosition}";
+    /// <summary>Identifies the published file alone: manifests that differ only in the edited entry
+    /// share it and need no native reload.</summary>
+    public string SceneKey => $"{DocumentId}:{Revision}:{Sha256}";
     public void ValidateFile()
     {
         if (Schema != 1 || !Restart || Offset < 0 || EntryPosition < 0) throw new InvalidDataException("无效预览清单。");
@@ -26,7 +29,13 @@ public sealed record PreviewEditorParameters(int EntryPosition, int BillboardAtt
 
 public sealed record PreviewEditorState(long Revision, bool Dirty, bool CanUndo, bool CanRedo,
     OfflinePreviewManifest? Manifest, PreviewEditorParameters? Parameters, string? PublicationError,
-    string? SavedPath, string? Warning);
+    string? SavedPath, string? Warning, PreviewAttributeInfo[]? Attributes = null, PreviewInspection? Inspection = null);
+
+/// <summary>The backend rejected a request; <see cref="Reply"/> is its full answer.</summary>
+public sealed class PreviewBackendException(string message, JsonObject reply) : InvalidOperationException(message)
+{
+    public JsonObject Reply { get; } = reply;
+}
 
 public sealed record BillboardEdit(Vector4 Color, Vector4 ColorRange, float ColorRate,
     Vector2 SizeScalar, Vector2 SizeX, Vector2 SizeY);
@@ -42,6 +51,7 @@ public sealed class PreviewEditorSession : IDisposable
     private readonly SemaphoreSlim gate = new(1);
     private Process? process;
     private readonly Queue<string> logs = new();
+    private JsonObject? lastReply;
     public string Directory { get; }
     public string Mailbox => Path.Combine(Directory, "mailbox");
     public string ManifestPath => Path.Combine(Mailbox, "offline-preview", "preview.json");
@@ -120,6 +130,7 @@ public sealed class PreviewEditorSession : IDisposable
             var reply=ReadJson(Path.Combine(Mailbox,"response.json"));
             if(reply?["id"]?.GetValue<string>()==id)
             {
+                lastReply=reply;
                 var doc=reply["document"];
                 // "open" replaces the document: the previous manifest and attribute indices must not
                 // survive it. Otherwise a failed configure_offline_preview would leave set_fields
@@ -131,6 +142,14 @@ public sealed class PreviewEditorSession : IDisposable
                     reply["offlinePreviewParameters"]?.Deserialize<PreviewEditorParameters>(Json)??previous?.Parameters,
                     reply["offlinePreviewError"]?.GetValue<string>(),reply["outputPath"]?.GetValue<string>()??previous?.SavedPath,
                     doc?["warning"]?.GetValue<string>());
+                if(State.Manifest is {} manifest && doc?["entries"] is JsonArray entries)
+                {
+                    var selected=entries.FirstOrDefault(e=>e?["index"]?.GetValue<int>()==manifest.EntryPosition);
+                    State=State with {Attributes=selected?["attributes"]?.Deserialize<PreviewAttributeInfo[]>(Json)??[]};
+                    if(previous?.Inspection is {} inspected && inspected.DocumentId==manifest.DocumentId &&
+                        inspected.Revision==State.Revision && inspected.EntryPosition==manifest.EntryPosition)
+                        State=State with {Inspection=inspected};
+                }
                 if(reply["ok"]?.GetValue<bool>()!=true) throw new InvalidOperationException(reply["error"]?.GetValue<string>()??"编辑操作失败。");
                 return State;
             }
@@ -149,6 +168,27 @@ public sealed class PreviewEditorSession : IDisposable
             await Call("open",new(){["path"]=Path.GetFullPath(path)});
             return await Call("configure_offline_preview",new(){["entryId"]=entryId});
         }
+        finally {gate.Release();}
+    }
+
+    /// <summary>Opens a file and selects the emitter by its position in the entry list.</summary>
+    public async Task<PreviewEditorState> OpenAtAsync(string path, int entryPosition)
+    {
+        await gate.WaitAsync();
+        try
+        {
+            await Start();
+            await Call("open",new(){["path"]=Path.GetFullPath(path)});
+            return await Call("configure_offline_preview",new(){["entryPosition"]=entryPosition});
+        }
+        finally {gate.Release();}
+    }
+
+    /// <summary>Makes another entry of the open document the edited one, at the current revision.</summary>
+    public async Task<PreviewEditorState> SelectEntryAsync(int entryPosition)
+    {
+        await gate.WaitAsync();
+        try {return await Call("configure_offline_preview",new(){["entryPosition"]=entryPosition});}
         finally {gate.Release();}
     }
 
@@ -190,8 +230,68 @@ public sealed class PreviewEditorSession : IDisposable
         finally {gate.Release();}
     }
 
+    /// <summary>Like <see cref="SendAsync"/>, and also returns a copy of the backend reply, for callers
+    /// that need fields the state record does not carry (inspect fields, color groups).</summary>
+    public async Task<(PreviewEditorState State, JsonObject Reply)> SendRawAsync(string action, JsonObject body, long? expectedRevision = null)
+    {
+        await gate.WaitAsync();
+        try
+        {
+            if(action=="open" || action=="shutdown") throw new ArgumentException("此入口不能执行 "+action+"。");
+            try {var state=await Call(action,body,expectedRevision);return (state,(JsonObject)lastReply!.DeepClone());}
+            catch(InvalidOperationException ex) when(lastReply?["id"]?.GetValue<string>()==body["id"]?.GetValue<string>())
+            {throw new PreviewBackendException(ex.Message,(JsonObject)lastReply!.DeepClone());}
+        }
+        finally {gate.Release();}
+    }
+
     public OfflinePreviewManifest? ReadPublishedManifest()
         => ReadJson(ManifestPath)?.Deserialize<OfflinePreviewManifest>(Json);
+
+    public async Task<PreviewEditorState> InspectAsync(string documentId,long revision,int attributeIndex)
+    {
+        await gate.WaitAsync();
+        try
+        {
+            var manifest=State?.Manifest??throw new InvalidOperationException("编辑文档未就绪。");
+            if(manifest.DocumentId!=documentId || State!.Revision!=revision) throw new InvalidOperationException("属性请求来自旧文档或旧修订，请刷新。");
+            var state=await Call("inspect",new(){["target"]=AttributeTarget(manifest.EntryPosition,attributeIndex)},revision);
+            if(state.Manifest?.DocumentId!=documentId || state.Revision!=revision || state.Manifest.EntryPosition!=manifest.EntryPosition)
+                throw new InvalidOperationException("读取属性期间文档已变化，请刷新。");
+            var inspection=new PreviewInspection(documentId,state.Revision,manifest.EntryPosition,attributeIndex,
+                lastReply!["fields"]?.Deserialize<PreviewFieldInfo[]>(Json)??[],
+                lastReply["colorGroups"]?.Deserialize<PreviewColorGroup[]>(Json)??[],
+                (lastReply["curves"] as JsonArray)?.Count??0);
+            State=state with {Inspection=inspection};return State;
+        }
+        finally {gate.Release();}
+    }
+
+    private static JsonObject AttributeTarget(int entry,int attribute)=>new(){["kind"]="entry",["index"]=entry,["attributeIndex"]=attribute};
+
+    public async Task<PreviewEditorState> ApplyFieldsAsync(PreviewFieldBatch batch)
+    {
+        await gate.WaitAsync();
+        try
+        {
+            var snapshot=batch.Inspection;
+            if(State?.Manifest is not {} manifest || manifest.DocumentId!=snapshot.DocumentId ||
+                manifest.EntryPosition!=snapshot.EntryPosition || State.Revision!=snapshot.Revision)
+                throw new InvalidOperationException("草稿来自旧文档或旧修订，请先刷新属性。");
+            if(batch.Fields.Length is <1 or >64 || batch.Fields.Select(f=>f.Path).Distinct(StringComparer.Ordinal).Count()!=batch.Fields.Length)
+                throw new ArgumentException("一次应用需要 1–64 个不重复字段；超出时请减少本次修改。");
+            var fields=snapshot.Fields.ToDictionary(f=>f.Path,StringComparer.Ordinal);
+            var changes=new JsonArray();
+            foreach(var edit in batch.Fields)
+            {
+                if(!fields.TryGetValue(edit.Path,out var field) || !field.Editable)
+                    throw new InvalidOperationException(field?.Reason??"字段不存在或只读："+edit.Path);
+                changes.Add(Field(edit.Path,edit.Value));
+            }
+            return await Call("set_fields",new(){["target"]=AttributeTarget(snapshot.EntryPosition,snapshot.AttributeIndex),["fields"]=changes},snapshot.Revision);
+        }
+        finally {gate.Release();}
+    }
 
     private static string Number(float value)
     {

@@ -485,9 +485,9 @@ LiveEditor 后台（`EditorEngine`）是 EFX 文档的唯一权威，游戏内 U
 |---|---|---|
 | P0 数据通道 | 辅助进程 `serve` 模式（控制管道、共享内存、`load` / `frame` / `shutdown`）；新承载器骨架（窗口、ImGui、相机、网格）；粒子以点显示；粒子检查器按偏移显示原样记录 | `exp_emitter.py` 的 bb、bb2 场景经共享内存读出的每 tick 位置、年龄、生命淡出字节与直接运行一致；人为触发 `NativeFault` 后承载器显示故障并自动重启辅助进程 |
 | P1 最小可用 | 单个 Billboard3D entry 带贴图：.tex 加载；真实 .uvs 帧数传入辅助进程，承载器查矩形；面向相机的面片、尺寸、滚转、顶点 alpha（life × blink）；BlendType 0、1 的折中混合；播放、暂停、单帧步进、拖动；固定 60 Hz；加载后状态的保存与恢复；持久映射实例缓冲 | bb2（sm82_320_00 root 13）出生时刻与粒子数同 Re4Native；UV 帧按真实帧数循环；拖回同一 tick 时粒子数组摘要相同；一万粒子压力 entry（放大 MaxParticles 的语料 entry）60 fps，并记录原生每 tick 耗时；与游戏录像并列，尺寸量级与翻页节奏一致 |
-| P2 编辑闭环 | LiveEditor 预览输出、修订号与加载状态；承载器属性面板经邮箱协议修改字段；重载与撤销；随后优化重载延迟、保留进度与局部重建 | 先验收单个 Billboard3D entry 的颜色、尺寸、Life 修改、撤销、保存再读与预览修订一致；首个增量可用显式从头重播模式。完整目标仍是 200 ms 内更新、保持时间轴位置、撤销后同 tick 摘要一致；延迟单独实测 |
+| P2 编辑闭环 | LiveEditor 预览输出、修订号与加载状态；承载器属性面板经邮箱协议修改字段；重载与撤销；优化重载延迟，保留进度与播放状态；局部重建移至 P3 多 entry 阶段 | 先验收单个 Billboard3D entry 的颜色、尺寸、Life 修改、撤销、保存再读与预览修订一致；首个增量可用显式从头重播模式。完整目标仍是 200 ms 内更新、保持时间轴位置、撤销后同 tick 摘要一致；延迟单独实测 |
 | P2 扩展预留：属性模块组装（功能愿望） | §8.4；在基础编辑与重载稳定后，支持把属性拖入发射器、删除、复制和结构撤销；每次结构修改从 tick 0 重播 | 受支持属性组装后能重载并从头出现效果；组合规则和资源依赖有效；结构撤销与保存再读正确。不阻塞 P3 |
-| P3 外观链 | 一个 EFX 文件的全部 CPU entry；FadeBy*、AlphaCorrection、ShaderSettings（软粒子、DepthBias、DetonemapRatio）、RgbCommon / RgbWater、BlendType 2–4；排序；合成配置面板；深度纹理 | 各公式的着色器单元测试（给定输入与规格公式的 C# 实现逐值比较）；含 10 个以上 entry 的官方文件无 NaN、无原生故障 |
+| P3 外观链 | 一个 EFX 文件的全部 CPU entry；多 entry 的局部重建（有子 Action 依赖时整体重建）；FadeBy*、AlphaCorrection、ShaderSettings（软粒子、DepthBias、DetonemapRatio）、RgbCommon / RgbWater、BlendType 2–4；排序；合成配置面板；深度纹理 | 各公式的着色器单元测试（给定输入与规格公式的 C# 实现逐值比较）；含 10 个以上 entry 的官方文件无 NaN、无原生故障 |
 | P4 条带族与 Polygon | §4.5 点缓冲定位与导出；§5.3–§5.5 | 每种类型至少一个官方 entry：承载器解码出的点与辅助进程原样记录一致；宽度、V 方向与游戏录像一致 |
 | P5 Mesh、Distortion、挂点 | .mesh / .mdf2 真实部件数进入辅助进程；实例化网格；Distortion 通道；角色骨骼动画驱动发射器矩阵轨道；ParentOptions 骨骼查找改为承载器提供的关节矩阵 | 挂在骨骼上的官方特效随动作移动；§4.3 的世界变换按 3dfca50 的 C# 重写，原生比对开关下误差 < 1e-5 |
 | P6 子 Action 与 GPU 类型 | 嵌套资源加载器 3cfadc0，子 Action 真正运行；GPU 类型的数据源（§5.8、§8.1） | PtLife、PtColliderAction 触发的子发射器在正确位置出现；GPU 类型有近似画面并标注"近似" |
@@ -495,11 +495,11 @@ LiveEditor 后台（`EditorEngine`）是 EFX 文档的唯一权威，游戏内 U
 
 P1 完成即满足"单个 Billboard3D entry 带贴图跑起来"。P2 放在外观链之前，是为了尽早让编辑工作流可用。
 
-### 9.1 当前下一步（P2a 已实现，2026-11-15）
+### 9.1 当前下一步（P2 窗口验收已补，2026-11-15）
 
-P2 的最小编辑闭环（P2a）已实现并验证：单个已有 Billboard3D entry 的颜色、尺寸、Life，通过 EditorEngine 修改 → 完整 EFX 与修订清单 → 从头预览 → 撤销和保存再读取。发布修订与成功显示修订分别记录，过期加载结果会被丢弃。后续 P2b 优先验证安全快速重载，再补保持进度和局部重建；200 ms 延迟目标仍需实测。
+P2 已实现单个已有 Billboard3D entry 的通用属性面板：选择已有属性，按 Inspector 描述编辑字段、颜色与枚举，同属性批量应用，管理只读与过期草稿。完整 EFX 修订发布、同进程快速重载、保持已显示 tick 与播放／暂停状态、撤销和保存再读取均已接通。发布修订与成功显示修订分别记录，过期加载结果会被丢弃。真实窗口已验收暂停与播放中修改、撤销/重做、故障恢复、保存保护及不支持混合方式的错误提示。
 
-当前重建辅助进程约需 5 秒，因此功能往返和延迟目标分开验收。先建立可用的编辑、重播与错误恢复路径，再验证安全快速重载；在实测前不承诺 200 ms。保持当前进度是完整 P2 的后续增量，属性组装的结构修改则明确从头播放。
+清单轮询已从 250 ms 改为默认 25 ms（`--manifest-poll-ms` 可配置），发现修订后快照加载与表单 status 查询并行。通用面板接入后，bb2 在 tick 45/300/900 的窗口提交路径，修改到首帧 GPU 完成的 P95 为 162–179 ms；外部修订路径为 120–129 ms。MCP 已连接离线预览窗口，并包含属性增删、跨文件复制粘贴与曲线关键帧编辑，见 [MCP 接入](RE4-EFX-PREVIEW-MCP.zh-CN.md)；属性组装目前只有 MCP 入口，窗口内还没有拖放界面。P3 多 entry 已实现（整文件模拟与绘制、编辑对象切换、原生故障按 entry 排除），见 [多 entry](RE4-EFX-PREVIEW-P3-MULTI.zh-CN.md)；局部重建尚未实现，整文件修改延迟目前高于 200 ms。P3 外观链已实现（淡出、AlphaCorrection、Rgb 层、混合方式 0–4、软粒子、深度偏移、反色调映射、排序、合成配置），GPU 与 C# 公式逐值一致，见 [外观链](RE4-EFX-PREVIEW-P3-APPEARANCE.zh-CN.md)；与游戏画面的校准尚未进行。TypePolygon 与 TypeBillboard2D 已接入，见 [Polygon 与 Billboard2D](RE4-EFX-PREVIEW-P4-POLYGON-2D.zh-CN.md)；Billboard2D 的屏幕坐标系为折中。TypeRibbonFollow 已接入，点数据取自引擎点池（类型块 +0x38），同时帧解码改为用粒子参考矩阵 P 求世界位置，RibbonLength 用同一种点池（引擎布局结果）一并接入，见 [条带族](RE4-EFX-PREVIEW-P4-RIBBON.zh-CN.md)。测量边界与早期对照见 [P2 窗口验收记录](RE4-EFX-PREVIEW-P2-ACCEPTANCE.zh-CN.md)，通用面板实现、验证和最新复测见 [通用属性面板](RE4-EFX-PREVIEW-P2-GENERIC.zh-CN.md)。
 
 P1 的游戏录像外观对照和完整分辨率一万粒子 60 fps 仍是未完成项，继续跟踪，不能因进入 P2 标记为已通过。当前实现与测量见 [RE4-EFX-PREVIEW-P1.zh-CN.md](RE4-EFX-PREVIEW-P1.zh-CN.md)。
 
@@ -534,6 +534,6 @@ P1 的游戏录像外观对照和完整分辨率一万粒子 60 fps 仍是未完
 
 ## 12. 实施状态补充（2026-11-15）
 
-P2 的首个增量（P2a）已接通：通过独立离线 LiveEditor 会话编辑已有 Billboard3D 的颜色、尺寸和 Life；完整 EFX 修订发布、从头播放、撤销/重做、保存副本/重新打开，以及发布与加载失败恢复。界面区分文档和画面修订，过时加载不会覆盖最新目标。使用与验证见 [RE4-EFX-PREVIEW-P2.zh-CN.md](RE4-EFX-PREVIEW-P2.zh-CN.md)。
+P2 已通过独立离线 LiveEditor 会话编辑已有 Billboard3D 的颜色、尺寸和 Life；完整 EFX 修订发布、同进程重载、保持 tick 与播放／暂停状态、撤销/重做、保存副本/重新打开，以及发布与加载失败恢复均已接通。界面区分文档和画面修订，过时加载不会覆盖最新目标。使用与验证见 [RE4-EFX-PREVIEW-P2.zh-CN.md](RE4-EFX-PREVIEW-P2.zh-CN.md)。
 
-当前修改到原生帧实测约 5.23 秒，200 ms、保留进度和局部重建仍待后续工作。§8.4 属性模块组装继续作为功能愿望预留，不计入已实现范围。
+首次进程加载仍约需 4.5–5.3 秒；常规同进程原生重载约 30–37 ms。窗口绘制实测见 §9.1，代表性窗口与外部修订样本已低于 200 ms，手动操作仍有超过 200 ms 的个别样本。通用表单与 MCP 离线接入已完成，局部重建移至 P3。§8.4 属性模块组装已有 MCP 工具（增删、复制粘贴属性，结构撤销），窗口内拖放界面仍为预留。

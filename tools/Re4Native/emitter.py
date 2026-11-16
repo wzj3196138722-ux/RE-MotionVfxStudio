@@ -340,6 +340,10 @@ class Emitter:
         rn.set_u64(self.U + 0x8, self.E)
         for off in (0x10, 0x18, 0x20, 0x28):
             rn.set_u64(self.U + off, img.alloc(0x1000))
+        # U+0x18 -> ctx+0xf8: +8 points to a {array, count} table that 3d024f0 searches by id (reached
+        # from 3e07150 on the Billboard2D path). An empty table makes the lookup return null, which the
+        # engine handles; a null table pointer faults.
+        rn.set_u64(rn.u64(self.U + 0x18) + 8, img.alloc(0x40))
         # U+0x20 -> ctx+0x100: +1 byte gates 3dfa810; float +8 is the effect's LOD factor q that Spawn
         # multiplies its counts by at (re)start (3d15b1d -> 3d154d0); 1.0 = full counts
         rn.set_f32(rn.u64(self.U + 0x20) + 8, 1.0)
@@ -349,9 +353,8 @@ class Emitter:
 
     def set_world(self, rows):
         """U+0x40..0x7f: the effect's world matrix (rows: X, Y, Z axes, translation), copied into ctx by 3d08480."""
-        for r, row in enumerate(rows):
-            for c, v in enumerate(row):
-                rn.set_f32(self.U + 0x40 + 16 * r + 4 * c, v)
+        data = struct.pack('<16f', *(v for row in rows for v in row))
+        ctypes.memmove(self.U + 0x40, data, 64)   # one write instead of 16 per-float calls
 
     @property
     def max_particles(self):

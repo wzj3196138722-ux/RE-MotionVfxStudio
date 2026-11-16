@@ -14,6 +14,7 @@ public sealed class PreviewPlaybackController
     private int? queuedTick;
     private PreviewFrameRequest? inFlight;
     private double accumulator;
+    private bool playAfterLoad;
 
     public bool IsReady { get; private set; }
     public bool IsPlaying { get; private set; }
@@ -22,12 +23,16 @@ public sealed class PreviewPlaybackController
     public bool IsBusy => inFlight.HasValue;
     public bool HasQueuedRequest => queuedTick.HasValue;
 
-    public void BeginLoad(bool restart = false)
+    public void BeginLoad(bool restart = false, bool? autoplay = null)
     {
+        // Revisions queued during a load retain the original intent, rather than the
+        // temporarily paused IsPlaying value. Explicit opens/replays/faults may override it.
+        playAfterLoad = autoplay ?? (IsReady ? IsPlaying : playAfterLoad);
+        if (restart) TargetTick = 0;
+        else if (IsReady) TargetTick = DisplayedTick;
         IsReady = false;
         IsPlaying = false;
         accumulator = 0;
-        TargetTick = restart ? 0 : DisplayedTick;
         queuedTick = null;
         revision++;
         // Keep ownership of the running request until its result is drained.
@@ -36,6 +41,7 @@ public sealed class PreviewPlaybackController
     public void FinishLoad()
     {
         IsReady = true;
+        IsPlaying = playAfterLoad;
         Queue(TargetTick);
     }
 

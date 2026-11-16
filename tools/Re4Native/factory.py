@@ -108,7 +108,8 @@ def table():
 
 
 def slot(vtable, i):
-    return struct.unpack("<Q", _image().data[_image().rva2off(vtable + 8 * i):][:8])[0] - rn.IMAGE_BASE
+    off = _image().rva2off(vtable + 8 * i)
+    return struct.unpack("<Q", _image().data[off:off + 8])[0] - rn.IMAGE_BASE   # slice 8 bytes, not the whole file
 
 
 if __name__ == "__main__":

@@ -9,10 +9,42 @@ namespace VfxStudio.Re4Render;
 
 public sealed record PreviewTexture(string Path, string Source, byte[] Bytes);
 public sealed record UvFrame(Vector4 Rect, int Texture);
+/// <summary>Drawable Type attributes. The value is the vertex shader's typeKind.</summary>
+public enum PreviewTypeKind { Billboard3D = 0, Polygon = 1, Billboard2D = 2, RibbonFollow = 3, RibbonLength = 4 }
 public sealed record PreviewDocument(string Path, int Offset, EFXEntry Entry, string UvsPath, uint UvFlags,
     IReadOnlyList<UvFrame[]> Sequences, IReadOnlyList<PreviewTexture> Textures)
 {
     public EFXAttributeTypeBillboard3D Billboard => Entry.Attributes.OfType<EFXAttributeTypeBillboard3D>().Single();
+    public PreviewTypeKind Kind => KindOf(Entry) ?? throw new NotSupportedException("Unsupported Type attribute");
+    /// <summary>The Type attribute's Flags (low 4 bits = BlendType).</summary>
+    public uint TypeFlags => FlagsOf(Entry.TypeAttribute);
+    public static PreviewTypeKind? KindOf(EFXEntry entry) => entry.TypeAttribute switch
+    {
+        EFXAttributeTypeBillboard3D => PreviewTypeKind.Billboard3D,
+        EFXAttributeTypePolygon => PreviewTypeKind.Polygon,
+        EFXAttributeTypeBillboard2D => PreviewTypeKind.Billboard2D,
+        EFXAttributeTypeRibbonFollow => PreviewTypeKind.RibbonFollow,
+        EFXAttributeTypeRibbonLength => PreviewTypeKind.RibbonLength,
+        _ => null
+    };
+    /// <summary>Ribbon types drawn from the engine's point pool.</summary>
+    public bool IsRibbon => Kind is PreviewTypeKind.RibbonFollow or PreviewTypeKind.RibbonLength;
+    /// <summary>UVSequence Flags bit 10: cross-fade the previous frame into the current one.</summary>
+    public bool FrameBlend => (UvFlags & 0x400) != 0;
+    /// <summary>Engine points per particle of a ribbon: (ShapeDivision-1)*SplineDivision + ShapeDivision,
+    /// ShapeDivision clamped to [2, 1000] as the loader does (RUNTIME 4.3.5); 0 for other types.</summary>
+    /// RibbonLength has no spline: ShapeDivision points (RUNTIME 4.3.4).
+    public int RibbonPointsPerParticle => Entry.TypeAttribute switch
+    {
+        EFXAttributeTypeRibbonFollow r => checked((int)((Math.Clamp(r.ShapeDivision, 2u, 1000u) - 1) * r.SplineDivision + Math.Clamp(r.ShapeDivision, 2u, 1000u))),
+        EFXAttributeTypeRibbonLength l => (int)Math.Clamp(l.ShapeDivision, 2u, 1000u),
+        _ => 0
+    };
+    private static uint FlagsOf(EFXAttribute? type) => type switch
+    {
+        EFXAttributeTypeBillboard3D b => b.Flags, EFXAttributeTypePolygon p => p.Flags, EFXAttributeTypeBillboard2D b2 => b2.Flags,
+        EFXAttributeTypeRibbonFollow r => r.BlendFlags, EFXAttributeTypeRibbonLength l => l.BlendFlags, _ => 0
+    };
     public object LoadCommand(int stressParticles = 0) => new
     {
         command = "load",
@@ -42,9 +74,10 @@ public sealed record PreviewDocument(string Path, int Offset, EFXEntry Entry, st
     public static PreviewDocument Read(string path, int offset, Re4ResourceSource source)
     {
         var entry=ReadEntry(path,offset);
-        if(entry.TypeAttribute is not EFXAttributeTypeBillboard3D billboard) throw new NotSupportedException("Preview supports CPU Billboard3D entries");
-        if(!BillboardRenderer.SupportsBlend((int)(billboard.Flags & 15)))
-            throw new NotSupportedException($"预览暂不支持混合方式 {billboard.Flags & 15}（目前只实现 AlphaBlend 0 与 Physical 1）。");
+        if(KindOf(entry)==null) throw new NotSupportedException("Preview supports CPU Billboard3D, Polygon and Billboard2D entries");
+        uint flags=FlagsOf(entry.TypeAttribute);
+        if(!BillboardRenderer.SupportsBlend((int)(flags & 15)))
+            throw new NotSupportedException($"预览暂不支持混合方式 {flags & 15}（支持 0–4）。");
         var uv = entry.Attributes.OfType<EFXAttributeUVSequence>().SingleOrDefault();
         if (string.IsNullOrWhiteSpace(uv?.UVSPath))
             throw new NotSupportedException("This entry has no UVSPath; P1 requires an explicit texture source");
@@ -69,12 +102,26 @@ public sealed class Re4ResourceSource : IDisposable
     private readonly Dictionary<ulong,(PakFile Pak,PakEntry Entry)> index = new();
     private readonly List<PakFile> paks = new();
     private bool indexed;
+    // Entries of one file share textures and UVS files; resources are read-only for the session.
+    private readonly Dictionary<string,PreviewTexture> cache = new(StringComparer.OrdinalIgnoreCase);
+    private readonly object sync = new();
     public Re4ResourceSource(string gameDirectory, params string[] extraRoots)
     {
         this.gameDirectory = gameDirectory;
         looseRoots = extraRoots.Concat(new[] { System.IO.Path.Combine(gameDirectory,"RE4_EXTRACT"),System.IO.Path.Combine(gameDirectory,"RE4_EXTRACT","re_chunk_000") }).ToArray();
     }
     public PreviewTexture Read(string rawPath, string version)
+    {
+        lock (sync)
+        {
+            if (cache.TryGetValue(rawPath + "|" + version, out var hit)) return hit;
+            var read = ReadUncached(rawPath, version);
+            cache[rawPath + "|" + version] = read;
+            return read;
+        }
+    }
+
+    private PreviewTexture ReadUncached(string rawPath, string version)
     {
         string path = rawPath.TrimStart('@','/').Replace('\\','/');
         if (!path.StartsWith("natives/",StringComparison.OrdinalIgnoreCase)) path = "natives/stm/" + path;

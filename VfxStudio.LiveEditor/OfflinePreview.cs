@@ -27,13 +27,17 @@ internal sealed partial class EditorEngine
             if (candidates.Length != 1) throw new ArgumentException("无法唯一定位所选发射器，请指定 entryPosition。");
             position = candidates[0].index;
         }
-        if (position < 0 || position >= file.Entries.Count || file.Entries[position].TypeAttribute is not EFXAttributeTypeBillboard3D)
-            throw new NotSupportedException("请选择一个 CPU Billboard3D 发射器。");
+        if (position < 0 || position >= file.Entries.Count || !Previewable(file.Entries[position]))
+            throw new NotSupportedException("请选择一个 Billboard3D、Polygon、Billboard2D、RibbonFollow 或 RibbonLength 发射器。");
         offlinePreviewEntry = position;
         offlinePreviewEntryId = file.Entries[position].index;
         offlinePreviewDocument = documentSessionKey;
         offlinePreviewRevision = -1;
     }
+
+    /// <summary>Type attributes the offline preview draws.</summary>
+    private static bool Previewable(EFXEntry entry) =>
+        entry.TypeAttribute is EFXAttributeTypeBillboard3D or EFXAttributeTypePolygon or EFXAttributeTypeBillboard2D or EFXAttributeTypeRibbonFollow or EFXAttributeTypeRibbonLength;
 
     private void AttachOfflinePreview(JsonObject response, bool force)
     {
@@ -50,9 +54,10 @@ internal sealed partial class EditorEngine
             if(offlinePreviewEntry.Value>=entries.Count || entries[offlinePreviewEntry.Value].index!=offlinePreviewEntryId)
                 throw new InvalidOperationException("预览目标已变化，请重新选择发射器。");
             var selectedEntry = entries[offlinePreviewEntry.Value];
-            var billboard = selectedEntry.Attributes.OfType<EFXAttributeTypeBillboard3D>().Single();
+            var billboard = selectedEntry.Attributes.OfType<EFXAttributeTypeBillboard3D>().SingleOrDefault();
             var life = selectedEntry.Attributes.OfType<EFXAttributeLife>().SingleOrDefault();
-            response["offlinePreviewParameters"] = JsonSerializer.SerializeToNode(new
+            // The dedicated colour/size form covers Billboard3D only; other types use the generic form.
+            if (billboard != null) response["offlinePreviewParameters"] = JsonSerializer.SerializeToNode(new
             {
                 entryPosition = offlinePreviewEntry.Value,
                 billboardAttribute = selectedEntry.Attributes.IndexOf(billboard),
@@ -71,7 +76,7 @@ internal sealed partial class EditorEngine
             {
                 var file = Require();
                 int position = offlinePreviewEntry.Value;
-                if (position >= file.Entries.Count || file.Entries[position].TypeAttribute is not EFXAttributeTypeBillboard3D)
+                if (position >= file.Entries.Count || !Previewable(file.Entries[position]))
                     throw new InvalidOperationException("所选发射器已变化，请重新选择预览目标。");
                 // Immutable revision files. Publish the manifest only after full EFX readback succeeds.
                 byte[] content = Validate(file, source!);

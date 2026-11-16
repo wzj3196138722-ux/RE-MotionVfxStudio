@@ -6,7 +6,20 @@ using System.Text.Json;
 
 namespace VfxStudio.Re4Render;
 
-public sealed class HostFaultException(string message) : IOException(message);
+/// <summary>The worker rejected one command without ending (for example a RecoveredError while
+/// advancing, after which it rewound to tick 0). <see cref="Entry"/> is the load-order position of
+/// the entry involved, when the worker reported one.</summary>
+public sealed class NativeCommandException(string message, int? entry = null) : InvalidOperationException(message)
+{
+    public int? Entry { get; } = entry;
+}
+
+/// <summary>The worker failed fatally. <see cref="Entry"/> is the load-order position of the entry
+/// being built or advanced when it failed, when the worker reported one.</summary>
+public sealed class HostFaultException(string message, int? entry = null) : IOException(message)
+{
+    public int? Entry { get; } = entry;
+}
 
 /// <summary>One command in flight. A slot is copied before the next request can reuse it.
 /// The renderer owns managed frame copies, never a view that the worker can overwrite.</summary>
@@ -25,9 +38,17 @@ public sealed class NativePreviewClient : IDisposable
     private readonly SemaphoreSlim gate = new(1);
     public string LastRecovery { get; private set; } = "";
     public double LoadMs { get; private set; }
+    /// <summary>True when the last load reused the running worker (base snapshot restore) instead of
+    /// starting a new process.</summary>
+    public bool LastLoadReused { get; private set; }
+    /// <summary>Wall time of the last LoadAsync as seen by the caller, including mapping and bind.</summary>
+    public double LastLoadWallMs { get; private set; }
     /// <summary>How long one command may take before the worker is treated as hung and stopped.</summary>
     public TimeSpan ReplyTimeout { get; set; } = TimeSpan.FromSeconds(90);
     public long SnapshotBytes { get; private set; }
+    /// <summary>Entries the last load left out without ending the worker (Python-level refusals such as
+    /// an attribute with no native factory), by load-order position, with the worker's message.</summary>
+    public IReadOnlyList<(int Entry, string Message)> LastLoadSkipped { get; private set; } = [];
 
     public NativePreviewClient(string python, string script, string exe, bool testFaults = false)
     { this.python = python; this.script = Path.GetFullPath(script); this.exe = exe; this.testFaults = testFaults; }
@@ -75,9 +96,11 @@ public sealed class NativePreviewClient : IDisposable
             { throw new IOException("Malformed worker response: " + line); }
             if (!reply.GetProperty("ok").GetBoolean())
             {
-                string error = reply.GetProperty("error").GetRawText();
-                if (reply.TryGetProperty("fatal", out var fatal) && fatal.GetBoolean()) throw new HostFaultException(error);
-                throw new InvalidOperationException(error);
+                var errorElement = reply.GetProperty("error");
+                string error = errorElement.GetRawText();
+                int? entry = errorElement.TryGetProperty("entry", out var e) && e.ValueKind == JsonValueKind.Number ? e.GetInt32() : null;
+                if (reply.TryGetProperty("fatal", out var fatal) && fatal.GetBoolean()) throw new HostFaultException(error, entry);
+                throw new NativeCommandException(error, entry);
             }
             return reply;
         }
@@ -100,19 +123,37 @@ public sealed class NativePreviewClient : IDisposable
         await gate.WaitAsync();
         try
         {
+            var watch = Stopwatch.StartNew();
             loadCommand = JsonSerializer.SerializeToElement(command);
             track = null;
-            await Reload();
+            if (process is { HasExited: false } && view != null)
+            {
+                // Same worker: it restores its base snapshot and builds the new document in place.
+                try { await Reload(restart: false); }
+                catch (Exception ex) when (ex is IOException or InvalidOperationException or InvalidDataException)
+                {
+                    // A load error ends the worker; retry once in a fresh process so a problem left
+                    // by the reused image cannot be mistaken for a problem in the document.
+                    LastRecovery = "同进程重载失败，已改用新进程：" + ex.Message;
+                    await Reload(restart: true);
+                }
+            }
+            else await Reload(restart: true);
+            LastLoadWallMs = watch.Elapsed.TotalMilliseconds;
         }
         catch { Stop(); throw; }
         finally { gate.Release(); }
     }
 
-    private async Task Reload()
+    private async Task Reload(bool restart = true)
     {
-        Stop();
-        Start();
+        if (restart) { Stop(); Start(); }
+        else { view?.Dispose(); view = null; mapping?.Dispose(); mapping = null; }
         var metadata = await Send(loadCommand);
+        LastLoadReused = metadata.TryGetProperty("reused", out var reused) && reused.GetBoolean();
+        LastLoadSkipped = metadata.TryGetProperty("skipped", out var skipped) && skipped.ValueKind == JsonValueKind.Array
+            ? skipped.EnumerateArray().Select(x => (x.GetProperty("entry").GetInt32(), x.GetProperty("message").GetString() ?? "")).ToArray()
+            : [];
         slotBytes = metadata.GetProperty("slot_bytes").GetInt32();
         int bytes = metadata.GetProperty("mapping_bytes").GetInt32();
         inputOffset = metadata.GetProperty("input_offset").GetInt32();
@@ -127,7 +168,7 @@ public sealed class NativePreviewClient : IDisposable
         await Send(new { command = "bind", name });
         var header = new byte[32];
         view.ReadArray(0, header, 0, header.Length);
-        if (!header.AsSpan(0,4).SequenceEqual("R4FX"u8) || FrameDecoder.U32(header,4) != 2 ||
+        if (!header.AsSpan(0,4).SequenceEqual("R4FX"u8) || FrameDecoder.U32(header,4) != FrameDecoder.ProtocolVersion ||
             FrameDecoder.U32(header,8) != 0x69A8F652 || FrameDecoder.U32(header,12) != 3 ||
             FrameDecoder.U32(header,16) != slotBytes || FrameDecoder.U32(header,28) != bytes)
             throw new InvalidDataException("Worker protocol/build mismatch");
@@ -167,7 +208,7 @@ public sealed class NativePreviewClient : IDisposable
                 // Recreate the worker, but do not automatically repeat a faulting tick.
                 // The UI pauses and retains its previous frame for inspection.
                 await Reload();
-                throw new HostFaultException($"Worker restarted; playback paused. {ex.Message}");
+                throw new HostFaultException($"Worker restarted; playback paused. {ex.Message}", (ex as HostFaultException)?.Entry);
             }
         }
         finally { gate.Release(); }
