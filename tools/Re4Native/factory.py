@@ -158,6 +158,13 @@ def native_table(img):
             continue
         tid = rn.u32(obj + 8)
         vt = rn.u64(obj) - rn.IMAGE_BASE
-        if 0 < tid < 512 and 0 < vt < 0x10000000 and tid not in out:
+        if 0 < tid < 512 and 0 < vt < 0x10000000 and (tid not in out or PREFERRED_FACTORY.get(tid) == fac):
             out[tid] = dict(factory=fac, ctor=ctor, vtable=vt, size=None)
     return out
+
+
+# Type ids built by more than one factory, with the factory whose loader matches the RE4 file layout.
+# 18 (EmitterColor): 3cfa430's loader reads 0x10 bytes (UniqueID + 12, the file's size); 3cf9610 also writes
+# id 18 but its loader (3de87a0) reads 0x58 bytes and misaligns every later attribute of the entry.
+# (24 has two factories with the same loader; 196 and 219 are not RE4 file ids.)
+PREFERRED_FACTORY = {18: 0x3CFA430}

@@ -59,10 +59,11 @@ class NativeFault(RuntimeError):
     """An access violation inside native code: faulting instruction (RVA), the address it touched,
     and the return addresses inside the exe on the stack at that moment (RVAs, innermost first)."""
 
-    def __init__(self, rip: int, access: str, address: int, backtrace: tuple[int, ...] = ()):
-        self.rip, self.access, self.address, self.backtrace = rip, access, address, backtrace
+    def __init__(self, rip: int, access: str, address: int, backtrace: tuple[int, ...] = (), kind: str = "access violation"):
+        self.rip, self.access, self.address, self.backtrace, self.kind = rip, access, address, backtrace, kind
         chain = " <- ".join(_fmt(f) for f in backtrace[:10])
-        super().__init__(f"access violation at {_fmt(rip)}: {access} {address:#x}" + (f" [{chain}]" if chain else ""))
+        detail = f": {access} {address:#x}" if kind == "access violation" else ""
+        super().__init__(f"{kind} at {_fmt(rip)}{detail}" + (f" [{chain}]" if chain else ""))
 
 
 def _fmt(addr: int) -> str:
@@ -79,6 +80,8 @@ _k32.AddVectoredExceptionHandler.argtypes = [ctypes.c_uint32, _VEH]
 _k32.RemoveVectoredExceptionHandler.argtypes = [ctypes.c_void_p]
 _ACCESS = {0: "read", 1: "write", 8: "execute"}
 _last_fault: list = [None]
+# Exceptions reported as NativeFault with the faulting instruction and backtrace.
+_FAULT_KINDS = {0xC0000005: "access violation", 0xC0000094: "integer divide by zero"}
 _k32.RtlLookupFunctionEntry.restype = ctypes.c_void_p
 _k32.RtlLookupFunctionEntry.argtypes = [ctypes.c_uint64, ctypes.POINTER(ctypes.c_uint64), ctypes.c_void_p]
 _k32.RtlVirtualUnwind.restype = ctypes.c_void_p
@@ -124,7 +127,8 @@ def _exe_backtrace(context: int, limit: int = 32) -> tuple[int, ...]:
 def _on_exception(pointers):
     record = ctypes.c_void_p.from_address(pointers).value       # EXCEPTION_POINTERS.ExceptionRecord
     context = ctypes.c_void_p.from_address(pointers + 8).value  # EXCEPTION_POINTERS.ContextRecord
-    if ctypes.c_uint32.from_address(record).value == 0xC0000005:  # EXCEPTION_ACCESS_VIOLATION
+    code = ctypes.c_uint32.from_address(record).value
+    if code in _FAULT_KINDS:
         try:
             frames = _exe_backtrace(context)
         except Exception:
@@ -132,7 +136,7 @@ def _on_exception(pointers):
         _last_fault[0] = (ctypes.c_void_p.from_address(record + 16).value or 0,  # ExceptionAddress
                           ctypes.c_size_t.from_address(record + 32).value,       # Information[0]
                           ctypes.c_size_t.from_address(record + 40).value,       # Information[1]
-                          frames)
+                          frames, _FAULT_KINDS[code])
     return 0  # EXCEPTION_CONTINUE_SEARCH: ctypes still handles it
 
 
@@ -293,13 +297,13 @@ class ExeImage:
         try:
             return fn(*args)
         except OSError as e:
-            if not re.search(r"access violation", str(e)) or _last_fault[0] is None:
+            if not re.search(r"access violation|divide by zero", str(e)) or _last_fault[0] is None:
                 raise
-            rip, kind, address, frames = _last_fault[0]
+            rip, kind, address, frames, fault = _last_fault[0]
             if self._trap_base <= rip < self._trap_end:
                 raise UnresolvedImportCalled(self.traps[(rip - self._trap_base) // _TRAP_SLOT]
                                              + (" from " + " <- ".join(_fmt(f) for f in frames[:6]) if frames else "")) from None
-            raise NativeFault(rip, _ACCESS.get(kind, str(kind)), address, frames) from None
+            raise NativeFault(rip, _ACCESS.get(kind, str(kind)), address, frames, fault) from None
         finally:
             _k32.RemoveVectoredExceptionHandler(handler)
 

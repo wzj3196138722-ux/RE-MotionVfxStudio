@@ -88,14 +88,26 @@ await client.LoadAsync(single.LoadCommand());
 string single13; using (var f = await client.FrameAsync(45)) single13 = Digest(f.Arrays[0]);
 Check(table13 >= 0 && multi13 == single13, "entry 13 simulated with the others matches its single-entry load at tick 45", $"{multi13} vs {single13}");
 
-// 4. An entry the emulator cannot run is excluded, and the rest of the file still loads.
+// 4. Entries that used to fault now load (scene-system and lighting-buffer stand-ins, EmitterColor's
+// factory), and an entry that still faults while advancing is excluded while the rest keep running.
 string muzzle = Path.Combine(stm, @"_anotherorder\vfx\effecteditor\efd_event\cs\efd_cse010_s00\efd_0015_cse010_s00_muzzleflash_0000.efx.3539837");
 var muzzleExcluded = new Dictionary<int, string>();
-watch.Restart();
 var muzzleScene = await PreviewSceneLoader.LoadAsync(client, muzzle, resources, muzzleExcluded);
-Check(muzzleExcluded.ContainsKey(4) && muzzleExcluded[4].Contains("access violation") && muzzleScene.Shown.Count > 0 && muzzleScene.TableOf(4) < 0,
-    "a natively failing entry is excluded and the other entries load", $"{watch.Elapsed.TotalSeconds:F1} s; " + string.Join("; ", muzzleExcluded.Select(p => $"[{p.Key}] {p.Value}")));
-using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == muzzleScene.Shown.Count, "the remaining entries run", $"{muzzleScene.Shown.Count} shown, alive {f.Particles.Count}");
+Check(muzzleExcluded.Count == 0 && muzzleScene.TableOf(4) >= 0, "muzzleflash: entry 4, which faulted before, loads with the others",
+    string.Join("; ", muzzleExcluded.Select(p => $"[{p.Key}] {p.Value}")));
+string deadbody = Directory.EnumerateFiles(stm, "efd_0015_chd3_deadbody_0000.efx.3539837", SearchOption.AllDirectories).First();
+var deadExcluded = new Dictionary<int, string>();
+watch.Restart();
+var deadScene = await PreviewSceneLoader.LoadAsync(client, deadbody, resources, deadExcluded);
+for (int tick = 1; tick <= 45; tick++)
+{
+    try { using var warm = await client.FrameAsync(tick); }
+    catch (Exception error) when (PreviewSceneLoader.ExcludeFailedEntry(deadScene, error, deadExcluded, tick) != null)
+    { deadScene = await PreviewSceneLoader.LoadAsync(client, deadbody, resources, deadExcluded); tick = 0; }
+}
+Check(deadExcluded.Count == 1 && deadExcluded.TryGetValue(58, out var deadReason) && deadReason.Contains("access violation") && deadScene.Shown.Count > 0 && deadScene.TableOf(58) < 0,
+    "a natively failing entry is excluded and the other entries load", $"{watch.Elapsed.TotalSeconds:F1} s; " + string.Join("; ", deadExcluded.Select(p => $"[{p.Key}] {p.Value}")));
+using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == deadScene.Shown.Count, "the remaining entries run", $"{deadScene.Shown.Count} shown, alive {f.Particles.Count}");
 
 // 5. RibbonFollow: engine point pools exported per frame.
 {

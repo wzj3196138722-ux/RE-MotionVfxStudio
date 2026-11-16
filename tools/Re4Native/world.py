@@ -26,7 +26,8 @@ import re4native as rn
 
 B = rn.IMAGE_BASE
 GROUND = [0.0]
-QUERIES = []          # (handle, kind, from, to, radius, hit) per submitted query
+QUERIES = []          # (handle, kind, from, to, radius, hit) per submitted query, while RECORD[0]
+RECORD = [True]       # False for long runs (the offline preview): QUERIES would grow without bound
 PTLIFE = []           # every 3d3d110 call: dict(ctx, particle, id, status, slot, fired, matrix)
 ACTION_TICKS = []     # 3d3e0a0 calls (not run)
 ACTION_COUNT = 64
@@ -62,8 +63,7 @@ def install_collision(img):
 
     def result(inner, idx):
         h = state.get(inner)
-        q = QUERIES[h["q"]] if h is not None else None
-        return results + 0x40 * h["slot"] if q and q["hit"] else 0
+        return results + 0x40 * h["slot"] if h is not None and h["hit"] else 0
 
     f_done, f_res = img.keep(done_t(done)), img.keep(res_t(result))
     vt = img.alloc(0x80)
@@ -78,7 +78,7 @@ def install_collision(img):
         s = slots + 0x28 * i
         rn.set_u64(s + 8, q)
         rn.set_u64(s + 0x10, q)
-        state[inner] = {"slot": i, "q": None}
+        state[inner] = {"slot": i, "q": None, "hit": False}
         inners.append(inner)
     counter = [0]
 
@@ -90,12 +90,14 @@ def install_collision(img):
         s = slots + 0x28 * h
         rn.set_u32(s, kind)
         rn.set_u32(s + 0x24, 0)
-        state[inners[h]]["q"] = len(QUERIES)
+        state[inners[h]]["q"] = len(QUERIES) if RECORD[0] else None
+        state[inners[h]]["hit"] = hit is not None
         if hit:
             pt = (hit[0], GROUND[0], hit[2])
             ctypes.memmove(results + 0x40 * h, struct.pack("<3fI3fI", *pt, 0, 0.0, 1.0, 0.0, 0), 32)
-        QUERIES.append(dict(handle=h, kind=kind, frm=a, to=b, radius=radius, layer=layer, mask=mask,
-                            hit=list(hit) if hit else None))
+        if RECORD[0]:
+            QUERIES.append(dict(handle=h, kind=kind, frm=a, to=b, radius=radius, layer=layer, mask=mask,
+                                hit=list(hit) if hit else None))
         return h
 
     ray_t = ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint32, ctypes.c_uint32)

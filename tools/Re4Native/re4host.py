@@ -104,7 +104,11 @@ class Host:
             self.mapping = None
         if not reused:
             self.img = rn.load(self.args.exe)
-            em.install_runtime(self.img)
+            # PtCollision / PtColliderAction query the physics world: a flat ground at y = 0 answers them
+            # (without it the query ring has no capacity and the first query divides by zero, 3ce336c).
+            import world
+            world.RECORD[0] = False
+            em.install_runtime(self.img, collision=True)
             em._native_table(self.img)      # runs every factory once; cached type table is static data
             self.base = Snapshot(self.img)
         else:

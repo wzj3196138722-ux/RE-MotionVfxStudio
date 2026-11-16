@@ -67,6 +67,7 @@ SINGLETONS = {
     0xD62F8E0: 0x4000,   # collision world (PtCollision / PtColliderAction)
     0xD62F9B0: 0x1000,   # mesh render manager: TypeMesh's builder asks it for an instance (3d2eae0; call stubbed)
     0xD62FA38: 0x5000,   # engine object: PtLife events (3d3d110); +0x4340 -> float +0x18 scales spawn counts (3d154f7)
+    0xD62FCC0: 0x1000,   # scene system: +0x90 scene (world origin doubles), +0x88 view lookup (see install_singletons)
 }
 
 
@@ -79,6 +80,12 @@ def install_singletons(img):
     q = img.alloc(0x100)                      # [d62fa38]+0x4340 -> +0x18: spawn-count scale, 1.0 here
     rn.set_f32(q + 0x18, 1.0)
     rn.set_u64(out[0xD62FA38] + 0x4340, q)
+    # [d62fcc0] scene-system object. +0x90 = the scene (731600), whose +0x180d70 / +0x180d78 doubles are a world
+    # origin offset added to positions (3d34519, 3d34586); +0x88 = a camera / view lookup source, passed to
+    # 3a3f920 by EmitterShape3D (3d212c7, 3d218f4), which returns 0 when [+0x18] is 0 and the caller skips it.
+    scene_system = out[0xD62FCC0]
+    rn.set_u64(scene_system + 0x88, img.alloc(0x100))
+    rn.set_u64(scene_system + 0x90, img.alloc(0x181000))
     return out
 
 
@@ -158,6 +165,10 @@ SERVICES = {
     0x43D8800: ("collision mask bit by name", lambda c, d, p, q: (0, _wstr(d))),
     # joint lookup by name on the parent's transform (ParentOptions BoneName): no parent -> not found
     0x3D00F80: ("joint lookup", lambda c, d, p, q: 0),
+    # ShaderSettings per-particle lighting atlas size (rcx = emitter; render path ctx+0x170 -> 3d26b90 -> 3d17ec0).
+    # A non-zero size makes the builder (3d2812a) allocate a lighting buffer through the render manager at
+    # [d62fa38]+8, which is absent here (null read at 47ce9e4). Render side only: 0 = no lighting buffer.
+    0x3D26850: ("particle lighting atlas size", None),
 }
 RESOURCES = {}
 _IMG = []
