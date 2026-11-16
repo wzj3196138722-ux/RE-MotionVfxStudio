@@ -4,7 +4,7 @@ PtBehavior 让特效调用游戏的 C# 脚本（RE:2023 讲座：特效里挂一
 
 ## 语料
 
-RE4 全部 3946 个文件里有 2193 个 PtBehavior（933 个文件），每个 entry 最多一个：顶层 NoDraw 1777、Billboard3D 275、Polygon 2，内嵌 entry 139。脚本类 14 个：
+RE4 全部 3946 个文件里有 2193 个 PtBehavior（933 个文件），每个 entry 最多一个：顶层 NoDraw 1777、Billboard3D 275、Polygon 2，内嵌 entry 139。脚本类 13 个：
 
 | 脚本类 | 次数 | 参数（主要） |
 |---|---|---|
@@ -42,8 +42,34 @@ RE4 全部 3946 个文件里有 2193 个 PtBehavior（933 个文件），每个 
 ## 编辑
 
 - 属性面板按参数名列出参数值（"脚本参数"组，按脚本里的参数顺序），X/Y/Z、min/max 并成一行，颜色用取色器。
-- 名称、类型、长度、序号、类名放在默认收起的"参数结构（只读）"组里，不能改：参数名和类型由脚本类定义，`varSize`、`size` 是存储值，不会自动重算。
-- 字符串参数（预制体路径、材质名）暂不能改：改长度要同时更新 `size` 和 `varSize`。
+- 名称、类型、长度、序号、类名放在默认收起的"参数结构（只读）"组里，不能改：参数名和类型由脚本类定义。
+- 字符串参数（预制体路径、材质名）可以改：写出时按内容重算长度。字符串占 (长度 + 1) × 2 字节（含结尾的 0），`varSize = 参数名长度 + 17 + size`（数据类型 4 + 数据头 12 + 值 + 参数名 + 0），语料里所有参数都符合。
+- EffectDecal 的 DecalPrefab 是下拉框，列出 RE4 贴花用过的 46 个预制体（按使用次数），也可以直接填路径。
+
+## 新建
+
+一个空的 PtBehavior（没有类名、没有参数）游戏用不了，所以新建时总是按 RE4 的写法填好：
+
+- `tools/Re4AttributeCatalog` 生成 `re4-ptbehavior-templates.json`：每个脚本类最常见的参数列表，取值来自与各参数众数最一致的那个实例；最常见的载体 entry 属性列表；EffectDecal 用过的预制体路径。
+- 从属性目录添加 PtBehavior（拖到面板、节点图或双击）时先选脚本类，参数按模板填入。
+- 文件菜单"新建脚本载体 entry"按 RE4 的常见载体新建：EffectDecal 是 Transform3D、ParentOptions、Spawn、TypeNoDraw、Life、PtBehavior（RE4 里 324 个顶层贴花 entry 是这样），其他属性字段取各类型的默认值。新 entry 成为编辑对象。
+- 后台 `add_attribute` / `add_entry` 的属性项可带 `behavior: {class, parameters: [{name, type, value}]}`；MCP 的 `add_attribute` 有 `script`，`add_entry` 可以用 `script` 代替 `type` 新建载体。
+- 参数由 `PtBehaviorVariable.Create` 按文本生成（数据头：Float2 和类型 20 的 unkn 为 2，其余为 1，然后是 -1 和参数序号）。把语料里全部 2193 个 PtBehavior 的参数按各自的文本重建，933 个文件写出与原文件逐字节相同。
+
+贴花选的是哪个预制体：预制体里直接写着三张贴图的路径（ALBA 颜色、NRMR 法线、MSK2 遮罩），没有经过材质文件；46 个预制体和贴图都在游戏的 pak 里，预览能读到。预览用近似的方式画贴花，见下一节。
+
+## 贴花近似预览
+
+游戏脚本把贴花投到地形上，预览只有 y = 0 的平地，所以只做最简单的近似：
+
+- 带 EffectDecal 的 NoDraw entry 现在会被模拟（不画粒子），和触发子 Action 的 NoDraw 一样。
+- 每个存活的载体粒子，在地面以上 0 ~ SearchTerrainDistance 之间时（允许低于地面 5 cm），在正下方地面上铺一张面片。贴图是预制体的 ALBA，颜色乘 BaseColorMod，透明度再乘粒子的 Life alpha；粒子消失贴花就消失。旋转在 ±RandomRollRange 之间按粒子编号随机。
+- 尺寸规则是推断的：默认把 ScaleXY 当作随机缩放，宽 = Extent.X × (ScaleXY.X + u × ScaleXY.Y) × 系数，深用 Extent.Z。也可以切换成把 ScaleXY 当宽、深两个方向的缩放；按宽深缩放读时，crushe_0000 的血迹（Extent 1, 0.02, 1，ScaleXY 0.5, 0.1）会变成 0.5 × 0.1 m 的细条，不像血迹。系数默认 1，在"合成配置"里调，用游戏里已知尺寸的 Billboard3D 对照校准。主面板显示所选贴花 entry 的尺寸。
+- 没做：MSK2 遮罩（血迹的形状和扩散多半靠它，所以现在边缘是方的）、法线、自发光、AlphaMaskRange 和 Alpha0/1 的时间变化、ProjectionShape 和投射方向、预制体里组件自己的参数。贴花画在完整分辨率的场景里、粒子之前，不写深度。
+- Billboard3D 载体的条目如果本身读不出贴图来源（例如 hold_dead_0000 的三个没有 UVSPath 的 entry），整个 entry 不显示，贴花也不出现。
+- MCP `composition` 有 `decals`、`decalScale`、`decalScaleXYRandom`。
+
+验证：`tools/Re4MultiEntryTests` 第 13 节，crushe_0000 的两个 NoDraw 贴花载体被模拟、贴图读到，第 60 帧内地面上最多同时有 6 个贴花，位置和尺寸符合上面的规则。窗口截图（俯视，第 40 帧）看到血迹贴花铺在地面上。
 - 节点图里的行显示脚本类短名（`PtBehavior [EffectRadialBlur]`），悬停显示完整类名和参数列表。
 - 顺带修正：`EFXAttribute.ExpectedByteSize`（读取时记录的字节数，不写回文件）以前在所有属性上都显示为可编辑，现在只读。
 
@@ -55,4 +81,7 @@ RE4 全部 3946 个文件里有 2193 个 PtBehavior（933 个文件），每个 
 
 ## 验证
 
-`tools/Re4MultiEntryTests` 第 12 节：2193 个 PtBehavior 除类型 20 外全部解析，933 个文件写回逐字节相同（只写到内存）；Decal 的 PtBehavior 只有 20 个参数值可编辑；改 Extent.Y 和 RandomRollRange 后写出再读回值正确；roar_0000 的节点图行为 `PtBehavior [EffectRadialBlur]`。通用编辑、结构编辑 12/12、MCP 端到端 65/65 通过。属性面板的新分组没有在窗口里截图核对。
+- `tools/Re4MultiEntryTests` 第 12 节：2193 个 PtBehavior 除类型 20 外全部解析，933 个文件写回逐字节相同（只写到内存）；按文本重建全部参数后仍逐字节相同；Decal 的 PtBehavior 只有参数值（含字符串）可编辑；改 Extent.Y、RandomRollRange 和一个更长的 DecalPrefab 路径后写出再读回正确；roar_0000 的节点图行为 `PtBehavior [EffectRadialBlur]`。
+- `tools/Re4StructureTests` 第 7 节：按窗口的请求新建贴花载体 entry，把预制体改成 Burnt，保存后读回，属性列表和 10 个参数都与模板一致。
+- MCP 端到端：`add_entry` 带 `script` 新建贴花载体并选中。
+- 属性面板的新分组、脚本类选择框和预制体下拉框没有在窗口里截图核对。

@@ -213,8 +213,76 @@ public partial class PtBehaviorVariable : BaseModel
 
 	protected override bool DoWrite(FileHandler handler)
 	{
+		// The stored lengths follow the content, so string values can change (RE4 corpus, every parameter type):
+		// a string takes (length + 1) * 2 bytes with its NUL, and varSize counts what follows it
+		// (dataType 4 + data header 12 + payload + name + NUL) = name length + 17 + size.
+		if (Version == EfxVersion.RE4 && variable != null)
+		{
+			if (variable is PtBehaviorVariableDataWString text) text.size = ((text.str?.Length ?? 0) + 1) * 2;
+			varSize = (behaviorProperty?.Length ?? 0) + 17 + variable.size;
+		}
 		DefaultWrite(handler);
 		return true;
+	}
+
+	/// <summary>The value as <see cref="Create"/> reads it.</summary>
+	public string ValueText()
+	{
+		var inv = System.Globalization.CultureInfo.InvariantCulture;
+		return variable switch
+		{
+			PtBehaviorVariableFloat f => f.value.ToString("R", inv),
+			PtBehaviorVariableFloat2 f2 => string.Join(",", f2.Vec.X.ToString("R", inv), f2.Vec.Y.ToString("R", inv)),
+			PtBehaviorVariableFloat3 f3 => string.Join(",", f3.vec.X.ToString("R", inv), f3.vec.Y.ToString("R", inv), f3.vec.Z.ToString("R", inv)),
+			PtBehaviorVariableRange r => string.Join(",", r.range.min.ToString("R", inv), r.range.max.ToString("R", inv)),
+			PtBehaviorVariableInteger i => i.value.ToString(inv),
+			PtBehaviorVariableUInt u => u.value.ToString(inv),
+			PtBehaviorVariableDataColor c => $"{c.color.R},{c.color.G},{c.color.B},{c.color.A}",
+			PtBehaviorVariableDataWString s => s.str ?? "",
+			PtBehaviorVariableDataPrefabUnknown raw => Convert.ToHexString(raw.data ?? []),
+			_ => "",
+		};
+	}
+
+	/// <summary>A new RE4 parameter from text: Float, Int, Enum, Uint (and types 3, 22) take one number; Float2,
+	/// Float3, Range and Color take comma-separated numbers (Color: R,G,B,A); the string types take the text; other
+	/// types take hex bytes. <paramref name="index"/> is the parameter's position in its PtBehavior.</summary>
+	public static PtBehaviorVariable Create(EfxVersion version, int index, string name, PtBehaviorPropType type, string value)
+	{
+		var inv = System.Globalization.CultureInfo.InvariantCulture;
+		float[] Floats(int n)
+		{
+			var parts = value.Split(',').Select(p => float.Parse(p.Trim(), inv)).ToArray();
+			if (parts.Length != n) throw new ArgumentException($"{name}: {type} needs {n} comma-separated numbers.");
+			return parts;
+		}
+		PtBehaviorVariableDataBase data = type switch
+		{
+			PtBehaviorPropType.PropFloat => new PtBehaviorVariableFloat(version) { value = float.Parse(value, inv), size = 4 },
+			PtBehaviorPropType.PropFloat2 => Floats(2) is var f2 ? new PtBehaviorVariableFloat2(version) { Vec = new(f2[0], f2[1]), size = 8 } : null!,
+			PtBehaviorPropType.PropFloat3 => Floats(3) is var f3 ? new PtBehaviorVariableFloat3(version) { vec = new(f3[0], f3[1], f3[2]), size = 12 } : null!,
+			PtBehaviorPropType.PropRange => Floats(2) is var r ? new PtBehaviorVariableRange(version) { range = new(r[0], r[1]), size = 8 } : null!,
+			PtBehaviorPropType.PropInt => new PtBehaviorVariableInteger(version) { value = int.Parse(value, inv), size = 4 },
+			PtBehaviorPropType.PropEnum => new PtBehaviorVariableEnum(version) { value = int.Parse(value, inv), size = 4 },
+			PtBehaviorPropType.PropUint or PtBehaviorPropType.PropType3 or PtBehaviorPropType.PropType22 =>
+				new PtBehaviorVariableUInt(version) { value = uint.Parse(value, inv), size = 4 },
+			PtBehaviorPropType.PropColor => value.Split(',').Select(p => byte.Parse(p.Trim(), inv)).ToArray() is { Length: 4 } c
+				? new PtBehaviorVariableDataColor(version) { color = new via.Color { R = c[0], G = c[1], B = c[2], A = c[3] }, size = 4 }
+				: throw new ArgumentException($"{name}: Color needs R,G,B,A."),
+			PtBehaviorPropType.PropWstringName or PtBehaviorPropType.PropWstring2 => new PtBehaviorVariableDataWString(version) { str = value },
+			PtBehaviorPropType.PropPrefabpath => new PtBehaviorVariableDataPrefabPath(version) { str = value },
+			_ => Convert.FromHexString(value) is var bytes ? new PtBehaviorVariableDataPrefabUnknown(version) { data = bytes, size = bytes.Length } : null!,
+		};
+		if (data is PtBehaviorVariableDataWString w) w.size = ((w.str?.Length ?? 0) + 1) * 2;
+		// Header as in every RE4 parameter: unkn 2 for Float2 and type 20, else 1; then -1 and the parameter index.
+		data.unkn = type is PtBehaviorPropType.PropFloat2 or PtBehaviorPropType.PropType20 ? 2 : 1;
+		data.re4_unkn0 = -1;
+		data.re4_unkn1 = (short)index;
+		return new PtBehaviorVariable(version)
+		{
+			dataType = type, variable = data, behaviorProperty = name,
+			varSize = name.Length + 17 + data.size,
+		};
 	}
 }
 

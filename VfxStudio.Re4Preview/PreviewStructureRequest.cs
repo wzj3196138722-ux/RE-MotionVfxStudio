@@ -9,7 +9,10 @@ namespace VfxStudio.Re4Preview;
 /// <param name="Type">The attribute type (add_attribute) or the new entry's Type attribute (add_entry).</param>
 /// <param name="ExpectedRevision">For AI requests: the revision the change must apply to (stale ones are refused);
 /// the window uses the current revision.</param>
-internal sealed record PreviewStructureRequest(string Op, int EntryPosition, int AttributeIndex = -1, string? Type = null, long? ExpectedRevision = null);
+/// <param name="Script">PtBehavior script class: add_attribute of PtBehavior fills it from that class's RE4 template;
+/// add_entry builds that class's usual carrier entry (NoDraw + PtBehavior).</param>
+internal sealed record PreviewStructureRequest(string Op, int EntryPosition, int AttributeIndex = -1, string? Type = null, long? ExpectedRevision = null,
+    string? Script = null);
 
 /// <summary>Menu items shared by the node graph and the main panel.</summary>
 internal static class PreviewStructureMenu
@@ -62,6 +65,14 @@ internal static class PreviewStructureMenu
             ImGui.TextDisabled("带上同类 entry 几乎都有的属性，字段取自 RE4 的实际文件");
             foreach (var type in NewEntryTypes)
                 if (ImGui.MenuItem(type[4..])) chosen = new("add_entry", -1, Type: type);
+            ImGui.EndMenu();
+        }
+        if (ImGui.BeginMenu("新建脚本载体 entry"))
+        {
+            // NoDraw entries carrying a PtBehavior, built like RE4's usual carriers of that script.
+            ImGui.TextDisabled("NoDraw + PtBehavior，属性与参数取自 RE4 的常见写法；预览不运行脚本");
+            foreach (var script in PreviewAttributeCatalog.Re4.Behaviors.Classes.Where(c => c.Carrier.Count > 0))
+                if (ImGui.MenuItem($"{script.ShortName}（RE4 {script.Uses} 处）")) chosen = new("add_entry", -1, Type: "TypeNoDraw", Script: script.Name);
             ImGui.EndMenu();
         }
         if (clipboardKind == "entry" && ImGui.MenuItem("粘贴 entry " + clipboardName)) chosen = new("paste_entry", -1);

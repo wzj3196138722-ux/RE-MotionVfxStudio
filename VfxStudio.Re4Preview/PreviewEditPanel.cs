@@ -260,6 +260,7 @@ internal sealed class PreviewEditPanel
                         ImGui.TableNextColumn();
                         if(row.Color is {} color) DrawColor(draft,color);
                         else if(row.Parts is {} parts) DrawParts(draft,parts);
+                        else if(row.Field is {} prefab && row.Label=="DecalPrefab" && prefab.Editable) DrawDecalPrefab(draft,prefab);
                         else if(row.Field is {} field) DrawField(draft,field,attribute?.Type);
                         ImGui.PopID();
                     }
@@ -330,6 +331,25 @@ internal sealed class PreviewEditPanel
         if(ImGui.ColorEdit4("##RGBA",ref value)) draft.SetColor(color,[value.X,value.Y,value.Z,value.W]);
         ImGui.EndDisabled();
         if(!color.Editable && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip("只读："+(color.Reason??"后台不允许编辑。"));
+    }
+
+    /// <summary>EffectDecal's prefab: the prefabs RE4 decals use (most used first), or any path typed below.</summary>
+    private static void DrawDecalPrefab(PreviewPropertyDraft draft,PreviewFieldInfo field)
+    {
+        string value=draft.Value(field.Path);
+        ImGui.SetNextItemWidth(-1);
+        if(ImGui.BeginCombo("##贴花",Path.GetFileNameWithoutExtension(value)))
+        {
+            foreach(var (path,uses) in PreviewAttributeCatalog.Re4.Behaviors.DecalPrefabs)
+            {
+                if(ImGui.Selectable($"{Path.GetFileNameWithoutExtension(path)}  ·  RE4 {uses} 处##{path}",string.Equals(path,value,StringComparison.OrdinalIgnoreCase)))
+                    draft.Set(field.Path,path);
+                if(ImGui.IsItemHovered()) ImGui.SetTooltip(path);
+            }
+            ImGui.EndCombo();
+        }
+        if(ImGui.IsItemHovered()) ImGui.SetTooltip(value+"\n列表是 RE4 贴花用过的 46 个预制体；也可以在下面直接填路径。");
+        DrawExact(draft,field,ref value,false);
     }
 
     /// <summary>Components of one value side by side, each as exact text.</summary>

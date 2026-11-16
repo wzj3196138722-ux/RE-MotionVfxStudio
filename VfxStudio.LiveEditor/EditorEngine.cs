@@ -248,7 +248,7 @@ internal sealed partial class EditorEngine : IDisposable
                     break;
                 case "add_entry":
                 {
-                    // Optional "attributes": [{type, fields?}] are created and checked before the entry is added,
+                    // Optional "attributes": [{type, fields?, behavior?}] are created and checked before the entry is added,
                     // so the entry and its attributes are one revision.
                     var version = Require().Header.Version;
                     var entry = new EFXEntry { Version = version, name = OptionalText(request, "name") ?? "New effect", entryAssignment = EfxEntryEnum.NoAssignment };
@@ -256,7 +256,7 @@ internal sealed partial class EditorEngine : IDisposable
                         foreach (var item in initial)
                         {
                             var spec = item as JsonObject ?? throw new ArgumentException("Each attribute needs a type.");
-                            if (!entry.AddAttribute(NewAttribute(version, Text(spec, "type"), spec["fields"] as JsonArray)))
+                            if (!entry.AddAttribute(NewAttribute(version, Text(spec, "type"), spec["fields"] as JsonArray, spec["behavior"] as JsonObject)))
                                 throw new InvalidOperationException("Attribute cannot be added to the new entry: " + Text(spec, "type"));
                         }
                     else if (request["attributes"] != null) throw new ArgumentException("attributes must be an array.");
@@ -269,7 +269,7 @@ internal sealed partial class EditorEngine : IDisposable
                     {
                         var target = Target.From(request) with { AttributeIndex = null };
                         var container = (EFXEntryBase)Resolve(target);
-                        var attribute = NewAttribute(ResolveTargetFile(target).Header.Version, Text(request, "type"), request["fields"] as JsonArray);
+                        var attribute = NewAttribute(ResolveTargetFile(target).Header.Version, Text(request, "type"), request["fields"] as JsonArray, request["behavior"] as JsonObject);
                         if (!service.AddAttributeToEntry(container, attribute))
                             throw new InvalidOperationException("Attribute cannot be added: it may already exist, require a matching base attribute, or be invalid for this entry kind.");
                     });
@@ -462,13 +462,31 @@ internal sealed partial class EditorEngine : IDisposable
 
     /// <summary>A new attribute with default values, then the optional initial "fields" ([{path, value}] as in
     /// set_fields). Every given path must exist and be editable.</summary>
-    private EFXAttribute NewAttribute(EfxVersion version, string name, JsonArray? fields)
+    /// <param name="behavior">For PtBehavior: {class, unkn1?, parameters: [{name, type, value}]}, the script class and its
+    /// parameter list (type = PtBehaviorPropType name, value as PtBehaviorVariable.Create reads it). A PtBehavior
+    /// without it has no class and no parameters, which the game cannot use.</param>
+    private EFXAttribute NewAttribute(EfxVersion version, string name, JsonArray? fields, JsonObject? behavior = null)
     {
         if (!Enum.TryParse<EfxAttributeType>(name, ignoreCase: false, out var type) || !Enum.IsDefined(type))
             throw new ArgumentException("Unknown attribute type: " + name);
         var attribute = EFXAttribute.Create(version, type);
         attribute.Version = version;
         attribute.UniqueID = NextAttributeId();
+        if (behavior != null)
+        {
+            if (attribute is not ReeLib.Efx.Structs.Pt.EFXAttributePtBehavior script) throw new ArgumentException("behavior applies only to PtBehavior.");
+            if (version != EfxVersion.RE4) throw new NotSupportedException("PtBehavior parameters can be created for RE4 only.");
+            script.behaviorString = Text(behavior, "class");
+            script.unkn1 = behavior["unkn1"] is JsonValue u && u.TryGetValue(out uint unkn) ? unkn : 2;   // 2 in 2189 of 2193 RE4 instances
+            var parameters = behavior["parameters"] as JsonArray ?? throw new ArgumentException("behavior needs a parameters array.");
+            script.properties = parameters.Select((item, index) =>
+            {
+                var o = item as JsonObject ?? throw new ArgumentException("Each behavior parameter needs name, type and value.");
+                if (!Enum.TryParse<ReeLib.Efx.Structs.Pt.PtBehaviorPropType>(Text(o, "type"), false, out var kind))
+                    throw new ArgumentException("Unknown PtBehavior parameter type: " + Text(o, "type"));
+                return ReeLib.Efx.Structs.Pt.PtBehaviorVariable.Create(version, index, Text(o, "name"), kind, o["value"]?.ToString() ?? "");
+            }).ToList();
+        }
         if (fields != null)
         {
             var values = fields.Select(f => f is JsonObject o ? KeyValuePair.Create(Text(o, "path"), Text(o, "value")) : throw new ArgumentException("Each field needs path and value.")).ToArray();

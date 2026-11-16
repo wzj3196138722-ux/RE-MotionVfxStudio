@@ -393,13 +393,6 @@
         "frameDelay": "40"
       }
     },
-    "PtBehavior": {
-      "samples": 1500,
-      "fields": {
-        "unkn1": "2",
-        "behaviorString": "via.effect.script.EffectDecal"
-      }
-    },
     "PtColliderAction": {
       "samples": 216,
       "fields": {

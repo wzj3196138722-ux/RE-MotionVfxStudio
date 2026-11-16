@@ -133,6 +133,12 @@ public sealed class PreviewAttributeCatalog
         return defaults.GetValueOrDefault(type) ?? [];
     }
 
+    private PreviewBehaviorTemplates? behaviorTemplates;
+
+    /// <summary>PtBehavior script classes with their usual parameters and carrier entry, and the decal prefabs RE4 uses
+    /// (tools/Re4AttributeCatalog, re4-ptbehavior-templates.json).</summary>
+    public PreviewBehaviorTemplates Behaviors => behaviorTemplates ??= PreviewBehaviorTemplates.Load();
+
     /// <summary>Attributes of the entry that need <paramref name="type"/> as their base (the backend would have
     /// refused them without it), so removing it would leave them orphaned.</summary>
     public IReadOnlyList<string> Dependents(string type, IEnumerable<string> existing) =>
@@ -248,5 +254,59 @@ public sealed class PreviewAttributeCatalog
         if (name.StartsWith("Pt", StringComparison.Ordinal) || name.Contains("Collider", StringComparison.Ordinal) || name is "FluidSimulator2D" or "TestBehaviorUpdater")
             return "粒子行为与碰撞";
         return "其他";
+    }
+}
+
+/// <param name="Type">PtBehaviorPropType name.</param>
+/// <param name="Value">Text as PtBehaviorVariable.Create reads it.</param>
+public sealed record PreviewBehaviorParameter(string Name, string Type, string Value);
+
+/// <param name="Uses">PtBehavior instances of this class in RE4 (top-level and embedded).</param>
+/// <param name="Carrier">The usual attribute list of a top-level entry carrying it, PtBehavior included; empty when
+/// RE4 has none.</param>
+public sealed record PreviewBehaviorClass(string Name, int Uses, IReadOnlyList<PreviewBehaviorParameter> Parameters, IReadOnlyList<string> Carrier)
+{
+    /// <summary>The class name without its namespace (EffectDecal).</summary>
+    public string ShortName => Name[(Name.LastIndexOf('.') + 1)..];
+
+    /// <summary>The backend's add_attribute / add_entry "behavior" object.</summary>
+    public System.Text.Json.Nodes.JsonObject Request() => new()
+    {
+        ["class"] = Name,
+        ["parameters"] = new System.Text.Json.Nodes.JsonArray(Parameters.Select(p => (System.Text.Json.Nodes.JsonNode?)new System.Text.Json.Nodes.JsonObject
+            { ["name"] = p.Name, ["type"] = p.Type, ["value"] = p.Value }).ToArray()),
+    };
+}
+
+/// <summary>PtBehavior templates taken from RE4: per script class the most common parameter list with the values of one
+/// real instance, and the decal prefab paths EffectDecal uses.</summary>
+public sealed class PreviewBehaviorTemplates
+{
+    public const string Decal = "via.effect.script.EffectDecal";
+    /// <summary>Most used first.</summary>
+    public IReadOnlyList<PreviewBehaviorClass> Classes { get; }
+    /// <summary>DecalPrefab paths with how many RE4 decals use them, most used first.</summary>
+    public IReadOnlyList<(string Path, int Uses)> DecalPrefabs { get; }
+
+    private PreviewBehaviorTemplates(IReadOnlyList<PreviewBehaviorClass> classes, IReadOnlyList<(string, int)> prefabs)
+    { Classes = classes; DecalPrefabs = prefabs; }
+
+    public PreviewBehaviorClass? Find(string name) => Classes.FirstOrDefault(c => c.Name == name);
+
+    internal static PreviewBehaviorTemplates Load()
+    {
+        using var stream = typeof(PreviewBehaviorTemplates).Assembly.GetManifestResourceStream("VfxStudio.Re4Render.re4-ptbehavior-templates.json")
+            ?? throw new InvalidDataException("缺少 PtBehavior 模板数据 re4-ptbehavior-templates.json。");
+        using var document = JsonDocument.Parse(stream);
+        var classes = document.RootElement.GetProperty("classes").EnumerateObject().Select(c => new PreviewBehaviorClass(c.Name,
+                c.Value.GetProperty("count").GetInt32(),
+                c.Value.GetProperty("parameters").EnumerateArray().Select(p => new PreviewBehaviorParameter(
+                    p.GetProperty("name").GetString()!, p.GetProperty("type").GetString()!, p.GetProperty("value").GetString()!)).ToArray(),
+                c.Value.GetProperty("carrier").ValueKind == JsonValueKind.Object
+                    ? c.Value.GetProperty("carrier").GetProperty("attributes").EnumerateArray().Select(a => a.GetString()!).ToArray() : []))
+            .OrderByDescending(c => c.Uses).ToArray();
+        var prefabs = document.RootElement.GetProperty("decalPrefabs").EnumerateArray()
+            .Select(p => (p.GetProperty("path").GetString()!, p.GetProperty("uses").GetInt32())).ToArray();
+        return new(classes, prefabs);
     }
 }

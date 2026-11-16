@@ -420,7 +420,7 @@ using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == deadSc
 // 12. PtBehavior (calls a game C# script; the preview does not run it): every parameter decodes except type 20, files
 // with it write back byte for byte (in memory only), only parameter values are editable, the graph names the class.
 {
-    int behaviors = 0, raw = 0, files = 0, differ = 0; string? firstRaw = null;
+    int behaviors = 0, raw = 0, files = 0, differ = 0, rebuiltDiffer = 0; string? firstRaw = null, firstRebuilt = null;
     ReeLib.Efx.Structs.Pt.EFXAttributePtBehavior? decal = null;
     ReeLib.EfxFile? decalFile = null; string? decalPath = null;
     foreach (var path in Directory.EnumerateFiles(stm, "*.efx.3539837", SearchOption.AllDirectories))
@@ -455,18 +455,29 @@ using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == deadSc
         using var written = new MemoryStream();
         file.WriteTo(new ReeLib.FileHandler(written, path) { FileVersion = (int)ReeLib.Efx.EfxVersion.RE4 }, false);   // never back to the source
         if (!written.ToArray().AsSpan().SequenceEqual(bytes)) differ++;
+        // Rebuild every parameter from its own text with the factory new PtBehaviors use: the file must not change.
+        foreach (var b in found)
+            b.properties = b.properties.Select((p, i) => ReeLib.Efx.Structs.Pt.PtBehaviorVariable.Create(ReeLib.Efx.EfxVersion.RE4, i, p.behaviorProperty!, p.dataType, p.ValueText())).ToList();
+        using var rebuiltBytes = new MemoryStream();
+        file.WriteTo(new ReeLib.FileHandler(rebuiltBytes, path) { FileVersion = (int)ReeLib.Efx.EfxVersion.RE4 }, false);   // memory only
+        if (!rebuiltBytes.ToArray().AsSpan().SequenceEqual(bytes)) { rebuiltDiffer++; firstRebuilt ??= Path.GetFileName(path); }
     }
     Check(behaviors == 2193 && raw == 0 && differ == 0,
         $"PtBehavior: {behaviors} attributes in {files} files; every parameter decodes but type 20; all files write back byte for byte",
         $"raw {raw} {firstRaw}, differ {differ}");
+    Check(rebuiltDiffer == 0, "PtBehavior: every parameter rebuilt from its text by PtBehaviorVariable.Create writes the same bytes (lengths, header, index)",
+        $"differ {rebuiltDiffer} {firstRebuilt}");
     var editable = VfxStudio.LiveEditor.EfxFieldValues.Editable(decal!, ReeLib.Efx.EfxVersion.RE4).Select(kv => kv.Key).ToArray();
-    var notValues = editable.Where(k => !System.Text.RegularExpressions.Regex.IsMatch(k, @"^properties\[\d+\]\.variable\.(value|vec|Vec|color|range)\b")).ToArray();
-    Check(editable.Length > 0 && notValues.Length == 0,
-        "PtBehavior: only parameter values are editable (not names, types, lengths or strings)", $"{editable.Length} editable; others: {string.Join(", ", notValues.Take(6))}");
+    var notValues = editable.Where(k => !System.Text.RegularExpressions.Regex.IsMatch(k, @"^properties\[\d+\]\.variable\.(value|vec|Vec|color|range|str)\b")).ToArray();
+    Check(editable.Length > 0 && notValues.Length == 0 && editable.Any(k => k.EndsWith(".str")),
+        "PtBehavior: only parameter values are editable, strings included (not names, types or lengths)", $"{editable.Length} editable; others: {string.Join(", ", notValues.Take(6))}");
     // Edit one value of each kind through the backend's own field writer, write the file to memory, read it back.
     int extent = decal!.properties.FindIndex(p => p.behaviorProperty == "Extent"), roll = decal.properties.FindIndex(p => p.behaviorProperty == "RandomRollRange");
+    int prefab = decal.properties.FindIndex(p => p.behaviorProperty == "DecalPrefab");
+    const string burnt = "RE_ENGINE_LIBRARY/VFX_Library/Decal/Burnt_BDC/decal_capcom_burnt_bdc_00.pfb";   // a different length
     var (applied, skipped) = VfxStudio.LiveEditor.EfxFieldValues.Apply(decal, ReeLib.Efx.EfxVersion.RE4,
-        [KeyValuePair.Create($"properties[{extent}].variable.vec.Y", "0.5"), KeyValuePair.Create($"properties[{roll}].variable.value", "45")]);
+        [KeyValuePair.Create($"properties[{extent}].variable.vec.Y", "0.5"), KeyValuePair.Create($"properties[{roll}].variable.value", "45"),
+         KeyValuePair.Create($"properties[{prefab}].variable.str", burnt)]);
     using var edited = new MemoryStream();
     decalFile!.WriteTo(new ReeLib.FileHandler(edited, decalPath!) { FileVersion = (int)ReeLib.Efx.EfxVersion.RE4 }, false);   // memory only
     var reread = new ReeLib.EfxFile(new ReeLib.FileHandler(new MemoryStream(edited.ToArray()), decalPath!) { FileVersion = (int)ReeLib.Efx.EfxVersion.RE4 });
@@ -474,15 +485,43 @@ using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == deadSc
         .FirstOrDefault(b => b.behaviorString == decal.behaviorString && b.properties.Count == decal.properties.Count) : null;
     float y = (back?.properties[extent].variable as ReeLib.Efx.Structs.Pt.PtBehaviorVariableFloat3)?.vec.Y ?? float.NaN;
     float r = (back?.properties[roll].variable as ReeLib.Efx.Structs.Pt.PtBehaviorVariableFloat)?.value ?? float.NaN;
-    Check(applied == 2 && skipped.Length == 0 && y == .5f && r == 45f, "PtBehavior: edited Extent.Y and RandomRollRange survive a write and read back",
-        $"written {applied}, Extent.Y {y}, RandomRollRange {r}, {Path.GetFileName(decalPath)}");
+    string? prefabBack = back?.properties[prefab].ValueText();
+    Check(applied == 3 && skipped.Length == 0 && y == .5f && r == 45f && prefabBack == burnt &&
+          back!.properties.Select(p => p.behaviorProperty).SequenceEqual(decal.properties.Select(p => p.behaviorProperty)),
+        "PtBehavior: edited Extent.Y, RandomRollRange and a longer DecalPrefab path survive a write and read back",
+        $"written {applied}, Extent.Y {y}, RandomRollRange {r}, prefab {prefabBack}, {Path.GetFileName(decalPath)}");
     string roar = Directory.EnumerateFiles(stm, "efd_0015_ao_wp5826_roar_0000.efx.3539837", SearchOption.AllDirectories).First();
     var row = PreviewEffectGraph.Read(roar).Nodes.SelectMany(n => n.Rows).FirstOrDefault(r => r.Label.StartsWith("PtBehavior", StringComparison.Ordinal));
     Check(row is { Label: "PtBehavior [EffectRadialBlur]" } && row.Tooltip!.Contains("BlurPower"),
         "graph: a PtBehavior row names its script class and lists the parameters in the tooltip", row?.Label);
 }
 
-// 13. Optional: large official files.
+// 13. Approximate decals: crushe_0000's two NoDraw EffectDecal carriers are simulated (not drawn), their prefabs'
+// ALBA textures load from the paks, and from the first ticks decals lie on the ground under the carrier particles.
+{
+    string crushe = Directory.EnumerateFiles(stm, "efd_0015_ao_chc0_damage_1000_dead_crushe_0000.efx.3539837", SearchOption.AllDirectories).First();
+    var decalScene = await PreviewSceneLoader.LoadAsync(client, crushe, resources, new Dictionary<int, string>());
+    var carriers = decalScene.Shown.Where(e => e.Decal != null).ToArray();
+    var config = new CompositionConfig();
+    int most = 0; bool flat = true, sized = true;
+    for (int tick = 1; tick <= 60; tick++)
+    {
+        using var f = await client.FrameAsync(tick);
+        var placed = PreviewDecalRenderer.Place(decalScene, f, config);
+        most = Math.Max(most, placed.Count);
+        foreach (var (table, center, size, _, _) in placed)
+        {
+            flat &= center.Y == 0.002f;
+            var d = decalScene.Shown[table].Decal!;
+            sized &= size.X >= d.Extent.X * d.ScaleXY.X - 1e-5f && size.X <= d.Extent.X * (d.ScaleXY.X + d.ScaleXY.Y) + 1e-5f;
+        }
+    }
+    Check(carriers.Length == 2 && carriers.All(c => c is { Logic: true, Decal.Albedo: not null }) && most > 0 && flat && sized,
+        "decals: crushe_0000's NoDraw EffectDecal carriers run, their ALBA textures load, and decals lie on the ground sized Extent x (ScaleXY.X + u ScaleXY.Y)",
+        $"carriers {string.Join(", ", carriers.Select(c => $"{c.Label} {Path.GetFileNameWithoutExtension(c.Decal!.Prefab)}"))}; at most {most} at once");
+}
+
+// 14. Optional: large official files.
 if (args.Contains("--corpus"))
 {
     var corpus = new[]

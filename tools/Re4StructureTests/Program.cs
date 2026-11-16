@@ -106,6 +106,40 @@ int before = Entries(reply);
 (state, reply) = await editor.SendRawAsync("remove_entry", new() { ["index"] = pasted }, state.Revision);
 Check(Entries(reply) == before - 1 && state.Manifest!.EntryPosition == 13 && state.PublicationError == null, "removing another entry leaves the edited one untouched");
 
+// 7. A decal carrier (what "新建脚本载体 entry → EffectDecal" sends): RE4's usual carrier attributes and an EffectDecal
+// PtBehavior with RE4's usual parameters; saved and read back, the entry has them, and the prefab path can change.
+var decal = catalog.Behaviors.Find(PreviewBehaviorTemplates.Decal)!;
+var carrier = new JsonArray(decal.Carrier.Select(t =>
+{
+    var spec = new JsonObject { ["type"] = t, ["fields"] = Fields(t) };
+    if (t == "PtBehavior") spec["behavior"] = decal.Request();
+    return (JsonNode?)spec;
+}).ToArray());
+(state, reply) = await editor.SendRawAsync("add_entry", new() { ["name"] = "New_EffectDecal", ["attributes"] = carrier }, editor.State!.Revision);
+int decalEntry = reply["selection"]!["index"]!.GetValue<int>();
+state = await editor.SelectEntryAsync(decalEntry);
+int behaviorIndex = state.Attributes!.Single(a => a.Type == "PtBehavior").Index;
+var behaviorFields = (await editor.InspectAsync(state.Manifest!.DocumentId, state.Revision, behaviorIndex)).Inspection!.Fields;
+var prefabField = behaviorFields.Single(f => f.Path.EndsWith(".variable.str") && behaviorFields.Any(n => n.Path == f.Path.Replace(".variable.str", ".behaviorProperty") && n.Value == "DecalPrefab"));
+const string burnt = "RE_ENGINE_LIBRARY/VFX_Library/Decal/Burnt_BDC/decal_capcom_burnt_bdc_00.pfb";
+(state, _) = await editor.SendRawAsync("set_fields", new()
+{
+    ["target"] = Entry(decalEntry, behaviorIndex),
+    ["fields"] = new JsonArray(new JsonObject { ["path"] = prefabField.Path, ["value"] = burnt }),
+}, state.Revision);
+(_, reply) = await editor.SendRawAsync("save", new(), null);
+string saved = reply["outputPath"]!.GetValue<string>();
+var savedFile = new ReeLib.EfxFile(new ReeLib.FileHandler(new MemoryStream(File.ReadAllBytes(saved)), saved) { FileVersion = (int)ReeLib.Efx.EfxVersion.RE4 });
+var savedEntry = savedFile.Read() ? savedFile.Entries[decalEntry] : null;
+var savedBehavior = savedEntry?.Attributes.OfType<ReeLib.Efx.Structs.Pt.EFXAttributePtBehavior>().SingleOrDefault();
+var expected = decal.Parameters.Select(p => p.Name == "DecalPrefab" ? burnt : p.Value).ToArray();
+Check(savedEntry != null && savedEntry.Attributes.Select(a => a.type.ToString()).SequenceEqual(decal.Carrier) &&
+      savedBehavior is { behaviorString: PreviewBehaviorTemplates.Decal, unkn1: 2 } &&
+      savedBehavior.properties.Select(p => p.behaviorProperty).SequenceEqual(decal.Parameters.Select(p => p.Name)) &&
+      savedBehavior.properties.Select(p => p.ValueText()).SequenceEqual(expected),
+    "a decal carrier entry (NoDraw + EffectDecal) saves with RE4's carrier attributes and parameters; the prefab path changed to Burnt",
+    $"{string.Join(",", savedEntry?.Attributes.Select(a => a.type) ?? [])}; {savedBehavior?.properties.Count} parameters; {Path.GetFileName(saved)}");
+
 Console.WriteLine($"{(failures == 0 ? "PASS" : "FAIL")}: {checks - failures}/{checks}; session {root}");
 if (failures > 0) Environment.ExitCode = 1;
 

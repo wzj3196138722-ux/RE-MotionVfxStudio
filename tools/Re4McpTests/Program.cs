@@ -311,6 +311,14 @@ try
         (error, outcome, _) = await Tool("select_entry", new JsonObject { ["entryPosition"] = 13 });
         Check(!error && Entries(outcome) == entryCount && Selected(outcome) == 13 && outcome["result"]?["previewError"] == null, "undo removes the four entry edits; entry 13 is selected again", Entries(outcome));
         rev = error ? rev : Revision(outcome);
+        // A decal carrier: NoDraw + an EffectDecal PtBehavior with RE4's usual parameters; then undone.
+        (error, outcome, _) = await Tool("add_entry", new JsonObject { ["script"] = "via.effect.script.EffectDecal", ["expectedRevision"] = rev });
+        Check(!error && Entries(outcome) == entryCount + 1 && Selected(outcome) == entryCount && IndexOf(outcome["result"]!["document"]!.AsObject(), "PtBehavior") >= 0,
+            "add_entry with script builds a decal carrier (NoDraw + EffectDecal) and selects it", outcome.ToJsonString()[..Math.Min(400, outcome.ToJsonString().Length)]);
+        rev = error ? rev : Revision(outcome);
+        (error, outcome, _) = await Tool("undo", new JsonObject { ["expectedRevision"] = rev }); rev = error ? rev : Revision(outcome);
+        (error, outcome, _) = await Tool("select_entry", new JsonObject { ["entryPosition"] = 13 });
+        rev = error ? rev : Revision(outcome);
         // copy_entry replaced the copied Life that the cross-file check below pastes: copy it again.
         (error, outcome, _) = await Tool("copy_attribute", new JsonObject { ["attributeIndex"] = lifeIndex });
         clip = outcome["result"]?["copyBuffer"]?["id"]?.GetValue<string>();

@@ -16,13 +16,59 @@ namespace VfxStudio.Re4Render;
 /// <param name="Offset">Byte offset of the entry in the file (embedded entries: inside the PlayEmitter data).</param>
 /// <param name="Actions">PtLife triggers of a top-level entry whose Action the preview runs (Action indices).</param>
 /// <param name="Action">For an embedded entry: the Action that plays it, and its position in the embedded file.</param>
+/// <param name="Decal">An EffectDecal PtBehavior on the entry: the preview lays an approximate decal under its particles.</param>
 public sealed record PreviewSceneEntry(int Position, int Index, string Name, string Type, PreviewDocument? Document, string? Excluded,
-    bool Logic = false, int Offset = 0, IReadOnlyList<int>? Actions = null, int? Action = null, int? Child = null)
+    bool Logic = false, int Offset = 0, IReadOnlyList<int>? Actions = null, int? Action = null, int? Child = null, PreviewDecal? Decal = null)
 {
     public bool Shown => (Document != null || Logic) && Excluded == null;
     public bool Embedded => Action != null;
     /// <summary>[position] for top-level entries, [A action.child] for embedded ones.</summary>
     public string Label => Embedded ? $"[A{Action}.{Child}]" : $"[{Position}]";
+}
+
+/// <summary>The parameters of an EffectDecal PtBehavior the approximate decal uses, and the prefab's colour texture.
+/// The game script places, sizes and fades the decal; the preview only approximates it (PreviewDecalRenderer).</summary>
+/// <param name="Albedo">The prefab's *_ALBA texture (RGB colour, A coverage), or null when it could not be read.</param>
+/// <param name="TextureError">Why <paramref name="Albedo"/> is null.</param>
+/// <param name="Color">BaseColorMod as 0..1 RGBA.</param>
+public sealed record PreviewDecal(string Prefab, PreviewTexture? Albedo, string? TextureError, Vector3 Extent, Vector2 ScaleXY,
+    float RollRange, float SearchDistance, Vector4 Color)
+{
+    /// <summary>Reads the EffectDecal parameters of <paramref name="behavior"/>, or null when it is another script.</summary>
+    public static PreviewDecal? From(ReeLib.Efx.Structs.Pt.EFXAttributePtBehavior behavior, Re4ResourceSource resources)
+    {
+        if (behavior.behaviorString != PreviewBehaviorTemplates.Decal) return null;
+        ReeLib.Efx.Structs.Pt.PtBehaviorVariableDataBase? Value(string name) => behavior.properties.FirstOrDefault(p => p.behaviorProperty == name)?.variable;
+        string prefab = (Value("DecalPrefab") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableDataWString)?.str ?? "";
+        var extent = (Value("Extent") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableFloat3)?.vec ?? Vector3.One;
+        var scale = (Value("ScaleXY") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableFloat2)?.Vec ?? Vector2.One;
+        float roll = (Value("RandomRollRange") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableFloat)?.value ?? 0;
+        float search = (Value("SearchTerrainDistance") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableFloat)?.value ?? 1;
+        var c = (Value("BaseColorMod") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableDataColor)?.color;
+        var color = c is { } k ? new Vector4(k.R, k.G, k.B, k.A) / 255f : Vector4.One;
+        PreviewTexture? albedo = null; string? error = null;
+        try { albedo = AlbedoOf(prefab, resources); }
+        catch (Exception ex) when (ex is FileNotFoundException or InvalidDataException or IOException) { error = ex.Message; }
+        return new(prefab, albedo, error, extent, scale, roll, search, color);
+    }
+
+    /// <summary>A decal prefab names its textures directly (no material file): the *_ALBA one is the colour.</summary>
+    private static PreviewTexture AlbedoOf(string prefab, Re4ResourceSource resources)
+    {
+        if (prefab.Length == 0) throw new InvalidDataException("DecalPrefab 为空。");
+        var bytes = resources.Read(prefab, ".17").Bytes;
+        var paths = new List<string>();
+        var text = new System.Text.StringBuilder();
+        for (int i = 0; i + 1 < bytes.Length; i += 2)
+        {
+            char ch = (char)(bytes[i] | bytes[i + 1] << 8);
+            if (ch >= 0x20 && ch < 0x7f) text.Append(ch);
+            else { if (text.ToString().EndsWith(".tex", StringComparison.OrdinalIgnoreCase)) paths.Add(text.ToString()); text.Clear(); }
+        }
+        string path = paths.FirstOrDefault(p => p.EndsWith("_ALBA.tex", StringComparison.OrdinalIgnoreCase)) ?? paths.FirstOrDefault()
+            ?? throw new InvalidDataException("预制体里没有找到贴图路径：" + prefab);
+        return resources.Read(path, ".143221013");
+    }
 }
 
 /// <summary>Every entry of one EFX file, with the subset the native worker simulates. The worker's
@@ -118,15 +164,16 @@ public sealed class PreviewScene
             string? reason = null; PreviewDocument? document = null;
             var actions = entry.Attributes.OfType<ReeLib.Efx.Structs.Pt.EFXAttributePtLife>().Select(l => l.ActionIndex).Where(playable.ContainsKey).Distinct().ToArray();
             bool logic = false;
+            var decal = entry.Attributes.OfType<ReeLib.Efx.Structs.Pt.EFXAttributePtBehavior>().Select(b => PreviewDecal.From(b, source)).FirstOrDefault(d => d != null);
             if (excluded != null && excluded.TryGetValue(position, out var known)) reason = known;
             else if (entry.TypeAttribute == null) reason = "没有 Type 属性，不产生粒子。";
-            else if (entry.TypeAttribute is EFXAttributeTypeNoDraw && actions.Length > 0)
+            else if (entry.TypeAttribute is EFXAttributeTypeNoDraw && (actions.Length > 0 || decal != null))
             {
-                // Not drawn, but its particles fire child Actions: simulated without a renderer.
+                // Not drawn, but its particles fire child Actions or carry a decal: simulated without a billboard renderer.
                 if (shown >= MaxEntries) reason = $"一次最多预览 {MaxEntries} 个 entry。";
                 else { logic = true; shown++; }
             }
-            else if (entry.TypeAttribute is EFXAttributeTypeNoDraw) reason = "NoDraw 不绘制，也没有预览能运行的子 Action。";
+            else if (entry.TypeAttribute is EFXAttributeTypeNoDraw) reason = "NoDraw 不绘制，也没有预览能运行的子 Action 或贴花。";
             else if (PreviewDocument.KindOf(entry) == null) reason = $"类型 {type} 尚未支持。";
             else if (shown >= MaxEntries) reason = $"一次最多预览 {MaxEntries} 个 entry。";
             else
@@ -135,7 +182,7 @@ public sealed class PreviewScene
                 catch (Exception ex) when (ex is NotSupportedException or InvalidDataException or FileNotFoundException or ArgumentException)
                 { reason = ex.Message; }
             }
-            entries.Add(new(position, entry.index, entry.name ?? "", type, document, reason, logic, (int)entry.Start, actions.Length > 0 ? actions : null));
+            entries.Add(new(position, entry.index, entry.name ?? "", type, document, reason, logic, (int)entry.Start, actions.Length > 0 ? actions : null, Decal: decal));
         }
         // Embedded entries of the Actions that shown entries fire, in Action order.
         var children = new List<PreviewSceneEntry>();
@@ -170,6 +217,9 @@ public sealed class PreviewSceneRenderer : IDisposable
 {
     private readonly BillboardRenderer?[] renderers;
     private readonly string?[] failures;
+    /// <summary>Approximate decals of EffectDecal carriers. The caller draws them into the full-resolution scene before
+    /// the particles (not into the reduced-resolution particle layer, which composites with the particles' blend).</summary>
+    public PreviewDecalRenderer Decals { get; }
     public PreviewScene Scene { get; }
     public int DrawCalls { get; private set; }
     /// <summary>Entries the last render actually drew (renderer present and blend supported).</summary>
@@ -195,6 +245,7 @@ public sealed class PreviewSceneRenderer : IDisposable
             catch (Exception ex) when (ex is NotSupportedException or InvalidDataException or ArgumentException or IndexOutOfRangeException or OverflowException)
             { failures[i] = "贴图无法创建：" + ex.Message; }
         }
+        Decals = new PreviewDecalRenderer(gl, scene, cache);
     }
 
     public BillboardRenderer? ForTable(int table) => table >= 0 && table < renderers.Length ? renderers[table] : null;
@@ -286,7 +337,7 @@ public sealed class PreviewSceneRenderer : IDisposable
         Unsupported = skipped == null ? null : string.Join("\n", skipped);
     }
 
-    public void Dispose() { foreach (var r in renderers) r?.Dispose(); }
+    public void Dispose() { foreach (var r in renderers) r?.Dispose(); Decals.Dispose(); }
 }
 
 /// <summary>Loads a scene into the native worker. An entry that fails natively while loading is

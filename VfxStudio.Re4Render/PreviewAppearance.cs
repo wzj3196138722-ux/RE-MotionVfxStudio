@@ -105,6 +105,13 @@ public sealed class CompositionConfig
     /// so it cannot be a plain alpha factor.</summary>
     public bool AlphaRate { get; set; }
     public bool SortEntries { get; set; } = true;
+    /// <summary>Approximate EffectDecal decals on the ground (PreviewDecalRenderer).</summary>
+    public bool Decals { get; set; } = true;
+    /// <summary>Calibration factor on the decal footprint (Extent x ScaleXY); to be matched against the game.</summary>
+    public float DecalScale { get; set; } = 1;
+    /// <summary>Read ScaleXY as a random scale ScaleXY.X + u * ScaleXY.Y (default; a 0.5 x 0.1 bloodstain reads as a streak
+    /// otherwise) instead of width / depth scales.</summary>
+    public bool DecalScaleXYRandom { get; set; } = true;
     public bool SortWithinEntry { get; set; }
     /// <summary>Gain K on the lit part of RgbCommon under Physical (RUNTIME §4.9).</summary>
     public float PhysicalGain { get; set; } = 1;

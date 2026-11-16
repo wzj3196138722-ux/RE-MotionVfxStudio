@@ -76,7 +76,7 @@ string? lastAttributeList = null;
 JsonObject? lastStructureReply = null;   // backend reply of the last structural edit (selection, document)
 string? openConfirmation = null;         // opened at the top level: popup ids depend on the window that opens them
 string? structureNote = null;        // a remark on the last structural edit (for example: new entry not previewable)
-PreviewStructureRequest? confirmRemoveEntry = null, confirmPaste = null;
+PreviewStructureRequest? confirmRemoveEntry = null, confirmPaste = null, chooseScript = null;
 bool dockCatalog = false;            // a saved layout from before the catalogue existed: dock it once next to the main panel
 // A file dropped on the window: waiting (pendingOpen), or waiting for the user to discard unsaved edits (dropConfirm).
 string? pendingOpen = null, dropConfirm = null;
@@ -273,6 +273,17 @@ async Task<PreviewEditorState> SendCurveKey(PreviewEditCommand command)
 }
 JsonArray DefaultFields(string type) => new(PreviewAttributeCatalog.Re4.Defaults(type)
     .Select(f => (JsonNode?)new JsonObject{["path"]=f.Key,["value"]=f.Value}).ToArray());
+// One attribute for add_attribute (with target) or add_entry's list: RE4 default fields; a PtBehavior also gets a script
+// class with its RE4 parameter template (EffectDecal unless another is named), since an empty one does nothing in game.
+JsonObject AddAttributeBody(JsonObject? target,string type,string? script)
+{
+    var body=new JsonObject{["type"]=type,["fields"]=DefaultFields(type)};
+    if(target!=null) body["target"]=target;
+    if(type=="PtBehavior")
+        body["behavior"]=(PreviewAttributeCatalog.Re4.Behaviors.Find(script??PreviewBehaviorTemplates.Decal)
+            ?? throw new InvalidOperationException("RE4 里没有这个脚本类的模板："+script)).Request();
+    return body;
+}
 // Structural edits from the window. Each runs as one editor task; edits that should open another entry select
 // it first (the backend's preview target then follows that entry by ID while positions shift).
 async Task<PreviewEditorState> Structure(PreviewEditCommand command)
@@ -314,7 +325,7 @@ async Task<PreviewEditorState> Structure(PreviewEditCommand command)
         {
             case "add_attribute":
                 await Select(entry);
-                return await Send("add_attribute",new(){["target"]=Target(),["type"]=request.Type,["fields"]=DefaultFields(request.Type!)});
+                return await Send("add_attribute",AddAttributeBody(Target(),request.Type!,request.Script));
             case "remove_attribute":
                 await Select(entry);
                 return await Send("remove_attribute",new(){["target"]=Target(request.AttributeIndex)});
@@ -340,9 +351,12 @@ async Task<PreviewEditorState> Structure(PreviewEditCommand command)
                 return await SelectNew(await Send("paste_efx",new(){["target"]=new JsonObject{["kind"]="document",["index"]=0},["clipboardId"]=copyBuffer?["id"]?.GetValue<string>()}));
             case "add_entry":
             {
-                var attributes=new JsonArray(PreviewAttributeCatalog.Re4.Template(request.Type!)
-                    .Select(t=>(JsonNode?)new JsonObject{["type"]=t,["fields"]=DefaultFields(t)}).ToArray());
-                return await SelectNew(await Send("add_entry",new(){["name"]="New_"+request.Type![4..],["attributes"]=attributes}));
+                // A script carrier takes RE4's usual attribute list for that script; other entries the Type's template.
+                var script=request.Script==null?null:PreviewAttributeCatalog.Re4.Behaviors.Find(request.Script)
+                    ?? throw new InvalidOperationException("RE4 里没有这个脚本类的模板："+request.Script);
+                var types=script?.Carrier ?? PreviewAttributeCatalog.Re4.Template(request.Type!);
+                var attributes=new JsonArray(types.Select(t=>(JsonNode?)AddAttributeBody(null,t,script?.Name)).ToArray());
+                return await SelectNew(await Send("add_entry",new(){["name"]="New_"+(script?.ShortName ?? request.Type![4..]),["attributes"]=attributes}));
             }
             case "duplicate_entry":
                 return await SelectNew(await Send("duplicate_entry",new(){["index"]=entry}));
@@ -377,6 +391,9 @@ void RequestStructure(PreviewStructureRequest request)
             if(existing is int index) {confirmPaste=request with {AttributeIndex=index};openConfirmation="替换属性";return;}
             break;
         }
+        // A PtBehavior needs a script class: ask which one before adding (catalogue, graph and panel drops all come here).
+        case "add_attribute" when request.Type=="PtBehavior" && request.Script==null:
+            chooseScript=request;openConfirmation="选择脚本类";return;
         case "add_attribute": focusAttributeType=request.Type; break;
     }
     StartEditorCommand(new PreviewEditCommand("structure",editorState.Revision,EntryPosition:request.EntryPosition,Tag:request));
@@ -414,6 +431,19 @@ void DrawStructureConfirmations()
         }
         ImGui.EndDisabled();ImGui.SameLine();
         if(ImGui.Button("取消")) {confirmRemoveEntry=null;ImGui.CloseCurrentPopup();}
+        ImGui.EndPopup();
+    }
+    if(ImGui.BeginPopupModal("选择脚本类",ImGuiWindowFlags.AlwaysAutoResize))
+    {
+        ImGui.TextUnformatted("PtBehavior 调用哪个游戏脚本？参数按 RE4 的常见写法填好，之后可以在属性面板里改。");
+        ImGui.TextDisabled("预览不运行游戏脚本，画面上看不到它的效果。");
+        foreach(var script in PreviewAttributeCatalog.Re4.Behaviors.Classes)
+            if(ImGui.Selectable($"{script.ShortName}（RE4 {script.Uses} 处，{script.Parameters.Count} 个参数）##{script.Name}"))
+            {
+                var request=chooseScript;chooseScript=null;ImGui.CloseCurrentPopup();
+                if(request!=null) RequestStructure(request with {Script=script.Name});
+            }
+        if(ImGui.Button("取消")) {chooseScript=null;ImGui.CloseCurrentPopup();}
         ImGui.EndPopup();
     }
     if(ImGui.BeginPopupModal("替换属性",ImGuiWindowFlags.AlwaysAutoResize))
@@ -479,6 +509,7 @@ JsonObject CompositionReport() => new()
     ["fades"]=composition.Fades,["alphaCorrection"]=composition.AlphaCorrection,["rgbLayers"]=composition.RgbLayers,
     ["softParticles"]=composition.SoftParticles,["depthBias"]=composition.DepthBias,["detonemap"]=composition.Detonemap,
     ["alphaRate"]=composition.AlphaRate,["sortEntries"]=composition.SortEntries,["sortWithinEntry"]=composition.SortWithinEntry,
+    ["decals"]=composition.Decals,["decalScale"]=composition.DecalScale,["decalScaleXYRandom"]=composition.DecalScaleXYRandom,
     ["physicalGain"]=composition.PhysicalGain,
     ["textureFilter"]=composition.TextureFilter,["texelChannel"]=composition.TexelChannel,["frameBlend"]=composition.FrameBlend,
     ["lighting"]=composition.Lighting,["distortion"]=composition.Distortion,["ambient"]=composition.Ambient.X,["keyLight"]=composition.KeyLight,
@@ -533,7 +564,9 @@ PreviewStructureRequest EntryRequest(PreviewControlRequest job)
     int Position()=>PreviewControlReports.Int(a,"entryPosition",0,1<<20);
     return job.Action switch
     {
-        "add_entry"=>new("add_entry",-1,Type:PreviewControlReports.String(a,"type"),ExpectedRevision:revision),
+        "add_entry"=>PreviewControlReports.String(a,"script") is {} script
+            ? new("add_entry",-1,Type:"TypeNoDraw",ExpectedRevision:revision,Script:script)
+            : new("add_entry",-1,Type:PreviewControlReports.String(a,"type"),ExpectedRevision:revision),
         "duplicate_entry"=>new("duplicate_entry",Position(),ExpectedRevision:revision),
         "copy_entry"=>new("copy_entry",Position()),
         "paste_entry"=>new("paste_entry",-1,ExpectedRevision:revision),
@@ -679,11 +712,13 @@ void BeginControl(PreviewControlRequest job)
                 ("rgbLayers",v=>composition.RgbLayers=v),("softParticles",v=>composition.SoftParticles=v),("depthBias",v=>composition.DepthBias=v),
                 ("detonemap",v=>composition.Detonemap=v),("alphaRate",v=>composition.AlphaRate=v),("sortEntries",v=>composition.SortEntries=v),
                 ("sortWithinEntry",v=>composition.SortWithinEntry=v),("textureFilter",v=>composition.TextureFilter=v),
-                ("texelChannel",v=>composition.TexelChannel=v),("frameBlend",v=>composition.FrameBlend=v),("lighting",v=>composition.Lighting=v),("distortion",v=>composition.Distortion=v)})
+                ("texelChannel",v=>composition.TexelChannel=v),("frameBlend",v=>composition.FrameBlend=v),("lighting",v=>composition.Lighting=v),("distortion",v=>composition.Distortion=v),
+                ("decals",v=>composition.Decals=v),("decalScaleXYRandom",v=>composition.DecalScaleXYRandom=v)})
                 if(a[name]!=null) setter(PreviewControlReports.Bool(a,name));
             if(PreviewControlReports.Float(a,"physicalGain",0,16) is float g) composition.PhysicalGain=g;
             if(PreviewControlReports.Float(a,"ambient",0,4) is float amb) composition.Ambient=new(amb);
             if(PreviewControlReports.Float(a,"keyLight",0,4) is float key) composition.KeyLight=key;
+            if(PreviewControlReports.Float(a,"decalScale",.01f,100) is float ds) composition.DecalScale=ds;
             if(a["blends"] is JsonArray blends)
                 foreach(var item in blends)
                 {
@@ -701,6 +736,8 @@ void BeginControl(PreviewControlRequest job)
             job.Phase=1; return;
         case "add_attribute":
             if(PreviewControlReports.String(a,"type") is not {Length:>0}) throw new ArgumentException("缺少属性类型 type。");
+            if(PreviewControlReports.String(a,"script") is {} named && PreviewAttributeCatalog.Re4.Behaviors.Find(named)==null)
+                throw new ArgumentException("script 应为 RE4 用过的 PtBehavior 脚本类之一："+string.Join("、",PreviewAttributeCatalog.Re4.Behaviors.Classes.Select(c=>c.Name)));
             PreviewControlReports.Long(a,"expectedRevision");RequireNoDraft();AttributeTarget(0);
             job.Phase=1; return;
         case "remove_attribute":
@@ -737,8 +774,13 @@ void BeginControl(PreviewControlRequest job)
                 if(scene?.Graph.EmitterAt(position)==null) throw new ArgumentException($"没有位置为 {position} 的 entry。");
                 if(job.Action=="remove_entry" && RemoveFallback(position)<0) throw new InvalidOperationException("这是文件里唯一能预览的 entry，删除后没有可编辑的目标。");
             }
-            if(job.Action=="add_entry" && !PreviewStructureMenu.NewEntryTypes.Contains(PreviewControlReports.String(a,"type")))
-                throw new ArgumentException("type 应为 "+string.Join("、",PreviewStructureMenu.NewEntryTypes)+" 之一。");
+            if(job.Action=="add_entry" && PreviewControlReports.String(a,"script") is {} script)
+            {
+                if(PreviewAttributeCatalog.Re4.Behaviors.Find(script) is not {Carrier.Count:>0})
+                    throw new ArgumentException("script 应为 RE4 用过的 PtBehavior 脚本类之一："+string.Join("、",PreviewAttributeCatalog.Re4.Behaviors.Classes.Where(c=>c.Carrier.Count>0).Select(c=>c.Name)));
+            }
+            else if(job.Action=="add_entry" && !PreviewStructureMenu.NewEntryTypes.Contains(PreviewControlReports.String(a,"type")))
+                throw new ArgumentException("type 应为 "+string.Join("、",PreviewStructureMenu.NewEntryTypes)+" 之一，或用 script 新建脚本载体。");
             if(job.Action=="paste_entry" && (copyBuffer?["kind"]?.GetValue<string>()!="entry" || copyBuffer["id"]?.GetValue<string>()!=PreviewControlReports.String(a,"clipboardId")))
                 throw new InvalidOperationException("复制缓冲区里不是这个 entry；先 copy_entry，再用结果里的 copyBuffer.id。");
             job.Phase=1; return;
@@ -813,8 +855,8 @@ void ContinueControl(PreviewControlRequest job)
                 "undo" or "redo"=>StartBackend(job,job.Action,new(),PreviewControlReports.Long(a,"expectedRevision")),
                 "attribute_types"=>StartBackend(job,"status",new(),null),
                 "select_entry"=>StartBackend(job,"configure_offline_preview",new(){["entryPosition"]=PreviewControlReports.Int(a,"entryPosition",0,1<<20)},null),
-                "add_attribute"=>StartBackend(job,"add_attribute",new(){["target"]=EntryTarget(),["type"]=PreviewControlReports.String(a,"type"),
-                    ["fields"]=DefaultFields(PreviewControlReports.String(a,"type")!)},PreviewControlReports.Long(a,"expectedRevision")),
+                "add_attribute"=>StartBackend(job,"add_attribute",AddAttributeBody(EntryTarget(),PreviewControlReports.String(a,"type")!,PreviewControlReports.String(a,"script")),
+                    PreviewControlReports.Long(a,"expectedRevision")),
                 "remove_attribute"=>StartBackend(job,"remove_attribute",new(){["target"]=AttributeTarget(PreviewControlReports.Int(a,"attributeIndex",0,4096))},PreviewControlReports.Long(a,"expectedRevision")),
                 "copy_attribute"=>StartBackend(job,"copy_efx",new(){["target"]=AttributeTarget(PreviewControlReports.Int(a,"attributeIndex",0,4096))},null),
                 "paste_attribute"=>StartBackend(job,"paste_efx",PasteBody(a),PreviewControlReports.Long(a,"expectedRevision")),
@@ -962,6 +1004,18 @@ void DrawComposition()
     composition.TexelChannel=Toggle("TexelChannelOperator（黑体色）",composition.TexelChannel);
     composition.FrameBlend=Toggle("FrameBlend（翻页交叉淡化）",composition.FrameBlend);
     composition.Distortion=Toggle("Distortion（屏幕扭曲）",composition.Distortion);
+    composition.Decals=Toggle("贴花（EffectDecal 近似）",composition.Decals);
+    if(ImGui.IsItemHovered()) ImGui.SetTooltip("游戏脚本把贴花投到地形上；预览只有 y = 0 的地面：载体粒子在地面以上 SearchTerrainDistance 以内时，\n"+
+        "在它正下方铺一张贴图（预制体的 ALBA），颜色乘 BaseColorMod，透明度随粒子 Life 淡出，按 RandomRollRange 随机旋转。\n尺寸规则是推断的，用下面的系数对照游戏校准。");
+    ImGui.BeginDisabled(!composition.Decals);
+    float decalScale=composition.DecalScale;
+    if(ImGui.SliderFloat("贴花尺寸系数",ref decalScale,.05f,10f,"%.3f",ImGuiSliderFlags.Logarithmic)) composition.DecalScale=decalScale;
+    if(ImGui.IsItemHovered()) ImGui.SetTooltip("宽 = Extent.X × ScaleXY.X × 系数，深 = Extent.Z × ScaleXY.Y × 系数（米，整宽）。\n"+
+        "在游戏里放一个已知尺寸的 Billboard3D 对照贴花，调到一致后告诉我系数。");
+    bool random=composition.DecalScaleXYRandom;
+    if(ImGui.Checkbox("ScaleXY 当作随机缩放（X + 随机 × Y）",ref random)) composition.DecalScaleXYRandom=random;
+    if(ImGui.IsItemHovered()) ImGui.SetTooltip("关：ScaleXY 是宽、深两个方向的缩放。开：ScaleXY.X 是基础缩放，ScaleXY.Y 是随机增加的范围，宽深同比。");
+    ImGui.EndDisabled();
     composition.Lighting=Toggle("受光粒子（预览光照）",composition.Lighting);
     ImGui.BeginDisabled(!composition.Lighting);
     float ambient=composition.Ambient.X,key=composition.KeyLight;
@@ -1048,6 +1102,17 @@ void DrawEntrySelector()
     }
     ImGui.TextDisabled("把 .efx 文件拖进窗口即可打开");
     if(current?.Excluded is {} reason) ImGui.TextColored(new Vector4(1,.75f,.35f,1),"所选 entry 未显示："+reason);
+    if(current?.Decal is {} decal)
+    {
+        var size=PreviewDecalRenderer.Footprint(decal,composition);
+        string sizeText=composition.DecalScaleXYRandom
+            ? $"{size.X:F3} × {size.Y:F3} ~ {PreviewDecalRenderer.Footprint(decal,composition,1).X:F3} × {PreviewDecalRenderer.Footprint(decal,composition,1).Y:F3} m"
+            : $"{size.X:F3} × {size.Y:F3} m";
+        ImGui.TextUnformatted($"贴花 {Path.GetFileNameWithoutExtension(decal.Prefab)}：{sizeText}（系数 {composition.DecalScale:G3}）");
+        if(ImGui.IsItemHovered()) ImGui.SetTooltip($"{decal.Prefab}\nExtent {decal.Extent.X:G4}, {decal.Extent.Y:G4}, {decal.Extent.Z:G4} · ScaleXY {decal.ScaleXY.X:G4}, {decal.ScaleXY.Y:G4}"+
+            $"\n只在载体粒子离地面 0 ~ {decal.SearchDistance:G3} m 时出现 · 随机旋转 ±{decal.RollRange:G3}°");
+        if(decal.TextureError!=null) ImGui.TextColored(new Vector4(1,.75f,.35f,1),"贴花贴图读取失败："+decal.TextureError);
+    }
     var native=scene.Entries.Where(e=>e.Excluded?.StartsWith("原生模拟器")==true).ToArray();
     if(native.Length>0 && ImGui.TreeNode($"原生模拟器排除的 entry（{native.Length}）"))
     {
@@ -1354,12 +1419,14 @@ window.Render += _ =>
             int? commonBlend=null;
             try {commonBlend=billboards?.CommonBlend(frame);} catch(InvalidDataException) {}
             if(commonBlend==null) particleDivisor=1;
-            if(particleDivisor>1) particleLayer.Begin(hdr.Width,hdr.Height,particleDivisor);
             int? solo=soloSelected && SelectedTable()>=0 ? SelectedTable() : null;
+            // Decals lie on the ground under the particles, in the full-resolution scene.
+            billboards?.Decals.Render(frame,view*projection,composition,solo);
+            if(particleDivisor>1) particleLayer.Begin(hdr.Width,hdr.Height,particleDivisor);
             var renderContext=new PreviewRenderContext(composition,exposure,.05f,100f,hdr.OpaqueDepthTexture,hdr.CaptureSceneColor);
             try {billboards?.Render(frame,view,projection,renderContext,solo);}
             catch(Exception ex) when(ex is InvalidDataException or TimeoutException) {sceneRendered=false;status="绘制失败："+ex.Message;}
-            if(billboards==null || billboards.Drawn==0) sceneRendered=false;
+            if(billboards==null || billboards.Drawn==0 && billboards.Decals.Drawn==0) sceneRendered=false;
             if(particleDivisor>1) particleLayer.End(hdr.Width,hdr.Height,commonBlend??0);
         }
     }

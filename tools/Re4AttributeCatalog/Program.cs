@@ -3,6 +3,8 @@
 // for new attributes (re4-attribute-defaults.json): per type, the corpus instance that agrees with the most
 // common value of the most fields, so the values come from one real attribute and stay consistent.
 // Usage: dotnet run -c Release --project tools/Re4AttributeCatalog [-- <natives/stm folder> [<output folder>]]
+// Also writes re4-ptbehavior-templates.json: per PtBehavior script class, the usual parameter list with values from
+// one real instance, the usual carrier entry, and the DecalPrefab paths EffectDecal uses.
 // Files are opened read-only; nothing in the game folder is written.
 using System.Text.Json;
 using ReeLib;
@@ -19,6 +21,10 @@ const int SamplesPerType = 1500;
 // Paths a freshly created attribute of each type exposes as editable: the only ones a default can set.
 var freshPaths = new Dictionary<EfxAttributeType, HashSet<string>?>();
 var samples = new Dictionary<EfxAttributeType, List<Dictionary<string, string>>>();
+// PtBehavior: per script class, (parameter signature, values) of every instance, and the carrier entries' attribute lists.
+var behaviors = new Dictionary<string, List<(string Signature, ReeLib.Efx.Structs.Pt.PtBehaviorVariable[] Parameters)>>(StringComparer.Ordinal);
+var carriers = new Dictionary<string, Dictionary<string, int>>(StringComparer.Ordinal);
+var decalPrefabs = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
 // Owner keys: "entry:<Type>" for top-level entries ("entry:" alone when the entry has no Type attribute),
 // "embedded:<Type>" for entries inside a PlayEmitter, "action" and "embedded-action".
@@ -54,6 +60,21 @@ void Visit(EFXEntryBase owner, string key)
         o.Attributes[type] = o.Attributes.GetValueOrDefault(type) + 1;
     owners[key] = o;
     foreach (var attribute in owner.Attributes) Sample(attribute);
+    foreach (var behavior in owner.Attributes.OfType<ReeLib.Efx.Structs.Pt.EFXAttributePtBehavior>())
+    {
+        string cls = behavior.behaviorString ?? "";
+        if (!behaviors.TryGetValue(cls, out var found)) behaviors[cls] = found = [];
+        found.Add((string.Join("|", behavior.properties.Select(p => p.behaviorProperty + ":" + p.dataType)), behavior.properties.ToArray()));
+        if (owner is EFXEntry && !key.StartsWith("embedded", StringComparison.Ordinal))
+        {
+            if (!carriers.TryGetValue(cls, out var lists)) carriers[cls] = lists = new(StringComparer.Ordinal);
+            string list = string.Join(",", owner.Attributes.Select(a => a.type.ToString()));
+            lists[list] = lists.GetValueOrDefault(list) + 1;
+        }
+        if (cls == "via.effect.script.EffectDecal")
+            foreach (var p in behavior.properties)
+                if (p.behaviorProperty == "DecalPrefab" && p.ValueText() is { Length: > 0 } prefab) decalPrefabs[prefab] = decalPrefabs.GetValueOrDefault(prefab) + 1;
+    }
     foreach (var attribute in owner.Attributes)
         if (attribute is EFXAttributePlayEmitter { efxrData: { } inner }) Walk(inner, embedded: true);
 }
@@ -110,6 +131,33 @@ File.WriteAllText(Path.Combine(outputFolder, "re4-attribute-defaults.json"), Jso
     types = defaults,
 }, new JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping }) + "\n");
 Console.WriteLine($"defaults for {defaults.Count} types ({unapplied} values dropped as not applicable)");
+
+// PtBehavior templates: the most common parameter list of each class; its values from the instance agreeing with
+// the most per-parameter modes (as for attribute defaults).
+var templates = new SortedDictionary<string, object>(StringComparer.Ordinal);
+foreach (var (cls, found) in behaviors)
+{
+    var signature = found.GroupBy(f => f.Signature).OrderByDescending(g => g.Count()).First();
+    var instances = signature.Select(f => f.Parameters).ToArray();
+    var modes = Enumerable.Range(0, instances[0].Length)
+        .Select(i => instances.GroupBy(x => x[i].ValueText()).OrderByDescending(g => g.Count()).First().Key).ToArray();
+    var best = instances.OrderByDescending(x => x.Select((p, i) => p.ValueText() == modes[i] ? 1 : 0).Sum()).First();
+    var carrier = carriers.GetValueOrDefault(cls)?.OrderByDescending(c => c.Value).First();
+    templates[cls] = new
+    {
+        count = found.Count,
+        signatureShare = Math.Round(signature.Count() / (double)found.Count, 3),
+        parameters = best.Select(p => new { name = p.behaviorProperty, type = p.dataType.ToString(), value = p.ValueText() }),
+        carrier = carrier == null ? null : new { attributes = carrier.Value.Key.Split(','), entries = carrier.Value.Value },
+    };
+}
+File.WriteAllText(Path.Combine(outputFolder, "re4-ptbehavior-templates.json"), JsonSerializer.Serialize(new
+{
+    source = "RE4 natives/stm *.efx.3539837: per PtBehavior class the most common parameter list, values from the instance agreeing with the most per-parameter modes; carrier = most common attribute list of top-level entries with that class",
+    classes = templates,
+    decalPrefabs = decalPrefabs.OrderByDescending(d => d.Value).ThenBy(d => d.Key, StringComparer.OrdinalIgnoreCase).Select(d => new { path = d.Key, uses = d.Value }),
+}, new JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping }) + "\n");
+Console.WriteLine($"PtBehavior templates for {templates.Count} classes, {decalPrefabs.Count} decal prefabs");
 
 var document = new
 {
