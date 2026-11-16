@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "re4-preview": {
+      "command": "dotnet",
+      "args": ["VfxStudio.Mcp/bin/Release/net8.0/VfxStudio.Mcp.dll", "--re4-preview"]
+    }
+  }
+}

@@ -4,6 +4,28 @@ namespace VfxStudio.Mcp;
 
 internal sealed record ToolDefinition(string Action, string Description, JsonObject Schema, bool ReadOnly, bool Idempotent);
 
+/// <summary>A named group of tools served by one MCP connection.</summary>
+internal interface IToolSet
+{
+    string Prefix { get; }
+    string ServerName { get; }
+    string Title { get; }
+    string Instructions { get; }
+    IReadOnlyList<ToolDefinition> All { get; }
+    /// <summary>Schema validation plus tool-specific rules; throws ArgumentException.</summary>
+    void Validate(ToolDefinition tool, JsonObject arguments);
+}
+
+internal sealed class LiveToolSet : IToolSet
+{
+    public string Prefix => ToolCatalog.Prefix;
+    public string ServerName => "motionvfx-live";
+    public string Title => "MotionVfx";
+    public string Instructions => "Control MotionVfx Live through its Lua AI bridge only. Workflow: status, capture/list_effects, open_effect using the full captured path, inspect, edit with expectedRevision, inspect to verify, save_copy, apply, ask the user to perform the action and inspect status, then restore. Group labels are Chinese-capable editor-only notes: use set_group_note, which stores separate JSON and never changes native EFX group names, hashes, revision, dirty state, or Undo/Redo. rename_group is a compatibility alias for the same note operation. Clear a note with an empty string; restore it by setting its prior value, not Undo. Apply acceptance is not visual confirmation. Never automatically retry mutations after an uncertain timeout. UI drafts and pending operations take precedence. This server implements MCP 2025-11-25 stdio with explicitly supported older versions; it does not implement server/discover.";
+    public IReadOnlyList<ToolDefinition> All => ToolCatalog.All;
+    public void Validate(ToolDefinition tool, JsonObject arguments) => ToolCatalog.Validate(tool, arguments);
+}
+
 internal static class ToolCatalog
 {
     public const string Prefix = "motionvfx_";
@@ -70,16 +92,20 @@ internal static class ToolCatalog
         Define("stop_preview", "Stop the standalone preview started by preview_effect.", new(), [], false, true)
     ];
 
-    public static ToolDefinition Find(string name) => All.SingleOrDefault(tool => Prefix + tool.Action == name)
+    public static readonly IToolSet Live = new LiveToolSet();
+
+    public static ToolDefinition Find(string name) => Find(name, Live);
+    public static ToolDefinition Find(string name, IToolSet set) => set.All.SingleOrDefault(tool => set.Prefix + tool.Action == name)
         ?? throw new ArgumentException("Unknown tool: " + name);
 
-    public static JsonArray Describe(bool legacy)
+    public static JsonArray Describe(bool legacy) => Describe(legacy, Live);
+    public static JsonArray Describe(bool legacy, IToolSet set)
     {
         var result = new JsonArray();
-        foreach (var tool in All)
+        foreach (var tool in set.All)
         {
-            var description = new JsonObject { ["name"] = Prefix + tool.Action, ["description"] = tool.Description, ["inputSchema"] = tool.Schema.DeepClone() };
-            if (!legacy) description["annotations"] = new JsonObject { ["title"] = "MotionVfx " + tool.Action, ["readOnlyHint"] = tool.ReadOnly,
+            var description = new JsonObject { ["name"] = set.Prefix + tool.Action, ["description"] = tool.Description, ["inputSchema"] = tool.Schema.DeepClone() };
+            if (!legacy) description["annotations"] = new JsonObject { ["title"] = set.Title + " " + tool.Action, ["readOnlyHint"] = tool.ReadOnly,
                 ["destructiveHint"] = !tool.ReadOnly, ["idempotentHint"] = tool.Idempotent, ["openWorldHint"] = false };
             result.Add(description);
         }
@@ -103,7 +129,7 @@ internal static class ToolCatalog
             throw new ArgumentException("arguments.speed is required for the speed operation.");
     }
 
-    private static void ValidateValue(JsonObject schema, JsonNode? value, string path)
+    internal static void ValidateValue(JsonObject schema, JsonNode? value, string path)
     {
         switch (schema["type"]!.GetValue<string>())
         {
@@ -131,6 +157,9 @@ internal static class ToolCatalog
                 if (schema["type"]!.GetValue<string>() == "integer" && (number != Math.Truncate(number) || Math.Abs(number) > 9007199254740991D)) throw new ArgumentException(path + " must be a safe integer.");
                 if (schema["minimum"] is { } minimum && number < Number(minimum) || schema["maximum"] is { } maximum && number > Number(maximum) ||
                     schema["exclusiveMinimum"] is { } exclusive && number <= Number(exclusive)) throw new ArgumentException(path + " is outside the supported range.");
+                break;
+            case "boolean":
+                if (value is not JsonValue flag || !flag.TryGetValue<bool>(out _)) throw new ArgumentException(path + " must be a boolean.");
                 break;
             case "array":
                 if (value is not JsonArray array) throw new ArgumentException(path + " must be an array.");

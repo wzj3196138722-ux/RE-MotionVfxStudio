@@ -17,13 +17,34 @@ namespace VfxStudio.Mcp
             if (args.SequenceEqual(new[] { "--version" })) { Console.WriteLine(McpServer.Version); return 0; }
             if (args.SequenceEqual(new[] { "--tools-schema" })) { Console.WriteLine(new JsonObject { ["tools"] = ToolCatalog.Describe(false) }.ToJsonString()); return 0; }
             if (args.SequenceEqual(new[] { "--self-test" })) return await SelfTests.Run();
+            IEditorBridge bridge; IToolSet? tools = null;
+            if (args.Length > 0 && args[0] == "--re4-preview")
+            {
+                // --re4-preview [--pipe <name>] [--repo <repository>] [--tools-schema]
+                string pipe = PreviewPipeBridge.DefaultPipe; string? repo = null; bool schema = false;
+                for (int i = 1; i < args.Length; i++)
+                {
+                    if (args[i] == "--pipe" && i + 1 < args.Length) pipe = args[++i];
+                    else if (args[i] == "--repo" && i + 1 < args.Length) repo = Path.GetFullPath(args[++i]);
+                    else if (args[i] == "--tools-schema") schema = true;
+                    else { Console.Error.WriteLine("Usage: VfxStudio.Mcp --re4-preview [--pipe <name>] [--repo <repository>] [--tools-schema]"); return 2; }
+                }
+                tools = new Re4PreviewToolSet();
+                if (schema) { Console.WriteLine(new JsonObject { ["tools"] = ToolCatalog.Describe(false, tools) }.ToJsonString()); return 0; }
+                bridge = new PreviewPipeBridge(pipe, repo);
+                return await Serve(new McpServer(bridge, tools));
+            }
             string gameRoot;
             try { gameRoot = ResolveGameRoot(args); }
             catch (Exception error) when (error is ArgumentException or IOException or System.Text.Json.JsonException or UnauthorizedAccessException)
             { Console.Error.WriteLine(error.Message); return 2; }
+            return await Serve(new McpServer(new MailboxBridge(gameRoot)));
+        }
+
+        private static async Task<int> Serve(McpServer server)
+        {
             using var stop = new CancellationTokenSource();
             Console.CancelKeyPress += (_, eventArgs) => { eventArgs.Cancel = true; stop.Cancel(); };
-            var server = new McpServer(new MailboxBridge(gameRoot));
             try
             {
                 await foreach (string? line in ReadLines(Console.In, stop.Token))

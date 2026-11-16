@@ -42,10 +42,59 @@ internal static class SelfTests
             await EmbeddedTargetTests();
             await MailboxTests(temporaryRoot);
             await TransportTests(temporaryRoot);
+            await PreviewToolTests();
             Console.WriteLine("PASS: " + checks + " MCP checks; fake Lua mailbox only, no live game access. Fixtures: " + temporaryRoot);
             return 0;
         }
         catch (Exception error) { Console.Error.WriteLine(error); Console.Error.WriteLine("Fixtures: " + temporaryRoot); return 1; }
+    }
+
+    private sealed class ImageBridge : IEditorBridge
+    {
+        internal string? LastAction;
+        public Task<JsonObject> Call(string id, string action, JsonObject arguments, CancellationToken cancellationToken)
+        {
+            LastAction = action;
+            var result = action == "screenshot"
+                ? new JsonObject { ["path"] = "C:/x.png", ["mimeType"] = "image/png", ["data"] = "iVBORw0KGgo=" }
+                : new JsonObject { ["action"] = action };
+            return Task.FromResult(new JsonObject { ["protocol"] = 1, ["id"] = id, ["ok"] = true, ["result"] = result });
+        }
+    }
+
+    private static async Task PreviewToolTests()
+    {
+        var tools = new Re4PreviewToolSet();
+        var bridge = new ImageBridge(); var server = new McpServer(bridge, tools);
+        var initialized = await server.Handle(Rpc(1, "initialize", new() { ["protocolVersion"] = McpServer.ProtocolVersion, ["capabilities"] = new JsonObject(),
+            ["clientInfo"] = new JsonObject { ["name"] = "offline-tests", ["version"] = "1" } }).ToJsonString());
+        Check(initialized!["result"]!["serverInfo"]!["name"]!.GetValue<string>() == "motionvfx-re4-preview", "Preview mode names its own server");
+        await server.Handle("{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
+        var listed = (await server.Handle(Rpc(2, "tools/list").ToJsonString()))!["result"]!["tools"]!.AsArray();
+        Check(listed.Count == tools.All.Count && listed.All(t => t!["name"]!.GetValue<string>().StartsWith("re4preview_")) &&
+            !listed.Any(t => t!["name"]!.GetValue<string>().StartsWith("motionvfx_")), "Preview mode lists only preview tools");
+        JsonObject Call(int id, string name, JsonObject arguments) => Rpc(id, "tools/call", new() { ["name"] = "re4preview_" + name, ["arguments"] = arguments });
+        async Task<int?> RpcError(int id, string name, JsonObject arguments) => (await server.Handle(Call(id, name, arguments).ToJsonString()))!["error"]?["code"]?.GetValue<int>();
+        Check(await RpcError(3, "open", new() { ["fixture"] = "bb2", ["path"] = "C:/a.efx" }) == -32602, "open rejects fixture plus path");
+        Check(await RpcError(4, "open", new() { ["path"] = "C:/a.efx" }) == -32602, "open with a path needs an entry selector");
+        Check(await RpcError(5, "playback", new() { ["operation"] = "seek" }) == -32602, "seek needs a tick");
+        Check(await RpcError(6, "playback", new() { ["operation"] = "play", ["tick"] = 3 }) == -32602, "tick is accepted only with seek");
+        Check(await RpcError(7, "set_fields", new() { ["attributeIndex"] = 1, ["expectedRevision"] = 1,
+            ["fields"] = new JsonArray(new JsonObject { ["path"] = "A", ["value"] = "1" }, new JsonObject { ["path"] = "A", ["value"] = "2" }) }) == -32602, "Duplicate field paths are rejected before the window");
+        Check(await RpcError(11, "curve_key", new() { ["attributeIndex"] = 1, ["path"] = "C", ["channel"] = 0, ["operation"] = "add", ["keyIndex"] = 0, ["time"] = "1", ["value"] = "1", ["expectedRevision"] = 1 }) == -32602, "curve_key add takes no keyIndex");
+        Check(await RpcError(12, "curve_key", new() { ["attributeIndex"] = 1, ["path"] = "C", ["channel"] = 0, ["operation"] = "update", ["keyIndex"] = 0, ["expectedRevision"] = 1 }) == -32602, "curve_key update needs time and value");
+        Check(await RpcError(13, "curve_key", new() { ["attributeIndex"] = 1, ["path"] = "C", ["channel"] = 0, ["operation"] = "remove", ["keyIndex"] = 0, ["value"] = "1", ["expectedRevision"] = 1 }) == -32602, "curve_key remove takes only keyIndex");
+        Check(await RpcError(15, "select_entry", new()) == -32602, "select_entry needs an entry position");
+        Check(await RpcError(16, "composition", new() { ["blends"] = new JsonArray(new JsonObject { ["blend"] = 5 }) }) == -32602, "composition rejects BlendType 5");
+        Check(await RpcError(14, "paste_attribute", new() { ["expectedRevision"] = 1 }) == -32602, "paste_attribute needs the clipboard id");
+        Check(await RpcError(8, "view", new() { ["showPoints"] = "yes" }) == -32602, "Boolean arguments are type-checked");
+        Check((await server.Handle(Rpc(9, "tools/call", new() { ["name"] = "motionvfx_status", ["arguments"] = new JsonObject() }).ToJsonString()))!["error"]?["code"]?.GetValue<int>() == -32602 && bridge.LastAction == null, "Live tools are unknown in preview mode and nothing reaches the bridge");
+        var shot = (await server.Handle(Call(10, "screenshot", new() { ["tick"] = 45 }).ToJsonString()))!["result"]!;
+        var content = shot["content"]!.AsArray();
+        Check(content.Count == 2 && content[1]!["type"]!.GetValue<string>() == "image" && content[1]!["data"]!.GetValue<string>() == "iVBORw0KGgo=" &&
+            shot["structuredContent"]!["result"]!["data"] == null && !content[0]!["text"]!.GetValue<string>().Contains("iVBORw0KGgo"),
+            "An image result becomes one image block; text and structured copies drop the payload");
+        Check(McpServer.Version.Length > 0 && ToolCatalog.Describe(false).Count == ToolCatalog.All.Length, "Live catalog is unchanged by preview mode");
     }
 
     private static async Task ProtocolTests()
