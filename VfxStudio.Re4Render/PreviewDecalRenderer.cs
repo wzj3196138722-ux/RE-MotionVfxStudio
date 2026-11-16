@@ -65,12 +65,12 @@ public sealed class PreviewDecalRenderer : IDisposable
     public bool Any => decals.Count > 0;
 
     /// <summary>Full width and depth in metres of one decal with the given random draw <paramref name="u"/> (0..1):
-    /// Extent.X / Extent.Z times ScaleXY (as width / depth scales, or as a random scale ScaleXY.X + u·ScaleXY.Y), times
-    /// the calibration factor.</summary>
+    /// 2 × Extent.X / Extent.Z (Extent is a half size, measured in game: Extent 1, scale 1 covers twice a 1 m Polygon)
+    /// times ScaleXY (as a random scale ScaleXY.X + u·ScaleXY.Y, or as width / depth scales), times the calibration factor.</summary>
     public static Vector2 Footprint(PreviewDecal decal, CompositionConfig config, float u = 0)
     {
         var scale = config.DecalScaleXYRandom ? new Vector2(decal.ScaleXY.X + u * decal.ScaleXY.Y) : decal.ScaleXY;
-        return new Vector2(decal.Extent.X, decal.Extent.Z) * scale * config.DecalScale;
+        return new Vector2(decal.Extent.X, decal.Extent.Z) * 2 * scale * config.DecalScale;
     }
 
     /// <summary>Decals of <paramref name="frame"/>: one per live carrier particle between the ground and

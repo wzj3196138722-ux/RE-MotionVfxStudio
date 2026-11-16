@@ -513,11 +513,11 @@ using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == deadSc
         {
             flat &= center.Y == 0.002f;
             var d = decalScene.Shown[table].Decal!;
-            sized &= size.X >= d.Extent.X * d.ScaleXY.X - 1e-5f && size.X <= d.Extent.X * (d.ScaleXY.X + d.ScaleXY.Y) + 1e-5f;
+            sized &= size.X >= 2 * d.Extent.X * d.ScaleXY.X - 1e-5f && size.X <= 2 * d.Extent.X * (d.ScaleXY.X + d.ScaleXY.Y) + 1e-5f;
         }
     }
     Check(carriers.Length == 2 && carriers.All(c => c is { Logic: true, Decal.Albedo: not null }) && most > 0 && flat && sized,
-        "decals: crushe_0000's NoDraw EffectDecal carriers run, their ALBA textures load, and decals lie on the ground sized Extent x (ScaleXY.X + u ScaleXY.Y)",
+        "decals: crushe_0000's NoDraw EffectDecal carriers run, their ALBA textures load, and decals lie on the ground sized 2 Extent x (ScaleXY.X + u ScaleXY.Y)",
         $"carriers {string.Join(", ", carriers.Select(c => $"{c.Label} {Path.GetFileNameWithoutExtension(c.Decal!.Prefab)}"))}; at most {most} at once");
 }
 

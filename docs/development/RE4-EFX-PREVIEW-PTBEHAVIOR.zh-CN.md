@@ -64,7 +64,7 @@ RE4 全部 3946 个文件里有 2193 个 PtBehavior（933 个文件），每个 
 
 - 带 EffectDecal 的 NoDraw entry 现在会被模拟（不画粒子），和触发子 Action 的 NoDraw 一样。
 - 每个存活的载体粒子，在地面以上 0 ~ SearchTerrainDistance 之间时（允许低于地面 5 cm），在正下方地面上铺一张面片。贴图是预制体的 ALBA，颜色乘 BaseColorMod，透明度再乘粒子的 Life alpha；粒子消失贴花就消失。旋转在 ±RandomRollRange 之间按粒子编号随机。
-- 尺寸规则是推断的：默认把 ScaleXY 当作随机缩放，宽 = Extent.X × (ScaleXY.X + u × ScaleXY.Y) × 系数，深用 Extent.Z。也可以切换成把 ScaleXY 当宽、深两个方向的缩放；按宽深缩放读时，crushe_0000 的血迹（Extent 1, 0.02, 1，ScaleXY 0.5, 0.1）会变成 0.5 × 0.1 m 的细条，不像血迹。系数默认 1，在"合成配置"里调，用游戏里已知尺寸的 Billboard3D 对照校准。主面板显示所选贴花 entry 的尺寸。
+- 尺寸：宽 = 2 × Extent.X × (ScaleXY.X + u × ScaleXY.Y) × 系数，深用 Extent.Z；Extent 是半边长，系数默认 1。依据是游戏里的对照（2026-11-16）：替换手雷爆炸，贴花 Extent 1,1,1、ScaleXY (1, 0)、白色方块，中心立两张十字交叉的 1 × 1 竖直 Polygon，贴花约为 Polygon 宽度的 2 倍；ScaleXY (1, 0.5) 的贴花比它更大，符合"缩放 + 随机范围"的读法（按宽深缩放读会有一个方向是 0.5）。手雷自带的焦痕 ScaleXY (3, 0) 也只能按这种读法解释。仍可切换成宽深缩放，系数在"合成配置"里调。主面板显示所选贴花 entry 的尺寸。
 - 没做：MSK2 遮罩（血迹的形状和扩散多半靠它，所以现在边缘是方的）、法线、自发光、AlphaMaskRange 和 Alpha0/1 的时间变化、ProjectionShape 和投射方向、预制体里组件自己的参数。贴花画在完整分辨率的场景里、粒子之前，不写深度。
 - Billboard3D 载体本身读不出贴图来源时（RE4 的贴花载体常常没有 UVSequence，例如手雷爆炸的 [50] デカール、hold_dead_0000 的三个 entry），按逻辑 entry 模拟：粒子不画，贴花照常放。
 - MCP `composition` 有 `decals`、`decalScale`、`decalScaleXYRandom`。

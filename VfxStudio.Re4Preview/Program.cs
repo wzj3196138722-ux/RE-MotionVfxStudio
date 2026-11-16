@@ -1010,8 +1010,8 @@ void DrawComposition()
     ImGui.BeginDisabled(!composition.Decals);
     float decalScale=composition.DecalScale;
     if(ImGui.SliderFloat("贴花尺寸系数",ref decalScale,.05f,10f,"%.3f",ImGuiSliderFlags.Logarithmic)) composition.DecalScale=decalScale;
-    if(ImGui.IsItemHovered()) ImGui.SetTooltip("宽 = Extent.X × ScaleXY.X × 系数，深 = Extent.Z × ScaleXY.Y × 系数（米，整宽）。\n"+
-        "在游戏里放一个已知尺寸的 Billboard3D 对照贴花，调到一致后告诉我系数。");
+    if(ImGui.IsItemHovered()) ImGui.SetTooltip("宽 = 2 × Extent.X × 缩放 × 系数，深 = 2 × Extent.Z × 缩放 × 系数（米，整宽；Extent 是半边长）。\n"+
+        "已在游戏里对照过：Extent 1、ScaleXY (1, 0) 的贴花约为 1 m Polygon 的 2 倍，所以系数 1 就是游戏的大小。");
     bool random=composition.DecalScaleXYRandom;
     if(ImGui.Checkbox("ScaleXY 当作随机缩放（X + 随机 × Y）",ref random)) composition.DecalScaleXYRandom=random;
     if(ImGui.IsItemHovered()) ImGui.SetTooltip("关：ScaleXY 是宽、深两个方向的缩放。开：ScaleXY.X 是基础缩放，ScaleXY.Y 是随机增加的范围，宽深同比。");

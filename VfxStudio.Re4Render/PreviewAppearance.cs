@@ -107,7 +107,8 @@ public sealed class CompositionConfig
     public bool SortEntries { get; set; } = true;
     /// <summary>Approximate EffectDecal decals on the ground (PreviewDecalRenderer).</summary>
     public bool Decals { get; set; } = true;
-    /// <summary>Calibration factor on the decal footprint (Extent x ScaleXY); to be matched against the game.</summary>
+    /// <summary>Correction on the decal footprint (2 x Extent x ScaleXY, which matched the game for Extent 1 and
+    /// ScaleXY (1, 0) next to a 1 m Polygon); 1 = no correction.</summary>
     public float DecalScale { get; set; } = 1;
     /// <summary>Read ScaleXY as a random scale ScaleXY.X + u * ScaleXY.Y (default; a 0.5 x 0.1 bloodstain reads as a streak
     /// otherwise) instead of width / depth scales.</summary>

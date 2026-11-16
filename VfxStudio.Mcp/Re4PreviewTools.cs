@@ -120,7 +120,7 @@ internal sealed class Re4PreviewToolSet : IToolSet
                 ["lighting"] = Boolean("Light particles whose ShaderSettings.ParticleLighting is 1-4 with the preview light (the preview has no scene lights)."),
                 ["ambient"] = Number("Preview ambient light for lit particles.", 0, 4), ["keyLight"] = Number("Preview key light intensity for lit particles.", 0, 4),
                 ["decals"] = Boolean("Approximate EffectDecal decals on the ground (flat quad under each carrier particle within SearchTerrainDistance)."),
-                ["decalScale"] = Number("Calibration factor on the decal footprint: width = Extent.X x ScaleXY.X x factor, depth = Extent.Z x ScaleXY.Y x factor (metres).", 0.01, 100),
+                ["decalScale"] = Number("Correction on the decal footprint: width = 2 x Extent.X x scale x factor, depth = 2 x Extent.Z x scale x factor (metres; Extent is a half size, checked in game). 1 = as in game.", 0.01, 100),
                 ["decalScaleXYRandom"] = Boolean("Read ScaleXY as a random scale X + u*Y (same on both axes) instead of width/depth scales."),
                 ["blends"] = new JsonObject { ["type"] = "array", ["minItems"] = 1, ["maxItems"] = 5, ["description"] = "Blend factor overrides.",
                     ["items"] = Object(new() { ["blend"] = Integer("BlendType 0-4.", 0, 4),
