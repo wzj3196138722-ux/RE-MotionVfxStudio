@@ -180,7 +180,12 @@ public sealed class PreviewScene
             {
                 try { document = PreviewDocument.Read(path, (int)entry.Start, source); shown++; }
                 catch (Exception ex) when (ex is NotSupportedException or InvalidDataException or FileNotFoundException or ArgumentException)
-                { reason = ex.Message; }
+                {
+                    // A decal carrier whose own particles cannot be drawn (RE4's often have no UVSequence) still places its
+                    // decal: simulate it without a billboard renderer.
+                    if (decal != null) { logic = true; shown++; }
+                    else reason = ex.Message;
+                }
             }
             entries.Add(new(position, entry.index, entry.name ?? "", type, document, reason, logic, (int)entry.Start, actions.Length > 0 ? actions : null, Decal: decal));
         }

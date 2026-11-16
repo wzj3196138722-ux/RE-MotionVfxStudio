@@ -66,7 +66,7 @@ RE4 全部 3946 个文件里有 2193 个 PtBehavior（933 个文件），每个 
 - 每个存活的载体粒子，在地面以上 0 ~ SearchTerrainDistance 之间时（允许低于地面 5 cm），在正下方地面上铺一张面片。贴图是预制体的 ALBA，颜色乘 BaseColorMod，透明度再乘粒子的 Life alpha；粒子消失贴花就消失。旋转在 ±RandomRollRange 之间按粒子编号随机。
 - 尺寸规则是推断的：默认把 ScaleXY 当作随机缩放，宽 = Extent.X × (ScaleXY.X + u × ScaleXY.Y) × 系数，深用 Extent.Z。也可以切换成把 ScaleXY 当宽、深两个方向的缩放；按宽深缩放读时，crushe_0000 的血迹（Extent 1, 0.02, 1，ScaleXY 0.5, 0.1）会变成 0.5 × 0.1 m 的细条，不像血迹。系数默认 1，在"合成配置"里调，用游戏里已知尺寸的 Billboard3D 对照校准。主面板显示所选贴花 entry 的尺寸。
 - 没做：MSK2 遮罩（血迹的形状和扩散多半靠它，所以现在边缘是方的）、法线、自发光、AlphaMaskRange 和 Alpha0/1 的时间变化、ProjectionShape 和投射方向、预制体里组件自己的参数。贴花画在完整分辨率的场景里、粒子之前，不写深度。
-- Billboard3D 载体的条目如果本身读不出贴图来源（例如 hold_dead_0000 的三个没有 UVSPath 的 entry），整个 entry 不显示，贴花也不出现。
+- Billboard3D 载体本身读不出贴图来源时（RE4 的贴花载体常常没有 UVSequence，例如手雷爆炸的 [50] デカール、hold_dead_0000 的三个 entry），按逻辑 entry 模拟：粒子不画，贴花照常放。
 - MCP `composition` 有 `decals`、`decalScale`、`decalScaleXYRandom`。
 
 验证：`tools/Re4MultiEntryTests` 第 13 节，crushe_0000 的两个 NoDraw 贴花载体被模拟、贴图读到，第 60 帧内地面上最多同时有 6 个贴花，位置和尺寸符合上面的规则。窗口截图（俯视，第 40 帧）看到血迹贴花铺在地面上。
