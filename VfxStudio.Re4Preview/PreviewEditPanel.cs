@@ -114,6 +114,10 @@ internal sealed class PreviewEditPanel
             return (f.Path[..dot],f.Path[(dot+1)..]);
         }
         if(Split(fields[start]) is not {} first) return 0;
+        // Pair structs (CenterSpread, MinMaxI, via.Range, ...) are recognised by their type, whatever the member names.
+        if(PreviewPairKind.For(fields[start].OwnerType)!=null)
+            return start+1<fields.Length && Split(fields[start+1]) is {} second && second.Prefix==first.Prefix &&
+                fields[start+1].OwnerType==fields[start].OwnerType ? 2 : 1;
         var set=ComponentSets.FirstOrDefault(c=>c[0]==first.Leaf);
         if(set==null) return 0;
         int n=1;
@@ -250,18 +254,15 @@ internal sealed class PreviewEditPanel
                         string label=row.Label ?? (header && row.Path.StartsWith(group.Key,StringComparison.Ordinal) && row.Path.Length>group.Key.Length
                             ? row.Path[group.Key.Length..].TrimStart('.') : row.Path);
                         if(row.Label==null && row.Color is {} c && c.Label.Length>0) label=c.Label;
-                        if(row.Parts is {} ps && ps[0].Path.EndsWith(".center",StringComparison.Ordinal)) label+=" (中心 ±范围)";
-                        else if(row.Parts is {} pm && pm[0].Path.EndsWith(".min",StringComparison.Ordinal)) label+=" (最小~最大)";
-                        ImGui.AlignTextToFramePadding();
-                        if(row.Editable) ImGui.TextUnformatted(label);
-                        else {ImGui.PushStyleColor(ImGuiCol.Text,ImGui.GetStyle().Colors[(int)ImGuiCol.TextDisabled]);ImGui.TextUnformatted(label);ImGui.PopStyleColor();}
-                        if(ImGui.IsItemHovered()) ImGui.SetTooltip(row.Field is {} tf ? tf.Path+"\n"+tf.Type+(tf.OwnerType==null?"":"\n"+tf.OwnerType)
-                            : row.Parts is {} tp ? string.Join("\n",tp.Select(p=>p.Path+"  "+p.Type)) : row.Path);
+                        var pair=row.Parts is {Length:2} pp ? PreviewPairKind.For(pp[0].OwnerType) : null;
+                        var semantic=(row.Field??row.Parts?[0])?.Semantic;
+                        DrawLabel(label,row.Editable,pair,semantic);
+                        if(ImGui.IsItemHovered()) ImGui.SetTooltip(RowTooltip(row,pair,semantic).Replace("%","%%"));
                         ImGui.TableNextColumn();
                         if(row.Color is {} color) DrawColor(draft,color);
-                        else if(row.Parts is {} parts) DrawParts(draft,parts);
+                        else if(row.Parts is {} parts) DrawParts(draft,parts,PreviewPairKind.For(parts[0].OwnerType));
                         else if(row.Field is {} prefab && row.Label=="DecalPrefab" && prefab.Editable) DrawDecalPrefab(draft,prefab);
-                        else if(row.Field is {} field) DrawField(draft,field,attribute?.Type);
+                        else if(row.Field is {} field) DrawField(draft,field);
                         ImGui.PopID();
                     }
                     ImGui.EndTable();
@@ -352,25 +353,68 @@ internal sealed class PreviewEditPanel
         DrawExact(draft,field,ref value,false);
     }
 
-    /// <summary>Components of one value side by side, each as exact text.</summary>
-    private static void DrawParts(PreviewPropertyDraft draft,PreviewFieldInfo[] parts)
+    /// <summary>Field name, then the unit and the pair reading (dimmed; orange when the pair's use is unconfirmed).</summary>
+    private static void DrawLabel(string label,bool editable,PreviewPairKind? pair,PreviewFieldSemantic? semantic)
+    {
+        ImGui.AlignTextToFramePadding();
+        var dim=ImGui.GetStyle().Colors[(int)ImGuiCol.TextDisabled];
+        ImGui.BeginGroup();
+        if(editable) ImGui.TextUnformatted(label);
+        else {ImGui.PushStyleColor(ImGuiCol.Text,dim);ImGui.TextUnformatted(label);ImGui.PopStyleColor();}
+        string note=string.Join(" · ",new[]{semantic?.Unit,pair?.Label}.Where(n=>n!=null));
+        if(note.Length>0)
+        {
+            ImGui.SameLine();
+            ImGui.PushStyleColor(ImGuiCol.Text,pair?.Unconfirmed==true?new Vector4(1,.75f,.35f,1):dim);
+            ImGui.TextUnformatted(note);ImGui.PopStyleColor();
+        }
+        else if(semantic?.Help!=null) {ImGui.SameLine();ImGui.TextDisabled("(?)");}
+        ImGui.EndGroup();
+    }
+
+    /// <summary>Meaning, unit and pair formula first; the technical path and types after a blank line.</summary>
+    private static string RowTooltip(PropertyRow row,PreviewPairKind? pair,PreviewFieldSemantic? semantic)
+    {
+        var lines=new List<string>();
+        if(semantic?.Text is {Length:>0} text) lines.Add(text);
+        if(pair!=null) lines.Add($"{pair.Label}：{pair.Formula}");
+        if(semantic?.Bits is {} bits) lines.Add("位："+bits.Summary);
+        if(lines.Count>0) lines.Add("");
+        lines.Add(row.Field is {} tf ? tf.Path+"\n"+tf.Type+(tf.OwnerType==null?"":"\n"+tf.OwnerType)
+            : row.Parts is {} tp ? string.Join("\n",tp.Select(p=>p.Path+"  "+p.Type))+(tp[0].OwnerType==null?"":"\n"+tp[0].OwnerType) : row.Path);
+        return string.Join("\n",lines);
+    }
+
+    /// <summary>Components of one value side by side, each as exact text. Pairs show their reading between the
+    /// boxes (center ± spread, [min, max), ...).</summary>
+    private static void DrawParts(PreviewPropertyDraft draft,PreviewFieldInfo[] parts,PreviewPairKind? pair)
     {
         float spacing=ImGui.GetStyle().ItemInnerSpacing.X;
-        float width=(ImGui.GetContentRegionAvail().X-spacing*(parts.Length-1))/parts.Length;
+        string[] glue=pair==null?[]:[pair.Prefix,pair.Separator,pair.Suffix];
+        float text=glue.Where(g=>g.Length>0).Sum(g=>ImGui.CalcTextSize(g).X+spacing);
+        float width=(ImGui.GetContentRegionAvail().X-text-spacing*(parts.Length-1))/parts.Length;
+        if(pair!=null && pair.Prefix.Length>0) {ImGui.AlignTextToFramePadding();ImGui.TextUnformatted(pair.Prefix);ImGui.SameLine(0,spacing);}
         for(int i=0;i<parts.Length;i++)
         {
             var part=parts[i];
-            if(i>0) ImGui.SameLine(0,spacing);
+            if(i>0)
+            {
+                ImGui.SameLine(0,spacing);
+                if(pair!=null) {ImGui.AlignTextToFramePadding();ImGui.TextUnformatted(pair.Separator);ImGui.SameLine(0,spacing);}
+            }
             ImGui.PushID(i);
             string value=draft.Value(part.Path);
             ImGui.SetNextItemWidth(Math.Max(20,width));
             if(ImGui.InputText("##值",ref value,512,part.Editable?ImGuiInputTextFlags.None:ImGuiInputTextFlags.ReadOnly) && part.Editable) draft.Set(part.Path,value);
-            if(ImGui.IsItemHovered()) ImGui.SetTooltip(part.Path[(part.Path.LastIndexOf('.')+1)..]+(part.Editable?"":"\n只读："+(part.Reason??"后台不允许编辑。")));
+            string name=part.Path[(part.Path.LastIndexOf('.')+1)..];
+            if(pair!=null && i<pair.Parts.Length) name=$"{pair.Parts[i]}（{name}）";
+            if(ImGui.IsItemHovered()) ImGui.SetTooltip((name+(part.Editable?"":"\n只读："+(part.Reason??"后台不允许编辑。"))).Replace("%","%%"));
             ImGui.PopID();
         }
+        if(pair!=null && pair.Suffix.Length>0) {ImGui.SameLine(0,spacing);ImGui.AlignTextToFramePadding();ImGui.TextUnformatted(pair.Suffix);}
     }
 
-    private static void DrawField(PreviewPropertyDraft draft,PreviewFieldInfo field,string? attributeType)
+    private static void DrawField(PreviewPropertyDraft draft,PreviewFieldInfo field)
     {
         string value=draft.Value(field.Path);
         if(!field.Editable)
@@ -395,7 +439,7 @@ internal sealed class PreviewEditPanel
             // A value outside the named choices (an unknown number) still needs a way to be seen and kept.
             if(Array.IndexOf(field.Choices,value)>=0) return;
         }
-        else if(field.Type=="System.UInt32" && PreviewFieldBits.For(attributeType,field.Path) is {} bits &&
+        else if(field.Type=="System.UInt32" && field.Semantic?.Bits is {} bits &&
             PreviewBitField.TryParse(value,out uint flags))
         {
             if(DrawBits(bits,ref flags)) {value=flags.ToString(CultureInfo.InvariantCulture);draft.Set(field.Path,value);}
@@ -412,7 +456,8 @@ internal sealed class PreviewEditPanel
         if(ImGui.InputText(labelled?"精确值":"##值",ref value,(uint)Math.Max(field.Type=="System.String"?32769:512,Encoding.UTF8.GetByteCount(value)+1))) draft.Set(field.Path,value);
     }
 
-    /// <summary>Exclusive groups as combos, independent bits as checkboxes; bits outside the table are kept.</summary>
+    /// <summary>Exclusive groups as combos, independent bits as checkboxes. Bits with no documented meaning are
+    /// listed as "位 N" (set ones directly, the rest folded), so every bit stays reachable.</summary>
     private static bool DrawBits(PreviewBitField bits,ref uint flags)
     {
         bool changed=false;
@@ -420,6 +465,7 @@ internal sealed class PreviewEditPanel
         foreach(var group in bits.Groups)
         {
             ImGui.PushID(group.Shift);
+            ImGui.BeginDisabled(group.Locked);
             uint part=group.Read(flags);
             if(group.IsSwitch)
             {
@@ -437,10 +483,24 @@ internal sealed class PreviewEditPanel
                     ImGui.EndCombo();
                 }
             }
+            ImGui.EndDisabled();
+            if(group.Locked && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip("这一位决定文件里有没有对应字段，只能在“精确值”里改。");
             ImGui.PopID();
         }
-        uint other=flags&~bits.KnownMask;
-        if(other!=0) ImGui.TextDisabled($"其他位 0x{other:X}（含义未列出，保持原值）");
+        uint unknown=~bits.KnownMask;
+        for(int bit=0;bit<32;bit++) if(((unknown&flags)>>bit&1)!=0 && UnknownBit(bit,ref flags)) changed=true;
+        if((unknown&~flags)!=0 && ImGui.TreeNode("其他位（含义未列出）"))
+        {
+            for(int bit=0;bit<32;bit++) if(((unknown&~flags)>>bit&1)!=0 && UnknownBit(bit,ref flags)) changed=true;
+            ImGui.TreePop();
+        }
         return changed;
+    }
+
+    private static bool UnknownBit(int bit,ref uint flags)
+    {
+        bool on=(flags>>bit&1)!=0;
+        if(!ImGui.Checkbox($"位 {bit}（未列出）##未知位{bit}",ref on)) return false;
+        flags=on?flags|1u<<bit:flags&~(1u<<bit);return true;
     }
 }

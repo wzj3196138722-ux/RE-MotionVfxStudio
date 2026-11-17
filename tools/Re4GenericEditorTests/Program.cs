@@ -47,6 +47,26 @@ try
         Console.WriteLine("INSPECT "+a.Type+": "+s.Inspection!.Fields.Length+" fields; choices="+string.Join(",",s.Inspection.Fields.Where(f=>f.Choices!=null).Select(f=>f.Path))+
             "; bool="+string.Join(",",s.Inspection.Fields.Where(f=>f.Type=="System.Boolean" && f.Editable).Select(f=>f.Path)));
     }
+    // Field semantics (LiveEditor FieldSemantics.re4.json) reach the inspect output: help, unit, bit layout, pair type.
+    var lifeFields=inspections.Single(x=>x.Attribute.Type=="Life").Inspection.Fields;
+    var appear=lifeFields.Single(f=>f.Path=="AppearFrame.min");
+    Check(appear.Semantic?.Unit=="帧" && appear.Semantic.Help?.Contains("淡入")==true,"Life.AppearFrame semantic missing from inspect");
+    Check(PreviewPairKind.For(appear.OwnerType)?.Label=="最小 ~ 最大","Life.AppearFrame is not reported as MinMaxI");
+    var holdMode=lifeFields.Single(f=>f.Path=="Flags").Semantic?.Bits?.Groups.SingleOrDefault();
+    Check(holdMode is {Shift:0,Width:2,Options.Length:4},"Life.Flags hold mode bits missing from inspect");
+    var blend=inspections.Single(x=>x.Attribute.Type=="TypeBillboard3D").Inspection.Fields.Single(f=>f.Path=="Flags").Semantic?.Bits;
+    Check(blend?.Groups.Any(g=>g.Shift==4 && g.IsSwitch)==true,"Billboard3D colour header bits missing from inspect");
+    // Every key in the table names a real RE4 field path (a typo would silently show nothing).
+    var missing=new List<string>();
+    foreach(string type in VfxStudio.LiveEditor.FieldSemantics.AttributeTypes)
+    {
+        var attribute=ReeLib.Efx.EFXAttribute.Create(ReeLib.Efx.EfxVersion.RE4,Enum.Parse<ReeLib.Efx.EfxAttributeType>(type));
+        var paths=VfxStudio.LiveEditor.EfxFieldValues.Paths(attribute,ReeLib.Efx.EfxVersion.RE4);
+        foreach(string key in VfxStudio.LiveEditor.FieldSemantics.Fields(type).Keys)
+            if(!paths.Any(p=>p==key || p.StartsWith(key+".",StringComparison.Ordinal) || p.StartsWith(key+"[",StringComparison.Ordinal))) missing.Add(type+"."+key);
+    }
+    Check(missing.Count==0,"Field semantics keys without an RE4 field: "+string.Join(", ",missing));
+    Console.WriteLine($"PASS field semantics reach inspect ({VfxStudio.LiveEditor.FieldSemantics.AttributeTypes.Count} attribute types, every key resolves)");
     if(args.Contains("--describe")) {Console.WriteLine("SESSION "+root);return;}
     using var resources=new Re4ResourceSource(Path.GetDirectoryName(exe)!);
     using var native=new NativePreviewClient("python",Path.Combine(repo,"tools/Re4Native/re4host.py"),exe);
