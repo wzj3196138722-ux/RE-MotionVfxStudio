@@ -350,9 +350,18 @@ using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == deadSc
           items["TypePolygonTrailExpression"].Status == PreviewCatalogStatus.NotCreatable,
         "catalogue statuses for a Billboard3D entry: " + string.Join(", ", new[] { "UVSequence", "Life", "PtColorClip", "EmitterColorClip", "TypeMesh", "PlayEmitter", "MeshEmitter", "FakeDoF", "TypePolygonTrailExpression" }.Select(t => $"{t} {items[t].Status}")),
         $"files {catalog.Files}, BB3D {catalog.OwnerCount("TypeBillboard3D")}, UVSequence {items["UVSequence"].Uses}/{items["UVSequence"].OwnerCount}");
-    var noType = catalog.For(null, ["UnitCulling"]).ToDictionary(i => i.Type);
-    Check(noType["TypeBillboard3D"] is { Status: PreviewCatalogStatus.Common, Uses: > 20000 } && noType["EmitterPriority"].Status == PreviewCatalogStatus.Common,
-        "an entry without Type is offered Type attributes, ranked by how many entries use them", noType["TypeBillboard3D"].Uses);
+    var noType = catalog.For(null, [], "Entry_New").ToDictionary(i => i.Type);
+    Check(noType["TypeBillboard3D"] is { Status: PreviewCatalogStatus.Common, Uses: > 20000 } && noType["UnitCulling"].Status == PreviewCatalogStatus.RootOnly,
+        "an entry without Type (not Root) is offered Type attributes, ranked by how many entries use them; Root attributes are flagged", noType["TypeBillboard3D"].Uses);
+    var root = catalog.For(null, ["UnitCulling"]).ToArray();
+    var rootUsed = root.Where(i => i.Uses > 0).Select(i => i.Type).Order(StringComparer.Ordinal).ToArray();
+    Check(rootUsed.SequenceEqual(PreviewAttributeCatalog.RootAttributes.Order(StringComparer.Ordinal))
+          && root.Where(i => i.Uses > 0).All(i => i.TotalUses == i.Uses && i.Category == "Root")
+          && root.First(i => i.Type == "TypeBillboard3D").Status == PreviewCatalogStatus.NotOnRoot
+          && root.First(i => i.Type == "EmitterPriority").Status == PreviewCatalogStatus.Common
+          && items["UnitCulling"].Status == PreviewCatalogStatus.RootOnly && catalog.For(null, [], "Root")[0].Category == "Root",
+        "Root: exactly the four Root attributes are used on Root entries and nowhere else; they form the Root category; others are flagged on Root and Root ones on ordinary entries",
+        string.Join(",", rootUsed));
     var uncategorised = catalog.Types.Where(t => PreviewAttributeCatalog.CategoryOf(t) == "其他").ToArray();
     Check(uncategorised.All(t => t.StartsWith("Unknown", StringComparison.Ordinal)), "every named attribute type has a category", string.Join(", ", uncategorised));
     // Variants follow their base: each group (base and its Expression / Clip / Modifier ...) is contiguous, base first.

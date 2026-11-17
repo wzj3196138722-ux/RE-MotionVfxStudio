@@ -43,6 +43,7 @@ internal static class PreviewControlReports
         return new JsonObject
         {
             ["entryType"] = entryType,
+            ["root"] = PreviewAttributeCatalog.IsRoot(entryType, null, existing),
             ["sameTypeEntries"] = catalog.OwnerCount(entryType),
             ["corpusFiles"] = catalog.Files,
             ["items"] = new JsonArray(catalog.For(entryType, existing).Select(i => (JsonNode?)new JsonObject

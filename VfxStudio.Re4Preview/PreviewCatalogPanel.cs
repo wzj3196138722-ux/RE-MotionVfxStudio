@@ -39,15 +39,17 @@ internal sealed class PreviewCatalogPanel
             ImGui.End(); return null;
         }
         var catalog = PreviewAttributeCatalog.Re4;
-        string key = entryType + "|" + string.Join(",", existing);
-        if (key != cacheKey) { items = catalog.For(entryType, existing); cacheKey = key; }
+        string key = entryType + "|" + entryName + "|" + string.Join(",", existing);
+        if (key != cacheKey) { items = catalog.For(entryType, existing, entryName); cacheKey = key; }
 
-        ImGui.TextWrapped($"[{position}] {entryName} · {entryType ?? "无 Type"}（RE4 同类 entry {catalog.OwnerCount(entryType)} 个）");
+        ImGui.TextWrapped(PreviewAttributeCatalog.IsRoot(entryType, entryName, existing)
+            ? $"[{position}] {entryName} · Root entry（全局控制，RE4 共 {catalog.OwnerCount(null)} 个）"
+            : $"[{position}] {entryName} · {entryType ?? "无 Type"}（RE4 同类 entry {catalog.OwnerCount(entryType)} 个）");
         ImGui.TextDisabled(locked ?? "拖到属性面板或节点图的 entry 上添加 · 双击加到当前 entry");
         ImGui.SetNextItemWidth(-60); ImGui.InputTextWithHint("##搜索", "搜索属性", ref filter, 128);
         ImGui.SameLine(); if (ImGui.SmallButton("清空")) filter = "";
         ImGui.Checkbox("RE4 未用的组合", ref showUnusual);
-        if (ImGui.IsItemHovered()) ImGui.SetTooltip("也列出 RE4 里同 Type 的 entry 从未用过的属性。后台允许添加，但游戏是否支持没有依据。");
+        if (ImGui.IsItemHovered()) ImGui.SetTooltip("也列出 RE4 里同 Type 的 entry 从未用过的属性，以及 Root 与普通 entry 互不使用的属性。后台允许添加，但游戏是否支持没有依据。");
         ImGui.SameLine(); ImGui.Checkbox("不可添加的", ref showBlocked);
         if (ImGui.IsItemHovered()) ImGui.SetTooltip("也列出缺少基础属性、第二个 Type、Action 专用的属性（灰色，不能拖）。");
         var missing = items.Where(i => i.Usual && i.Status == PreviewCatalogStatus.Common).ToArray();
@@ -60,7 +62,7 @@ internal sealed class PreviewCatalogPanel
             var shown = items.Where(i => i.Category == category && Shown(i)).ToArray();
             if (shown.Length == 0) continue;
             int addable = shown.Count(i => i.CanAdd);
-            if (!ImGui.CollapsingHeader($"{category}（{addable}）###{category}", category is "类型" or "Action" ? ImGuiTreeNodeFlags.None : ImGuiTreeNodeFlags.DefaultOpen)) continue;
+            if (!ImGui.CollapsingHeader($"{category}（{addable}）###{category}", category is "类型" or "Action" or "Root" ? ImGuiTreeNodeFlags.None : ImGuiTreeNodeFlags.DefaultOpen)) continue;
             string? lastGroup = null;
             foreach (var item in shown)
             {
@@ -74,11 +76,11 @@ internal sealed class PreviewCatalogPanel
                 {
                     PreviewCatalogStatus.Common when item.Usual => new Vector4(1, .7f, .3f, 1),
                     PreviewCatalogStatus.Common => new Vector4(.92f, .92f, .92f, 1),
-                    PreviewCatalogStatus.Unseen => new Vector4(.85f, .8f, .5f, 1),
+                    PreviewCatalogStatus.Unseen or PreviewCatalogStatus.RootOnly or PreviewCatalogStatus.NotOnRoot => new Vector4(.85f, .8f, .5f, 1),
                     PreviewCatalogStatus.Unused => new Vector4(.7f, .6f, .45f, 1),
                     _ => new Vector4(.5f, .5f, .5f, 1),
                 };
-                string mark = (child ? "  └ " : "") + item.Status switch { PreviewCatalogStatus.Present => "(已有) ", PreviewCatalogStatus.Unseen or PreviewCatalogStatus.Unused => "? ", _ => "" };
+                string mark = (child ? "  └ " : "") + item.Status switch { PreviewCatalogStatus.Present => "(已有) ", PreviewCatalogStatus.Unseen or PreviewCatalogStatus.Unused or PreviewCatalogStatus.RootOnly or PreviewCatalogStatus.NotOnRoot => "? ", _ => "" };
                 float right = ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X;
                 ImGui.PushStyleColor(ImGuiCol.Text, color);
                 bool clicked = ImGui.Selectable(mark + item.Type, false, ImGuiSelectableFlags.AllowDoubleClick);
@@ -117,7 +119,7 @@ internal sealed class PreviewCatalogPanel
         return item.Status switch
         {
             PreviewCatalogStatus.Common or PreviewCatalogStatus.Present => true,
-            PreviewCatalogStatus.Unseen or PreviewCatalogStatus.Unused => showUnusual,
+            PreviewCatalogStatus.Unseen or PreviewCatalogStatus.Unused or PreviewCatalogStatus.RootOnly or PreviewCatalogStatus.NotOnRoot => showUnusual,
             _ => showBlocked,
         };
     }

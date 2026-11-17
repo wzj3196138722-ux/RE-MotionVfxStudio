@@ -20,6 +20,10 @@ public enum PreviewCatalogStatus
     MissingBase,
     /// <summary>PlayEmitter / PlayEfx: Action attributes, refused on entries.</summary>
     ActionOnly,
+    /// <summary>A Root attribute on an ordinary entry: RE4 puts it only on the Root entry. The backend allows it.</summary>
+    RootOnly,
+    /// <summary>An ordinary attribute on the Root entry, which in RE4 holds only Root attributes. The backend allows it.</summary>
+    NotOnRoot,
     /// <summary>The editor library has no class for this type, so the backend cannot create it.</summary>
     NotCreatable,
 }
@@ -33,7 +37,8 @@ public sealed record PreviewCatalogItem(string Type, string Category, string? Ba
     int Uses, int OwnerCount, int TotalUses, bool Usual)
 {
     /// <summary>The backend accepts it (it may still be unusual for this Type).</summary>
-    public bool CanAdd => Status is PreviewCatalogStatus.Common or PreviewCatalogStatus.Unseen or PreviewCatalogStatus.Unused;
+    public bool CanAdd => Status is PreviewCatalogStatus.Common or PreviewCatalogStatus.Unseen or PreviewCatalogStatus.Unused
+        or PreviewCatalogStatus.RootOnly or PreviewCatalogStatus.NotOnRoot;
     public float Share => OwnerCount == 0 ? 0 : Uses / (float)OwnerCount;
 
     public string Reason => Status switch
@@ -45,6 +50,8 @@ public sealed record PreviewCatalogItem(string Type, string Category, string? Ba
         PreviewCatalogStatus.SecondType => "这个 entry 已经有 Type 属性，一个 entry 只能有一个。",
         PreviewCatalogStatus.MissingBase => $"需要先有基础属性 {Base}。",
         PreviewCatalogStatus.ActionOnly => "这是 Action 的属性，不能加到 entry 上。",
+        PreviewCatalogStatus.RootOnly => "RE4 里这个属性只出现在 Root entry 上（文件第一个、没有 Type 的 entry），用于全局控制。可以添加，但普通 entry 带它没有依据。",
+        PreviewCatalogStatus.NotOnRoot => "Root entry 在 RE4 里只放全局控制属性（UnitCulling、EmitterPriority、DrawOverlay、RenderTarget）。可以添加，但没有依据。",
         PreviewCatalogStatus.NotCreatable => "编辑器还不认识这个属性的字段结构，不能新建。",
         _ => "",
     };
@@ -56,7 +63,17 @@ public sealed record PreviewCatalogItem(string Type, string Category, string? Ba
 /// on Actions); the corpus counts only rank and flag the choices.</summary>
 public sealed class PreviewAttributeCatalog
 {
-    public static readonly string[] Categories = ["类型", "发射", "变换与运动", "生命与动画", "外观", "UV", "淡化与遮挡", "粒子行为与碰撞", "Action", "其他"];
+    public static readonly string[] Categories = ["Root", "类型", "发射", "变换与运动", "生命与动画", "外观", "UV", "淡化与遮挡", "粒子行为与碰撞", "Action", "其他"];
+
+    /// <summary>Attributes RE4 puts only on the Root entry: the first entry of a file, named Root, with no Type
+    /// (1422 files). It holds global controls; ordinary entries never have these, and Root never has anything else.</summary>
+    public static readonly string[] RootAttributes = ["UnitCulling", "EmitterPriority", "DrawOverlay", "RenderTarget"];
+
+    public static bool IsRootAttribute(string type) => RootAttributes.Contains(BaseOf(type) ?? type, StringComparer.Ordinal);
+
+    /// <summary>A Root entry: no Type, and named Root or already holding a Root attribute.</summary>
+    public static bool IsRoot(string? entryType, string? entryName, IEnumerable<string> existing) =>
+        entryType == null && (entryName == "Root" || existing.Any(IsRootAttribute));
 
     private readonly Dictionary<string, (int Count, Dictionary<string, int> Attributes)> owners;
     private readonly Dictionary<string, int> totals = new(StringComparer.Ordinal);
@@ -158,9 +175,11 @@ public sealed class PreviewAttributeCatalog
     /// <summary>The catalogue for one entry: every type with its status, in category order, most used first.</summary>
     /// <param name="entryType">The entry's Type* attribute, or null when it has none.</param>
     /// <param name="existing">Attribute types the entry already has.</param>
-    public IReadOnlyList<PreviewCatalogItem> For(string? entryType, IEnumerable<string> existing)
+    /// <param name="entryName">The entry's name; with no Type, "Root" marks the Root entry (see <see cref="IsRoot"/>).</param>
+    public IReadOnlyList<PreviewCatalogItem> For(string? entryType, IEnumerable<string> existing, string? entryName = null)
     {
         var have = existing.ToHashSet(StringComparer.Ordinal);
+        bool root = IsRoot(entryType, entryName, have);
         var (count, uses) = Owner(entryType);
         int usualAt = Math.Max(1, (int)Math.Ceiling(count * .95));
         var all = types.Select(type =>
@@ -173,10 +192,11 @@ public sealed class PreviewAttributeCatalog
                     : type is "PlayEmitter" or "PlayEfx" ? PreviewCatalogStatus.ActionOnly
                     : isType && entryType != null ? PreviewCatalogStatus.SecondType
                     : required != null ? PreviewCatalogStatus.MissingBase
+                    : IsRootAttribute(type) != root ? (root ? PreviewCatalogStatus.NotOnRoot : PreviewCatalogStatus.RootOnly)
                     : n > 0 ? PreviewCatalogStatus.Common
                     : totals.ContainsKey(type) ? PreviewCatalogStatus.Unseen : PreviewCatalogStatus.Unused;
                 // A Type attribute on an entry without one: rank by how many entries have that Type.
-                if (isType && entryType == null && status is not (PreviewCatalogStatus.Present or PreviewCatalogStatus.NotCreatable))
+                if (isType && entryType == null && !root && status is not (PreviewCatalogStatus.Present or PreviewCatalogStatus.NotCreatable))
                 {
                     n = Owner(type).Count;
                     status = n > 0 ? PreviewCatalogStatus.Common : status;
@@ -197,8 +217,8 @@ public sealed class PreviewAttributeCatalog
     public string GroupOf(PreviewCatalogItem item) => BaseOf(item.Type) is { } b && types.Contains(b, StringComparer.Ordinal) ? b : item.Type;
 
     /// <summary>Checks one type for an entry: the catalogue item, or null for a name that is not an RE4 attribute type.</summary>
-    public PreviewCatalogItem? Check(string type, string? entryType, IEnumerable<string> existing)
-        => types.Contains(type, StringComparer.Ordinal) ? For(entryType, existing).First(i => i.Type == type) : null;
+    public PreviewCatalogItem? Check(string type, string? entryType, IEnumerable<string> existing, string? entryName = null)
+        => types.Contains(type, StringComparer.Ordinal) ? For(entryType, existing, entryName).First(i => i.Type == type) : null;
 
     private (int Count, Dictionary<string, int> Attributes) Owner(string? entryType)
     {
@@ -238,10 +258,11 @@ public sealed class PreviewAttributeCatalog
     public static string CategoryOf(string type)
     {
         string name = BaseOf(type) ?? type;
+        if (RootAttributes.Contains(name, StringComparer.Ordinal)) return "Root";
         if (IsTypeAttribute(name) || name.StartsWith("Type", StringComparison.Ordinal)) return "类型";
         if (name is "PlayEmitter" or "PlayEfx") return "Action";
-        if (name is "Spawn" or "EmitterShape2D" or "EmitterShape3D" or "MeshEmitter" or "ScreenSpaceEmitter" or "EmitterPriority"
-            or "FixRandomGenerator" or "AssignCSV" or "UnitCulling") return "发射";
+        if (name is "Spawn" or "EmitterShape2D" or "EmitterShape3D" or "MeshEmitter" or "ScreenSpaceEmitter"
+            or "FixRandomGenerator" or "AssignCSV") return "发射";
         if (name.StartsWith("UV", StringComparison.Ordinal) || name.StartsWith("PtUv", StringComparison.Ordinal)) return "UV";
         if (name.StartsWith("FadeBy", StringComparison.Ordinal) || name is "DepthOcclusion" or "VanishArea3D") return "淡化与遮挡";
         if (name is "Life" or "PtLife" or "ScaleAnim" or "RotateAnim" or "Blink" or "ScaleByDepth") return "生命与动画";
@@ -250,7 +271,7 @@ public sealed class PreviewAttributeCatalog
             or "WindInfluence3D" or "PtVortexelWind" or "PtPathTranslate") return "变换与运动";
         if (name is "ShaderSettings" or "EmitterColor" or "PtColor" or "RgbCommon" or "RgbWater" or "AlphaCorrection" or "TexelChannelOperator"
             or "TextureFilter" or "TextureUnit" or "Distortion" or "ProceduralDistortion" or "StretchBlur" or "LuminanceBleed" or "ContrastHighlighter"
-            or "DepthOperator" or "DrawOverlay" or "RenderTarget" or "EffectShader" or "FakeDoF" or "VolumetricLighting") return "外观";
+            or "DepthOperator" or "EffectShader" or "FakeDoF" or "VolumetricLighting") return "外观";
         if (name.StartsWith("Pt", StringComparison.Ordinal) || name.Contains("Collider", StringComparison.Ordinal) || name is "FluidSimulator2D" or "TestBehaviorUpdater")
             return "粒子行为与碰撞";
         return "其他";
