@@ -169,7 +169,8 @@ public partial class EFXAttributeFakeDoF : ReeLib.Efx.EFXAttribute
 {
     public EFXAttributeFakeDoF() : base(EfxAttributeType.FakeDoF) { }
 
-    public float NearDistance;
+    // 名字取自 MonsterHunterWilds.exe 文本解析器（vtable e0ff6e0）；五个字段由构建器实跑确认逐字原样拷贝。
+    public float Near;
     public float MaxScale;
     public float MinAlpha;
     public uint UsingMipLevel;
@@ -208,6 +209,8 @@ public partial class EFXAttributePlaneCollider : EFXAttribute
 {
 	public EFXAttributePlaneCollider() : base(EfxAttributeType.PlaneCollider) { }
 
+    // MonsterHunterWilds.exe 文本解析器（vtable e102cc0）把 RotationOrder 写进这个字；语料取值（264、650、810 等）
+    // 是位域，所以保留 Flags，RotationOrder 应只占其中几位（哪几位没读）。其余字段名与解析器一致。
     public uint Flags;
 	public Vector3 Position;
     public Vector3 Rotation;
@@ -934,9 +937,10 @@ public partial class EFXAttributeRepeatArea : EFXAttribute
 {
 	public EFXAttributeRepeatArea() : base(EfxAttributeType.RepeatArea) { }
 
+	// 名字取自 MonsterHunterWilds.exe 文本解析器（vtable e106ba0）。
 	public uint Flags;
-	public Vector3 Area;
-	public float Unkn;
+	public Vector3 Size;
+	public float FadeoutStart;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.Listener, EfxVersion.MHWilds)]

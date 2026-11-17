@@ -181,6 +181,8 @@ public partial class EFXAttributeFluidParticle2DSimulator : ReeLib.Efx.EFXAttrib
 {
     public EFXAttributeFluidParticle2DSimulator() : base(EfxAttributeType.FluidParticle2DSimulator) { }
 
+    // 命名字段取自 MonsterHunterWilds.exe 文本解析器（vtable e100240），文件偏移经构建器（slot 16）对上；
+    // 加载器先读 168 字节定长段（Flags .. dataCount），其余字符串与数组另读。
     public uint Flags;
     public uint unkn1;
     public uint unkn2;
@@ -188,30 +190,30 @@ public partial class EFXAttributeFluidParticle2DSimulator : ReeLib.Efx.EFXAttrib
     public uint unkn4;
 
     public float unkn5;
-    public UndeterminedFieldType unkn6;
-    public float unkn7;
-    public float unkn8;
+    public float VortexelWindTransitionRate;
+    public float VortexelWindTransitionThreshold;
+    public float VortexelWindMaxSpeed;
 
     public UndeterminedFieldType unkn9;
     public UndeterminedFieldType unkn10;
     public float unkn11;
-    public float unkn12;
+    public float PostEdgeDropoff;
 
-    public UndeterminedFieldType unkn13;
-    public float unkn14;
-    public float unkn15;
-    public float unkn16;
+    public float DensityColorMin;
+    public float DensityColorMax;
+    public float DensityAlphaMin;
+    public float DensityAlphaMax;
     public float unkn17;
     public float unkn18;
 
     public float unkn19;
-    public float unkn20;
-    public float unkn21;
+    public float SourceDensityScale;
+    public float SourceVelocityScale;
     public UndeterminedFieldType unkn22;
     public float unkn23;
-    public UndeterminedFieldType unkn24;
+    public float WaterVelocityScale;
 
-    public float unkn25;
+    public float WaterVelocityAddRate;
     public UndeterminedFieldType unkn26;
     public UndeterminedFieldType unkn27;
     public UndeterminedFieldType unkn28;
@@ -219,9 +221,9 @@ public partial class EFXAttributeFluidParticle2DSimulator : ReeLib.Efx.EFXAttrib
     public float unkn30;
     public float unkn31;
     public UndeterminedFieldType unkn32;
-    public float unkn33;
+    public float InternalInherit;
 
-    public float unkn34;
+    public float Buoyancy;
     public float unkn35;
     public int unkn36;
     public int unkn37;
@@ -255,11 +257,12 @@ public partial class EFXAttributeFluidParticleEmitter : EFXAttribute
 {
 	public EFXAttributeFluidParticleEmitter() : base(EfxAttributeType.FluidParticleEmitter) { }
 
+	// 名字取自 MonsterHunterWilds.exe 文本解析器（vtable e1088f0）；Flags 不在解析器里。
 	public uint Flags;
-	public float Unkn0;
-	public float Unkn1;
-	public float Unkn2;
-	public float Unkn3;
+	public float DensityScale;
+	public float VelocityScale;
+	public float SizeScale;
+	public float PressureScale;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.FluidParticleEmitterTarget, EfxVersion.MHWilds)]

@@ -635,10 +635,11 @@ public partial class EFXAttributePtVortexelHeatSource : EFXAttribute
 {
 	public EFXAttributePtVortexelHeatSource() : base(EfxAttributeType.PtVortexelHeatSource) { }
 
-	public float Unkn0;
-	public int unkn1;
-	public short unkn2;
-	public uint unkn3;
+	// 名字取自 MonsterHunterWilds.exe 文本解析器（vtable e103ba0）；文件里 14 字节紧排，OverwritePriority 是 u16。
+	public float Radius;
+	public int OverwriteType;
+	public short OverwritePriority;
+	public uint DurationFrame;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.PtCollisionInfluence, EfxVersion.MHWilds)]
