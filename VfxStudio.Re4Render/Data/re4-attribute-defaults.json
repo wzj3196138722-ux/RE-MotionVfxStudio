@@ -199,7 +199,7 @@
     "FadeByOcclusion": {
       "samples": 19,
       "fields": {
-        "Radius": "1",
+        "CullingRadius": "1",
         "MinSize": "0.2"
       }
     },
@@ -466,9 +466,9 @@
     "PtTransform3D": {
       "samples": 2,
       "fields": {
-        "scale.X": "1",
-        "scale.Y": "1",
-        "scale.Z": "1"
+        "LocalScale.X": "1",
+        "LocalScale.Y": "1",
+        "LocalScale.Z": "1"
       }
     },
     "PtTransform3DClip": {
@@ -704,7 +704,7 @@
         "ShadeColor.B": "255",
         "ShadeColor.A": "255",
         "EmissiveRate": "4",
-        "EmissivePower": "2",
+        "EmissionPower": "2",
         "Opacity": "1",
         "HueIntensityCurve": "1",
         "Keep.s": "100",
@@ -1627,7 +1627,7 @@
         "Size.X": "2",
         "Size.Y": "2",
         "Size.Z": "2",
-        "DrawDistance": "-1"
+        "Distance": "-1"
       }
     },
     "UnknownRE4_197": {
@@ -1665,9 +1665,9 @@
         "Parameter.Y": "1",
         "Lacunarity": "3",
         "Gain": "0.5",
-        "Blend": "0.5",
-        "lfoRange": "3",
-        "lfoTime": "10",
+        "VelocityBlend": "0.5",
+        "OscillationRange": "3",
+        "OscillationTime": "10",
         "Scale.X": "1",
         "Scale.Y": "1",
         "Scale.Z": "1",

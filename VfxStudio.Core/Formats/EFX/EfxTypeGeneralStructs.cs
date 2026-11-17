@@ -84,10 +84,11 @@ public partial class EFXAttributeUnitCulling : EFXAttribute
 
 	public uint Flags;
 	public Vector3 Center;
+	// Size 在引擎里另有别名 Radius（同一槽）。名字取自 MonsterHunterWilds.exe 文本解析器（vtable e0fe6e0）。
 	public Vector3 Size;
-	public Vector3 Rotation;
+	public Vector3 LocalRotation;
     [RszVersion(EfxVersion.RE8)]
-	public float DrawDistance;
+	public float Distance;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.UnitCullingExpression, EfxVersion.DD2)]

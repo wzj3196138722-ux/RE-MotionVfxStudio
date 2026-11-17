@@ -590,7 +590,8 @@ public partial class EFXAttributeTexelChannelOperator : EFXAttribute
 	public float Desaturate;
 	public float AmbientColorIntensity;
 	public float EmissiveRate;
-	public float EmissivePower;
+	// 引擎名（re4.exe 与 MonsterHunterWilds.exe 的文本解析器）是 EmissionPower。
+	public float EmissionPower;
 	public float Opacity;
 	public float HueIntensityCurve;
 	public uint UseIntEnvelope;

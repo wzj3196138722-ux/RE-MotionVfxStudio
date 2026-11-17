@@ -95,8 +95,9 @@ public partial class EFXAttributeFadeByOcclusion : EFXAttribute
 {
 	public EFXAttributeFadeByOcclusion() : base(EfxAttributeType.FadeByOcclusion) { }
 
-	public float Radius;
-	public Vector2 Offset;
+	// 名字取自 MonsterHunterWilds.exe 文本解析器（vtable e0ff390）；MinSize 槽另有别名 MinAlpha。
+	public float CullingRadius;
+	public Vector2 SphereOffset;
 	public float MinSize;
 }
 

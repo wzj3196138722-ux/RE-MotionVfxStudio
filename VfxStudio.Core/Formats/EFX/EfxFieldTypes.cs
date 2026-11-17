@@ -9,12 +9,14 @@ public partial class EFXAttributeVectorFieldParameter : EFXAttribute
 {
 	public EFXAttributeVectorFieldParameter() : base(EfxAttributeType.VectorFieldParameter) { }
 
+	// 名字取自 MonsterHunterWilds.exe 文本解析器（vtable e102040）。Parameter 的三个分量在引擎里按场类型换名：
+	// X = Frequency / Range，Y = Amplitude / Detail，Z = SmoothBlend。
 	public Vector3 Parameter;
 	public float Lacunarity;
 	public float Gain;
-	public float Blend;
-	public float lfoRange;
-	public float lfoTime;
+	public float VelocityBlend;
+	public float OscillationRange;
+	public float OscillationTime;
 	public Vector3 Rotation;
     public Vector3 Scale;
     public via.Range Coefficient;
