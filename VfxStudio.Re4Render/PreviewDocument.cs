@@ -118,15 +118,45 @@ public sealed class Re4ResourceSource : IDisposable
     public Re4ResourceSource(string gameDirectory, params string[] extraRoots)
     {
         this.gameDirectory = gameDirectory;
-        looseRoots = extraRoots.Concat(new[] { System.IO.Path.Combine(gameDirectory,"RE4_EXTRACT"),System.IO.Path.Combine(gameDirectory,"RE4_EXTRACT","re_chunk_000") }).ToArray();
+        // Lookup order: the open document's own natives root (UseDocument), explicit roots, the game's loose files
+        // (<game>/natives/STM/..., where mods are installed; the game loads them over pak contents), the extracted paks,
+        // then the paks themselves. Paths start with natives/, so the game folder is the root.
+        looseRoots = extraRoots.Concat(new[] { gameDirectory, System.IO.Path.Combine(gameDirectory,"RE4_EXTRACT"),System.IO.Path.Combine(gameDirectory,"RE4_EXTRACT","re_chunk_000") })
+            .Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+    }
+
+    /// <summary>The folder holding the document's natives folder (found by walking up from it), searched first: a file
+    /// opened from a release folder or a mod finds its own textures and .uvs there. Null when none.</summary>
+    public string? DocumentRoot { get; private set; }
+
+    /// <summary>Searches the natives root above <paramref name="documentPath"/> first from now on (the original file,
+    /// not a published revision copy).</summary>
+    public void UseDocument(string? documentPath)
+    {
+        lock (sync) DocumentRoot = documentPath == null ? null : NativesRootOf(documentPath);
+    }
+
+    /// <summary>Folder levels <see cref="NativesRootOf"/> walks up at most (RE4 resource paths are about 6-8 levels
+    /// below natives/STM).</summary>
+    public const int MaxNativesSearchDepth = 16;
+
+    /// <summary>The parent of the nearest folder named natives above <paramref name="path"/>, within
+    /// <see cref="MaxNativesSearchDepth"/> levels, or null.</summary>
+    public static string? NativesRootOf(string path)
+    {
+        var dir = new DirectoryInfo(System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(path))!);
+        for (int depth = 0; dir != null && depth < MaxNativesSearchDepth; dir = dir.Parent, depth++)
+            if (string.Equals(dir.Name, "natives", StringComparison.OrdinalIgnoreCase)) return dir.Parent?.FullName;
+        return null;
     }
     public PreviewTexture Read(string rawPath, string version)
     {
         lock (sync)
         {
-            if (cache.TryGetValue(rawPath + "|" + version, out var hit)) return hit;
+            string key = rawPath + "|" + version + "|" + DocumentRoot;
+            if (cache.TryGetValue(key, out var hit)) return hit;
             var read = ReadUncached(rawPath, version);
-            cache[rawPath + "|" + version] = read;
+            cache[key] = read;
             return read;
         }
     }
@@ -136,7 +166,7 @@ public sealed class Re4ResourceSource : IDisposable
         string path = rawPath.TrimStart('@','/').Replace('\\','/');
         if (!path.StartsWith("natives/",StringComparison.OrdinalIgnoreCase)) path = "natives/stm/" + path;
         if (!path.EndsWith(version,StringComparison.OrdinalIgnoreCase)) path += version;
-        foreach (string root in looseRoots)
+        foreach (string root in (DocumentRoot == null ? looseRoots : looseRoots.Prepend(DocumentRoot)))
         {
             string relative=path;
             string normalizedRoot=root.Replace('\\','/').TrimEnd('/');

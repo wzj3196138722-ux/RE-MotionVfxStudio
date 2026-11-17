@@ -521,7 +521,28 @@ using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == deadSc
         $"carriers {string.Join(", ", carriers.Select(c => $"{c.Label} {Path.GetFileNameWithoutExtension(c.Decal!.Prefab)}"))}; at most {most} at once");
 }
 
-// 14. Optional: large official files.
+// 14. Resource lookup order: the document's own natives root (walking up at most 16 levels) > the game's loose natives >
+// RE4_EXTRACT > paks. A file present only under the document root resolves there; with the root set it also wins over
+// the game's copy of the same path; a document deeper than the limit gets no root.
+{
+    string docRoot = Path.Combine(repo, "test-output", "resource-order-" + Guid.NewGuid().ToString("N")[..8]);
+    const string Relative = "_Chainsaw/VFX/Dimcirui/ResourceOrderTest/only_here.uvs";
+    string official = "RE_ENGINE_LIBRARY/VFX_Library/Texture/TEX_Smoke/tex_capcom_smoke_00_0050.uvs";
+    using var lookup = new Re4ResourceSource(game, Path.Combine(game, "RE4_EXTRACT"));
+    var bytes = lookup.Read(official, ".7").Bytes;
+    string only = Path.Combine(docRoot, "natives", "STM", Relative.Replace('/', '\\') + ".7");
+    string shadow = Path.Combine(docRoot, "natives", "STM", official.Replace('/', '\\') + ".7");
+    Directory.CreateDirectory(Path.GetDirectoryName(only)!); File.WriteAllBytes(only, bytes);
+    Directory.CreateDirectory(Path.GetDirectoryName(shadow)!); File.WriteAllBytes(shadow, bytes);
+    lookup.UseDocument(Path.Combine(docRoot, "natives", "STM", "_Chainsaw", "VFX", "EffectEditor", "x.efx.3539837"));
+    string a = lookup.Read(Relative, ".7").Source, b = lookup.Read(official, ".7").Source;
+    string deep = Path.Combine(new[] { docRoot, "natives" }.Concat(Enumerable.Repeat("d", 17)).Append("x.efx.3539837").ToArray());
+    Check(lookup.DocumentRoot == docRoot && a.StartsWith(docRoot) && b.StartsWith(docRoot) && Re4ResourceSource.NativesRootOf(deep) == null,
+        "resources: the document's natives root is searched first (walking up at most 16 levels)", $"{a} | {b}");
+    Directory.Delete(docRoot, true);
+}
+
+// 15. Optional: large official files.
 if (args.Contains("--corpus"))
 {
     var corpus = new[]

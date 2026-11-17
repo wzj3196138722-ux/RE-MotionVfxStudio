@@ -189,6 +189,7 @@ void StartReload()
     loading=Task.Run(async () =>
     {
         manifest.ValidateFile();
+        resources.UseDocument(manifest.Source);   // the original file's own natives folder first (not the revision copy's)
         if(singleEntry)
         {
             var all=PreviewScene.Read(manifest.Path,resources,known);
