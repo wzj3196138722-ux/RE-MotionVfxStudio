@@ -459,8 +459,8 @@
     "PtTransform2D": {
       "samples": 2,
       "fields": {
-        "unkn3": "1",
-        "unkn4": "1"
+        "LocalScale.X": "1",
+        "LocalScale.Y": "1"
       }
     },
     "PtTransform3D": {
@@ -496,9 +496,9 @@
     "PtVelocity3D": {
       "samples": 1500,
       "fields": {
-        "unkn1_0": "1",
-        "unkn1_2": "1",
-        "unkn1_3": "0.120000005"
+        "Direction.X": "1",
+        "Direction.Z": "1",
+        "Speed": "0.120000005"
       }
     },
     "PtVortexelWind": {
@@ -1701,10 +1701,10 @@
     "Velocity2D": {
       "samples": 78,
       "fields": {
-        "unkn1_2": "1",
-        "unkn1_4": "0.95",
-        "unkn2_0": "1",
-        "unkn2_1": "1"
+        "Speed.s": "1",
+        "SpeedCoef.s": "0.95",
+        "SizeX": "1",
+        "SizeY": "1"
       }
     },
     "Velocity2DExpression": {

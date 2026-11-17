@@ -214,11 +214,10 @@ public partial class EFXAttributePtTransform2D : ReeLib.Efx.EFXAttribute
 {
     public EFXAttributePtTransform2D() : base(EfxAttributeType.PtTransform2D) { }
 
-    public float unkn0;
-    public float unkn1;
-    public UndeterminedFieldType unkn2;
-    public float unkn3;
-    public float unkn4;
+    // 字段名取自 MonsterHunterWilds.exe 文本解析器（vtable e100830），布局与 Transform2D 相同。
+    public Vector2 LocalPosition;
+    public float LocalRotation;
+    public Vector2 LocalScale;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.PtTransform2DClip, EfxVersion.RE8)]

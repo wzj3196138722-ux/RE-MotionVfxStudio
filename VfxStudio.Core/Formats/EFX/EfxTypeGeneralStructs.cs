@@ -25,9 +25,9 @@ public partial class EFXAttributeTypeNoDraw : EFXAttribute
 	public CenterSpread SizeX;
 	public CenterSpread SizeY;
 	public CenterSpread SizeZ;
-	[RszVersion(EfxVersion.MHWilds, EndAt = nameof(unkn15))]
-	public float unkn14;
-	public float unkn15;
+	// MHWilds 起：MonsterHunterWilds.exe 文本解析器（vtable e0fa670）把这一对读作 SizeScalar；采样方式没读，所以用 via.Range。
+	[RszVersion(EfxVersion.MHWilds)]
+	public via.Range SizeScalar;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.TypeNoDrawExpression, EfxVersion.RE3, EfxVersion.RE4)]
