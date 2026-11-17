@@ -44,7 +44,7 @@
       "samples": 7,
       "fields": {
         "UseTableRange": "true",
-        "mTableRange.s": "5",
+        "mTableRange.r": "5",
         "efcsvPostionListPath": "_Chainsaw/VFX/Mesh/MESH_Stage/MESH_st40/MESH_st40_200/mesh_0015_st40_200_glass_0000_00.efcsv"
       }
     },
@@ -362,8 +362,8 @@
       "samples": 87,
       "fields": {
         "Flags": "137",
-        "BounceNum.r": "1",
-        "BounceNum.s": "2",
+        "BounceNum.s": "1",
+        "BounceNum.r": "2",
         "BounceRate.s": "0.3",
         "BounceRate.r": "0.3"
       }
@@ -707,8 +707,8 @@
         "EmissivePower": "2",
         "Opacity": "1",
         "HueIntensityCurve": "1",
-        "Keep.r": "100",
-        "Keep.s": "100"
+        "Keep.s": "100",
+        "Keep.r": "100"
       }
     },
     "TextureFilter": {
@@ -926,7 +926,7 @@
         "ColorRange.A": "255",
         "ColorRate": "1",
         "MaxPartsNum": "3",
-        "PartsStartNo.s": "4",
+        "PartsStartNo.r": "4",
         "PlaySpeed.s": "1",
         "PlaySpeed.r": "1",
         "PlaySpeedCoef.s": "1",
@@ -1776,7 +1776,7 @@
       "fields": {
         "InfluenceRate.s": "0.2",
         "InfluenceCoef.s": "0.995",
-        "InfluenceFrame.r": "20"
+        "InfluenceFrame.s": "20"
       }
     }
   }
