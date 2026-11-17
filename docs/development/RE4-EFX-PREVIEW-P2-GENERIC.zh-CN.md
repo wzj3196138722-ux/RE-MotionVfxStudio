@@ -16,6 +16,14 @@ dotnet run -c Release --project VfxStudio.Re4Preview -- --fixture bb2
 4. 点“应用本属性修改”提交全部变化字段，每次最多 64 个字段、一次撤销步骤。多个区间分量可以一起提交，颜色四通道计为四个字段。
 5. “放弃草稿”恢复文档值。未应用时禁止切换属性、打开副本或重新打开源文件，防止静默丢弃草稿；保存只保存已应用内容。遇到外部新修订时保留原草稿并停用提交，可明确“丢弃草稿并刷新”。
 
+### 字段说明、标志位与成对数值
+
+- 字段名后面灰字显示单位和成对数值的读法；悬停显示含义、公式、单位和“未确定：”部分，空一行后是字段路径与类型。只有说明、没有单位的字段显示 `(?)`。
+- 成对数值按类型显示：CenterSpread(I) 为“中心 ± 幅度”，MinMax(I) 为“最小 ~ 最大”，MinMaxExclusiveI 为 `[最小, 上限)`，MinExtra(I) 为“最小 + [0, 增量]”，InnerOuter、StartSpan、ClampRange、AnchorPair 各有标签。两个输入框之间显示对应符号。仍是 via.Range / via.RangeI 的字段以橙色标出“s / r（用法未确认）”，两者都是先 s 后 r。
+- 有位说明的 u32 标志字段显示为勾选框和下拉框（互斥位段，如 Life 保持模式、UVSequence 的 PlayMode / FlipU / FlipV / Reverse / Rotate90）。没有说明的已置位位显示为“位 N（未列出）”，其余未列出的位折叠在“其他位”里；决定字段是否存在的位（PtCollision / PtColliderAction 位 0、1）只能在“精确值”里改。勾选只改草稿，应用时仍走 `set_fields`。
+
+说明数据在 `VfxStudio.LiveEditor/FieldSemantics.re4.json`（嵌入资源），按属性类型名和字段路径索引；键也覆盖它下面的路径（`AppearFrame` 覆盖 `AppearFrame.min`）。`ContentInspector` 只对 RE4 文件把它附到 `inspect` 每个字段的 `semantic`（`help`、`unit`、`status`、`bits`），MCP `inspect` 原样带出。成对数值的读法由前端按字段的 `ownerType` 判断，不进 JSON。新增说明时以 `VfxStudio.Core/Formats/EFX` 的注释和 [RE4-EFX-RUNTIME.zh-CN.md](RE4-EFX-RUNTIME.zh-CN.md) 为准，没有依据的字段不写。
+
 数字不经过 float/double 统一转换，避免 Int64/UInt64、位标志或未知数值丢失精度。底层类型、版本条件、只读状态、数字解析和区间合法性均由后台决定；失败时文档修订与历史不变，窗口草稿保留供修正。
 
 ## 实现与边界
@@ -43,6 +51,7 @@ dotnet run -c Release --project tools/Re4PreviewP2Tests
 - 旧修订、错误文档，以及打开副本后的旧草稿被拒绝；原本的草稿值没有自动重定基准。
 - Boolean EnableGroupColor、Transform3D 的 RotationOrder 枚举、UVSPath 字符串和 Life 整数修改，经保存/重开回读一致。UInt64 最大值的草稿精度另以本地模型测试验证。
 - 不支持的 BlendType 2 可被加载阶段拒绝，随后一次撤销恢复原文档。
+- `inspect` 结果带出字段说明：Life.AppearFrame 的单位与 MinMaxI 读法、Life.Flags 的保持模式位段、Billboard3D 颜色头的位；JSON 里每个键都能对应到 RE4 属性的实际字段路径（拼错的键会让测试失败）。
 
 最终通用测试记录：`test-output/re4-generic-089c0705300f48a6bf4fad776513d566/generic-result.json`。既有 P2 回归也通过，覆盖旧专用接口、其他 entry 不变、源文件保护、保存保护、发布重试及损坏快照恢复；输出在 `test-output/re4-generic-p2-regression-20261115.log`。
 

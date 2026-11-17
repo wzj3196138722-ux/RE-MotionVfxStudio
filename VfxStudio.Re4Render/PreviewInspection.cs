@@ -4,7 +4,7 @@ namespace VfxStudio.Re4Render;
 
 public sealed record PreviewAttributeInfo(int Index, string Type, string ClrType);
 public sealed record PreviewFieldInfo(string Path, string Label, string Type, string Value, bool Editable,
-    string? Reason = null, string[]? Choices = null, string? OwnerType = null);
+    string? Reason = null, string[]? Choices = null, string? OwnerType = null, PreviewFieldSemantic? Semantic = null);
 public sealed record PreviewColorChannel(string Component, string Path, int Value);
 public sealed record PreviewColorGroup(string Path, string Label, string Storage, int Scale, bool Hdr,
     bool Editable, string? Reason, PreviewColorChannel[] Channels);

@@ -10,7 +10,9 @@ using ReeLib.InternalAttributes;
 
 namespace VfxStudio.LiveEditor;
 
-internal sealed record FieldDescription(string Path, string Label, string Type, string Value, bool Editable, string? Reason = null, string[]? Choices = null, string? OwnerType = null);
+/// <param name="Semantic">RE4 meaning, unit and status of the field (FieldSemantics), or null when nothing is documented.</param>
+internal sealed record FieldDescription(string Path, string Label, string Type, string Value, bool Editable, string? Reason = null, string[]? Choices = null, string? OwnerType = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] FieldSemantic? Semantic = null);
 internal sealed record EditableField(FieldDescription Description, Type ValueType, Action<object?>? Set);
 internal sealed record EditableCurve(string Path, EfxClipData Data);
 internal sealed record InspectionContent(IReadOnlyList<EditableField> Fields, IReadOnlyList<EditableCurve> Curves);
@@ -48,13 +50,15 @@ internal static class ContentInspector
     {
         var result = new List<EditableField>();
         var ancestors = new HashSet<object>(ReferenceEqualityComparer.Instance);
+        string? attributeType = (root as EFXAttribute)?.type.ToString();
         Walk(() => root, null, root.GetType(), "", null, 0, true);
         return result;
 
         void Leaf(string path, Type type, object? value, Action<object?>? setter, string? reason, string? ownerType = null)
         {
             result.Add(new(new(path, path, type.FullName ?? type.Name, Format(value), setter != null && reason == null, reason,
-                type.IsEnum ? ExpressionInspector.Choices(type) ?? Enum.GetNames(type) : type == typeof(bool) ? ["false", "true"] : null, ownerType), type, reason == null ? setter : null));
+                type.IsEnum ? ExpressionInspector.Choices(type) ?? Enum.GetNames(type) : type == typeof(bool) ? ["false", "true"] : null, ownerType,
+                FieldSemantics.For(attributeType, path, version)), type, reason == null ? setter : null));
         }
 
         void Walk(Func<object?> get, Action<object?>? set, Type declaredType, string path, string? blocked, int depth, bool isRoot = false, string? ownerType = null)
@@ -382,6 +386,10 @@ public static class EfxFieldValues
     public static IReadOnlyList<KeyValuePair<string, string>> Editable(object root, EfxVersion version) =>
         ContentInspector.Describe(root, version).Where(f => f.Description.Editable && f.Set != null)
             .Select(f => KeyValuePair.Create(f.Description.Path, f.Description.Value)).ToArray();
+
+    /// <summary>Every described field path of <paramref name="root"/>, editable or not, in model order.</summary>
+    public static IReadOnlyList<string> Paths(object root, EfxVersion version) =>
+        ContentInspector.Describe(root, version).Select(f => f.Description.Path).ToArray();
 
     /// <summary>Writes the values whose paths exist and are editable. Some fields select which nested object
     /// exists (and so which paths follow), so the walk repeats until nothing changes.</summary>
