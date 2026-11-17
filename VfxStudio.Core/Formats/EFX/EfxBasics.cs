@@ -416,6 +416,10 @@ public partial class EFXAttributeShaderSettings : EFXAttribute
 	// 受光块（旧名 unkn15、unkn16、unkn17）。BackfaceLightRatio 运行时 ×8。
 	public float LightShadowRatio;
 	public float BackfaceLightRatio;
+	// MHWilds 起新增。MHWilds 这一段（LightingGrayscaleRatio .. SSRAlphaThreshold）的顺序由 MonsterHunterWilds.exe
+	// 构建器（vtable e0fdc90，slot 16）在语料字节上实跑确定：每个字换成标记值，看它落到块里哪个解析器名的位置。
+	[RszVersion(EfxVersion.MHWilds)]
+	public float LightingGrayscaleRatio;
 	[RszVersion(EfxVersion.RE2)]
 	public float MieShadowRatio;
 
@@ -425,8 +429,8 @@ public partial class EFXAttributeShaderSettings : EFXAttribute
 	public float LightingOffsetY;
 	public float LightingOffsetZ;
 
-	// 旧名 unkn19；exe 按 float 读（旧代码按 uint）。
-    [RszVersion('<', EfxVersion.DD2)]
+	// 旧名 unkn19；exe 按 float 读（旧代码按 uint）。DD2 没有；MHWilds 又有（exe 构建器实跑确认）。
+    [RszVersion(nameof(Version), "<", EfxVersion.DD2, "||", nameof(Version), ">=", EfxVersion.MHWilds)]
 	public float LightingVelocityOffset;
 
 	// 进出阴影的过渡时间，毫秒（旧名 sb_unkn2..5）。
@@ -439,13 +443,14 @@ public partial class EFXAttributeShaderSettings : EFXAttribute
 	// 引擎按 "== 1" 判断（值 2 等于关闭），含义未追。
     [RszVersionExact(EfxVersion.RE4)]
 	public uint toggle_re4;
+	// MHWilds：exe 构建器不读这个字。
     [RszVersion(EfxVersion.DD2)]
 	public float dd2_unkn1;
 	// 着色器 detonemapRate：粒子颜色绕过色调映射的比例（旧名 ColorBrightness，**不是亮度**）。
     [RszVersion(EfxVersion.RE2)]
 	public float DetonemapRatio;
 
-    [RszVersion(EfxVersion.DD2)] public uint toggle_dd2;
+    [RszVersion(nameof(Version), ">=", EfxVersion.DD2, "&&", nameof(Version), "<", EfxVersion.MHWilds)] public uint toggle_dd2;
     [RszVersion(EfxVersion.RE3, EndAt = nameof(StochasticShadingRate))]
 	public float VolumeDepth;
 
@@ -456,9 +461,9 @@ public partial class EFXAttributeShaderSettings : EFXAttribute
 	public float AlphaCoverage;
 	public float SSRAlphaThreshold;
 
-    [RszVersion(EfxVersion.DD2)]
+    [RszVersion(nameof(Version), ">=", EfxVersion.DD2, "&&", nameof(Version), "<", EfxVersion.MHWilds)]
 	public float dd2_unkn2;
-	// 只用低字节；Flags 位 13 打开时生效（旧名 unkn22）。
+	// 只用低字节；Flags 位 13 打开时生效（旧名 unkn22；MHWilds 实跑确认同样受位 13 控制）。
 	public uint StencilTarget;
 
     [RszVersionExact(EfxVersion.RE8, EndAt = nameof(re8_unkn5))]
@@ -478,9 +483,11 @@ public partial class EFXAttributeShaderSettings : EFXAttribute
 	public uint ZPrepassShadingRate;
 	public uint StochasticShadingRate;
 
-	[RszVersion(EfxVersion.MHWilds, EndAt = nameof(mhws_unkn_short))] public float mhws_unkn1;
+	// MHWilds：mhws_unkn1 / 2 exe 构建器不读。ShadingRates 是 Particle / Lighting / Shadow / ZPrepass / Stochastic
+	// 五个 *ShadingRate 共用的 u16（解析器把五个名字都写到块的同一个 u16，构建器原样拷贝；官方全是 0x7fff）。
+	[RszVersion(EfxVersion.MHWilds, EndAt = nameof(ShadingRates))] public float mhws_unkn1;
 	public float mhws_unkn2;
-	public short mhws_unkn_short;
+	public short ShadingRates;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.ShaderSettingsExpression, EfxVersion.DMC5, EfxVersion.RE8, EfxVersion.RERT, EfxVersion.DD2)]
