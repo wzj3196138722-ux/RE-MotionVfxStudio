@@ -1049,7 +1049,7 @@ void DrawComposition()
 void DrawEntrySelector()
 {
     var current=scene!.Entries.FirstOrDefault(e=>e.Position==displayedManifest?.EntryPosition);
-    string Label(PreviewSceneEntry e)=>$"[{e.Position}] {e.Name} · {e.Type}{(e.Shown?"":" · 未显示")}";
+    string Label(PreviewSceneEntry e)=>$"[{e.Position}] {e.Name} · {e.Type}{(e.Shown?"":" · 未显示")}{(e.Missing.Count>0?" · 缺资源（占位贴图）":"")}";
     int topShown=scene.Entries.Count(e=>e.Shown);
     ImGui.Text($"显示 {topShown} / {scene.Entries.Count} 个 entry");
     if(scene.Children.Count>0)
@@ -1067,6 +1067,7 @@ void DrawEntrySelector()
             if(ImGui.Selectable(Label(e),e.Position==current?.Position,selectable?ImGuiSelectableFlags.None:ImGuiSelectableFlags.Disabled) && selectable && e.Position!=current?.Position && editorState!=null)
                 StartEditorCommand(new PreviewEditCommand("select_entry",editorState.Revision,EntryPosition:e.Position));
             if(e.Excluded!=null && ImGui.IsItemHovered()) ImGui.SetTooltip(e.Excluded);
+            else if(e.Missing.Count>0 && ImGui.IsItemHovered()) ImGui.SetTooltip("找不到这些资源，用黄白格子占位贴图代替：\n"+string.Join("\n",e.Missing));
         }
         ImGui.EndCombo();
     }
@@ -1103,6 +1104,12 @@ void DrawEntrySelector()
     }
     ImGui.TextDisabled("把 .efx 文件拖进窗口即可打开");
     if(current?.Excluded is {} reason) ImGui.TextColored(new Vector4(1,.75f,.35f,1),"所选 entry 未显示："+reason);
+    var placeholders=scene.Entries.Concat(scene.Children).Where(e=>e.Shown && e.Missing.Count>0).ToArray();
+    if(placeholders.Length>0)
+    {
+        ImGui.TextColored(new Vector4(1,.75f,.35f,1),$"{placeholders.Length} 个 entry 缺资源，用黄白格子代替");
+        if(ImGui.IsItemHovered()) ImGui.SetTooltip(string.Join("\n",placeholders.Select(e=>$"{e.Label} {e.Name}: {string.Join(", ",e.Missing)}")));
+    }
     if(current?.Decal is {} decal)
     {
         var size=PreviewDecalRenderer.Footprint(decal,composition);

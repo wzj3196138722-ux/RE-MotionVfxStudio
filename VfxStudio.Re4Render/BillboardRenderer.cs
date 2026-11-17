@@ -346,7 +346,7 @@ public sealed unsafe class BillboardRenderer : IDisposable
             for (int i=0;i<textures.Length;i++)
             {
                 var t=document.Textures[i];
-                textures[i]=cache?.Texture(t) ?? GpuTexture.CreateFromTexBytes(gl,t.Bytes,t.Path+".143221013") ?? throw new NotSupportedException("Unsupported TEX: "+t.Path);
+                textures[i]=cache?.Texture(t) ?? BillboardGpuCache.Create(gl,t);
             }
             vao=gl.GenVertexArray();
             instances=gl.GenBuffer();
@@ -621,13 +621,18 @@ public sealed class BillboardGpuCache(GL gl) : IDisposable
     public Shader Shader => shader ??= new Shader(gl, BillboardRenderer.VertexSource, BillboardRenderer.FragmentSource);
     public int TextureCount => textures.Count;
 
+    /// <summary>A GPU texture for <paramref name="texture"/>: the RE4 .tex bytes, or the RGBA checker of a placeholder.</summary>
+    public static GpuTexture Create(GL gl, PreviewTexture texture) => texture.Placeholder
+        ? GpuTexture.CreateRgba(gl, PreviewTexture.CheckerSize, PreviewTexture.CheckerSize, texture.Bytes)
+        : GpuTexture.CreateFromTexBytes(gl, texture.Bytes, texture.Path + ".143221013") ?? throw new NotSupportedException("Unsupported TEX: " + texture.Path);
+
     public GpuTexture Texture(PreviewTexture texture)
     {
         if(textures.TryGetValue(texture.Source,out var hit)) return hit;
         if(failures.TryGetValue(texture.Source,out var known)) throw new NotSupportedException(known);
         try
         {
-            var created=GpuTexture.CreateFromTexBytes(gl,texture.Bytes,texture.Path+".143221013") ?? throw new NotSupportedException("Unsupported TEX: "+texture.Path);
+            var created=Create(gl,texture);
             textures[texture.Source]=created;
             return created;
         }

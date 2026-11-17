@@ -7,13 +7,36 @@ using System.Numerics;
 
 namespace VfxStudio.Re4Render;
 
-public sealed record PreviewTexture(string Path, string Source, byte[] Bytes);
+/// <param name="Placeholder">Not read from the game: <paramref name="Bytes"/> are raw RGBA8 pixels of a square
+/// checker that stands in for a missing resource (see <see cref="Missing"/>).</param>
+public sealed record PreviewTexture(string Path, string Source, byte[] Bytes, bool Placeholder = false)
+{
+    public const int CheckerSize = 64;
+    private static readonly byte[] checker = MakeChecker();
+    /// <summary>A dim yellow / white checker (8 x 8 cells) standing in for <paramref name="path"/>, which was not found.</summary>
+    public static PreviewTexture Missing(string path) => new(path, "占位贴图（找不到 " + path + "）", checker, true);
+    private static byte[] MakeChecker()
+    {
+        var pixels = new byte[CheckerSize * CheckerSize * 4];
+        for (int y = 0; y < CheckerSize; y++)
+            for (int x = 0; x < CheckerSize; x++)
+            {
+                bool light = (x / 8 + y / 8) % 2 == 0;
+                int o = (y * CheckerSize + x) * 4;
+                (pixels[o], pixels[o + 1], pixels[o + 2], pixels[o + 3]) = light ? ((byte)180, (byte)180, (byte)170, (byte)255) : ((byte)140, (byte)120, (byte)40, (byte)255);
+            }
+        return pixels;
+    }
+}
 public sealed record UvFrame(Vector4 Rect, int Texture);
 /// <summary>Drawable Type attributes. The value is the vertex shader's typeKind.</summary>
 public enum PreviewTypeKind { Billboard3D = 0, Polygon = 1, Billboard2D = 2, RibbonFollow = 3, RibbonLength = 4, RibbonFixEnd = 5, PolygonTrail = 6 }
+/// <param name="Missing">Resources (.uvs, textures) that were not found and are drawn with the checker placeholder.</param>
 public sealed record PreviewDocument(string Path, int Offset, EFXEntry Entry, string UvsPath, uint UvFlags,
-    IReadOnlyList<UvFrame[]> Sequences, IReadOnlyList<PreviewTexture> Textures)
+    IReadOnlyList<UvFrame[]> Sequences, IReadOnlyList<PreviewTexture> Textures, IReadOnlyList<string>? Missing = null)
 {
+    /// <summary>Frames per sequence assumed when the .uvs is missing (its real count is unknown).</summary>
+    public const int PlaceholderFrames = 64;
     public EFXAttributeTypeBillboard3D Billboard => Entry.Attributes.OfType<EFXAttributeTypeBillboard3D>().Single();
     public PreviewTypeKind Kind => KindOf(Entry) ?? throw new NotSupportedException("Unsupported Type attribute");
     /// <summary>The Type attribute's Flags (low 4 bits = BlendType).</summary>
@@ -91,16 +114,48 @@ public sealed record PreviewDocument(string Path, int Offset, EFXEntry Entry, st
         var uv = entry.Attributes.OfType<EFXAttributeUVSequence>().SingleOrDefault();
         if (string.IsNullOrWhiteSpace(uv?.UVSPath))
             throw new NotSupportedException("This entry has no UVSPath; P1 requires an explicit texture source");
-        var data = source.Read(uv.UVSPath, ".7");
-        using var memory = new MemoryStream(data.Bytes, writable:false);
-        var uvs = new UvsFile(new FileHandler(memory, uv.UVSPath + ".7"));
-        if (!uvs.Read() || uvs.Sequences.Count == 0 || uvs.Sequences.Count > 256) throw new InvalidDataException("Invalid UVS sequences");
-        var textures = uvs.Textures.Select(t => source.Read(t.path,".143221013")).ToArray();
-        var sequences = uvs.Sequences.Select(s => s.patterns.Select(p => new UvFrame(new Vector4(p.left,p.top,p.right,p.bottom),p.textureIndex)).ToArray()).ToArray();
+        // A missing .uvs or texture is drawn with a checker placeholder, so the entry's size and motion stay visible
+        // and the gap is obvious (listed in Missing).
+        var missing = new List<string>();
+        PreviewTexture[] textures; UvFrame[][] sequences;
+        PreviewTexture? data = null;
+        try { data = source.Read(uv.UVSPath, ".7"); }
+        catch (FileNotFoundException) { missing.Add(uv.UVSPath + ".7"); }
+        if (data == null)
+        {
+            // Unknown frame count: as many sequences as SequenceNo can pick, PlaceholderFrames full frames each.
+            int count = Math.Clamp(Math.Max(uv.SequenceNo.maxExclusive, 1), 1, 256);
+            textures = [PreviewTexture.Missing(uv.UVSPath)];
+            sequences = Enumerable.Range(0, count).Select(_ => Enumerable.Repeat(new UvFrame(new Vector4(0, 0, 1, 1), 0), PlaceholderFrames).ToArray()).ToArray();
+        }
+        else
+        {
+            using var memory = new MemoryStream(data.Bytes, writable:false);
+            var uvs = new UvsFile(new FileHandler(memory, uv.UVSPath + ".7"));
+            if (!uvs.Read() || uvs.Sequences.Count == 0 || uvs.Sequences.Count > 256) throw new InvalidDataException("Invalid UVS sequences");
+            textures = uvs.Textures.Select(t =>
+            {
+                try { return source.Read(t.path, ".143221013"); }
+                catch (FileNotFoundException) { missing.Add(t.path + ".143221013"); return PreviewTexture.Missing(t.path); }
+            }).ToArray();
+            sequences = uvs.Sequences.Select(s => s.patterns.Select(p => new UvFrame(new Vector4(p.left,p.top,p.right,p.bottom),p.textureIndex)).ToArray()).ToArray();
+        }
         if (sequences.Any(s => s.Length is < 1 or > 256 || s.Any(p => p.Texture < 0 || p.Texture >= textures.Length ||
             !float.IsFinite(p.Rect.X) || !float.IsFinite(p.Rect.Y) || !float.IsFinite(p.Rect.Z) || !float.IsFinite(p.Rect.W))))
             throw new InvalidDataException("Invalid UV rectangles or texture indices");
-        return new(System.IO.Path.GetFullPath(path),offset,entry,uv.UVSPath,uv.Flags,sequences,textures);
+        return new(System.IO.Path.GetFullPath(path),offset,entry,uv.UVSPath,uv.Flags,sequences,textures,missing.Count > 0 ? missing : null);
+    }
+
+    /// <summary>The frame rectangles of a .uvs (no textures): a decal carrier's UVSequence picks the decal's cell.
+    /// Throws FileNotFoundException when the .uvs is missing.</summary>
+    public static UvFrame[][] ReadUvRects(string uvsPath, Re4ResourceSource source)
+    {
+        using var memory = new MemoryStream(source.Read(uvsPath, ".7").Bytes, writable:false);
+        var uvs = new UvsFile(new FileHandler(memory, uvsPath + ".7"));
+        if (!uvs.Read() || uvs.Sequences.Count == 0 || uvs.Sequences.Count > 256) throw new InvalidDataException("Invalid UVS sequences: " + uvsPath);
+        var sequences = uvs.Sequences.Select(s => s.patterns.Select(p => new UvFrame(new Vector4(p.left,p.top,p.right,p.bottom),p.textureIndex)).ToArray()).ToArray();
+        if (sequences.Any(s => s.Length is < 1 or > 256)) throw new InvalidDataException("Invalid UVS sequence sizes: " + uvsPath);
+        return sequences;
     }
 }
 

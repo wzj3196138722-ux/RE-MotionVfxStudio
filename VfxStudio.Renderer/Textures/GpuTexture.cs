@@ -376,6 +376,25 @@ public class GpuTexture : IDisposable
         return gpuTex;
     }
 
+    /// <summary>An uncompressed RGBA8 texture from <paramref name="pixels"/> (width x height x 4 bytes), linear,
+    /// repeating, no mips.</summary>
+    public static GpuTexture CreateRgba(GL gl, int width, int height, byte[] pixels)
+    {
+        var gpuTex = new GpuTexture(gl) { Width = width, Height = height, IsCompressed = false };
+        gl.BindTexture(TextureTarget.Texture2D, gpuTex.Handle);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)GLEnum.Repeat);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)GLEnum.Repeat);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)GLEnum.Linear);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)GLEnum.Nearest);
+        unsafe
+        {
+            fixed (byte* ptr = pixels)
+                gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba8, (uint)width, (uint)height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, ptr);
+        }
+        gl.BindTexture(TextureTarget.Texture2D, 0);
+        return gpuTex;
+    }
+
     public static GpuTexture CreateSolidColor(GL gl, byte r, byte g, byte b, byte a)
     {
         var gpuTex = new GpuTexture(gl)

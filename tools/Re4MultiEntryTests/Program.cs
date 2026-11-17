@@ -509,7 +509,7 @@ using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == deadSc
         using var f = await client.FrameAsync(tick);
         var placed = PreviewDecalRenderer.Place(decalScene, f, config);
         most = Math.Max(most, placed.Count);
-        foreach (var (table, center, size, _, _) in placed)
+        foreach (var (table, center, size, _, _, _) in placed)
         {
             flat &= center.Y == 0.002f;
             var d = decalScene.Shown[table].Decal!;
@@ -542,7 +542,58 @@ using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == deadSc
     Directory.Delete(docRoot, true);
 }
 
-// 15. Optional: large official files.
+// 15. Missing resources: an entry whose .uvs does not exist is still simulated and drawn, with the checker placeholder
+// (PreviewDocument.PlaceholderFrames frames per sequence) and the missing path listed.
+{
+    string copy = Path.Combine(repo, "test-output", "missing-uvs-" + Guid.NewGuid().ToString("N")[..8] + ".efx.3539837");
+    var source = new ReeLib.EfxFile(new ReeLib.FileHandler(new MemoryStream(File.ReadAllBytes(bb2.Path)), bb2.Path) { FileVersion = (int)ReeLib.Efx.EfxVersion.RE4 });
+    source.Read();
+    var uv = source.Entries[13].Attributes.OfType<ReeLib.Efx.Structs.Basic.EFXAttributeUVSequence>().Single();
+    uv.UVSPath = "_Chainsaw/VFX/Dimcirui/DoesNotExist/missing.uvs";
+    using (var written = new MemoryStream())
+    {
+        source.WriteTo(new ReeLib.FileHandler(written, copy) { FileVersion = (int)ReeLib.Efx.EfxVersion.RE4 }, false);   // memory, then the test copy
+        File.WriteAllBytes(copy, written.ToArray());
+    }
+    var missingScene = await PreviewSceneLoader.LoadAsync(client, copy, resources, new Dictionary<int, string>());
+    var e13 = missingScene.Entries[13];
+    int alive = 0;
+    for (int tick = 1; tick <= 60; tick++) { using var f = await client.FrameAsync(tick); alive = Math.Max(alive, f.EntryStates![missingScene.TableOf(13)].Count); }
+    Check(e13 is { Shown: true, Document.Textures: [{ Placeholder: true }] } && e13.Missing.SequenceEqual(["_Chainsaw/VFX/Dimcirui/DoesNotExist/missing.uvs.7"]) &&
+          e13.Document!.Sequences.All(s => s.Length == PreviewDocument.PlaceholderFrames) && alive > 0,
+        "missing .uvs: the entry is simulated and drawn with the checker placeholder, the missing path listed", $"{string.Join(", ", e13.Missing)}; alive {alive}; {e13.Excluded}");
+    File.Delete(copy);
+}
+
+// 16. Flipbook decal: with EnableUVRect the decal shows its carrier particle's UVSequence cell. Typho's kuo decal carrier
+// (TypeNoDraw) has kuo's UVSequence (tyl_kuo.uvs, 6 x 6) and the whole sheet as its texture: the worker plays that sequence
+// on the NoDraw carrier, and the decal's cell follows kuo's frame tick by tick. Skipped when the release folder is absent.
+string typho = @"E:\Data\Modding\REE-Releases\RE4\VFX\Typho Style Explosion\natives\STM\_Chainsaw\VFX\EffectEditor\EFD_Weapon\efd_wp5400\efd_0015_wp5400_grenade_explosion_0000s.efx.3539837";
+if (File.Exists(typho))
+{
+    using var own = new Re4ResourceSource(game, Path.Combine(game, "RE4_EXTRACT"));
+    own.UseDocument(typho);
+    var flip = await PreviewSceneLoader.LoadAsync(client, typho, own, new Dictionary<int, string>());
+    int carrier = flip.Shown.ToList().FindIndex(e => e.Name == "decal_copy"), kuo = flip.Shown.ToList().FindIndex(e => e.Name == "kuo");
+    var d = carrier < 0 ? null : flip.Shown[carrier].Decal;
+    int same = 0, compared = 0; var cells = new HashSet<System.Numerics.Vector4>();
+    var config = new CompositionConfig();
+    for (int tick = 1; tick <= 45; tick++)
+    {
+        using var f = await client.FrameAsync(tick);
+        var placed = PreviewDecalRenderer.Place(flip, f, config).Where(p => p.Table == carrier).ToList();
+        var ks = f.EntryStates![kuo];
+        if (placed.Count != 1 || ks.Count == 0) continue;
+        var kuoCell = d!.UvOf(f.Particles[ks.First].Flags);
+        compared++; if (placed[0].Uv == kuoCell) same++;
+        cells.Add(placed[0].Uv);
+    }
+    Check(d is { UvRect: true, UvsMissing: null, Sequences: [{ Length: 36 }] } && flip.Shown[carrier].Logic && compared >= 40 && same == compared && cells.Count >= 30,
+        "flipbook decal: EnableUVRect + the carrier's UVSequence give the decal the carrier's cell, in step with kuo's frame",
+        $"{d?.UvsPath}; {same}/{compared} ticks match kuo; {cells.Count} distinct cells");
+}
+
+// 17. Optional: large official files.
 if (args.Contains("--corpus"))
 {
     var corpus = new[]

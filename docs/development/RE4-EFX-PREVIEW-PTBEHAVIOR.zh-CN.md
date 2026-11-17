@@ -68,8 +68,12 @@ RE4 全部 3946 个文件里有 2193 个 PtBehavior（933 个文件），每个 
 - 没做：MSK2 遮罩（血迹的形状和扩散多半靠它，所以现在边缘是方的）、法线、自发光、AlphaMaskRange 和 Alpha0/1 的时间变化、ProjectionShape 和投射方向、预制体里组件自己的参数。贴花画在完整分辨率的场景里、粒子之前，不写深度。
 - Billboard3D 载体本身读不出贴图来源时（RE4 的贴花载体常常没有 UVSequence，例如手雷爆炸的 [50] デカール、hold_dead_0000 的三个 entry），按逻辑 entry 模拟：粒子不画，贴花照常放。
 - MCP `composition` 有 `decals`、`decalScale`、`decalScaleXYRandom`。
+- 贴花随载体年龄放大：OBBScalarAdd / OBBScalarCoef 和 ScaleAnim 的规则一样（第 n 步加 add × coefⁿ，加到收敛为止），每个 60 Hz tick 约 2 步（游戏里和同参数 ScaleAnim 的 Polygon 并排对照，2026-11-16）。
+- 贴花翻页：EnableUVRect 打开、载体 entry 带 UVSequence 时，贴花只显示载体粒子当前所在的格子，所以序列帧贴图会在地上播放。游戏里验证过（2026-11-16）：Typho 的 kuo 贴花载体改成 TypeNoDraw，挂上 kuo 自己的 UVSequence（tyl_kuo.uvs，6 × 6），预制体用整张序列帧贴图，地上的贴花跟着 kuo 一起翻页。荒野有 447 个贴花载体也是 EnableUVRect + UVSequence。预览读载体的 .uvs，把帧数交给原生模拟（NoDraw 载体同样会播放 UVSequence），按粒子的序列号和帧号取格子。UVOffset / UVScale 没有用上：RE4 里只有两个足迹文件用到它们，载体也没有 UVSequence。
 
-验证：`tools/Re4MultiEntryTests` 第 13 节，crushe_0000 的两个 NoDraw 贴花载体被模拟、贴图读到，第 60 帧内地面上最多同时有 6 个贴花，位置和尺寸符合上面的规则。窗口截图（俯视，第 40 帧）看到血迹贴花铺在地面上。
+验证：
+- `tools/Re4MultiEntryTests` 第 13 节：crushe_0000 的两个 NoDraw 贴花载体被模拟、贴图读到，第 60 帧内地面上最多同时有 6 个贴花，位置和尺寸符合上面的规则。窗口截图（俯视，第 40 帧）看到血迹贴花铺在地面上。
+- 第 16 节：Typho 发布版的 kuo 贴花第 1–45 帧都和 kuo 当帧的格子一致，共经过 34 个不同格子。窗口单独显示这个贴花时，地上是 kuo 的单格冲击环，逐帧变大，不是 6 × 6 的整张图。
 - 节点图里的行显示脚本类短名（`PtBehavior [EffectRadialBlur]`），悬停显示完整类名和参数列表。
 - 顺带修正：`EFXAttribute.ExpectedByteSize`（读取时记录的字节数，不写回文件）以前在所有属性上都显示为可编辑，现在只读。
 

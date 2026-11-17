@@ -21,6 +21,9 @@ public sealed record PreviewSceneEntry(int Position, int Index, string Name, str
     bool Logic = false, int Offset = 0, IReadOnlyList<int>? Actions = null, int? Action = null, int? Child = null, PreviewDecal? Decal = null)
 {
     public bool Shown => (Document != null || Logic) && Excluded == null;
+    /// <summary>Resources that were not found and are drawn with the checker placeholder (billboard and decal).</summary>
+    public IReadOnlyList<string> Missing => (Document?.Missing ?? []).Concat(Decal?.Albedo is { Placeholder: true } a ? [a.Path] : [])
+        .Concat(Decal?.UvsMissing is { } u ? [u] : []).ToArray();
     public bool Embedded => Action != null;
     /// <summary>[position] for top-level entries, [A action.child] for embedded ones.</summary>
     public string Label => Embedded ? $"[A{Action}.{Child}]" : $"[{Position}]";
@@ -31,9 +34,55 @@ public sealed record PreviewSceneEntry(int Position, int Index, string Name, str
 /// <param name="Albedo">The prefab's *_ALBA texture (RGB colour, A coverage), or null when it could not be read.</param>
 /// <param name="TextureError">Why <paramref name="Albedo"/> is null.</param>
 /// <param name="Color">BaseColorMod as 0..1 RGBA.</param>
+/// <param name="ObbAdd">OBBScalarAdd.X: added to the scale each step (step n adds ObbAdd x ObbCoef^n), like ScaleAnim; 0 = no growth.</param>
+/// <param name="ObbCoef">OBBScalarCoef.X.</param>
+/// <param name="UvRect">EnableUVRect is on.</param>
+/// <param name="UvsPath">With <paramref name="UvRect"/>: the carrier's UVSequence .uvs. The decal then shows the carrier
+/// particle's current cell of the prefab's texture, so a flipbook sheet plays on the ground (checked in game 2026-11-16:
+/// Typho's kuo sheet on a TypeNoDraw carrier with kuo's UVSequence). Wilds sets EnableUVRect on decal carriers with a
+/// UVSequence too. UVOffset / UVScale are not applied (RE4 uses them only in two footprint files, without a UVSequence).</param>
+/// <param name="Sequences">Frame rectangles of <paramref name="UvsPath"/> (placeholder full frames when it is missing).</param>
+/// <param name="UvsMissing">The .uvs path when it was not found.</param>
 public sealed record PreviewDecal(string Prefab, PreviewTexture? Albedo, string? TextureError, Vector3 Extent, Vector2 ScaleXY,
-    float RollRange, float SearchDistance, Vector4 Color)
+    float RollRange, float SearchDistance, Vector4 Color, float ObbAdd = 0, float ObbCoef = 1, bool UvRect = false,
+    string? UvsPath = null, IReadOnlyList<UvFrame[]>? Sequences = null, string? UvsMissing = null)
 {
+    /// <summary>Texture rectangle (left, top, right, bottom) of a carrier particle's decal: its current UVSequence cell
+    /// (sequence in Flags bits 10-17, frame in 18-25, as for billboards), or the whole texture.</summary>
+    public Vector4 UvOf(uint particleFlags)
+    {
+        if (Sequences is not { Count: > 0 } sequences) return new(0, 0, 1, 1);
+        var sequence = sequences[Math.Min((int)((particleFlags >> 10) & 255), sequences.Count - 1)];
+        return sequence[Math.Min((int)((particleFlags >> 18) & 255), sequence.Length - 1)].Rect;
+    }
+
+    /// <summary>With EnableUVRect, the carrier entry's UVSequence picks the decal's cell: reads its .uvs.</summary>
+    public PreviewDecal WithCarrierUvs(EFXEntry carrier, Re4ResourceSource resources)
+    {
+        if (!UvRect || carrier.Attributes.OfType<EFXAttributeUVSequence>().SingleOrDefault() is not { UVSPath: { Length: > 0 } path } uv) return this;
+        try { return this with { UvsPath = path, Sequences = PreviewDocument.ReadUvRects(path, resources) }; }
+        catch (FileNotFoundException)
+        {
+            int count = Math.Clamp(Math.Max(uv.SequenceNo.maxExclusive, 1), 1, 256);
+            var full = Enumerable.Range(0, count).Select(_ => Enumerable.Repeat(new UvFrame(new Vector4(0, 0, 1, 1), 0), PreviewDocument.PlaceholderFrames).ToArray()).ToArray();
+            return this with { UvsPath = path, Sequences = full, UvsMissing = path + ".7" };
+        }
+    }
+
+    /// <summary>Scale gained after <paramref name="steps"/> OBBScalar steps: sum of ObbAdd x ObbCoef^k, k = 1..steps
+    /// (the ScaleAnim model; the first step is already decayed once). Measured in game (2026-11-16): ScaleXY 0.5, add 0.05,
+    /// coef 0.9 stops at 0.95; next to a Polygon with the same numbers as ScaleAnim the decal grows about twice as fast
+    /// (<see cref="StepsPerTick"/>) and reaches the same size; the decal ends with its carrier particle.</summary>
+    /// <summary>OBBScalar steps per 60 Hz tick of the carrier's age, as measured in game (about 1.9 from one frame; 2 fits
+    /// every result so far).</summary>
+    public const float StepsPerTick = 2;
+
+    public float ObbGrowth(float steps)
+    {
+        if (ObbAdd == 0 || steps <= 0) return 0;
+        return MathF.Abs(ObbCoef - 1) < 1e-6f ? ObbAdd * steps : ObbAdd * ObbCoef * (1 - MathF.Pow(ObbCoef, steps)) / (1 - ObbCoef);
+    }
+
     /// <summary>Reads the EffectDecal parameters of <paramref name="behavior"/>, or null when it is another script.</summary>
     public static PreviewDecal? From(ReeLib.Efx.Structs.Pt.EFXAttributePtBehavior behavior, Re4ResourceSource resources)
     {
@@ -48,8 +97,16 @@ public sealed record PreviewDecal(string Prefab, PreviewTexture? Albedo, string?
         var color = c is { } k ? new Vector4(k.R, k.G, k.B, k.A) / 255f : Vector4.One;
         PreviewTexture? albedo = null; string? error = null;
         try { albedo = AlbedoOf(prefab, resources); }
-        catch (Exception ex) when (ex is FileNotFoundException or InvalidDataException or IOException) { error = ex.Message; }
-        return new(prefab, albedo, error, extent, scale, roll, search, color);
+        catch (Exception ex) when (ex is FileNotFoundException or InvalidDataException or IOException)
+        {
+            // Drawn with the checker placeholder so the decal's size stays visible.
+            error = ex.Message + "（用占位贴图代替）";
+            albedo = PreviewTexture.Missing(prefab);
+        }
+        var obbAdd = (Value("OBBScalarAdd") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableFloat2)?.Vec.X ?? 0;
+        var obbCoef = (Value("OBBScalarCoef") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableFloat2)?.Vec.X ?? 1;
+        bool uvRect = behavior.properties.FirstOrDefault(p => p.behaviorProperty == "EnableUVRect")?.ValueText() is "1" or "True" or "true";
+        return new(prefab, albedo, error, extent, scale, roll, search, color, obbAdd, obbCoef, uvRect);
     }
 
     /// <summary>A decal prefab names its textures directly (no material file): the *_ALBA one is the colour.</summary>
@@ -112,13 +169,19 @@ public sealed class PreviewScene
     {
         if (Shown.Count == 0) throw new NotSupportedException("此文件没有可预览的 entry。" + string.Join("；", Entries.Where(e => e.Excluded != null).Take(3).Select(e => $"[{e.Position}] {e.Excluded}")));
         var uvs = new Dictionary<string, int[]>(StringComparer.Ordinal);
+        void Add(string? path, IReadOnlyList<UvFrame[]>? sequences)
+        {
+            if (string.IsNullOrEmpty(path) || sequences == null) return;
+            var counts = sequences.Select(s => s.Length).ToArray();
+            if (uvs.TryGetValue(path, out var existing) && !existing.SequenceEqual(counts))
+                throw new InvalidDataException("同一 UVS 资源在不同 entry 中读出的帧数不同：" + path);
+            uvs[path] = counts;
+        }
         foreach (var entry in Shown)
         {
-            if (entry.Document is not { } document || string.IsNullOrEmpty(document.UvsPath)) continue;
-            var counts = document.Sequences.Select(s => s.Length).ToArray();
-            if (uvs.TryGetValue(document.UvsPath, out var existing) && !existing.SequenceEqual(counts))
-                throw new InvalidDataException("同一 UVS 资源在不同 entry 中读出的帧数不同：" + document.UvsPath);
-            uvs[document.UvsPath] = counts;
+            Add(entry.Document?.UvsPath, entry.Document?.Sequences);
+            // A decal carrier's UVSequence (EnableUVRect): the worker plays it like a billboard's, also on NoDraw carriers.
+            Add(entry.Decal?.UvsPath, entry.Decal?.Sequences);
         }
         return new
         {
@@ -164,7 +227,8 @@ public sealed class PreviewScene
             string? reason = null; PreviewDocument? document = null;
             var actions = entry.Attributes.OfType<ReeLib.Efx.Structs.Pt.EFXAttributePtLife>().Select(l => l.ActionIndex).Where(playable.ContainsKey).Distinct().ToArray();
             bool logic = false;
-            var decal = entry.Attributes.OfType<ReeLib.Efx.Structs.Pt.EFXAttributePtBehavior>().Select(b => PreviewDecal.From(b, source)).FirstOrDefault(d => d != null);
+            var decal = entry.Attributes.OfType<ReeLib.Efx.Structs.Pt.EFXAttributePtBehavior>().Select(b => PreviewDecal.From(b, source)).FirstOrDefault(d => d != null)
+                ?.WithCarrierUvs(entry, source);
             if (excluded != null && excluded.TryGetValue(position, out var known)) reason = known;
             else if (entry.TypeAttribute == null) reason = "没有 Type 属性，不产生粒子。";
             else if (entry.TypeAttribute is EFXAttributeTypeNoDraw && (actions.Length > 0 || decal != null))

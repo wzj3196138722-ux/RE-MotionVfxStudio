@@ -163,7 +163,8 @@ internal static class PreviewControlReports
     {
         ["position"] = e.Position, ["index"] = e.Index, ["name"] = e.Name, ["type"] = e.Type,
         ["shown"] = e.Shown, ["selected"] = e.Position == selected, ["excluded"] = e.Excluded,
-        ["logicOnly"] = e.Logic ? true : null, ["firesActions"] = e.Actions == null ? null : new JsonArray(e.Actions.Select(a => (JsonNode?)a).ToArray())
+        ["logicOnly"] = e.Logic ? true : null, ["firesActions"] = e.Actions == null ? null : new JsonArray(e.Actions.Select(a => (JsonNode?)a).ToArray()),
+        ["missingResources"] = e.Missing.Count == 0 ? null : new JsonArray(e.Missing.Select(m => (JsonNode?)m).ToArray())
     }).ToArray());
 
     /// <summary>Entries embedded in child Actions: which Action plays them and whether the preview runs them.</summary>

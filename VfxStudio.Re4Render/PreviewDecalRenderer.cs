@@ -27,7 +27,7 @@ public sealed class PreviewDecalRenderer : IDisposable
         for (int i = 0; i < scene.Shown.Count; i++)
             if (scene.Shown[i].Decal is { Albedo: { } albedo } decal)
             {
-                var texture = cache?.Texture(albedo) ?? GpuTexture.CreateFromTexBytes(gl, albedo.Bytes, albedo.Path + ".143221013");
+                var texture = cache?.Texture(albedo) ?? BillboardGpuCache.Create(gl, albedo);
                 if (texture != null) decals.Add((i, decal, texture, cache == null));
             }
         shader = new Shader(gl, """
@@ -67,18 +67,21 @@ public sealed class PreviewDecalRenderer : IDisposable
     /// <summary>Full width and depth in metres of one decal with the given random draw <paramref name="u"/> (0..1):
     /// 2 × Extent.X / Extent.Z (Extent is a half size, measured in game: Extent 1, scale 1 covers twice a 1 m Polygon)
     /// times ScaleXY (as a random scale ScaleXY.X + u·ScaleXY.Y, or as width / depth scales), times the calibration factor.</summary>
-    public static Vector2 Footprint(PreviewDecal decal, CompositionConfig config, float u = 0)
+    /// <param name="age">The carrier particle's age in 60 Hz ticks: OBBScalarAdd / Coef grow the scale with it.</param>
+    public static Vector2 Footprint(PreviewDecal decal, CompositionConfig config, float u = 0, float age = 0)
     {
         var scale = config.DecalScaleXYRandom ? new Vector2(decal.ScaleXY.X + u * decal.ScaleXY.Y) : decal.ScaleXY;
+        scale += new Vector2(decal.ObbGrowth(MathF.Floor(age) * PreviewDecal.StepsPerTick));
         return new Vector2(decal.Extent.X, decal.Extent.Z) * 2 * scale * config.DecalScale;
     }
 
     /// <summary>Decals of <paramref name="frame"/>: one per live carrier particle between the ground and
-    /// SearchTerrainDistance above it, for every scene entry with a decal (texture or not).</summary>
-    public static IReadOnlyList<(int Table, Vector3 Center, Vector2 Size, float Roll, Vector4 Color)> Place(PreviewScene scene, PreviewFrame frame,
+    /// SearchTerrainDistance above it, for every scene entry with a decal (texture or not). Uv is the texture rectangle
+    /// (left, top, right, bottom): the carrier particle's UVSequence cell with EnableUVRect, else the whole texture.</summary>
+    public static IReadOnlyList<(int Table, Vector3 Center, Vector2 Size, float Roll, Vector4 Color, Vector4 Uv)> Place(PreviewScene scene, PreviewFrame frame,
         CompositionConfig config, int? soloTable = null)
     {
-        var placed = new List<(int, Vector3, Vector2, float, Vector4)>();
+        var placed = new List<(int, Vector3, Vector2, float, Vector4, Vector4)>();
         if (frame.EntryStates == null) return placed;
         for (int table = 0; table < scene.Shown.Count && table < frame.EntryStates.Count; table++)
         {
@@ -91,8 +94,8 @@ public sealed class PreviewDecalRenderer : IDisposable
                 // Per-particle draws from its id, so a decal keeps its roll and size while the particle lives.
                 float u = Hash(p.Id, 1), v = Hash(p.Id, 2);
                 float roll = (v * 2 - 1) * decal.RollRange * MathF.PI / 180;
-                placed.Add((table, new Vector3(p.Position.X, 0.002f, p.Position.Z), Footprint(decal, config, u), roll,
-                    decal.Color with { W = decal.Color.W * p.LifeAlpha / 255f }));
+                placed.Add((table, new Vector3(p.Position.X, 0.002f, p.Position.Z), Footprint(decal, config, u, p.Age), roll,
+                    decal.Color with { W = decal.Color.W * p.LifeAlpha / 255f }, decal.UvOf(p.Flags)));
             }
         }
         return placed;
@@ -113,14 +116,15 @@ public sealed class PreviewDecalRenderer : IDisposable
         foreach (var group in placed.GroupBy(d => d.Table))
         {
             int n = 0;
-            foreach (var (_, center, size, roll, color) in group)
+            foreach (var (_, center, size, roll, color, rect) in group)
             {
                 var x = new Vector3(MathF.Cos(roll), 0, MathF.Sin(roll)) * size.X / 2;
                 var z = new Vector3(-MathF.Sin(roll), 0, MathF.Cos(roll)) * size.Y / 2;
                 (Vector3, Vector2)[] corners = [(center - x - z, new(0, 1)), (center + x - z, new(1, 1)), (center + x + z, new(1, 0)),
                     (center - x - z, new(0, 1)), (center + x + z, new(1, 0)), (center - x + z, new(0, 0))];
-                foreach (var (position, uv) in corners)
+                foreach (var (position, unit) in corners)
                 {
+                    var uv = new Vector2(rect.X + unit.X * (rect.Z - rect.X), rect.Y + unit.Y * (rect.W - rect.Y));
                     int o = n++ * Floats;
                     vertices[o] = position.X; vertices[o + 1] = position.Y; vertices[o + 2] = position.Z;
                     vertices[o + 3] = uv.X; vertices[o + 4] = uv.Y;

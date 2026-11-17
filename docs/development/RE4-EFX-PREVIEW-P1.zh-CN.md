@@ -13,7 +13,7 @@ dotnet run -c Release --project VfxStudio.Re4Preview -- --fixture bb2
 dotnet run -c Release --project VfxStudio.Re4Preview -- --fixture bb
 ```
 
-`--exe` / `RE4_EXE` 指定锁定版本的 re4.exe，`--python` 指定 64 位 Python。自选 entry 使用 `--efx <文件> --offset <十六进制字节偏移>`。`--resources` 可指定解包根目录、natives 目录或 natives/stm 目录。缺失资源时显示错误，不用默认白图伪装成已加载。
+`--exe` / `RE4_EXE` 指定锁定版本的 re4.exe，`--python` 指定 64 位 Python。自选 entry 使用 `--efx <文件> --offset <十六进制字节偏移>`。`--resources` 可指定解包根目录、natives 目录或 natives/stm 目录。缺失资源时用黄白格子占位贴图代替并照常模拟和绘制，这样仍能看到 entry 的大小和运动；缺的路径列在 entry 选择框的悬停提示、主面板和 MCP `status.preview.entries[].missingResources` 里。.uvs 缺失时帧数未知，按每个序列 64 帧、整张贴图一帧处理（序列数取 UVSequence 的 SequenceNo 上限），所以"播完即死"的寿命只是近似。贴花的预制体或贴图缺失时同样画格子。没有 UVSPath 的 entry（例如贴花载体）不画。
 
 资源按以下顺序查找：打开的文件自己所在的 natives 根目录（从文件往上找名为 natives 的文件夹，最多 16 层；用于发布目录或 mod 里自带的贴图和 .uvs）、`--resources` 指定的目录、游戏目录下的松散文件（`<游戏>/natives/STM`，mod 装在这里，游戏加载时也优先于 pak）、解包目录，找不到时按补丁顺序从游戏目录中的 `re_chunk_000*.pak` 读取；只读目录表和所需文件，不解包整套游戏，也不修改游戏。RE4 使用 `.uvs.7` 和 `.tex.143221013`。两个样本的实际数据为：
 
