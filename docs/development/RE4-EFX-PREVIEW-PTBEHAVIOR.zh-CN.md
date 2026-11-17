@@ -24,20 +24,28 @@ RE4 全部 3946 个文件里有 2193 个 PtBehavior（933 个文件），每个 
 
 ## 参数编码
 
-每个参数：`varSize`、`dataType`、数据头（`unkn`、`size`、两个 short，第二个是参数序号）、`size` 字节的值、参数名。`varSize = 名字长度 + 17 + size`。按语料确认的类型：
+每个参数：`varSize`、`dataType`、数据头（`unkn`、`size`、两个 short，第二个是参数序号）、`size` 字节的值、参数名。`varSize = 名字长度 + 17 + size`。
 
-| dataType | 长度 | 内容 |
-|---|---|---|
-| 4 Uint | 4 | 无符号整数（TriggerId 是哈希） |
-| 9 Float / 19 Float2 / 11 Float3 | 4 / 8 / 12 | 浮点 |
-| 10 Range | 8 | 两个浮点 min、max（EffectDecal Alpha0 = 0 ~ 0.1） |
-| 14 Int / 18 Enum | 4 | 整数 |
-| 15 Color | 4 | RGBA8 |
-| 16 WstringName / 17 Prefabpath / 21 Wstring2 | 可变 | UTF-16 字符串 |
-| 3、22 | 4 | 整数（RadialBlur Priority = 1；LensFlare AxisType、RotationOrder，像枚举） |
-| 20 | 8 | 只有 ShakeCamera Period 一处（1, 0），保留原始字节 |
+类型名取自参数所设字段在引擎里的类型：语料里每个参数都按"脚本类名 + 参数名"在 re4.exe 内嵌的类型库里找到了对应字段，每个 dataType 只对应一种字段类型。
 
-库里新增了 Uint、Range 的解析，Wstring2 用字符串类，3 和 22 按 Uint 读。全部 933 个文件在内存里写回与原文件逐字节相同。
+| dataType | 名称 | 引擎类型 | 长度 | 例子 |
+|---|---|---|---|---|
+| 3 | Int | System.Int32 | 4 | RadialBlur Priority |
+| 4 | Uint | System.UInt32 | 4 | TriggerId（哈希） |
+| 9 | Float | System.Single | 4 | |
+| 10 | Vec2 | via.vec2 (x, y) | 8 | EffectDecal UVOffset、UVScale、Alpha0；不是随机范围 |
+| 11 | Vec3 | via.vec3 | 12 | Extent |
+| 14 | Bool | System.Boolean | 4 | 存成 0 / 1 |
+| 15 | Color | via.Color | 4 | RGBA8 |
+| 16 | String | System.String | 可变 | UTF-16 |
+| 17 | Prefab | via.Prefab | 可变 | UTF-16 路径 |
+| 18 | Enum | 脚本自己的枚举 | 4 | DecalDirection、Priority |
+| 19 | Range | via.Range (s, r) | 8 | ScaleXY、OBBScalarAdd、PyramidAngle |
+| 20 | RangeI | via.RangeI (s, r) | 8 | 只有 ShakeCamera Period 一处 |
+| 21 | Texture | via.render.TextureResourceHolder | 可变 | UTF-16 路径（FlowTexture） |
+| 22 | NativeEnum | 引擎枚举 | 4 | LensFlare AxisType、RotationOrder |
+
+全部 933 个文件在内存里写回与原文件逐字节相同。
 
 ## 编辑
 
@@ -54,7 +62,7 @@ RE4 全部 3946 个文件里有 2193 个 PtBehavior（933 个文件），每个 
 - 从属性目录添加 PtBehavior（拖到面板、节点图或双击）时先选脚本类，参数按模板填入。
 - 文件菜单"新建脚本载体 entry"按 RE4 的常见载体新建：EffectDecal 是 Transform3D、ParentOptions、Spawn、TypeNoDraw、Life、PtBehavior（RE4 里 324 个顶层贴花 entry 是这样），其他属性字段取各类型的默认值。新 entry 成为编辑对象。
 - 后台 `add_attribute` / `add_entry` 的属性项可带 `behavior: {class, parameters: [{name, type, value}]}`；MCP 的 `add_attribute` 有 `script`，`add_entry` 可以用 `script` 代替 `type` 新建载体。
-- 参数由 `PtBehaviorVariable.Create` 按文本生成（数据头：Float2 和类型 20 的 unkn 为 2，其余为 1，然后是 -1 和参数序号）。把语料里全部 2193 个 PtBehavior 的参数按各自的文本重建，933 个文件写出与原文件逐字节相同。
+- 参数由 `PtBehaviorVariable.Create` 按文本生成（数据头：Range 和 RangeI 的 unkn 为 2，其余为 1，然后是 -1 和参数序号）。把语料里全部 2193 个 PtBehavior 的参数按各自的文本重建，933 个文件写出与原文件逐字节相同。
 
 贴花选的是哪个预制体：预制体里直接写着三张贴图的路径（ALBA 颜色、NRMR 法线、MSK2 遮罩），没有经过材质文件；46 个预制体和贴图都在游戏的 pak 里，预览能读到。预览用近似的方式画贴花，见下一节。
 
@@ -85,7 +93,7 @@ RE4 全部 3946 个文件里有 2193 个 PtBehavior（933 个文件），每个 
 
 ## 验证
 
-- `tools/Re4MultiEntryTests` 第 12 节：2193 个 PtBehavior 除类型 20 外全部解析，933 个文件写回逐字节相同（只写到内存）；按文本重建全部参数后仍逐字节相同；Decal 的 PtBehavior 只有参数值（含字符串）可编辑；改 Extent.Y、RandomRollRange 和一个更长的 DecalPrefab 路径后写出再读回正确；roar_0000 的节点图行为 `PtBehavior [EffectRadialBlur]`。
+- `tools/Re4MultiEntryTests` 第 12 节：2193 个 PtBehavior 的参数全部解析，933 个文件写回逐字节相同（只写到内存）；按文本重建全部参数后仍逐字节相同；Decal 的 PtBehavior 只有参数值（含字符串）可编辑；改 Extent.Y、RandomRollRange 和一个更长的 DecalPrefab 路径后写出再读回正确；roar_0000 的节点图行为 `PtBehavior [EffectRadialBlur]`。
 - `tools/Re4StructureTests` 第 7 节：按窗口的请求新建贴花载体 entry，把预制体改成 Burnt，保存后读回，属性列表和 10 个参数都与模板一致。
 - MCP 端到端：`add_entry` 带 `script` 新建贴花载体并选中。
 - 属性面板的新分组、脚本类选择框和预制体下拉框没有在窗口里截图核对。

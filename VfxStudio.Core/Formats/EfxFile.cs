@@ -693,13 +693,17 @@ namespace ReeLib.Efx
                 };
                 jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableDataColor), PtBehaviorPropType.PropColor.ToString()));
                 jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableFloat), PtBehaviorPropType.PropFloat.ToString()));
-                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableFloat2), PtBehaviorPropType.PropFloat2.ToString()));
-                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableFloat3), PtBehaviorPropType.PropFloat3.ToString()));
+                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableVec2), PtBehaviorPropType.PropVec2.ToString()));
+                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableVec3), PtBehaviorPropType.PropVec3.ToString()));
+                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableRange), PtBehaviorPropType.PropRange.ToString()));
+                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableRangeI), PtBehaviorPropType.PropRangeI.ToString()));
                 jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableInteger), PtBehaviorPropType.PropInt.ToString()));
+                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableUInt), PtBehaviorPropType.PropUint.ToString()));
+                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableBool), PtBehaviorPropType.PropBool.ToString()));
                 jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableEnum), PtBehaviorPropType.PropEnum.ToString()));
-                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableDataWString), PtBehaviorPropType.PropWstringName.ToString()));
-                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableDataPrefabPath), PtBehaviorPropType.PropPrefabpath.ToString()));
-                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableDataPrefabUnknown), "_unknown"));
+                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableDataWString), PtBehaviorPropType.PropString.ToString()));
+                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableDataPrefabPath), PtBehaviorPropType.PropPrefab.ToString()));
+                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableRaw), "_unknown"));
                 jsonTypeInfo.PreferredPropertyObjectCreationHandling = JsonObjectCreationHandling.Populate;
             }
 

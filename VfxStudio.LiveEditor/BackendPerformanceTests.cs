@@ -109,18 +109,18 @@ internal static class BackendPerformanceTests
         {
             var opened=Request("open",new(){["path"]=fixture});
             var first=Inspect(Target());var cached=Inspect(Target());CheckFresh(Target(),cached,"initial cache hit");
-            string initial=Value(first,"KeepFrame.r");
+            string initial=Value(first,"KeepFrame.min");
             first["fields"]![0]!["value"]="tampered";first["document"]!["entries"]![0]!["name"]="tampered";
             CheckFresh(Target(),Inspect(Target()),"response mutation isolation");
             Check(Request("status")["document"]!["entries"]![0]!["name"]!.GetValue<string>()!="tampered","A response cannot modify the cached document tree");
             var other=Inspect(Target(6,1));CheckFresh(Target(6,1),other,"same index in a different embedded Action");
             CheckFresh(Target(13),Inspect(Target(13)),"nested RGBA grouping");
             CheckFresh(Target(2),Inspect(Target(2)),"nested expression curves");
-            Request("set",new(){["target"]=Target(),["path"]="KeepFrame.r",["value"]="37"});
-            var modified=Inspect(Target());Check(Value(modified,"KeepFrame.r")=="37","Successful edits invalidate cached field values");CheckFresh(Target(),modified,"after set");
+            Request("set",new(){["target"]=Target(),["path"]="KeepFrame.min",["value"]="37"});
+            var modified=Inspect(Target());Check(Value(modified,"KeepFrame.min")=="37","Successful edits invalidate cached field values");CheckFresh(Target(),modified,"after set");
             Check(modified["document"]!["dirty"]!.GetValue<bool>() && modified["document"]!["canUndo"]!.GetValue<bool>(),"Document snapshot refreshes dirty and undo state");
-            Request("undo");Check(Value(Inspect(Target()),"KeepFrame.r")==initial,"Undo invalidates inspection values");
-            Request("redo");Check(Value(Inspect(Target()),"KeepFrame.r")=="37","Redo invalidates inspection values");
+            Request("undo");Check(Value(Inspect(Target()),"KeepFrame.min")==initial,"Undo invalidates inspection values");
+            Request("redo");Check(Value(Inspect(Target()),"KeepFrame.min")=="37","Redo invalidates inspection values");
             long unchanged=revision;
             var saved=Request("save");Check(revision==unchanged && !saved["document"]!["dirty"]!.GetValue<bool>(),"Save refreshes dirty metadata even when revision is unchanged");
             var groupDoc=Request("status")["document"]!;
@@ -133,7 +133,7 @@ internal static class BackendPerformanceTests
             var shifted=Inspect(Target(12));Check(shifted["colorGroups"]!.AsArray().Count>0,"Deleting an attribute cannot reuse stale same-index fields");CheckFresh(Target(12),shifted,"after nested deletion");
             Request("inspect",new(){["target"]=Target(13)},false);
             Request("undo");CheckFresh(Target(13),Inspect(Target(13)),"after deletion undo");
-            Request("set",new(){["target"]=Target(),["path"]="KeepFrame.r",["value"]="not an integer"},false);
+            Request("set",new(){["target"]=Target(),["path"]="KeepFrame.min",["value"]="not an integer"},false);
             CheckFresh(Target(),Inspect(Target()),"rejected edit");
             var parentTarget=new JsonObject{["kind"]="action",["index"]=0,["attributeIndex"]=0};
             // A derived payload length is rejected. It must not poison subsequent reads.
@@ -143,7 +143,7 @@ internal static class BackendPerformanceTests
             // not merely an invalid value rejected before Mutate begins.
             var oldModel=(ReeLib.EfxFile)modelField.GetValue(engine)!;
             var selected=((EFXAttributePlayEmitter)oldModel.Actions[0].Attributes[0]).efxrData!.Entries[1].Attributes[6];
-            var life=ContentInspector.Describe(selected,oldModel.Header.Version).Single(f=>f.Description.Path=="KeepFrame.r");
+            var life=ContentInspector.Describe(selected,oldModel.Header.Version).Single(f=>f.Description.Path=="KeepFrame.min");
             long rollbackRevision=revision;
             var mutate=typeof(EditorEngine).GetMethod("Mutate",BindingFlags.Instance|BindingFlags.NonPublic)!;
             bool rolledBack=false;
@@ -155,13 +155,13 @@ internal static class BackendPerformanceTests
             catch(TargetInvocationException ex) when(ex.InnerException is InvalidDataException){rolledBack=true;}
             Check(rolledBack && !ReferenceEquals(oldModel,modelField.GetValue(engine)),"Verification failure restores a fresh model");
             var recovered=Inspect(Target());
-            Check(revision==rollbackRevision && Value(recovered,"KeepFrame.r")=="37","Rollback invalidates snapshots without increasing revision");
+            Check(revision==rollbackRevision && Value(recovered,"KeepFrame.min")=="37","Rollback invalidates snapshots without increasing revision");
             CheckFresh(Target(),recovered,"post-serialization rollback");
             string second=Path.Combine(options.Assets,"VfxShared/natives/stm/art/vfx/effecteditor/common/guide/11_guide_200.efx.5571972");
             Request("open",new(){["path"]=second});
             Check(Request("status")["document"]!["name"]!.GetValue<string>()=="11_guide_200.efx.5571972","Source switching invalidates the cached document tree");
             Request("open",new(){["path"]=fixture});
-            Check(Value(Inspect(Target()),"KeepFrame.r")=="37","Returning to a retained document loads its working values instead of another file's cache");
+            Check(Value(Inspect(Target()),"KeepFrame.min")=="37","Returning to a retained document loads its working values instead of another file's cache");
             CheckFresh(Target(),Inspect(Target()),"retained source reopen");
             // Use public API to populate more than the bounded cache capacity with real fields.
             var document=Request("status")["document"]!;

@@ -82,7 +82,7 @@ internal static class EmbeddedActionTests
             check(!parentInspection["fields"]!.AsArray().Single(f => f!["path"]!.GetValue<string>() == "efxrSize")!["editable"]!.GetValue<bool>(), "PlayEmitter payload length is derived and read-only");
 
             var ribbon = Target(1, 5); var life = Target(1, 6); var rgb = Target(1, 13);
-            check(Value(ribbon.DeepClone().AsObject(), "SizeScalar.s").Length > 0 && Value(life.DeepClone().AsObject(), "KeepFrame.r").Length > 0,
+            check(Value(ribbon.DeepClone().AsObject(), "SizeScalar.s").Length > 0 && Value(life.DeepClone().AsObject(), "KeepFrame.min").Length > 0,
                 "Nested RibbonFollow size and Life fields can be inspected independently");
             check(Inspect(rgb.DeepClone().AsObject())["colorGroups"]!.AsArray().Any(c => c!["path"]!.GetValue<string>() == "RedChColor"), "Nested RgbCommon exposes its specialized color editor");
             check(Inspect(Target(1, 2))["expressionCurves"]!.AsArray().Count > 0, "Nested Transform3DExpression exposes its specialized expression curves");
@@ -91,14 +91,14 @@ internal static class EmbeddedActionTests
             Request("set_color", new() { ["target"] = rgb.DeepClone(), ["path"] = "RedChColor", ["values"] = new JsonArray(12, 34, 56, 255) });
             Request("set", new() { ["target"] = ribbon.DeepClone(), ["path"] = "SizeScalar.s", ["value"] = "0.375" });
             Request("set_fields", new() { ["target"] = life.DeepClone(), ["fields"] = new JsonArray(
-                new JsonObject { ["path"] = "KeepFrame.r", ["value"] = "17" }, new JsonObject { ["path"] = "KeepFrame.s", ["value"] = "17" }) });
+                new JsonObject { ["path"] = "KeepFrame.min", ["value"] = "17" }, new JsonObject { ["path"] = "KeepFrame.s", ["value"] = "17" }) });
             byte[] edited = Saved();
             var reread = service.Load(edited, fixture);
             try
             {
                 var child = ((EFXAttributePlayEmitter)reread.Actions[0].Attributes[0]).efxrData!;
                 check(ContentInspector.Describe(child.Entries[1].Attributes[5], child.Header.Version).Single(f => f.Description.Path == "SizeScalar.s").Description.Value == "0.375", "Nested size survives complete binary save/reopen");
-                check(ContentInspector.Describe(child.Entries[1].Attributes[6], child.Header.Version).Single(f => f.Description.Path == "KeepFrame.r").Description.Value == "17", "Nested life survives complete binary save/reopen");
+                check(ContentInspector.Describe(child.Entries[1].Attributes[6], child.Header.Version).Single(f => f.Description.Path == "KeepFrame.min").Description.Value == "17", "Nested life survives complete binary save/reopen");
                 check(ColorEditor.Inspect(child.Entries[1].Attributes[13], child.Header.Version).Single(c => c.Path == "RedChColor").Hex == "#0C2238FF", "Nested RGBA survives complete binary save/reopen");
                 check(UntouchedFingerprint(reread) == untouched, "Nested edits preserve root entries and the other two Actions");
                 check(edited.AsSpan().SequenceEqual(service.SaveToBytes(reread)), "Nested edits yield a stable full-file binary round trip");

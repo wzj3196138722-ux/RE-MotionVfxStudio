@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 namespace ReeLib.Efx.Structs.Common;
 
 // 成对数值的语义类型。
-// 引擎文件里的成对值统一存成 via.Range（两个 float，先 s 后 r）、via.RangeI（两个 int，先 r 后 s）或 via.Int2（x, y），
+// 引擎文件里的成对值统一存成 via.Range（两个 float，先 s 后 r）、via.RangeI（两个 int，先 s 后 r）或 via.Int2（x, y），
 // 但不同属性对这两个数的用法不同：有的是"中心 ± 幅度"，有的是"最小–最大"，有的根本不随机。
 // 下面这些类型与对应的 via.* 逐字节相同，只是字段按语义命名；字段顺序 = 文件里的存储顺序。
 // 语义是从 re4.exe 读码得到的，见各属性字段上的注释。没核对过语义的字段仍用 via.Range / via.RangeI。

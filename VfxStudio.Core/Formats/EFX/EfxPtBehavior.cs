@@ -5,25 +5,26 @@ using ReeLib.InternalAttributes;
 
 namespace ReeLib.Efx.Structs.Pt;
 
-// Payloads measured over the RE4 corpus (2065 PtBehavior attributes): Uint, 3 and 22 are 4-byte integers (3: RadialBlur
-// Priority = 1; 22: LensFlare AxisType / RotationOrder, enum-like), Range is two floats (min, max: EffectDecal Alpha0 =
-// 0 ~ 0.1), Wstring2 is a UTF-16 string like WstringName (FlowTexture paths). 20 (ShakeCamera Period, one use) stays raw.
+// Named after the engine type of the script field the parameter sets: every parameter in the RE4 corpus was matched to
+// its field in the type database inside re4.exe (class = the PtBehavior's script name, field = the parameter name), and
+// each id maps to exactly one field type. 18 and 22 are both enums: 18 the script's own (DecalDirectionEnum,
+// Priority, ...), 22 the engine's via.effect.lensflare.RotationOrder / AxisType.
 public enum PtBehaviorPropType
 {
-    PropType3 = 3,
-    PropUint = 4,
-    PropFloat = 9,
-    PropRange = 10,
-    PropFloat3 = 11,
-    PropInt = 14,
-    PropColor = 15,
-    PropWstringName = 16,
-    PropPrefabpath = 17,
-    PropEnum = 18,
-    PropFloat2 = 19,
-    PropType20 = 20,
-    PropWstring2 = 21,
-    PropType22 = 22,
+    PropInt = 3,            // System.Int32
+    PropUint = 4,           // System.UInt32
+    PropFloat = 9,          // System.Single
+    PropVec2 = 10,          // via.vec2 (x, y), not a random range: EffectDecal UVOffset, UVScale, Alpha0
+    PropVec3 = 11,          // via.vec3
+    PropBool = 14,          // System.Boolean, stored as a 4-byte 0 / 1
+    PropColor = 15,         // via.Color
+    PropString = 16,        // System.String
+    PropPrefab = 17,        // via.Prefab (path)
+    PropEnum = 18,          // script enum
+    PropRange = 19,         // via.Range (s, r): EffectDecal ScaleXY, OBBScalarAdd, PyramidAngle
+    PropRangeI = 20,        // via.RangeI (s, r): ShakeCamera Period
+    PropTexture = 21,       // via.render.TextureResourceHolder (path): EffectDecal FlowTexture
+    PropNativeEnum = 22,    // engine enum
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion))]
@@ -83,15 +84,21 @@ public partial class PtBehaviorVariableUInt : PtBehaviorVariableDataBase
 }
 
 [RszGenerate, RszVersionedObject(typeof(EfxVersion))]
-public partial class PtBehaviorVariableRange : PtBehaviorVariableDataBase
+public partial class PtBehaviorVariableVec2 : PtBehaviorVariableDataBase
 {
-	public PtBehaviorVariableRange(EfxVersion version) : base(version) { }
+	public PtBehaviorVariableVec2(EfxVersion version) : base(version) { }
 
-	public MinMax range;
+	public Vector2 vec;
 	[RszFixedSizeArray(nameof(size), - 8)] public byte[]? restData;
 
     protected override bool DoRead(FileHandler handler) => base.DoRead(handler) && DefaultRead(handler);
     protected override bool DoWrite(FileHandler handler) => EnsureMinimumSize(8) && base.DoWrite(handler) && DefaultWrite(handler);
+}
+
+/// <summary>A bool parameter: the payload is a 4-byte 0 / 1.</summary>
+public partial class PtBehaviorVariableBool : PtBehaviorVariableInteger
+{
+	public PtBehaviorVariableBool(EfxVersion version) : base(version) { }
 }
 
 public partial class PtBehaviorVariableEnum : PtBehaviorVariableInteger
@@ -111,20 +118,31 @@ public partial class PtBehaviorVariableFloat : PtBehaviorVariableDataBase
     protected override bool DoWrite(FileHandler handler) => EnsureMinimumSize(4) && base.DoWrite(handler) && DefaultWrite(handler);
 }
 [RszGenerate, RszVersionedObject(typeof(EfxVersion))]
-public partial class PtBehaviorVariableFloat2 : PtBehaviorVariableDataBase
+public partial class PtBehaviorVariableRange : PtBehaviorVariableDataBase
 {
-	public PtBehaviorVariableFloat2(EfxVersion version) : base(version) { }
+	public PtBehaviorVariableRange(EfxVersion version) : base(version) { }
 
-	public Vector2 Vec;
+	public via.Range range;
 	[RszFixedSizeArray(nameof(size), - 8)] public byte[]? restData;
 
     protected override bool DoRead(FileHandler handler) => base.DoRead(handler) && DefaultRead(handler);
     protected override bool DoWrite(FileHandler handler) => EnsureMinimumSize(8) && base.DoWrite(handler) && DefaultWrite(handler);
 }
 [RszGenerate, RszVersionedObject(typeof(EfxVersion))]
-public partial class PtBehaviorVariableFloat3 : PtBehaviorVariableDataBase
+public partial class PtBehaviorVariableRangeI : PtBehaviorVariableDataBase
 {
-	public PtBehaviorVariableFloat3(EfxVersion version) : base(version) { }
+	public PtBehaviorVariableRangeI(EfxVersion version) : base(version) { }
+
+	public via.RangeI range;
+	[RszFixedSizeArray(nameof(size), - 8)] public byte[]? restData;
+
+    protected override bool DoRead(FileHandler handler) => base.DoRead(handler) && DefaultRead(handler);
+    protected override bool DoWrite(FileHandler handler) => EnsureMinimumSize(8) && base.DoWrite(handler) && DefaultWrite(handler);
+}
+[RszGenerate, RszVersionedObject(typeof(EfxVersion))]
+public partial class PtBehaviorVariableVec3 : PtBehaviorVariableDataBase
+{
+	public PtBehaviorVariableVec3(EfxVersion version) : base(version) { }
 
 	public Vector3 vec;
 	[RszFixedSizeArray(nameof(size), - 12)] public byte[]? restData;
@@ -150,9 +168,9 @@ public partial class PtBehaviorVariableDataPrefabPath : PtBehaviorVariableDataWS
 }
 
 [RszGenerate, RszVersionedObject(typeof(EfxVersion))]
-public partial class PtBehaviorVariableDataPrefabUnknown : PtBehaviorVariableDataBase
+public partial class PtBehaviorVariableRaw : PtBehaviorVariableDataBase
 {
-	public PtBehaviorVariableDataPrefabUnknown(EfxVersion version) : base(version) { }
+	public PtBehaviorVariableRaw(EfxVersion version) : base(version) { }
 
 	[RszFixedSizeArray(nameof(size))] public byte[]? data;
 
@@ -186,19 +204,20 @@ public partial class PtBehaviorVariable : BaseModel
 	// }
 	[RszClassInstance, RszConstructorParams(nameof(Version)), RszSwitch(
 		nameof(dataType), "==", PtBehaviorPropType.PropColor, typeof(PtBehaviorVariableDataColor),
-		nameof(dataType), "==", PtBehaviorPropType.PropPrefabpath, typeof(PtBehaviorVariableDataPrefabPath),
+		nameof(dataType), "==", PtBehaviorPropType.PropPrefab, typeof(PtBehaviorVariableDataPrefabPath),
 		nameof(dataType), "==", PtBehaviorPropType.PropInt, typeof(PtBehaviorVariableInteger),
+		nameof(dataType), "==", PtBehaviorPropType.PropBool, typeof(PtBehaviorVariableBool),
 		nameof(dataType), "==", PtBehaviorPropType.PropEnum, typeof(PtBehaviorVariableEnum),
+		nameof(dataType), "==", PtBehaviorPropType.PropNativeEnum, typeof(PtBehaviorVariableEnum),
 		nameof(dataType), "==", PtBehaviorPropType.PropFloat, typeof(PtBehaviorVariableFloat),
-		nameof(dataType), "==", PtBehaviorPropType.PropFloat2, typeof(PtBehaviorVariableFloat2),
-		nameof(dataType), "==", PtBehaviorPropType.PropFloat3, typeof(PtBehaviorVariableFloat3),
-		nameof(dataType), "==", PtBehaviorPropType.PropWstringName, typeof(PtBehaviorVariableDataWString),
-		nameof(dataType), "==", PtBehaviorPropType.PropWstring2, typeof(PtBehaviorVariableDataWString),
-		nameof(dataType), "==", PtBehaviorPropType.PropUint, typeof(PtBehaviorVariableUInt),
-		nameof(dataType), "==", PtBehaviorPropType.PropType3, typeof(PtBehaviorVariableUInt),
-		nameof(dataType), "==", PtBehaviorPropType.PropType22, typeof(PtBehaviorVariableUInt),
+		nameof(dataType), "==", PtBehaviorPropType.PropVec2, typeof(PtBehaviorVariableVec2),
+		nameof(dataType), "==", PtBehaviorPropType.PropVec3, typeof(PtBehaviorVariableVec3),
 		nameof(dataType), "==", PtBehaviorPropType.PropRange, typeof(PtBehaviorVariableRange),
-		typeof(PtBehaviorVariableDataPrefabUnknown)
+		nameof(dataType), "==", PtBehaviorPropType.PropRangeI, typeof(PtBehaviorVariableRangeI),
+		nameof(dataType), "==", PtBehaviorPropType.PropString, typeof(PtBehaviorVariableDataWString),
+		nameof(dataType), "==", PtBehaviorPropType.PropTexture, typeof(PtBehaviorVariableDataWString),
+		nameof(dataType), "==", PtBehaviorPropType.PropUint, typeof(PtBehaviorVariableUInt),
+		typeof(PtBehaviorVariableRaw)
 	)]
 	public PtBehaviorVariableDataBase? variable;
 
@@ -232,21 +251,23 @@ public partial class PtBehaviorVariable : BaseModel
 		return variable switch
 		{
 			PtBehaviorVariableFloat f => f.value.ToString("R", inv),
-			PtBehaviorVariableFloat2 f2 => string.Join(",", f2.Vec.X.ToString("R", inv), f2.Vec.Y.ToString("R", inv)),
-			PtBehaviorVariableFloat3 f3 => string.Join(",", f3.vec.X.ToString("R", inv), f3.vec.Y.ToString("R", inv), f3.vec.Z.ToString("R", inv)),
-			PtBehaviorVariableRange r => string.Join(",", r.range.min.ToString("R", inv), r.range.max.ToString("R", inv)),
+			PtBehaviorVariableVec2 v2 => string.Join(",", v2.vec.X.ToString("R", inv), v2.vec.Y.ToString("R", inv)),
+			PtBehaviorVariableVec3 v3 => string.Join(",", v3.vec.X.ToString("R", inv), v3.vec.Y.ToString("R", inv), v3.vec.Z.ToString("R", inv)),
+			PtBehaviorVariableRange r => string.Join(",", r.range.s.ToString("R", inv), r.range.r.ToString("R", inv)),
+			PtBehaviorVariableRangeI ri => string.Join(",", ri.range.s.ToString(inv), ri.range.r.ToString(inv)),
 			PtBehaviorVariableInteger i => i.value.ToString(inv),
 			PtBehaviorVariableUInt u => u.value.ToString(inv),
 			PtBehaviorVariableDataColor c => $"{c.color.R},{c.color.G},{c.color.B},{c.color.A}",
 			PtBehaviorVariableDataWString s => s.str ?? "",
-			PtBehaviorVariableDataPrefabUnknown raw => Convert.ToHexString(raw.data ?? []),
+			PtBehaviorVariableRaw raw => Convert.ToHexString(raw.data ?? []),
 			_ => "",
 		};
 	}
 
-	/// <summary>A new RE4 parameter from text: Float, Int, Enum, Uint (and types 3, 22) take one number; Float2,
-	/// Float3, Range and Color take comma-separated numbers (Color: R,G,B,A); the string types take the text; other
-	/// types take hex bytes. <paramref name="index"/> is the parameter's position in its PtBehavior.</summary>
+	/// <summary>A new RE4 parameter from text: Float, Int, Uint, Bool (0 / 1) and the two enums take one number; Vec2,
+	/// Vec3, Range, RangeI and Color take comma-separated numbers (Range: s,r; Color: R,G,B,A); String, Prefab and
+	/// Texture take the text; other types take hex bytes. <paramref name="index"/> is the parameter's position in its
+	/// PtBehavior.</summary>
 	public static PtBehaviorVariable Create(EfxVersion version, int index, string name, PtBehaviorPropType type, string value)
 	{
 		var inv = System.Globalization.CultureInfo.InvariantCulture;
@@ -259,23 +280,27 @@ public partial class PtBehaviorVariable : BaseModel
 		PtBehaviorVariableDataBase data = type switch
 		{
 			PtBehaviorPropType.PropFloat => new PtBehaviorVariableFloat(version) { value = float.Parse(value, inv), size = 4 },
-			PtBehaviorPropType.PropFloat2 => Floats(2) is var f2 ? new PtBehaviorVariableFloat2(version) { Vec = new(f2[0], f2[1]), size = 8 } : null!,
-			PtBehaviorPropType.PropFloat3 => Floats(3) is var f3 ? new PtBehaviorVariableFloat3(version) { vec = new(f3[0], f3[1], f3[2]), size = 12 } : null!,
-			PtBehaviorPropType.PropRange => Floats(2) is var r ? new PtBehaviorVariableRange(version) { range = new(r[0], r[1]), size = 8 } : null!,
+			PtBehaviorPropType.PropVec2 => Floats(2) is var v2 ? new PtBehaviorVariableVec2(version) { vec = new(v2[0], v2[1]), size = 8 } : null!,
+			PtBehaviorPropType.PropVec3 => Floats(3) is var v3 ? new PtBehaviorVariableVec3(version) { vec = new(v3[0], v3[1], v3[2]), size = 12 } : null!,
+			PtBehaviorPropType.PropRange => Floats(2) is var r ? new PtBehaviorVariableRange(version) { range = new via.Range { s = r[0], r = r[1] }, size = 8 } : null!,
+			PtBehaviorPropType.PropRangeI => value.Split(',').Select(p => int.Parse(p.Trim(), inv)).ToArray() is { Length: 2 } ri
+				? new PtBehaviorVariableRangeI(version) { range = new via.RangeI { s = ri[0], r = ri[1] }, size = 8 }
+				: throw new ArgumentException($"{name}: RangeI needs s,r."),
 			PtBehaviorPropType.PropInt => new PtBehaviorVariableInteger(version) { value = int.Parse(value, inv), size = 4 },
-			PtBehaviorPropType.PropEnum => new PtBehaviorVariableEnum(version) { value = int.Parse(value, inv), size = 4 },
-			PtBehaviorPropType.PropUint or PtBehaviorPropType.PropType3 or PtBehaviorPropType.PropType22 =>
-				new PtBehaviorVariableUInt(version) { value = uint.Parse(value, inv), size = 4 },
+			PtBehaviorPropType.PropBool => new PtBehaviorVariableBool(version) { value = int.Parse(value, inv), size = 4 },
+			PtBehaviorPropType.PropEnum or PtBehaviorPropType.PropNativeEnum =>
+				new PtBehaviorVariableEnum(version) { value = int.Parse(value, inv), size = 4 },
+			PtBehaviorPropType.PropUint => new PtBehaviorVariableUInt(version) { value = uint.Parse(value, inv), size = 4 },
 			PtBehaviorPropType.PropColor => value.Split(',').Select(p => byte.Parse(p.Trim(), inv)).ToArray() is { Length: 4 } c
 				? new PtBehaviorVariableDataColor(version) { color = new via.Color { R = c[0], G = c[1], B = c[2], A = c[3] }, size = 4 }
 				: throw new ArgumentException($"{name}: Color needs R,G,B,A."),
-			PtBehaviorPropType.PropWstringName or PtBehaviorPropType.PropWstring2 => new PtBehaviorVariableDataWString(version) { str = value },
-			PtBehaviorPropType.PropPrefabpath => new PtBehaviorVariableDataPrefabPath(version) { str = value },
-			_ => Convert.FromHexString(value) is var bytes ? new PtBehaviorVariableDataPrefabUnknown(version) { data = bytes, size = bytes.Length } : null!,
+			PtBehaviorPropType.PropString or PtBehaviorPropType.PropTexture => new PtBehaviorVariableDataWString(version) { str = value },
+			PtBehaviorPropType.PropPrefab => new PtBehaviorVariableDataPrefabPath(version) { str = value },
+			_ => Convert.FromHexString(value) is var bytes ? new PtBehaviorVariableRaw(version) { data = bytes, size = bytes.Length } : null!,
 		};
 		if (data is PtBehaviorVariableDataWString w) w.size = ((w.str?.Length ?? 0) + 1) * 2;
-		// Header as in every RE4 parameter: unkn 2 for Float2 and type 20, else 1; then -1 and the parameter index.
-		data.unkn = type is PtBehaviorPropType.PropFloat2 or PtBehaviorPropType.PropType20 ? 2 : 1;
+		// Header as in every RE4 parameter: unkn 2 for Range and RangeI, else 1; then -1 and the parameter index.
+		data.unkn = type is PtBehaviorPropType.PropRange or PtBehaviorPropType.PropRangeI ? 2 : 1;
 		data.re4_unkn0 = -1;
 		data.re4_unkn1 = (short)index;
 		return new PtBehaviorVariable(version)

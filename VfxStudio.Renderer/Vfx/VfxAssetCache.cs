@@ -417,8 +417,8 @@ public class VfxAssetCache : IDisposable
                 {
                     meshPath = gm.MeshPath;
                     mdfPath = gm.MaterialPath;
-                    partsMin = gm.PartsStartNo.r;
-                    partsMax = gm.PartsStartNo.s;
+                    partsMin = gm.PartsStartNo.s;
+                    partsMax = gm.PartsStartNo.r;
                     if (gm.Color.A > 0)
                     {
                         baseTint = new Vector4(gm.Color.R / 255f, gm.Color.G / 255f, gm.Color.B / 255f, gm.Color.A / 255f);

@@ -39,7 +39,7 @@
       "parameters": [
         {
           "name": "UseDistanceAttenuation",
-          "type": "PropInt",
+          "type": "PropBool",
           "value": "1"
         },
         {
@@ -54,7 +54,7 @@
         },
         {
           "name": "UseAngleAttenuation",
-          "type": "PropInt",
+          "type": "PropBool",
           "value": "1"
         },
         {
@@ -81,7 +81,7 @@
       "parameters": [
         {
           "name": "DecalPrefab",
-          "type": "PropPrefabpath",
+          "type": "PropPrefab",
           "value": "RE_ENGINE_LIBRARY/VFX_Library/Decal/Blood_BDC/decal_capcom_blood_bdc_bloodstain_00.pfb"
         },
         {
@@ -106,12 +106,12 @@
         },
         {
           "name": "Extent",
-          "type": "PropFloat3",
+          "type": "PropVec3",
           "value": "1,1,1"
         },
         {
           "name": "ScaleXY",
-          "type": "PropFloat2",
+          "type": "PropRange",
           "value": "0.35,0.20000002"
         },
         {
@@ -222,7 +222,7 @@
       "parameters": [
         {
           "name": "LensflarePrefab",
-          "type": "PropPrefabpath",
+          "type": "PropPrefab",
           "value": "RE_ENGINE_LIBRARY/VFX_Library/Lensflare/LensflarePrefab/lensflare_capcom_asset_0001.pfb"
         },
         {
@@ -282,12 +282,12 @@
       "parameters": [
         {
           "name": "MaterialName",
-          "type": "PropWstringName",
+          "type": "PropString",
           "value": "sm84_786_C_Mat__Env_Default"
         },
         {
           "name": "VariableName",
-          "type": "PropWstringName",
+          "type": "PropString",
           "value": "Blood_Rate"
         },
         {
@@ -361,17 +361,17 @@
         },
         {
           "name": "OrderDecal",
-          "type": "PropInt",
+          "type": "PropBool",
           "value": "0"
         },
         {
           "name": "ScaleXY",
-          "type": "PropFloat2",
+          "type": "PropRange",
           "value": "0.025,0.003999999"
         },
         {
           "name": "Extent",
-          "type": "PropFloat3",
+          "type": "PropVec3",
           "value": "1,1,1"
         },
         {
@@ -403,7 +403,7 @@
         },
         {
           "name": "UsingSameIntensity",
-          "type": "PropInt",
+          "type": "PropBool",
           "value": "1"
         },
         {
@@ -418,7 +418,7 @@
         },
         {
           "name": "ShadowEnable",
-          "type": "PropInt",
+          "type": "PropBool",
           "value": "1"
         },
         {
@@ -503,7 +503,7 @@
         },
         {
           "name": "FixedPosition",
-          "type": "PropInt",
+          "type": "PropBool",
           "value": "1"
         }
       ],

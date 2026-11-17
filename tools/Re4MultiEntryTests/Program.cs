@@ -447,7 +447,7 @@ using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == deadSc
         if (found.Count == 0) continue;
         behaviors += found.Count;
         foreach (var p in found.SelectMany(b => b.properties))
-            if (p.variable is ReeLib.Efx.Structs.Pt.PtBehaviorVariableDataPrefabUnknown && p.dataType != ReeLib.Efx.Structs.Pt.PtBehaviorPropType.PropType20)
+            if (p.variable is ReeLib.Efx.Structs.Pt.PtBehaviorVariableRaw)
             { raw++; firstRaw ??= $"{p.behaviorProperty}:{p.dataType}"; }
         if (decal == null && found.FirstOrDefault(b => b.behaviorString == "via.effect.script.EffectDecal" && b.properties.Count >= 10) is { } d)
         { decal = d; decalFile = file; decalPath = path; }
@@ -463,7 +463,7 @@ using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == deadSc
         if (!rebuiltBytes.ToArray().AsSpan().SequenceEqual(bytes)) { rebuiltDiffer++; firstRebuilt ??= Path.GetFileName(path); }
     }
     Check(behaviors == 2193 && raw == 0 && differ == 0,
-        $"PtBehavior: {behaviors} attributes in {files} files; every parameter decodes but type 20; all files write back byte for byte",
+        $"PtBehavior: {behaviors} attributes in {files} files; every parameter decodes; all files write back byte for byte",
         $"raw {raw} {firstRaw}, differ {differ}");
     Check(rebuiltDiffer == 0, "PtBehavior: every parameter rebuilt from its text by PtBehaviorVariable.Create writes the same bytes (lengths, header, index)",
         $"differ {rebuiltDiffer} {firstRebuilt}");
@@ -483,7 +483,7 @@ using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == deadSc
     var reread = new ReeLib.EfxFile(new ReeLib.FileHandler(new MemoryStream(edited.ToArray()), decalPath!) { FileVersion = (int)ReeLib.Efx.EfxVersion.RE4 });
     var back = reread.Read() ? reread.Entries.SelectMany(e => e.Attributes).OfType<ReeLib.Efx.Structs.Pt.EFXAttributePtBehavior>()
         .FirstOrDefault(b => b.behaviorString == decal.behaviorString && b.properties.Count == decal.properties.Count) : null;
-    float y = (back?.properties[extent].variable as ReeLib.Efx.Structs.Pt.PtBehaviorVariableFloat3)?.vec.Y ?? float.NaN;
+    float y = (back?.properties[extent].variable as ReeLib.Efx.Structs.Pt.PtBehaviorVariableVec3)?.vec.Y ?? float.NaN;
     float r = (back?.properties[roll].variable as ReeLib.Efx.Structs.Pt.PtBehaviorVariableFloat)?.value ?? float.NaN;
     string? prefabBack = back?.properties[prefab].ValueText();
     Check(applied == 3 && skipped.Length == 0 && y == .5f && r == 45f && prefabBack == burnt &&

@@ -107,8 +107,8 @@ public sealed record PreviewDecal(string Prefab, PreviewTexture? Albedo, string?
         if (behavior.behaviorString != PreviewBehaviorTemplates.Decal) return null;
         ReeLib.Efx.Structs.Pt.PtBehaviorVariableDataBase? Value(string name) => behavior.properties.FirstOrDefault(p => p.behaviorProperty == name)?.variable;
         string prefab = (Value("DecalPrefab") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableDataWString)?.str ?? "";
-        var extent = (Value("Extent") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableFloat3)?.vec ?? Vector3.One;
-        var scale = (Value("ScaleXY") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableFloat2)?.Vec ?? Vector2.One;
+        var extent = (Value("Extent") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableVec3)?.vec ?? Vector3.One;
+        var scale = (Value("ScaleXY") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableRange)?.range is { } xy ? new Vector2(xy.s, xy.r) : Vector2.One;
         float roll = (Value("RandomRollRange") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableFloat)?.value ?? 0;
         float search = (Value("SearchTerrainDistance") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableFloat)?.value ?? 1;
         var c = (Value("BaseColorMod") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableDataColor)?.color;
@@ -121,12 +121,10 @@ public sealed record PreviewDecal(string Prefab, PreviewTexture? Albedo, string?
             error = ex.Message + "（用占位贴图代替）";
             albedo = PreviewTexture.Missing(prefab);
         }
-        var obbAdd = (Value("OBBScalarAdd") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableFloat2)?.Vec.X ?? 0;
-        var obbCoef = (Value("OBBScalarCoef") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableFloat2)?.Vec.X ?? 1;
+        var obbAdd = (Value("OBBScalarAdd") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableRange)?.range.s ?? 0;
+        var obbCoef = (Value("OBBScalarCoef") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableRange)?.range.s ?? 1;
         bool uvRect = behavior.properties.FirstOrDefault(p => p.behaviorProperty == "EnableUVRect")?.ValueText() is "1" or "True" or "true";
-        // Property type 10 is a via.vec2 (x, y) in the engine although the reader names it Range (min, max).
-        static Vector2? Vec2(ReeLib.Efx.Structs.Pt.PtBehaviorVariableDataBase? v) =>
-            v is ReeLib.Efx.Structs.Pt.PtBehaviorVariableRange r ? new Vector2(r.range.min, r.range.max) : null;
+        static Vector2? Vec2(ReeLib.Efx.Structs.Pt.PtBehaviorVariableDataBase? v) => (v as ReeLib.Efx.Structs.Pt.PtBehaviorVariableVec2)?.vec;
         return new(prefab, albedo, error, extent, scale, roll, search, color, obbAdd, obbCoef, uvRect,
             UvOffset: Vec2(Value("UVOffset")) ?? Vector2.Zero, UvScale: Vec2(Value("UVScale")));
     }

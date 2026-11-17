@@ -153,7 +153,7 @@ public partial class EFXAttributeLife : EFXAttribute
 	public MinMaxI KeepHoldFrame;
 	// 低 2 位是保持模式（re4.exe 3d1be80）：0 不保持（忽略 KeepHoldFrame）；1 Keep 后满 alpha 保持 KeepHoldFrame 帧，
 	// {0,0} = 直到发射器停止；2 同 1，但释放时再播一遍 Keep；3 CPU 每帧把 alpha 置 0（不要用）。
-	// 四个 *Frame 在 [r, s] 内均匀取整（不是 s±r），s = r − 1 会除以零。
+	// 四个 *Frame 在 [min, max] 内均匀取整（不是中心 ± 幅度），max = min − 1 会除以零。
 	[RszVersion(EfxVersion.RE2)]
 	public uint Flags;
 
