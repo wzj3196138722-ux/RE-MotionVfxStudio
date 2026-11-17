@@ -4,7 +4,7 @@
 读者：修改 `VfxStudio.Core/Formats/EFX/` 的 Wilds 版本字段，或要把 RE4 运行时规格（`RE4-EFX-RUNTIME.zh-CN.md`，下称 RT）套到 Wilds 上的人。
 本文以 RE4 为基准，只记差异；没有写到的部分按 RT 理解。GPU 粒子类型和离线预览不在范围内。
 
-状态标记与 RT §0.1 相同（已确认 / 部分待确认 / 折中实现 / 待清理）。全部结论来自静态反汇编（pefile + capstone）和 Wilds 语料（`MHWILDS_EXTRACT/natives/STM/Art/VFX`，9225 个文件）只读统计，没有运行 Wilds 代码。
+状态标记与 RT §0.1 相同（已确认 / 部分待确认 / 折中实现 / 待清理）。结论来自静态反汇编（pefile + capstone）、Wilds 语料（`MHWILDS_EXTRACT/natives/STM/Art/VFX`，9225 个文件）只读统计，以及在本进程里执行 Wilds 代码：混淆的构造函数用 unicorn 模拟，步骤注册（槽 6）和块构建器（槽 16）用 `tools/Re4Native/re4native.py` 原样映射 exe 后直接调用。运行时不碰游戏进程，不写游戏目录，语料只读。
 
 ## 1. 读 Wilds exe 的前提
 
@@ -12,15 +12,20 @@
 |---|---|---|
 | 节 | 节名被混淆；代码在 `.xtls`（可执行）和 `.trace`（RWX）。`.pdata` 只覆盖 `.xtls` 41 万个函数和 `.trace` 1.2 万个，许多小函数要靠 int3 填充找起点 | 已确认 |
 | 常量隐藏 | `.trace` 里的立即数写成"全局变量 ± 立即数"，如类型 id `mov edx,[rip+G]; sub edx,0xa02f`。G 的值在文件里，静态即可求出 | 已确认 |
-| 混淆构造函数 | 11 个类型（24、31、62、125、157、207、239、251、261、278、280）的构造函数在 `.trace` 里做了控制流混淆（flags 分支、跳转寄存器），静态没有解出它们的 vtable | 部分待确认 |
+| 混淆构造函数 | 11 个类型（24、31、62、125、157、207、239、251、261、278、280）的构造函数在 `.trace` 里做了控制流混淆（flags 分支、跳转寄存器）。模拟执行时代码会读 KUSER_SHARED_DATA 和 PEB，补上这两页后 10 个类型跑到写 vtable；31 在写 vtable 前出错，按位置认定（见 §2） | 已确认（31 部分待确认） |
 
 ## 2. 类型表的来源
 
 RE4 靠"基类构造函数 3d0e910 的调用者 + edx 立即数"建表（`factory.py`）。Wilds 有一张更直接的表：
 
 - **工厂注册表**：静态初始化函数 0xaab6b5b..0xaab8b72 把 282 个 `std::function` 依次写进全局数组 0x14bf2000（每项 0x40 字节，`+0x38` 是实现指针），**数组下标 = 文件里的类型 id**（0..281，与 C# `EfxAttributeTypes.cs` 的 MHWilds 编号一致）。每个 lambda 的调用槽是 `mov ecx, 对象大小; call 0xb020830（分配）; jmp 构造函数`。已确认。
-- **基类构造函数** 0x38970，`edx` = 类型 id，写到对象 +8。共享构造函数（多个类型共用一个类）由外层按 `edx` 传入 id，`*MaterialExpression` 还多传 `r8d` = 所属 Type 的 id（如 29 → 27）。由下标得到的 id 与构造函数里的立即数 id 有 131 项可以互相核对，只有一处不一致：下标 161（PtTransform3DExpression）的构造函数 0xb6dafc0 写入的是 204。RE4 也有同类现象（类型 18 有两个工厂，RT 依据见 `factory.py` 的 `PREFERRED_FACTORY`）。部分待确认。
-- vtable：268 个类型解出（257 个经构造函数链，11 个直接读构造函数体）。完整表见附录。
+- **基类构造函数** 0x38970，`edx` = 类型 id，写到对象 +8。共享构造函数（多个类型共用一个类）由外层按 `edx` 传入 id，`*MaterialExpression` 还多传 `r8d` = 所属 Type 的 id（如 29 → 27）。由下标得到的 id 与构造函数里的立即数 id 有 131 项可以互相核对，只有一处不一致：下标 161（PtTransform3DExpression）的构造函数 0xb6dafc0 写入的是 204（模拟全部工厂后又多出 24、239 两处，见下一条）。RE4 也有同类现象（类型 18 有两个工厂，RT 依据见 `factory.py` 的 `PREFERRED_FACTORY`）。部分待确认。
+- **逐个调用工厂**（unicorn 模拟，分配器换成线性分配，在基类构造函数 0x38970 处记录 `edx`，并记录对象 +0 / +8 的写入）：281 个下标里 275 个写入的类型 id 等于下标。例外：
+  - 24（TypeBillboard2DExpression）写 26，239（EmitterHSV）写 19，161 写 204（与静态结果相同）；
+  - 138、255 的工厂返回空指针（没有类型）；
+  - 280 在混淆代码里读到运行时才有的数据，id 没有读出，vtable e108af0 是在补零页后记录到的。
+  这些对象 +8 的 id 与文件 id 不同，但文件按下标查工厂，读写不受影响；它们在引擎里的用途没有追。
+- vtable：279 个类型解出（257 个经构造函数链，11 个直接读构造函数体，10 个模拟工厂得到）。31（TypeMeshClip）的构造函数在写 vtable 前出错；`e0f6cd0` 是唯一一个带属性 vtable 特征（槽 1 = 0xb032750，槽 2–4 = 0xb46f210）、又夹在 TypeMesh（e0f6b90）和 TypeMeshExpression（e0f6df0）之间且没有归属的 vtable，所以认定为 31。部分待确认。完整表见附录。
 
 ## 3. vtable 布局
 
@@ -30,7 +35,7 @@ Wilds vtable 比首轮笔记假定的起点早 0x10（多出两个槽），共 3
 |---|---|---|---|
 | 0–4 | 0–4 | 析构（Wilds 跳进 `.trace`）、若干空函数 | 已确认 |
 | 5 加载器 | 5 加载器 | 读法改变，见 §4 | 已确认 |
-| 6 块大小 | 6 | Wilds 改成**注册逐粒子步骤**（§6.3）；RE4 的块大小计算在 Wilds 中的位置未定 | 部分待确认 |
+| 6 块大小 | 6 | Wilds 改成**注册逐粒子步骤**（§6.3），签名 `(attr, ctx)`，`[ctx]` = 发射器描述对象 X；RE4 的块大小计算在 Wilds 中的位置未定 | 部分待确认 |
 | 7–12 常量 getter | 8–13 | 值大多相同；ScaleAnim 块大小 0x40 → 0x50（多了 SizeDelayFrame）、RotateAnim / UVScroll 第三个值不同 | 已确认 |
 | 15 块构建 | 16 块构建 | 逐字段 `[attr+X] → [block+Y]` 拷贝；ScaleAnim 块内顺序与 RE4 相同 | 已确认 |
 | 18 文本解析器 | 20 文本解析器 | strcmp 链，字段名字符串与 RE4 基本相同，部分改存 UTF-16；写的是运行时块，不是 attribute 对象 | 已确认 |
@@ -57,7 +62,11 @@ call/jmp 0x5fb70
 
 ## 5. 字段名的取法
 
-`字段名 → 块偏移`（槽 20 解析器）+ `块偏移 ← 对象偏移`（槽 16 构建器）+ `对象偏移 → 文件偏移`（§4）三步组合，得到引擎字段名在文件中的位置。能完整走通的有 63 个类型；解析器或构建器在 `.trace` 里、或构建器有条件分支（ShaderSettings、Spawn、EmitterShape3D、AngularVelocity2D/3D 部分字段）的类型没有自动走通，不能直接用于改名。
+`字段名 → 块偏移`（槽 20 解析器）+ `块偏移 ← 对象偏移`（槽 16 构建器）+ `对象偏移 → 文件偏移`（§4）三步组合，得到引擎字段名在文件中的位置。能完整走通的有 63 个类型；解析器或构建器在 `.trace` 里、或构建器有条件分支（ShaderSettings、Spawn、EmitterShape3D、AngularVelocity2D/3D 部分字段）的类型没有自动走通。
+
+这些类型改用原生运行：把语料里的载荷（每类型最多 400 份不同的字节）按 §4 放到对象 `+A+4`，直接调用构建器；再逐个把一个 4 字节字换成标记值重跑，比较块的差异。标记值原样出现在块的某个偏移，就得到"文件偏移 → 块偏移"，再查解析器的"块偏移 → 名字"。块里其他位置也变了的字是标志位或被换算过的值（表里记为"换算"）。Spawn、EmitterShape3D 的构建器要读引擎单例（`[0x147ca268]+0x5520`、`[0x147ca238]+0x88`），运行时给它们一个全零对象，并把 0xb073170 换成返回 1.0、0xb04fb00 换成返回空。结果见 §7。
+
+另有一种解析器形式静态脚本没有覆盖：外层只保存栈 cookie 再调用内层，内层把字段写到 `[[rdx]] + 偏移`（PtVortexelHeatSource、FluidParticleEmitter、RepeatArea、FluidParticle2DSimulator 等）。这几个手工读出，见 §7。
 
 解析器有两个现象，含义未定：
 
@@ -71,7 +80,7 @@ call/jmp 0x5fb70
 | 项 | RE4 | Wilds | 状态 |
 |---|---|---|---|
 | 3D 路径循环 | 3d08480 | 0xaaba8e0 | 已确认 |
-| 另一路循环 | 3d079c0（2D，只有两遍） | 0xaabba90，同样三遍 | 部分待确认（按结构推定为 2D） |
+| 另一路循环 | 3d079c0（2D，只有两遍） | 0xaabba90，同样三遍 | 已确认是 2D（§6.3） |
 | 属性数组 | `E+0x288` | `E+0x2c8` | 已确认 |
 | 三遍调用 | vtable +0xb0 / +0xb8 / +0xc0 | +0xc8 / +0xd0 / +0xd8 | 已确认 |
 
@@ -86,23 +95,33 @@ call/jmp 0x5fb70
 
 这是与 RE4 唯一的结构性差别。RE4 的出生前置步骤（RT §1.3 第 5 步）和逐粒子管线 3d05350（RT §1.4）是写死的直接调用；Wilds 改成数据驱动：
 
-- 每个属性的 vtable 槽 6 在首次调用时（函数级静态初始化）把自己的步骤函数写进全局步骤表 0x14bf66e8（`.didata`）的第 k 项，再把 k 追加到发射器的步骤列表（u32 数组 `[X+0x50]`，个数 `[X+0x58]`）。已确认。
-- 粒子循环按号段分阶段遍历该列表，遇到超出本段上限的号就结束本段，所以列表应是升序；排序代码没有找到。部分待确认。
-- 3D 路径用 0..116，2D 路径用 117..199（同一函数，编号差 111）。已确认。
+- 每个属性的 vtable 槽 6 在首次调用时（函数级静态初始化）把自己的步骤函数写进全局步骤表 0x14bf66e8（`.didata`）的第 k 项，再把 k 追加到发射器描述对象 X 的步骤列表。已确认。
+- 列表有两条，都是 u32 数组：A = `[X+0x50]`（个数 `[X+0x58]`），B = `[X+0x60]`（个数 `[X+0x68]`）。属性按 `[X+0x34] == 1` 选编号：等于 1 时用 3D 编号，否则用 2D 编号。只有 2D 才有的属性（PtVelocity2D、PtTransform2D、AngularVelocity2D 等）在 3D 表里没有函数，所以 1 = 3D。已确认。
+- 同一张表分四段，按"同一个属性在不同编号下指向同一个函数"核对（UVSequence、Blink、PtColor、RotateAnim、ParentOptions 四段都对上）。已确认。
+
+  | 列表 | 3D（循环 0xaaba8e0） | 2D（循环 0xaabba90） |
+  |---|---|---|
+  | A | 表 + 0 | 表 + 230 |
+  | B | 表 + 119 | 表 + 281 |
+
+- B 列表在同一循环的另一个分支里用：这个分支先把所有槽重置、重新认领（`[p] |= 3`，重新编号），再按 B 列表的号段执行。进入这个分支的条件没有读完。部分待确认。
+- 排序在 0x1dec20：先调发射器自身的注册函数 0x386e3e0，再沿 `X+0x10` 链表对每个属性调槽 6，然后把 A、B 两条列表各自排成升序（超过 32 项用 std::sort 0xa548de0，否则希尔排序）。所以执行顺序就是号的顺序。已确认。
+- 发射器自身的注册函数 0x386e3e0 对每个 3D 发射器无条件追加 1、6、7、12、14、19、25、26、40、47、48（B 列表：1、2、6、9、14、17、18、32、39、40）；2D 发射器追加 7、11、13、14、22、25、44（B：1、3、7、8、16、19）。这些步骤不属于任何属性：Velocity3D、Life、Spawn、Transform3D、EmitterShape3D 等的槽 6 都是空函数 0x6de0，它们的逐粒子工作由这组内置步骤做。已确认。内置步骤各自的作用仍按读的 ctx 偏移推定：6 / 19 同一函数 0xb0ccd90，7 / 40 同一函数 0xb050680（读 Velocity 块），12 = 0xb00ead0，14 = 0xad97170（读 Life 块，出生），25 = 0xb010440，26 = 0xaabc420（Life 逐帧），47 = 0xb11a880、48 = 0xb063730（推定积分）。
+- PtLife 在 3D 下还追加 117、118（与 2、3 同一函数），超出 A 列表的所有号段（最高到 0x74），在哪里执行没有找到。部分待确认。
 
 3D 号段与 RT 的对应：
 
-| 号段 | 循环位置 | 对应 RE4 | 步骤（号 = 所属属性；? = 由共享函数 0x386e3e0 等注册，按读的 ctx 偏移推定） |
+| 号段 | 循环位置 | 对应 RE4 | 步骤（号 = 所属属性；"内置" = 发射器自身的注册函数 0x386e3e0 追加，括号里是按读的 ctx 偏移推定的作用） |
 |---|---|---|---|
 | 0–4 | 每槽先执行（`[p+4]` 位 10 置位时；RE4 击杀检查看位 9） | 击杀检查 | 2、3 PtLife，4 PtBehavior |
-| 5–9 | 认领之后 | 其他出生源 | 5 AssignCSV，7 ?（读 ctx+0x1c0 / 0x208，与 40 同一函数），8 Attractor，9 PtProjection |
-| 0xa–0x15 | 新粒子 | 出生前置 | 11 PointCloudEmitter，13 / 15 PtFreezer，**14 ?（读 Life 块 ctx+0x1e0，即 Life 出生）**，16 ParentOptions，17 TexelChannelOperator，18 AssignCSV，20 PointCloudEmitter，21 ShaderSettings；6 / 12 / 19 未认出 |
-| 0x17–0x6e | 存活粒子 | 3d05350 | 24 Trigger，26 ?（Life 逐帧），27 Attractor，28 VanishArea3D，29–31 PtTransform3D / Clip / Expression，32 AngularVelocity3D，33 PtAngularVelocity3D，34 PtPathTranslate，35 Layout，36 Noise，**38 RotateAnim，39 ScaleAnim，40 ?（Velocity）**，41–42 PtVelocity3D / Clip，43 PtVortexelWind，45 WindInfluence3D，47–48 ?（读 ctx+0x1c8 与变换，推定积分），49 PtColliderAction，50 PtProjection，51 PtCollision，52 PtCollisionInfluence，**53–86 各 Type***，87–88 RibbonJoint*，89 PtLightningBranchAction，91 Blink，92 UVSequence，93 UVSequenceModifier，94–95 PtUvSequence / Clip，96 UVScroll，97 TextureUnit，98 AlphaCorrection，99 FluidSimulator2D，101 FlowMap，102 RgbCommon，103 RgbWater，104 ParticleTimer，105–107 PtColor / Clip / Mixer，108 DestinationCSV，109 RayTracingTarget |
+| 5–9 | 认领之后 | 其他出生源 | 5 AssignCSV，6 内置，7 内置（读 ctx+0x1c0 / 0x208，与 40 同一函数），8 Attractor，9 PtProjection |
+| 0xa–0x15 | 新粒子 | 出生前置 | 11 PointCloudEmitter，12 内置，13 / 15 PtFreezer，**14 内置（读 Life 块 ctx+0x1e0，即 Life 出生）**，16 ParentOptions，17 TexelChannelOperator，18 AssignCSV，19 内置（与 6 同一函数），20 PointCloudEmitter，21 ShaderSettings |
+| 0x17–0x6e | 存活粒子 | 3d05350 | 24 Trigger，25 内置，26 内置（Life 逐帧），27 Attractor，28 VanishArea3D，29–31 PtTransform3D / Clip / Expression，32 AngularVelocity3D，33 PtAngularVelocity3D，34 PtPathTranslate，35 Layout，36 Noise，**38 RotateAnim，39 ScaleAnim，40 内置（Velocity）**，41–42 PtVelocity3D / Clip，43 PtVortexelWind，44 PtVortexelHeatSource，45 WindInfluence3D，47–48 内置（读 ctx+0x1c8 与变换，推定积分），49 PtColliderAction，50 PtProjection，51 PtCollision，52 PtCollisionInfluence，**53–86 各 Type***，87–88 RibbonJoint*，89 PtLightningBranchAction，90 PtLightningColliderAction，91 Blink，92 UVSequence，93 UVSequenceModifier，94–95 PtUvSequence / Clip，96 UVScroll，97 TextureUnit，98 AlphaCorrection，99 FluidSimulator2D，101 FlowMap，102 RgbCommon，103 RgbWater，104 ParticleTimer，105–107 PtColor / Clip / Mixer，108 DestinationCSV，109 RayTracingTarget |
 | 0x6f–0x74 | 类型不是 0x22 / 0x23 时 | 类型后处理 | 110 PtBehavior，112 Billboard3D，113 Polygon，114 Mesh，**115 ScaleAnim（基值捕获）**，116 Trigger |
 
 与 RE4 顺序的差别：
 
-- **Type 出生抽样在碰撞之后**。RE4 默认（`[g+0xeb0] == 0`）把类型分派放在 Noise 之后、RotateAnim 之前，`!= 0` 时才移到碰撞之后（RT §1.4 第 6、16 步）。Wilds 的 Type 步骤（53–86）在 PtCollision（51）之后、Blink（91）之前，相当于 RE4 的 `!= 0` 分支，且没有看到另一种排列。因此 Wilds 中 RotateAnim / ScaleAnim / Velocity 的出生抽样先于 Type 的颜色、尺寸抽样，随机数抽取顺序与 RE4 默认路径不同。ScaleAnim 基值捕获仍在后处理（115），所以基值仍是 Type 抽样后的值。部分待确认（步骤 40 = Velocity 是按读的 ctx 偏移推定）。
+- **Type 出生抽样在碰撞之后**。RE4 默认（`[g+0xeb0] == 0`）把类型分派放在 Noise 之后、RotateAnim 之前，`!= 0` 时才移到碰撞之后（RT §1.4 第 6、16 步）。Wilds 的 Type 步骤（53–86）在 PtCollision（51）之后、Blink（91）之前，相当于 RE4 的 `!= 0` 分支，且没有看到另一种排列。因此 Wilds 中 RotateAnim / ScaleAnim / Velocity 的出生抽样先于 Type 的颜色、尺寸抽样，随机数抽取顺序与 RE4 默认路径不同。ScaleAnim 基值捕获仍在后处理（115），所以基值仍是 Type 抽样后的值。步骤顺序已确认；步骤 40 = Velocity 是按读的 ctx 偏移推定。
 - 新增的步骤属于 RE4 没有的属性：PtFreezer、PointCloudEmitter、Trigger、PtVortexelWind、RibbonJoint*、PtLightningBranchAction、FlowMap、ParticleTimer、DestinationCSV、RayTracingTarget、TypeLightning3D 等。
 - 后处理段跳过 0x22 / 0x23 类型，与 RE4 相同。
 
@@ -125,20 +144,34 @@ call/jmp 0x5fb70
 
 `VfxStudio.Re4Render/Data/re4-attribute-defaults.json` 随字段路径重新生成。没读采样代码的成对值一律用 `via.Range`。
 
+原生运行后又改了以下几处，同样字节不变（两份语料往返与基线相同，Wilds 骨骼对齐与基线相同，Re4MultiEntryTests 50/50）：
+
+| 类型 | 改动 | 依据 |
+|---|---|---|
+| ShaderSettings（≥ MHWilds） | BackfaceLightRatio 后新增 LightingGrayscaleRatio；LightingVelocityOffset 在 MHWilds 重新出现；toggle_dd2、dd2_unkn2 只留给 DD2。改后 +72..+136 依次是 LightingGrayscaleRatio、MieShadowRatio、LightingOffsetX/Y/Z、LightingVelocityOffset、InShadowDelay、TimeToFullShadow、OutShadowDelay、TimeToNoShadow、dd2_unkn1、DetonemapRatio、VolumeDepth、VolumetricIntensityBlend、DeinterlaceDistance、AlphaCoverage、SSRAlphaThreshold。原来从 +72 起整段错一个字。mhws_unkn_short → ShadingRates | 构建器在 400 份语料载荷上的标记实验（§5）；+136 → 块 0x98（SSRAlphaThreshold，构建器会截断标记值，单独用 0.25 / 0.5 验证）；+140 只在 Flags 位 13 置位时写到块 0x9c（StencilTarget）；+156 的 u16 写到五个 *ShadingRate 共用的块 0xbc。+112、+148、+152 构建器不读 |
+| FakeDoF | NearDistance → Near；其余四个字段名与引擎一致 | 解析器 + 构建器实跑，五个字逐字原样拷贝 |
+| PtVortexelHeatSource | Radius、OverwriteType、OverwritePriority（u16）、DurationFrame | 内层解析器 0xd004690；加载器区间 14 字节 = 4 + 4 + 2 + 4 |
+| FluidParticleEmitter | DensityScale、VelocityScale、SizeScale、PressureScale（+4..+16）；+0 不在解析器里，保留 Flags | 内层解析器 0xd00f000 + 构建器 |
+| RepeatArea | Area → Size（Vector3），Unkn → FadeoutStart | 内层解析器 0xd00b2c0 + 构建器 |
+| FluidParticle2DSimulator | 14 个字段命名：VortexelWindTransitionRate / Threshold / MaxSpeed（+24..+32）、PostEdgeDropoff（+48）、DensityColorMin / Max、DensityAlphaMin / Max（+52..+64）、SourceDensityScale / SourceVelocityScale（+80、+84）、WaterVelocityScale / WaterVelocityAddRate（+96、+100）、InternalInherit（+132）、Buoyancy（+136）；这些位置由 UndeterminedFieldType 改为 float（解析器按浮点解析） | 内层解析器 0xcffb940 + 构建器；加载器定长段 168 字节，与 C# 的 Flags .. dataCount 一致 |
+
+运行后确认 C# 已经正确、没有改动的：UVSequenceModifier（三对值与解析器一致，第三对双名 PlaySpeedChangeTime / Coef）、AngularVelocity3D（全部原样拷贝，AddRadiusCoef +24、AddRotationCoef +76 与解析器一致）、Spawn（SpawnNum +8、IntervalFrame +16；其余字段构建器会换算）、PlaneCollider（+4 起与解析器一致）。
+
 exe 给出了、但没有改的：
 
 | 项 | 原因 |
 |---|---|
 | Velocity3D `DirectionVectorX/Y/Z`（引擎名 DirX/Y/Z，两个 exe 相同） | 离线模拟器与预览按现名读取，改名要连带改它们 |
 | VolumetricLighting（VolumeDepth、IntensityToAlphaBlendRatio、ShadowToLightRatio、BackfaceLightRatio，16 字节）、ShapeOperator（Operator、Position、Size、Rotation、Radius，44 字节）、VolumeBufferInfluence（0x08 起 Threshold、BounceRate、DragRatio，20 字节） | C# 是不透明类，语料里没有实例；可按左列结构化，需要单独提交 |
-| ShaderSettings | 构建器按标志位条件拷贝，自动映射错位，不能用于改名 |
-| FakeDoF Near / NearDistance、FadeByEmitterAngle FadeinRange、UVSequenceModifier PlaySpeedChangeTime / Coef、PlaneCollider 0x00（解析器名 RotationOrder，C# 为 Flags） | 名字或宽度与 C# 字段不是一一对应，需要读对应的处理块 |
+| FadeByEmitterAngle | +16 / +20 两个 float 在解析器里是一对 FadeinRange（块 0x24，8 字节），采样方式没读，保留 FadeInStart / FadeInEnd；Cone、Spread 在块里各占 8 字节（另一半由构建器算出），+0 与 +24 解析器里没有名字 |
+| PlaneCollider +0 | 解析器把 RotationOrder 写进这个字，但语料取值（264、650、810 等）是位域，保留 Flags；RotationOrder 占哪几位没读 |
+| EmitterShape3D | 槽 20 落到与 AlphaCorrection 共用的解析器（HiPass / Max / LifePow0），不是它自己的，没有名字可用；构建器的拷贝关系已记在 `bm_EmitterShape3D.json` |
 | `*MaterialClip` 的 clipBits 位数 | 所有材质 Clip 共用加载器 0xaf0e3c0，位数随材质参数变化；C# 的 `BitSet(4)` 只是占位，读到第 5 位时 ReeLib 记一条错误日志（TypeRibbonLengthMaterialClip，语料 21 处），写出字节不受影响 |
-| 第 1 节列出的 11 个混淆类型 | 没有解出 vtable |
+| 第 1 节列出的 11 个混淆类型 | vtable 已补进附录。EmitterHSV（239，载荷 84）、PtLightningColliderAction（125）、各 Expression（24、62、261、280）的解析器是空函数，没有字段名；PtVortexelHeatSource（207）、RepeatArea（251）、FluidParticle2DSimulator（157）、FluidParticleEmitter（278）已改名，见上表 |
 
 ## 8. 复核
 
-脚本在共享笔记目录 `side-session-notes/local_73f294ed…/wilds-exe-scripts/`（只读 exe，不运行游戏代码）：
+脚本在共享笔记目录 `side-session-notes/local_73f294ed…/wilds-exe-scripts/`。前几个只读 exe；`emu.py` 起的脚本会执行 exe 代码（模拟或原生），都在独立子进程里跑，不碰游戏进程、不写游戏目录：
 
 | 脚本 | 产出 |
 |---|---|
@@ -147,7 +180,14 @@ exe 给出了、但没有改的：
 | `ctors.py` / `table.py` | 构造函数链 → 类型 id 与 vtable |
 | `fmap.py` / `allmap.py` / `diff.py` | §5 的字段名 → 文件偏移，以及与 C# 字段的逐项对照（`diff.txt`） |
 | `loop.py` / `seq.py` | §6.1 的三遍循环与调用序列 |
-| `steps.py` | §6.3 的步骤表与所属属性 |
+| `steps.py` | §6.3 的步骤表与所属属性（静态部分） |
+| `emu.py` | unicorn 模拟：映射 exe、补 KUSER_SHARED_DATA / PEB / TLS、AVX 指令单步补丁、int3 函数替换 |
+| `e4.py` | §2 的工厂逐个模拟，结果 `emu_fac.json` |
+| `e5.py` | §6.3 的槽 6 与 0x386e3e0 模拟，读两条列表，结果 `emu_steps.json` |
+| `wn.py` | 用 `tools/Re4Native/re4native.py` 原样映射 Wilds exe（换掉版本校验，分配器 0xb020830 换成线性分配） |
+| `n8.py` / `n9.py` | §5 的构建器原生标记实验，结果 `bm_*.json`；`W_GLOBALS`、`W_PATCH` 环境变量给 Spawn / EmitterShape3D 补单例与桩函数 |
+| `p20.py` | 内层解析器形式的字段名 → 块偏移 |
+| `rawdump/` | C# 工具：从语料读出指定类型的载荷字节（只读内存流，写到内存里的 FileHandler） |
 
 ## 附录：Wilds 属性类型表
 
@@ -179,14 +219,14 @@ exe 给出了、但没有改的：
 | 21 | Layout |  | 0x100 | e0f5ef0 | 12 + R | 12,80,108… | 0x590 |
 | 22 | PtSort | 20 | 0x48 | e0f6000 | 4 | 4 | 0x538 |
 | 23 | TypeBillboard2D | 21 | 0x80 | e0f6130 | 64 | 64 | 代码 |
-| 24 | TypeBillboard2DExpression | 22 | 0x88 | — |  |  |  |
+| 24 | TypeBillboard2DExpression | 22 | 0x88 | e0f6350 | 自定义 |  |  |
 | 25 | TypeBillboard3D | 23 | 0x90 | e0f6560 | 76 | 76 | 代码 |
 | 26 | TypeBillboard3DExpression | 24 | 0x88 | e0f6230 | 自定义 | 80,92,108… | 代码 |
 | 27 | TypeBillboard3DMaterial | 25 | 0x100 | e0f6670 | 52 | 362,364,370… | 代码 |
 | 28 | TypeBillboard3DMaterialClip | 26 | 0x98 | e0f6780 | 自定义 | 112,296,308… | 代码 |
 | 29 | TypeBillboard3DMaterialExpression | 27 | 0xe0 | e0f68a0 | 自定义 | 128,144,152… | 代码 |
 | 30 | TypeMesh | 28 | 0x198 | e0f6b90 | 自定义 | 322,330,342… | 代码 |
-| 31 | TypeMeshClip | 29 | 0x98 | — |  | 100,112,124… |  |
+| 31 | TypeMeshClip | 29 | 0x98 | e0f6cd0（按位置认定） | 自定义 | 100,112,124… |  |
 | 32 | TypeMeshExpression | 30 | 0xd8 | e0f6df0 | 自定义 | 120,152,160… | 代码 |
 | 33 | TypeRibbonFollow | 31 | 0xe0 | e0f6f90 | 自定义 | 140 | 代码 |
 | 34 | TypeRibbonLength | 32 | 0xf8 | e0f70d0 | 自定义 | 164 | 代码 |
@@ -217,7 +257,7 @@ exe 给出了、但没有改的：
 | 59 | TypeRibbonParticleMaterialExpression |  | 0xe0 | e0f8f20 | 自定义 | 184 | 代码 |
 | 60 | TypeRibbonFollowExpression |  | 0x88 | e0f9040 | 自定义 | 108,132,140… | 代码 |
 | 61 | TypeRibbonLengthExpression | 58 | 0x88 | e0f9160 | 自定义 | 104,116,132… | 代码 |
-| 62 | TypeRibbonChainExpression |  | 0x88 | — |  | 108,132,340 |  |
+| 62 | TypeRibbonChainExpression |  | 0x88 | e0f92f0 | 自定义 | 108,132,340 |  |
 | 63 | TypeRibbonFixEndExpression | 60 | 0x88 | e0f9410 | 自定义 | 156 | 代码 |
 | 64 | TypeRibbonLightweightExpression |  | 0x88 | e0f9530 | 自定义 |  | 代码 |
 | 65 | TypeRibbonParticleExpression |  | 0x88 | e0f9650 | 自定义 | 156,172,236 | 代码 |
@@ -280,7 +320,7 @@ exe 给出了、但没有改的：
 | 122 | TypeLightning3DMaterialClip |  | 0x98 | e0fd710 | 自定义 |  | 代码 |
 | 123 | TypeLightning3DMaterialExpression |  | 0xe0 | e0fd830 | 自定义 |  | 代码 |
 | 124 | TypeLightningExpensive |  | 0x1f8 | e0fd950 | 自定义 | 184 | 代码 |
-| 125 | PtLightningColliderAction |  | 0x58 | — |  | 12 |  |
+| 125 | PtLightningColliderAction |  | 0x58 | e0fda60 | 自定义 | 12 |  |
 | 126 | PtLightningBranchAction |  | 0x68 | e0fdb60 | 24 + R | 28 | 0x2a8 |
 | 127 | ShaderSettings | 123 | 0xe0 | e0fdc90 | 158 | 158 | 代码 |
 | 128 | ShaderSettingsExpression | 124 | 0x88 | e0fe060 | 自定义 | 112,136,200 | 代码 |
@@ -312,7 +352,7 @@ exe 给出了、但没有改的：
 | 154 | FluidEmitter2DClip |  | 0x80 | e0ffe80 | 自定义 |  | 代码 |
 | 155 | FluidEmitter2DExpression |  | 0x88 | e0fffa0 | 自定义 |  | 代码 |
 | 156 | FluidSimulator2D | 150 | 0x1b0 | e1000d0 | 248 |  | 代码 |
-| 157 | FluidParticle2DSimulator |  | 0x150 | — |  | 214,230,246… |  |
+| 157 | FluidParticle2DSimulator |  | 0x150 | e100240 | 168 + 自定义 | 214,230,246… |  |
 | 158 | PlayEmitter | 151 | 0x50 | e100340 | 自定义 | 494,540,545… |  |
 | 159 | PtTransform3D | 152 | 0x68 | e1004c0 | 36 | 36 | 0x140 |
 | 160 | PtTransform3DClip | 153 | 0x130 | e1005f0 | 自定义 | 40,60,72… | 0x148 |
@@ -362,7 +402,7 @@ exe 给出了、但没有改的：
 | 204 | PtVortexelWindExpression |  | 0x88 | e103820 | 自定义 | 72 | 代码 |
 | 205 | VortexelWindEmitter |  | 0x98 | e103980 | 82 | 82 | 代码 |
 | 206 | VortexelWindEmitterExpression |  | 0x88 | e103a80 | 自定义 | 80,96,120… | 代码 |
-| 207 | PtVortexelHeatSource |  | 0x50 | — |  | 14 |  |
+| 207 | PtVortexelHeatSource |  | 0x50 | e103ba0 | 14 | 14 |  |
 | 208 | VortexelCollider |  | 0x60 | e103cb0 | 32 | 32 | 代码 |
 | 209 | VortexelColliderExpression |  | 0x88 | e103db0 | 自定义 |  | 代码 |
 | 210 | VortexelIndoorMask |  | 0x58 | e103ed0 | 24 | 24 | 代码 |
@@ -394,7 +434,7 @@ exe 给出了、但没有改的：
 | 236 | TestBehaviorUpdater | 220 | 0x118 | e105920 | 4 + R |  |  |
 | 237 | StretchBlur | 221 | 0x78 | e105a20 | 48 |  | 代码 |
 | 238 | StretchBlurExpression | 222 | 0x88 | e105bb0 | 自定义 |  | 代码 |
-| 239 | EmitterHSV |  | 0x98 | — |  | 84 |  |
+| 239 | EmitterHSV |  | 0x98 | e105ce0 | 84 | 84 |  |
 | 240 | EmitterHSVExpression |  | 0x90 | e105de0 | 自定义 | 156 | 代码 |
 | 241 | FlowMap |  | 0x68 | e105f10 | 32 + R | 144,146 | 0x4c0 |
 | 242 | RgbCommon | 226 | 0xa8 | e106020 | 104 | 104 | 0x4b0 |
@@ -406,7 +446,7 @@ exe 给出了、但没有改的：
 | 248 | DestinationCSV |  | 0xc8 | e106750 | 28 + R | 170,190 | 0x4d8 |
 | 249 | GpuPhysics |  | 0x70 | e1068d0 | 25 + R |  | 0x550 |
 | 250 | TerrainSnap |  | 0x80 | e106a40 | 自定义 | 52 | 0x560 |
-| 251 | RepeatArea |  | 0x60 | — |  | 20 |  |
+| 251 | RepeatArea |  | 0x60 | e106ba0 | 自定义 | 20 |  |
 | 252 | EmitMask |  | 0x48 | e106ca0 | 4 | 4 |  |
 | 253 | ParticleTimer |  | 0x38 | e106da0 | 自定义 |  | 0x530 |
 | 254 | Trigger |  | 0x58 | e106f20 | 自定义 | 12 | 0x5a8 |
@@ -416,7 +456,7 @@ exe 给出了、但没有改的：
 | 258 | TypeGpuBillboard | 243 | 0x98 | e107240 | 自定义 | 76 | 代码 |
 | 259 | TypeGpuBillboardExpression | 244 | 0x88 | e107340 | 自定义 | 96,120,124… | 代码 |
 | 260 | TypeGpuPolygon | 245 | 0xa0 | e107460 | 自定义 | 88 | 代码 |
-| 261 | TypeGpuPolygonExpression |  | 0x88 | — |  | 132,164,196… |  |
+| 261 | TypeGpuPolygonExpression |  | 0x88 | e107560 | 自定义 | 132,164,196… |  |
 | 262 | TypeGpuRibbonFollow | 247 | 0x88 | e107680 | 60 | 60 | 代码 |
 | 263 | TypeGpuRibbonFollowExpression | 248 | 0x88 | e107780 | 自定义 | 124,176,236 | 代码 |
 | 264 | TypeGpuRibbonLength | 249 | 0xb0 | e1078a0 | 100 | 100 | 代码 |
@@ -433,7 +473,7 @@ exe 给出了、但没有改的：
 | 275 | DumpGpuParticle |  | 0x48 | e1085b0 | 4 |  | 0x578 |
 | 276 | RibbonJointOffsetVelocity |  | 0xa0 | e1086b0 | 88 |  | 0x568 |
 | 277 | RibbonJointScale |  | 0x68 | e1087b0 | 32 |  | 0x570 |
-| 278 | FluidParticleEmitter |  | 0x60 | — |  | 20 |  |
+| 278 | FluidParticleEmitter |  | 0x60 | e1088f0 | 20 | 20 |  |
 | 279 | FluidParticleEmitterTarget |  | 0x78 | e1089f0 | 20 + R | 92,96,100… | 代码 |
-| 280 | FluidParticle2DSimulatorExpression |  | 0x88 | — |  | 152 |  |
+| 280 | FluidParticle2DSimulatorExpression |  | 0x88 | e108af0 | 自定义 | 152 |  |
 | 281 | FluidParticleEmitter3D |  | 0x50 | e108c80 | 自定义 |  |  |
