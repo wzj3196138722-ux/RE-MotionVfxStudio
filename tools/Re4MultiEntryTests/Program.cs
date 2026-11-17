@@ -521,6 +521,32 @@ using (var f = await client.FrameAsync(60)) Check(f.EntryStates!.Count == deadSc
         $"carriers {string.Join(", ", carriers.Select(c => $"{c.Label} {Path.GetFileNameWithoutExtension(c.Decal!.Prefab)}"))}; at most {most} at once");
 }
 
+// 13b. Decal UVOffset / UVScale: the footprint file's decals (EnableUVRect, UVScale (+-3, 3), UVOffset (0.4|0.6, 0.66))
+// are read as vec2 and map the decal corner-to-corner onto uv = (UVOffset + cell.min) + cell.size / UVScale * unit,
+// so a negative UVScale.X mirrors (left foot) and |3| shows a third of the cell.
+{
+    string foot = Directory.EnumerateFiles(stm, "efd_0015_csa025_s00_footprint_0000.efx.3539837", SearchOption.AllDirectories).First();
+    var footScene = await PreviewSceneLoader.LoadAsync(client, foot, resources, new Dictionary<int, string>());
+    var decals = footScene.Shown.Where(e => e.Decal != null).Select(e => e.Decal!).ToArray();
+    bool read = decals.Length > 0 && decals.All(d => d.UvRect && d.UvScale is { } s && MathF.Abs(MathF.Abs(s.X) - 3) < 1e-4f && MathF.Abs(s.Y - 3) < 1e-4f);
+    bool mirrored = decals.Any(d => d.UvScale!.Value.X < 0) && decals.Any(d => d.UvScale!.Value.X > 0);
+    bool formula = true;
+    var cell = new System.Numerics.Vector4(0.25f, 0.5f, 0.75f, 1f);
+    foreach (var d in decals)
+    {
+        var s = d.UvScale!.Value;
+        var at0 = d.TexCoord(cell, System.Numerics.Vector2.Zero);
+        var at1 = d.TexCoord(cell, System.Numerics.Vector2.One);
+        formula &= System.Numerics.Vector2.Distance(at0, d.UvOffset + new System.Numerics.Vector2(0.25f, 0.5f)) < 1e-6f
+            && System.Numerics.Vector2.Distance(at1 - at0, new System.Numerics.Vector2(0.5f / s.X, 0.5f / s.Y)) < 1e-6f;
+    }
+    var plain = decals[0] with { UvRect = false };
+    formula &= plain.TexCoord(cell, System.Numerics.Vector2.One) == new System.Numerics.Vector2(0.75f, 1f);
+    Check(read && mirrored && formula,
+        "decals: footprint UVOffset / UVScale are read as vec2 and applied as (UVOffset + cell.min) + cell.size / UVScale * unit (left foot mirrored); without EnableUVRect the cell is used as is",
+        string.Join("; ", decals.Select(d => $"offset {d.UvOffset} scale {d.UvScale}").Distinct()));
+}
+
 // 14. Resource lookup order: the document's own natives root (walking up at most 16 levels) > the game's loose natives >
 // RE4_EXTRACT > paks. A file present only under the document root resolves there; with the root set it also wins over
 // the game's copy of the same path; a document deeper than the limit gets no root.

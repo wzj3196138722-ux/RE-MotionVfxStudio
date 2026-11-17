@@ -76,8 +76,9 @@ public sealed class PreviewDecalRenderer : IDisposable
     }
 
     /// <summary>Decals of <paramref name="frame"/>: one per live carrier particle between the ground and
-    /// SearchTerrainDistance above it, for every scene entry with a decal (texture or not). Uv is the texture rectangle
-    /// (left, top, right, bottom): the carrier particle's UVSequence cell with EnableUVRect, else the whole texture.</summary>
+    /// SearchTerrainDistance above it, for every scene entry with a decal (texture or not). Uv is the carrier cell
+    /// (left, top, right, bottom): the particle's UVSequence cell with EnableUVRect, else the whole texture;
+    /// <see cref="PreviewDecal.TexCoord"/> applies UVOffset / UVScale to it.</summary>
     public static IReadOnlyList<(int Table, Vector3 Center, Vector2 Size, float Roll, Vector4 Color, Vector4 Uv)> Place(PreviewScene scene, PreviewFrame frame,
         CompositionConfig config, int? soloTable = null)
     {
@@ -115,6 +116,7 @@ public sealed class PreviewDecalRenderer : IDisposable
         // One draw per decal texture, in table order.
         foreach (var group in placed.GroupBy(d => d.Table))
         {
+            var decal = scene.Shown[group.Key].Decal!;
             int n = 0;
             foreach (var (_, center, size, roll, color, rect) in group)
             {
@@ -124,7 +126,7 @@ public sealed class PreviewDecalRenderer : IDisposable
                     (center - x - z, new(0, 1)), (center + x + z, new(1, 0)), (center - x + z, new(0, 0))];
                 foreach (var (position, unit) in corners)
                 {
-                    var uv = new Vector2(rect.X + unit.X * (rect.Z - rect.X), rect.Y + unit.Y * (rect.W - rect.Y));
+                    var uv = decal.TexCoord(rect, unit);
                     int o = n++ * Floats;
                     vertices[o] = position.X; vertices[o + 1] = position.Y; vertices[o + 2] = position.Z;
                     vertices[o + 3] = uv.X; vertices[o + 4] = uv.Y;

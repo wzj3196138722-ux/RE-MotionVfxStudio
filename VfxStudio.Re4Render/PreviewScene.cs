@@ -40,13 +40,31 @@ public sealed record PreviewSceneEntry(int Position, int Index, string Name, str
 /// <param name="UvsPath">With <paramref name="UvRect"/>: the carrier's UVSequence .uvs. The decal then shows the carrier
 /// particle's current cell of the prefab's texture, so a flipbook sheet plays on the ground (checked in game 2026-11-16:
 /// Typho's kuo sheet on a TypeNoDraw carrier with kuo's UVSequence). Wilds sets EnableUVRect on decal carriers with a
-/// UVSequence too. UVOffset / UVScale are not applied (RE4 uses them only in two footprint files, without a UVSequence).</param>
+/// UVSequence too.</param>
 /// <param name="Sequences">Frame rectangles of <paramref name="UvsPath"/> (placeholder full frames when it is missing).</param>
 /// <param name="UvsMissing">The .uvs path when it was not found.</param>
+/// <param name="UvOffset">UVOffset (via.vec2; stored as property type 10, which the reader calls a Range).</param>
+/// <param name="UvScale">UVScale (via.vec2): a zoom divisor of the cell, negative mirrors.</param>
 public sealed record PreviewDecal(string Prefab, PreviewTexture? Albedo, string? TextureError, Vector3 Extent, Vector2 ScaleXY,
     float RollRange, float SearchDistance, Vector4 Color, float ObbAdd = 0, float ObbCoef = 1, bool UvRect = false,
-    string? UvsPath = null, IReadOnlyList<UvFrame[]>? Sequences = null, string? UvsMissing = null)
+    string? UvsPath = null, IReadOnlyList<UvFrame[]>? Sequences = null, string? UvsMissing = null,
+    Vector2 UvOffset = default, Vector2? UvScale = null)
 {
+    /// <summary>Texture coordinate of the decal at <paramref name="unit"/> (0..1 across the decal, from its corner) for a
+    /// carrier cell <paramref name="rect"/> (left, top, right, bottom). With EnableUVRect the script writes
+    /// <c>uv = (UVOffset + rect.min) + rect.size / UVScale · unit</c> every frame (re4.exe updateUVRect_VolumeDecal
+    /// 28f00c0; the shader gets 1/UVScale as a half float, 0 when |UVScale| &lt; 1e-4); the sampler wraps. Without
+    /// EnableUVRect the script leaves the prefab's own VolumeDecal UV values, which the preview does not read (whole
+    /// texture).</summary>
+    public Vector2 TexCoord(Vector4 rect, Vector2 unit)
+    {
+        var size = new Vector2(rect.Z - rect.X, rect.W - rect.Y);
+        if (!UvRect) return new Vector2(rect.X, rect.Y) + size * unit;
+        var scale = UvScale ?? Vector2.One;
+        static float Inverse(float s) => MathF.Abs(s) < 1e-4f ? 0 : 1 / s;
+        return UvOffset + new Vector2(rect.X, rect.Y) + size * new Vector2(Inverse(scale.X), Inverse(scale.Y)) * unit;
+    }
+
     /// <summary>Texture rectangle (left, top, right, bottom) of a carrier particle's decal: its current UVSequence cell
     /// (sequence in Flags bits 10-17, frame in 18-25, as for billboards), or the whole texture.</summary>
     public Vector4 UvOf(uint particleFlags)
@@ -106,7 +124,11 @@ public sealed record PreviewDecal(string Prefab, PreviewTexture? Albedo, string?
         var obbAdd = (Value("OBBScalarAdd") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableFloat2)?.Vec.X ?? 0;
         var obbCoef = (Value("OBBScalarCoef") as ReeLib.Efx.Structs.Pt.PtBehaviorVariableFloat2)?.Vec.X ?? 1;
         bool uvRect = behavior.properties.FirstOrDefault(p => p.behaviorProperty == "EnableUVRect")?.ValueText() is "1" or "True" or "true";
-        return new(prefab, albedo, error, extent, scale, roll, search, color, obbAdd, obbCoef, uvRect);
+        // Property type 10 is a via.vec2 (x, y) in the engine although the reader names it Range (min, max).
+        static Vector2? Vec2(ReeLib.Efx.Structs.Pt.PtBehaviorVariableDataBase? v) =>
+            v is ReeLib.Efx.Structs.Pt.PtBehaviorVariableRange r ? new Vector2(r.range.min, r.range.max) : null;
+        return new(prefab, albedo, error, extent, scale, roll, search, color, obbAdd, obbCoef, uvRect,
+            UvOffset: Vec2(Value("UVOffset")) ?? Vector2.Zero, UvScale: Vec2(Value("UVScale")));
     }
 
     /// <summary>A decal prefab names its textures directly (no material file): the *_ALBA one is the colour.</summary>
