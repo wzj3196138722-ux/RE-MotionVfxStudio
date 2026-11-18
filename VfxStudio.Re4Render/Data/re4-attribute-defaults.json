@@ -51,11 +51,11 @@
     "Attractor": {
       "samples": 245,
       "fields": {
-        "AttractPositionWorld.X": "-8",
-        "AttractPositionWorld.Y": "5",
-        "AttractPositionLocal.X": "15",
-        "AttractPositionLocal.Y": "1",
-        "ForceStatic": "0.3"
+        "AttractPosition.X": "-8",
+        "AttractPosition.Y": "5",
+        "ForceScale": "15",
+        "ReversalForceScale": "1",
+        "ForceResist": "0.3"
       }
     },
     "Blink": {

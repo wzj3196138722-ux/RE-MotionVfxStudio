@@ -1159,7 +1159,7 @@ UV：点 +0x40 = 累计弧长 / 总长（默认整条贴一次）
 
 #### 4.3.12 GPU 类型
 
-GPU 类型的出生、运动、动画都在计算着色器里完成；CPU 只把各属性的区间与参数作为常量上传（共享 tick 3e1b4e0 依次调用每个属性的 GPU 常量写入函数）。计算着色器未读，所以 GPU 类型的逐粒子公式只能按 CPU 公式近似：**折中实现**。
+GPU 类型的出生、运动、动画都在计算着色器里完成；CPU 只把各属性的区间与参数作为常量上传（共享 tick 3e1b4e0 依次调用每个属性的 GPU 常量写入函数）。GpuBillboard 的计算着色器见 [RE4-EFX-GPU-BILLBOARD](RE4-EFX-GPU-BILLBOARD.zh-CN.md)（Velocity3D、Attractor、ScaleAnim 与更新顺序已读）；其余 GPU 类型仍按 CPU 公式近似：**折中实现**。
 
 | 类型 | CPU 侧已知 | 状态 | 依据 |
 |---|---|---|---|

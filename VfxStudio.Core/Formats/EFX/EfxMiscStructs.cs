@@ -287,7 +287,41 @@ public partial class EFXAttributeEffectOptimizeShader : EFXAttribute
     public override string ToString() => !string.IsNullOrEmpty(shaderPath) ? shaderPath : type.ToString();
 }
 
-[RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.Attractor, EfxVersion.RERT, EfxVersion.RE4, EfxVersion.DD2)]
+// RE-MotionVfxStudio：RE7RT / RE4 布局。字段名取自 re4.exe 的 AttractorExpression 槽位；
+// 块构建 0x3dc81c0、GPU 上传 0x3dc8690 原样拷贝这些值。GPU 每帧（billboardcompute UpdateAttractor）：
+//   k = |目标 − 位置| > ReversalDistance ? 1 : −ReversalForceScale
+//   v += normalize(目标 − 位置) · ForceScale · k · dt          大小恒定，与距离无关
+//   v −= 0.5 · ForceResist · v² · min(dt, 1/60)                二次阻力
+// ForceScale 为 0 时没有吸引。DD2 起在 AttractPosition 后插入局部偏移 vec3、在 ForceScale 后插入
+// ForceBiRand，并追加尾部字段（见 EFXAttributeAttractor），所以两代不能共用字段名。
+// 详见 docs/development/RE4-EFX-GPU-BILLBOARD.zh-CN.md §4.2。
+[RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.Attractor, EfxVersion.RERT, EfxVersion.RE4)]
+public partial class EFXAttributeAttractorRE4 : EFXAttribute, IBoneRelationAttribute
+{
+	public EFXAttributeAttractorRE4() : base(EfxAttributeType.Attractor) { }
+
+	/// <summary>低 2 位为目标模式：2 = AttractPosition 是世界坐标点；0、1、3 = 发射器空间的偏移。位 2–4 在 CPU 路径上无作用。</summary>
+	public uint Flags;
+	/// <summary>吸引目标。模式 2 为世界坐标，其余模式为相对发射器的偏移。</summary>
+	public Vector3 AttractPosition;
+	/// <summary>吸引加速度。GPU 路径为 m/s²；CPU 路径的单位未读。</summary>
+	public float ForceScale;
+	/// <summary>进入 ReversalDistance 以内后，吸引反向为推出，推力 = ForceScale × 本值。官方文件几乎都是 1。</summary>
+	public float ReversalForceScale;
+	/// <summary>反向半径，米；0 = 不反向。</summary>
+	public float ReversalDistance;
+	/// <summary>与速度平方成正比的阻力系数。</summary>
+	public float ForceResist;
+
+	[RszInlineWString(ByteSize = true)] public string? boneName;
+
+    public string? ParentBone { get; set; }
+
+    public override string ToString() => !string.IsNullOrEmpty(boneName) ? boneName : type.ToString();
+}
+
+// DD2 及之后（含 MHWilds）。RE7RT / RE4 用 EFXAttributeAttractorRE4。
+[RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.Attractor, EfxVersion.DD2)]
 public partial class EFXAttributeAttractor : EFXAttribute, IBoneRelationAttribute
 {
 	public EFXAttributeAttractor() : base(EfxAttributeType.Attractor) { }
