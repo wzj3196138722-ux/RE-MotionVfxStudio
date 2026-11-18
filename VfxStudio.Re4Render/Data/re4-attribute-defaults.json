@@ -422,11 +422,11 @@
       "fields": {
         "ColorOperator": "PtColorOperator_Multiply",
         "AlphaOperator": "PtColorOperator_Multiply",
-        "Color.rgba": "4294967295",
-        "Color.R": "255",
-        "Color.G": "255",
-        "Color.B": "255",
-        "Color.A": "255"
+        "ElementColor.rgba": "4294967295",
+        "ElementColor.R": "255",
+        "ElementColor.G": "255",
+        "ElementColor.B": "255",
+        "ElementColor.A": "255"
       }
     },
     "PtColorClip": {

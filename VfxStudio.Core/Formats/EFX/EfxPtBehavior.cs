@@ -450,9 +450,9 @@ public partial class EFXAttributePtColor : EFXAttribute
 
 	public PtColorOperator ColorOperator;
 	public PtColorOperator AlphaOperator;
-	public via.Color Color;
+	public via.Color ElementColor;   // re4.exe 文本解析器名；原生标记实验：文件 +8 → 块
 
-	public override string ToString() => $"PtColor: {Color}";
+	public override string ToString() => $"PtColor: {ElementColor}";
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.PtColorClip, EfxVersion.DMC5)]
