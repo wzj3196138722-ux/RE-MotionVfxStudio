@@ -37,11 +37,13 @@ python -I -X utf8 -u pe_image.py "<re4.exe>" 3d1d830 80     # 反汇编一个 RV
 | `exp_wilds_emitter.py` | Wilds 语料条目上的发射器场景：步骤列表、槽数、逐帧存活数、执行过的步骤；`sweep <entries.json>` 批量跑 |
 | `exp_wilds_reference.py` | Wilds 粒子数值对照 RE4 规格与 `refsim.py`：出生时刻与 E.state、Life、积分、出生位置、出生速度、Billboard3D、出生颜色、ScaleAnim、RotateAnim、UV 帧推进与 UVSequenceModifier、Rgb* 寿命、Noise，以及含均分模式与 Box 的出生位置 |
 | `noise_ref.py` | 从 re4.exe 3dc7050 / 3dc6d50 读出的 Noise 参考实现（出生抽取、每帧偏移、相位推进） |
+| `equidistant_ref.py` | 从 re4.exe 读出的等距圆柱参考实现：建表 3d23470（64 点弦长 + 10 次二分）、查表 3d20e20、取点 3d22030 |
 | `refsim.py` | 规格 §1.6 的参考随机数（种子、xorshift32、CenterSpread、ScaleAnim 与 Blink 的抽取顺序） |
 | `exp_map.py` | 映射、导入绑定、故障与陷阱的捕获 |
 | `exp_scaleanim.py` | ScaleAnim 闭式函数 3cfd420 与逐粒子步 3d1d830 + 基值捕获 3d1dd00 |
 | `exp_blink.py` | Blink 3dc7a20 |
 | `exp_noise.py` | Noise 3dc7050 对照 `noise_ref.py`（RE4 语料中唯一带 Noise 的 Billboard3D 条目，逐帧偏移与逐粒子记录） |
+| `exp_equidistant.py` | 等距圆柱对照 `equidistant_ref.py`（RE4 语料中唯一的等距条目 csa071 smoke：引擎的表逐项、出生位置） |
 | `exp_loader.py` | 引擎自己的构造函数 → 加载器（槽 5）→ 块构建器（槽 15），输入为语料 .efx 的原始字节 |
 | `exp_rng.py` | 两个播种函数与 ScaleAnim / Blink 出生抽取对照 `refsim.py` |
 | `exp_pipeline.py` | 整个逐粒子管线 3d05350，ctx 中只挂 ScaleAnim 与 Blink |

@@ -21,7 +21,9 @@ Checks (spec section in brackets):
            c (3d231b0: b index = c % Vn, a index = (c / Vn + c % Vn) % Hn, a = index / Hn when H.span is exactly
            the float 2pi, else index / (Hn - 1); one cell -> 0.5); Box takes the RangeDivideAxis coordinate as
            (c % Dn) / (Dn - 1) * 2 - 1 (3d223c0, own counter wrapping at Dn), and its shell test cascades from the
-           first other axis to the second. RangeDivideNum is not read by Sphere / Cylinder, H / V nums not by Box
+           first other axis to the second. RangeDivideNum is not read by Sphere / Cylinder, H / V nums not by Box.
+           DivideEquidistant cylinders use equidistant_ref.py (the engine's arc-length table); no corpus entry with
+           it runs natively, so the eq_* scenarios set the flag in a copy of a working entry (see EQUIDISTANT)
   vel      Velocity3D spawn draws (salt 0x23): Normal direction, Speed, GravityRate, SpeedCoef (§3.2, §1.6.3)
   bb       TypeBillboard3D spawn draws (salt 0x0f): SizeScalar, SizeX, SizeY, Rotation, each skipped at spread 0
   color    with Billboard3D Flags bit 4: one more draw u first, colour byte = trunc(lerp(Color, ColorRange, u)),
@@ -130,6 +132,19 @@ ENTRIES = {
                      shape=dict(kind="cylinder", X=(0.7, 1), Y=(0, 0.2), Z=(1, 1.3), H=(0.34906587, 2.4434612), V=(1, 0), ext=True, rot=(0, 0, 0), hn=4)),
     "cyl_hv": dict(path=r"EffectEditor\Enemy\em0009\11_em0009_00_401.efx.5571972", off=16886,
                    shape=dict(kind="cylinder", X=(0.5, 0.9), Y=(0, 0.19999999), Z=(0.5, 0.9), H=(0, 4.363323), V=(1, 0), ext=True, rot=(0, 0.43633235, 0), hn=7, vn=7)),
+    # Equidistant cylinders: the same three cylinders with DivideEquidistant set in a temporary copy (no Wilds
+    # corpus entry with it runs natively: 143 of 158 stop in other steps, 15 have no particles). tr = Transform3D
+    # LocalPosition, part of the matrix the table is built with. cyl_part: ellipse 0.85 / 1.15, H over 140°,
+    # UseExtension; em21: circle, H 2 over a full turn, UseExtension off; em2: circle, angle drawn, LocalRotation.X 90°
+    "eq_cyl_part": dict(path=r"EffectEditor\Enemy\em0005\11_em0005_00_204.efx.5571972", off=5496, equidistant=(0.7, 1),
+                        shape=dict(kind="cylinder", X=(0.7, 1), Y=(0, 0.2), Z=(1, 1.3), H=(0.34906587, 2.4434612), V=(1, 0),
+                                   ext=True, rot=(0, 0, 0), hn=4, equi=True, tr=(0, -0.03, 0))),
+    "eq_em21": dict(path=r"EffectEditor\Enemy\em0021\11_em0021_00_206.efx.5571972", off=5845, equidistant=(0.020000003, 0.1),
+                    shape=dict(kind="cylinder", X=(0.020000003, 0.1), Y=(0.54999995, 0.54999995), Z=(0.020000003, 0.1),
+                               H=(0, 6.2831855), V=(1, 0), ext=False, rot=(0, 0, 0), hn=2, equi=True, tr=(0, -0.79999995, -1.2))),
+    "eq_em2": dict(path=r"EffectEditor\Enemy\em0002\11_em0002_00_800.efx.5571972", off=173, equidistant=(0, 0.3),
+                   shape=dict(kind="cylinder", X=(0, 0.3), Y=(-0.5, 0.3), Z=(0, 0.3), H=(0, PI), V=(1.25, -0.5), ext=True,
+                              rot=(math.pi / 2, 0, 0), equi=True, tr=(0, 0, 0))),
     # Spawn Max 1, LoopNum 1; no Velocity3D; Life 0 / 1 / 3
     "s012": dict(path=r"EffectEditor\Common\slinger\11_pl_slinger_012.efx.5571972", off=906,
                  delay=0, interval=0, loops=1, spawn_num=1, cap=1, life=((0, 0), (1, 1), (3, 3)),
@@ -143,7 +158,33 @@ SCENARIOS = {"em2_60": ("em2", "60"), "em2_60_b": ("em2", "60"), "em2_var": ("em
              "s053_60": ("s053", "60"), "s012_60": ("s012", "60"),
              "em2_uvs16": ("em2", "60", dict(uvs=16, only=("uv",))),   # PlayMode 2 reaching the last pattern
              "box_div": ("box_div", "60", dict(only=("shape",))), "cyl_part": ("cyl_part", "60", dict(only=("shape",))),
-             "cyl_hv": ("cyl_hv", "60", dict(only=("shape",)))}
+             "cyl_hv": ("cyl_hv", "60", dict(only=("shape",))),
+             "eq_cyl_part": ("eq_cyl_part", "60", dict(only=("shape",))), "eq_em21": ("eq_em21", "60_long", dict(only=("shape",))),
+             "eq_em2": ("eq_em2", "60", dict(only=("shape",)))}
+SHAPE_TYPE = 105   # Wilds EmitterShape3D type id
+
+
+def equidistant_copy(src, start, range_x):
+    """A copy of src in the temp folder with DivideEquidistant set on the entry's EmitterShape3D (payload +64, checked
+    against RangeX first). The game folder is only read."""
+    import tempfile
+    data = bytearray(open(src, "rb").read())
+    pos = start + 16
+    for _ in range(struct.unpack_from("<I", data, start + 12)[0]):
+        tid, size = struct.unpack_from("<2I", data, pos)
+        if tid == SHAPE_TYPE:
+            p = pos + 12                       # type id, declared size, UniqueID
+            got = struct.unpack_from("<2f", data, p)
+            if any(abs(a - b) > 1e-6 for a, b in zip(got, range_x)) or bytes(data[p + 64:p + 67]) != bytes(3):
+                raise RuntimeError(f"unexpected EmitterShape3D payload at {p:#x}: RangeX {got}")
+            data[p + 64] = 1
+            folder = os.path.join(tempfile.gettempdir(), "re4native-equidistant")
+            os.makedirs(folder, exist_ok=True)
+            out = os.path.join(folder, f"{start}_{os.path.basename(src)}")
+            open(out, "wb").write(data)
+            return out
+        pos += 8 + size
+    raise RuntimeError("no EmitterShape3D in the entry")
 
 
 def run(name):
@@ -156,7 +197,10 @@ def run(name):
     me.install_runtime(img)
     out = dict(scenario=name, entry=f"{os.path.basename(ent['path'])}@{ent['off']}", uvs=me.UVS_SHAPE[1], frames=[])
     try:
-        e = me.Entry(img, os.path.join(ROOT, ent["path"]), ent["off"])
+        src = os.path.join(ROOT, ent["path"])
+        if "equidistant" in ent:
+            src = equidistant_copy(src, ent["off"], ent["equidistant"])
+        e = me.Entry(img, src, ent["off"])
         e.set_3d(10 in [a["type"] for a in e.attrs])
         e.register_steps(img)
         m = me.Emitter(img, e)
@@ -197,6 +241,22 @@ def _rot(r):
 
 
 TWO_PI_F = float(F(2 * math.pi))
+
+
+_TABLES = {}
+
+
+def _equidistant_table(sh, H):
+    """The engine's table for one shape: mean radii (CalcOuterCurveData off), matrix = shape rotation + translation."""
+    key = id(sh)
+    if key not in _TABLES:
+        import equidistant_ref as eq
+        M = np.eye(4)
+        M[:3, :3] = _rot(sh["rot"])
+        M[3, :3] = sh.get("tr", (0, 0, 0))
+        mean = lambda r: eq.F(eq.F(eq.F(r[0]) + eq.F(r[1])) * eq.F(0.5))   # noqa: E731
+        _TABLES[key] = eq.build(M.flatten().tolist(), mean(sh["X"]), mean(sh["Z"]), 64, H[0], eq.F(H[1]), not sh["ext"])
+    return _TABLES[key]
 
 
 def _divide(c, hn, vn, wrap):
@@ -249,6 +309,12 @@ def _shape_local(sh, g, c):
             d = d / np.linalg.norm(d)
             t = float(g.u())
         return np.array([lerp(*X, t) * d[0], lerp(*Y, t) * d[1], lerp(*Z, t) * d[2]])
+    if sh.get("equi"):                          # DivideEquidistant (3d22b00): a, b, then t; the angle from the table
+        import equidistant_ref as eq
+        a = a if a >= 0 else float(g.u())
+        b = b if b >= 0 else float(g.u())
+        t = float(g.u())
+        return np.array([float(v) for v in eq.sample(_equidistant_table(sh, H), 64, a, b, t, X, Y, Z, H, V, ext)])
     if a >= 0 or ext:                           # cylinder
         a = a if a >= 0 else float(g.u())
         th = H[0] + a * H[1]

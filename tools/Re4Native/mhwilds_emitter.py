@@ -60,6 +60,7 @@ PATCHES = {
 EFFECT_KEEP_WITHOUT_JOINT = 1 << 20
 
 UVS_SHAPE = [4, 16]   # synthetic UVS: 4 sequences of 16 patterns, no UV rectangles
+THREAD_TABLE_LOCK = 0x14905870   # CRITICAL_SECTION in .bss, set up by a static initializer in the game
 
 STUB_FN = ctypes.CFUNCTYPE(ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64)
 CALLS = []
@@ -125,6 +126,9 @@ def install_runtime(img):
     stub(img, 0x614A0, "resource lookup", _resource)
     stub(img, 0x1E1DE0, "render slot alloc", lambda *a: img.alloc(0x2000))
     tls = wn.install_static_tls(img)
+    # critical section of the engine's thread-index table (17871dc0, reached through b006400 from the memory-tag
+    # scope 0x2100 that the equidistant-cylinder table builder b4e4a60 opens); RE4's is d78b380 in emitter.py
+    ctypes.WinDLL("kernel32").InitializeCriticalSection(ctypes.c_void_p(B + THREAD_TABLE_LOCK))
     return dict(singletons=out, tls=tls)
 
 

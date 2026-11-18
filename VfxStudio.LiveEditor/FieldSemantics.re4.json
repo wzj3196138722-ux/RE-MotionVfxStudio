@@ -131,9 +131,9 @@
       "UseExtension": { "help": "0 时 ScaleHorizontal / ScaleVertical 被默认值覆盖（不起作用）。" },
       "ScaleHorizontal": { "help": "Sphere / Cylinder：方位角区间 θ = start + t·span；Box：锥形收缩系数。", "when": {"field": "UseExtension", "nonZero": true, "why": "UseExtension 为 0：被默认值覆盖"} },
       "ScaleVertical": { "help": "Sphere：仰角区间 φ = start + t·span；Box：锥形收缩系数；Cylinder：沿高度的收缩。", "when": {"field": "UseExtension", "nonZero": true, "why": "UseExtension 为 0：被默认值覆盖"} },
-      "DivideEquidistant": { "when": {"field": "ShapeType", "in": ["Shape3DType_Cylinder"], "why": "只有 Cylinder 有等距模式"} },
-      "DivideEquidistantCalcOuterCurveData": { "when": {"all": [{"field": "ShapeType", "in": ["Shape3DType_Cylinder"], "why": "只有 Cylinder 有等距模式"}, {"field": "DivideEquidistant", "nonZero": true, "why": "DivideEquidistant 未开启"}]} },
-      "DivideEquidistantRecalcEveryFrameData": { "when": {"all": [{"field": "ShapeType", "in": ["Shape3DType_Cylinder"], "why": "只有 Cylinder 有等距模式"}, {"field": "DivideEquidistant", "nonZero": true, "why": "DivideEquidistant 未开启"}]} }
+      "DivideEquidistant": { "help": "方位角按椭圆弧长等分：椭圆截面上相邻粒子间距相等（不开时按角度等分）。引擎用 64 点弦长近似建表。", "when": {"field": "ShapeType", "in": ["Shape3DType_Cylinder"], "why": "只有 Cylinder 有等距模式"} },
+      "DivideEquidistantCalcOuterCurveData": { "help": "内、外两个椭圆各建一张表，按半径插值点在两表之间；关时用平均半径建一张表。官方文件都关着。", "when": {"all": [{"field": "ShapeType", "in": ["Shape3DType_Cylinder"], "why": "只有 Cylinder 有等距模式"}, {"field": "DivideEquidistant", "nonZero": true, "why": "DivideEquidistant 未开启"}]} },
+      "DivideEquidistantRecalcEveryFrameData": { "help": "每帧重建弧长表（半径或形状矩阵会变时需要）；关时只在开始时建一次。官方文件都关着。", "when": {"all": [{"field": "ShapeType", "in": ["Shape3DType_Cylinder"], "why": "只有 Cylinder 有等距模式"}, {"field": "DivideEquidistant", "nonZero": true, "why": "DivideEquidistant 未开启"}]} }
     },
     "ScaleAnim": {
       "SizeScalarAdd": { "help": "统一尺寸每帧增量。Coef = 1：尺寸 = 基准 + Add·t；否则 基准 + Add·Coef·(1 − Coef^t)/(1 − Coef)；结果 ≥ 0。", "unit": "每帧" },

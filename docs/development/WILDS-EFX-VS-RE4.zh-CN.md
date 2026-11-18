@@ -154,7 +154,7 @@ E 的偏移：状态 +0x100（RE4 +0x170），槽数 +0x84，粒子槽 +0x120（
 
 ### 6.5 与参照比对
 
-参照是 RE4 运行时规格（[RE4-EFX-RUNTIME.zh-CN.md](RE4-EFX-RUNTIME.zh-CN.md)，下称 RT）的公式和 `tools/Re4Native/refsim.py` 的随机数。期望值由 ReeLib 读出的字段值（`VfxStudio.Core` 的 MHWilds 结构）按这些公式算出，`tools/Re4Native/exp_wilds_reference.py` 与原生运行逐帧比较。比较了 10 个 Billboard3D 条目、13 个场景：其中一个用可变 dt，一个在另一个进程里重跑（两次结果相同），一个把合成 .uvs 缩短到 16 个图案，让 PlayMode 2 播到末帧，三个只比出生位置（Box 均分、横向范围不足一圈的圆柱、H / V 同时均分且绕 Y 轴旋转的圆柱）。
+参照是 RE4 运行时规格（[RE4-EFX-RUNTIME.zh-CN.md](RE4-EFX-RUNTIME.zh-CN.md)，下称 RT）的公式和 `tools/Re4Native/refsim.py` 的随机数。期望值由 ReeLib 读出的字段值（`VfxStudio.Core` 的 MHWilds 结构）按这些公式算出，`tools/Re4Native/exp_wilds_reference.py` 与原生运行逐帧比较。比较了 10 个 Billboard3D 条目、16 个场景：其中一个用可变 dt，一个在另一个进程里重跑（两次结果相同），一个把合成 .uvs 缩短到 16 个图案，让 PlayMode 2 播到末帧，三个只比出生位置（Box 均分、横向范围不足一圈的圆柱、H / V 同时均分且绕 Y 轴旋转的圆柱），三个是等距圆柱的合成副本（见下文）。
 
 Noise 的公式和形状均分规则原先不在 RT 里（均分只到"部分待确认"）。这两项的参照是这次从 re4.exe 读出来的（见下文），Noise 公式先在 RE4 原生运行上核对过，再用来比 Wilds；两者现已写进 RT §3.1 与 §3.8。
 
@@ -195,7 +195,7 @@ Noise（re4.exe 3dc7050 逐粒子、3dc6d50 求偏移；`tools/Re4Native/noise_r
 
 频率单位是周 / 秒（dt 为秒）。这个公式在 RE4 上核对过：`tools/Re4Native/exp_noise.py` 用 RE4 语料里唯一带 Noise 的 Billboard3D 条目（csa114 dust，25 个粒子），5,424 帧的偏移与记录逐位一致。偏移另放在粒子的独立字段里，位置本身不变；它怎样进入渲染位置没有追。
 
-把参照里的任意一个字段值改一点（速度、Offset、KeepFrame、旋转范围、ScaleAnim Add、形状半径、图案区间、IntervalFrame、ColorRange、PlaySpeed、PlayMode、Modifier 系数、Rgb 的 Keep / Vanish、H.span、均分数、均分轴、Noise 的频率与幅度），对应的那一项就报 FAIL，其他项不变。所以上表也说明这些字段在 C# 结构里的位置是对的。
+把参照里的任意一个字段值改一点（速度、Offset、KeepFrame、旋转范围、ScaleAnim Add、形状半径、图案区间、IntervalFrame、ColorRange、PlaySpeed、PlayMode、Modifier 系数、Rgb 的 Keep / Vanish、H.span、均分数、均分轴、等距开关、Noise 的频率与幅度），对应的那一项就报 FAIL，其他项不变。所以上表也说明这些字段在 C# 结构里的位置是对的。
 
 与 RE4 不同的地方：
 
@@ -208,6 +208,14 @@ RT 没有写、原生运行中观察到的：
 - Rgb* 的寿命计数在出生那一帧就减 1（Life 的计数不减）；结束后 remain 继续往负数减，阶段码为 9。
 - Rgb* 用槽号作 key，所以 E.state 不变时同一个槽先后出生的粒子抽到相同的时长（jimen 的 0 号、3 号粒子）。
 
+等距圆柱（DivideEquidistant，规则见 RT §3.1，参考实现 `tools/Re4Native/equidistant_ref.py`）：
+
+- **语料条目：** Wilds 语料里有 178 个打开等距的条目，全部是 Cylinder，都没开 CalcOuterCurveData / RecalcEveryFrameData。其中 158 个是 CPU Billboard3D。
+- **运行时补件：** 起初这 158 个都跑不起来：23 个在建表时申请临时内存，走到线程下标表的注册函数 0x17871dc0，进入一个从未初始化的临界区（0x14905870，游戏里由静态初始化建立）。`mhwilds_emitter.install_runtime` 现在先初始化它（RE4 的同类临界区 d78b380 早已这样处理）。其余 120 个停在别的步骤，15 个没有粒子。
+- **结果：** 这 23 个语料条目都能原生跑，出生位置与参考实现逐粒子一致（误差 ≤ 7.2e-8），覆盖椭圆截面（如 evc0019 的 rx 0.3..0.8、rz 0..0.5）、UseExtension、横向不足一圈、带横向均分。
+- **合成场景：** 对照脚本的三个 `eq_*` 场景把三个能跑的圆柱条目复制到临时目录，只置位 DivideEquidistant，结果也一致。其中 cyl_part 是椭圆、横向 140°、带 UseExtension。
+- **两个反例：** 换回普通圆柱的模型，偏差 0.18；换成理想的等弧长表，偏差约 1e-3。所以引擎的 64 点弦长和 10 次二分必须照搬。
+
 替身的影响：
 
 - 合成的 .uvs 每个序列只有 16 个图案时，PlayMode 2 的条目（UVSequence Flags 低 2 位为 2，如 em0002_00_800 的 554）很快播到末帧并杀掉粒子：em0002 的粒子只活 6 帧，Life 是 49 帧。这是 RT 写的行为，不是错误；但真实 .uvs 的图案数不同，寿命也会不同。其余场景把合成序列加长到 255 个图案。真实的 .uvs 不在解包目录里。
@@ -216,7 +224,7 @@ RT 没有写、原生运行中观察到的：
 
 - 顶点颜色与着色器里的合成（RT §4.10 第 4 步起）、ColorRate / Intensity、RgbCommon 的红层系数（AlphaToB 驱动，记录里第 7、8 个字在红层结束后变为 1.0，含义没有对）、Rgb* 的 Appear 段和第二个通道的抽取位置（样本里都是定值）。
 - ParentOptions 跟随、GPU 类型、UV 的翻转 / 倒放（Reverse 只在 CPU 路径影响帧号，样本里都关着）。
-- 形状：DivideEquidistant（语料里没有打开的条目）、RotationCorrect 的相机模式（3 个条目跳过）、绕多个轴的 LocalRotation（模型只写了单轴旋转）；Noise 偏移进入渲染位置的方式。
+- 形状：DivideEquidistant 的双表（CalcOuterCurveData）与每帧重建（RecalcEveryFrameData），语料里没有打开的条目；RotationCorrect 的相机模式（3 个条目跳过）、绕多个轴的 LocalRotation（模型只写了单轴旋转）；Noise 偏移进入渲染位置的方式。
 
 ## 7. 对 C# 读取器的修改
 
@@ -283,7 +291,8 @@ exe 给出了、但没有改的：
 | `rawdump/` | C# 工具：从语料读出指定类型的载荷字节（只读内存流，写到内存里的 FileHandler） |
 | `tools/Re4Native/exp_wilds_emitter.py` | §6.4：内置条目或 `sweep <entries.json>`，每个条目一个子进程，报告步骤列表、槽数、逐帧存活数、执行过的步骤 |
 | `tools/Re4Native/exp_noise.py`、`noise_ref.py` | §6.5：Noise 参考实现，以及它在 RE4 原生运行上的核对 |
-| `tools/Re4Native/exp_wilds_reference.py` | §6.5：13 个场景，每个一个子进程，逐项对照 RT 的公式与 `refsim.py`，最后一行 `RESULT` 汇总各项 PASS / FAIL |
+| `tools/Re4Native/exp_equidistant.py`、`equidistant_ref.py` | §6.5：等距圆柱参考实现，以及它在 RE4 原生运行上的核对 |
+| `tools/Re4Native/exp_wilds_reference.py` | §6.5：16 个场景，每个一个子进程，逐项对照 RT 的公式与 `refsim.py`，最后一行 `RESULT` 汇总各项 PASS / FAIL |
 
 ## 附录：Wilds 属性类型表
 

@@ -295,7 +295,7 @@ rnd(c, r) = f32( f32( f32(u()·2.0) − 1.0 ) · r ) + c       // CenterSpread�
 | Spawn（1，key 0） | 启动时：LoopNum（3d14b60，未解码）、EmitterDelayFrame、IntervalFrame、SpawnNum；**每批：SpawnNum，然后 IntervalFrame**。复活（0xe4bcc19e）：1 次 `min + x % (extra+1)` | 整数取模，无门控；16 位存储截断。每 tick 用当前 `E.state` 重新播种，所以每次都是新流的头几次抽取 | LoopNum 与 3d154d0 内顺序部分待确认，其余已确认 | ORD 3d14c64..3d14f97 |
 | Life（0x29） | 出生：x1 → AppearFrame，x2 → KeepFrame，x3 → VanishFrame；KeepHoldFrame 复用 x2；KeepHold {0,0} → 0x7fff | 整数，无门控；KeepHold 仅 Flags & 3 ≠ 0 | 已确认 | ORD 3d1bf04..3d1bff8 |
 | ParentOptions（0xf62e295d，槽号） | ① ConstInheritRate `clamp(rnd, 0, 1)` ② ConstFrame ③ ConstReleaseFrame（负值置 0） | 仅 ParticleUseLocal 且新粒子；"不跟随"时跳过 ②③ | 已确认 | ORD 3d36ad0..3d36bde |
-| EmitterShape3D（0x30） | Box：轴 `k = x % 3`，再 u_x、u_y、u_z（各 ∈ [−1,1)），壳逻辑不再抽取；均分时不抽轴号，均分轴的 u 也不抽。Sphere 默认：3 次方向（[−1,1)，归一化，过小时为 0），再 1 次 t。UseExtension / 均分：角 a（未设时抽）、角 b（同）、再 t。Cylinder 默认：2 次 XZ 方向、t、h（均分未设时）；横向均分或 UseExtension：角（未设时抽）、t、h（未设时抽）。等距圆柱（3d22b00）：a、h、t（各在未设时抽） | a、b、h 在对应均分数为 0 时为 −1（需抽），否则由形状计数器 `shape+0x158` 按 §3.1 的交错算出，不抽 | 已确认；等距圆柱的交错未核对 | ORD 3d22444..3d22613、3d22e0b..3d22fdd、3d228a1..3d22a55；3d231b0、3d223c0 |
+| EmitterShape3D（0x30） | Box：轴 `k = x % 3`，再 u_x、u_y、u_z（各 ∈ [−1,1)），壳逻辑不再抽取；均分时不抽轴号，均分轴的 u 也不抽。Sphere 默认：3 次方向（[−1,1)，归一化，过小时为 0），再 1 次 t。UseExtension / 均分：角 a（未设时抽）、角 b（同）、再 t。Cylinder 默认：2 次 XZ 方向、t、h（均分未设时）；横向均分或 UseExtension：角（未设时抽）、t、h（未设时抽）。等距圆柱（3d22b00）：a、h、t（各在未设时抽） | a、b、h 在对应均分数为 0 时为 −1（需抽），否则由形状计数器 `shape+0x158` 按 §3.1 的交错算出，不抽 | 已确认 | ORD 3d22444..3d22613、3d22e0b..3d22fdd、3d228a1..3d22a55；3d231b0、3d223c0、3d22b00 |
 | Velocity3D（0x23） | init 时延迟：Flags 位 5 时 SpeedDelayFrame、位 6 时 GravityDelayFrame（`x % (2·spread+1) − spread + center`）；无待定延迟时方向：Direction = 3 次 `rnd(DirX/Y/Z)`，Normal / Radial = 0 次，Spread = 2 次（极角、方位角），有形状块的其他类型 = 0 次；然后 **Speed**、**GravityRate**、**SpeedCoef**、**InheritRate**（Flags 位 0） | 方向无门控；Speed 有门控；Gravity 在 center 与 spread 都为 0 时跳过；SpeedCoef、Inherit 无门控 | 已确认 | ORD 3d1af0e、3d1b3f6..3d1b704 |
 | RotateAnim（0x25） | X-Add、X-Coef、[X 符号]、Y-Add、Y-Coef、[Y 符号]、Z-Add、Z-Coef、[Z 符号]；符号抽取仅 Flags 位 0，x 为偶数时取反 | **无门控** | 已确认 | ORD 3d1ce3d..3d1d036 |
 | ScaleAnim（0x27） | ScalarAdd、ScalarCoef、XAdd、XAddCoef、YAdd、YAddCoef、ZAdd、ZAddCoef | 各自有门控 | 已确认 | SCA |
@@ -352,7 +352,6 @@ E.seed = seed
 | 项 | 影响 |
 |---|---|
 | Spawn LoopNum 抽取（3d14b60）、3d154d0 内的取模顺序、三个 Spawn 调用点之间的流衔接 | 多轮发射的批数 |
-| EmitterShape3D 等距圆柱（3d22b00）的均分交错（其余均分规则见 §3.1） | 等距圆柱的发射点位 |
 | PtCollision / PtColliderAction 的抽取次数、Transform3DModifier 抽取位置、Rgb* / AngularVelocity / Polygon / Trail / Strain / Lightning / 材质变体的抽取顺序 | 这些属性与游戏逐粒子对齐 |
 | GPU 类型的计算着色器种子（CPU 种子是否传入未知） | GPU 类型的随机值 |
 | CRT 的 `sqrtf / sinf / cosf / powf` 与 numpy 末位差异 | 浮点逐位一致 |
@@ -567,11 +566,13 @@ RE4 文件里没有 TrySpawnAllParticles、InitializeFull、SpawnChanceFrame、O
 | `RangeX` / `RangeY` / `RangeZ` | InnerOuter | Box：内空心半边长 / 外半边长；Sphere：每轴内 / 外半径；Cylinder：X、Z 为内 / 外半径，Y 为高度起点 / 终点（单侧，不是 ±） | 已确认 | SEM 3d223c0, 3d22d50, 3d22800 |
 | `ShapeType` | Shape3DType | Box 0、Sphere 1、Cylinder 2 | 已确认 | SEM（枚举注册 4b12a00..） |
 | `RangeDivideNum`、`RangeDivideAxis` | u32 | 只有 Box 读：均分轴的坐标按块计数步进，不再抽轴号（见下方采样） | 已确认 | 3d223c0 |
-| `RangeDivideHorizontalNum`、`RangeDivideVerticalNum` | u32 | 只有 Sphere、Cylinder 读：把随机的 a、b 换成按块计数的均分位置（3d231b0，见下方采样） | 已确认（等距圆柱 3d22b00 未核对） | 3d231b0 及调用处 3d22854、3d22b44、3d22da2 |
+| `RangeDivideHorizontalNum`、`RangeDivideVerticalNum` | u32 | 只有 Sphere、Cylinder 读：把随机的 a、b 换成按块计数的均分位置（3d231b0，见下方采样） | 已确认 | 3d231b0 及调用处 3d22854、3d22b44、3d22da2 |
 | `LocalRotation` | Vector3，弧度 | 形状旋转 R = euler(LocalRotation, RotationOrder)，每帧重建（3d242d0），同时保存 R⁻¹ | 已确认 | SEM |
 | `RotationOrder` | 同 Transform3D | | 已确认 | SEM |
 | `RotationCorrect` | 枚举 | 1、2 时 R 依赖相机（3d21210 调用相机取值） | 部分待确认 | SEM |
-| `DivideEquidistant*` | bool ×3 | Cylinder 等距模式走 3d22b00 | 部分待确认 | SEM |
+| `DivideEquidistant` | bool | 只有 Cylinder 读：方位角按椭圆弧长等分（3d22b00，见下方采样） | 已确认 | 3d22b00、3d23470 |
+| `DivideEquidistantCalcOuterCurveData` | bool | 内、外椭圆各建一张表，按 t 在两点之间插值；关时用平均半径建一张表 | 读码已确认；原生运行未覆盖（语料无） | 3d210d0、3d22b00 |
+| `DivideEquidistantRecalcEveryFrameData` | bool | 每帧重建表（半径或形状矩阵会变时）；关时只在首次建一次 | 读码已确认；原生运行未覆盖（语料无） | 3d210d0 |
 | `UseExtension` | bool | 0 时下两项被默认值覆盖：Box H=(1,0)、V=(1,0)；Sphere H=(0,2π)、V=(−π/2,π)；Cylinder H=(0,2π)、V=(1,0) | 已确认 | SEM |
 | `ScaleHorizontal` / `ScaleVertical` | StartSpan | Sphere / Cylinder 的角度区间（θ、φ）；Box 的锥形收缩系数；Cylinder 的 V 为沿高度的收缩 | 已确认 | SEM |
 
@@ -605,7 +606,35 @@ Sphere / Cylinder 的均分（3d231b0；c = 块 +0x158，调用处每次采样�
 - RangeDivideNum / Axis 只有 Box 读；H / V 均分数只有 Sphere、Cylinder 读。语料里存在 Sphere、Cylinder 带 RangeDivideNum、Box 带 H / V 均分数的条目，这些字段对它们不起作用。
 - 级联的壳判断与旧版本文"两条其余轴都走壳公式"不同。已比过的 Box 条目 inner 都是 0，两种写法结果相同，原生运行没能区分。
 
-状态：已确认（读码 3d24d00、3d223c0、3d231b0 及调用处）。均分规则在 MonsterHunterWilds.exe 的同一套采样代码上原生运行核对过：39 个带均分的条目逐粒子一致，覆盖 H / V 同时均分、横向不足一圈、Box 均分（`docs/development/WILDS-EFX-VS-RE4.zh-CN.md` §6.5）。re4.exe 上没有单独做原生运行。等距圆柱（3d22b00）的交错未核对。
+等距圆柱（Cylinder 且 DivideEquidistant；属性对象 +0x6c / +0x6d / +0x6e 依次是 DivideEquidistant、CalcOuterCurveData、RecalcEveryFrameData）：方位角不再与 a 成正比，而是按椭圆弧长等分，所以椭圆截面上相邻粒子的间距相等。
+
+```
+抽取（3d22b00）：a、b 先取 3d231b0 的均分值（规则同上），未均分的依次抽 a、b；再抽 t
+  y = lerp(Y.inner, Y.outer, b)
+  单表（CalcOuterCurveData 关，语料全部如此）：rX = lerp(X.inner, X.outer, t)，rZ = 同理；点 = 3d22030(表 0, rX, y, rZ)
+  双表（CalcOuterCurveData 开）：内、外椭圆各取一点（表 0 用 inner 半径，表 1 用 outer），x、z 再按 t 插值，y 取外点
+3d22030：UseExtension 开：v = 查表(a·(N−1))
+         UseExtension 关（半圈表）：a > 0.5 时 v = 查表((a − 0.5)·2·(N−1)) + 0.5（double 运算），否则 v = 查表(a·2·(N−1))
+         θ = H.start + v·H.span;  x = cosθ·rX;  z = sinθ·rZ;  UseExtension 开时 x、z 再乘 V.start + b·V.span
+查表（3d20e20）：i = floorf(s)，i = N − 1 时取 table[i]，否则 (1 − f)·table[i] + f·table[i+1]
+建表（3d23470，由 3d210d0 在块 +0x164 / +0x165 置位时调用；之后只在 RecalcEveryFrameData 开时每帧重建）：
+  表 0 存在形状块 +0x168，N = 属性对象 +0x84 项（RE4 读到 64）；表 1 紧随其后
+  半径：单表时用平均值 (inner + outer)/2，双表时分别用 inner、outer；再各自除以 max(min(rx, rz), 1)
+  角度范围：UseExtension 关时只取半圈（比例 0.5），开时取整个 H
+  N 个点 θ_i = H.start + (i/(N−1))·比例·H.span，点 = (cosθ·rx, 0, sinθ·rz, 1)·M（M = 形状块 +0x80 的 4×4 矩阵：形状旋转与发射器平移，含透视除法）
+  L[0] = 0，L[i] = L[i−1] + |点_i − 点_{i−1}|（累积弦长）
+  对 j = 0..N−1：目标 = j·L[N−1]/(N−1)；在 [下界, N−1] 上二分 10 次，下界从上一个 j 的结果开始；
+    每步 mid = (lo + hi)/2，(目标 − L(mid))·(目标 − L(lo)) > 0 时 lo = mid，否则 hi = mid（L(s) 为对 L 的线性插值）
+    table[j] = ((lo + hi)/2)/(N − 1)·比例
+```
+
+- 64 点的弦长和 10 次二分都是近似。和理想的等弧长分布相比，粒子位置差约 1e-3，所以离线实现必须照搬这些步骤（`tools/Re4Native/equidistant_ref.py`）。
+- 发射器平移不改变弦长，所以 M 实际上只有缩放会影响结果。
+
+状态：已确认（读码 3d24d00、3d223c0、3d231b0 及调用处，等距圆柱 3d22b00、3d22030、3d20e20、3d23470、3d210d0）。核对方式如下：
+- re4.exe：`tools/Re4Native/exp_equidistant.py` 原生运行 RE4 语料里唯一的等距条目（csa071 smoke，半径 0.2，横向均分 3）。64 项表逐位一致，粒子位置误差 < 2e-8。
+- MonsterHunterWilds.exe：同一套采样代码原生运行。39 个带均分的条目，以及 23 个带等距的语料条目（含椭圆截面、UseExtension、横向不足一圈），逐粒子一致（`docs/development/WILDS-EFX-VS-RE4.zh-CN.md` §6.5）。
+- 未在原生运行中覆盖：双表（CalcOuterCurveData）和每帧重建（RecalcEveryFrameData），两个语料里都没有打开的条目。
 
 ### 3.2 Velocity3D（初速度与积分）
 
@@ -1511,7 +1540,7 @@ frontDirType 0、1 时条带绕自身长度轴转向相机，端视时退化成�
 
 | # | 问题 | 影响 | 现有线索 | 依据 |
 |---|---|---|---|---|
-| 1 | 随机数的剩余缺口（§1.9）：Spawn LoopNum 抽取、等距圆柱的均分、PtCollision / Transform3DModifier / Rgb* 等的抽取位置；参考实现未对照实机 | 与游戏逐粒子对齐 | 执行顺序、播种公式、salt 与主要属性的抽取顺序已确认（§1） | ORD |
+| 1 | 随机数的剩余缺口（§1.9）：Spawn LoopNum 抽取、PtCollision / Transform3DModifier / Rgb* 等的抽取位置；参考实现未对照实机 | 与游戏逐粒子对齐 | 执行顺序、播种公式、salt 与主要属性的抽取顺序已确认（§1） | ORD |
 | 2 | PS 中 ColorRate / Intensity / EdgeBlendRange / AlphaRate 的组合与各 BlendType 的混合因子 | 所有画面的亮度与叠加 | 常量偏移已知（+0x10c、+0xec、+0x108、+0xe4）；Physical 增益式见 §4.9 | SHE, RW |
 | 3 | primitivevfx 家族的面片构建与条带宽度展开 | CPU 类型的几何 | GPU 家族公式（§7.2） | SFD, SHE |
 | 4 | LegacyMode2018（`[g+0xeb2]`）与 `[g+0xeb0]` 在发行版中的值 | Spawn 首批时刻与周期、ScaleAnim 首帧增量、批次种子；类型分派在积分之前或之后 | 只有 setter 写入 | FRG, SP, SCA, ORD |
@@ -1524,7 +1553,7 @@ frontDirType 0、1 时条带绕自身长度轴转向相机，端视时退化成�
 | 11 | EmitterContextType 7 的委托淡出计时器公式 | 该类型粒子的寿命结束 | 安装 3d53b40 | LF |
 | 12 | Life 模式 1/2 依赖的发射器状态 4、所有者状态 4/5 的含义 | 无限寿命粒子何时进入 Vanish | 推定为停止请求 | LF |
 | 13 | ScaleAnimDelayFrame（86）、RotateAnimDelayFrame（83）、Velocity3DDelayFrame（80）、Transform3DModifierDelayFrame（10） | 延迟起始 | 均未追踪 | SCA, ROT, SEM, MOD |
-| 14 | EmitterShape3D 等距圆柱（DivideEquidistant）的交错；RotationCorrect 1/2；Box 壳判断的级联（读码所得，原生运行尚未区分）；Noise 偏移（粒子 +0x34）进入渲染位置的方式与它的清零位置 | 等距圆柱与相机朝向形状的点位；Noise 的显示位置 | 3d22b00、3d21210；§3.1、§3.8 | SEM |
+| 14 | EmitterShape3D 的 RotationCorrect 1/2、等距圆柱的双表与每帧重建（读码所得，语料无实例）；Box 壳判断的级联（读码所得，原生运行尚未区分）；Noise 偏移（粒子 +0x34）进入渲染位置的方式与它的清零位置 | 相机朝向形状的点位；Noise 的显示位置 | 3d21210、3d210d0；§3.1、§3.8 | SEM |
 | 15 | Velocity3D Spread 锥面参数化；ScreenSpace 在 CPU 上的实际行为 | Spread / ScreenSpace 速度方向 | 3d1a470 | SEM |
 | 16 | UVSequence 余量 `frac·(1/60)`；Rotate90 方向 | speed ≠ 1 时的帧时刻 | 3d1eee9 | UVS |
 | 17 | RibbonTrail 头部布局：exe 读法与语料、C# 布局冲突（按 exe 读法官方文件 alpha 为 0） | 52 个官方 RibbonTrail 是否可见 | 一次只读实机检查粒子 +0x4c 即可判定 | RT |
