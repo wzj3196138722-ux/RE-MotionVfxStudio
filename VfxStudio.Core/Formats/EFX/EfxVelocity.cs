@@ -159,21 +159,17 @@ public partial class EFXAttributeAngularVelocity2D : EFXAttribute
 {
 	public EFXAttributeAngularVelocity2D() : base(EfxAttributeType.AngularVelocity2D) { }
 
+	// 名字取自 re4.exe 文本解析器（slot 18），文件偏移由原生标记实验（加载器 slot 5 → 构建器 slot 15）对上；
+	// 成对值的抽样方式没读，按 via.Range 声明。
 	public uint unkn0;
-	public float unkn1;
-	public float unkn2;
-	public float unkn3;
-	public float unkn4;
-	public float AddRadiusCoef;   // MonsterHunterWilds.exe 解析器 +20；与 AngularVelocity3D 的 AddRadiusCoef 同序
-	public float unkn6;
-	public float unkn7;
-	public float unkn8;
-	public float unkn9;
-	public float unkn10;
-	public float unkn11;
-	public float radians12;
-	public float radians13;
-	public float radians14;
+	public via.Range Radius;
+	public via.Range AddRadius;
+	public float AddRadiusCoef;
+	public via.Range Rotation;
+	public via.Range RotationScaleX;
+	public via.Range RotationScaleY;
+	public via.Range RotationSpeed;   // 弧度
+	public float RotationSpeedCoef;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.AngularVelocity2DDelayFrame, EfxVersion.DMC5, EfxVersion.RE4)]

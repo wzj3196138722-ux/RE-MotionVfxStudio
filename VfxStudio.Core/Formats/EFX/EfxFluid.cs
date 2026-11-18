@@ -51,7 +51,7 @@ public partial class EFXAttributeFluidSimulator2D : ReeLib.Efx.EFXAttribute
 {
     public EFXAttributeFluidSimulator2D() : base(EfxAttributeType.FluidSimulator2D) { }
 
-    // 已命名字段取自 MonsterHunterWilds.exe 文本解析器，文件偏移经构建器（slot 16）对上；RE4 与 Wilds 在这些偏移上布局相同。
+    // 已命名字段取自 re4.exe 文本解析器（slot 18），文件偏移由原生标记实验（加载器 slot 5 → 构建器 slot 15）对上。
     public byte unkn0_1;
     public byte unkn0_2;
     public byte unkn0_3;
@@ -63,8 +63,8 @@ public partial class EFXAttributeFluidSimulator2D : ReeLib.Efx.EFXAttribute
 
     public float unkn5;
     public float unkn6;
-    public float unkn7;
     public float PostEdgeDropoff;
+    public float unkn8;
 
     public uint unkn9;
     public uint unkn10;
@@ -73,12 +73,12 @@ public partial class EFXAttributeFluidSimulator2D : ReeLib.Efx.EFXAttribute
 
     public float unkn13;
     public float unkn14;
-    public float unkn15;
     public float DensityColorMin;
     public float DensityColorMax;
     public float DensityAlphaMin;
-
     public float DensityAlphaMax;
+
+    public uint unkn19;
     public uint unkn20;
     public uint unkn21;
     public uint unkn22;
@@ -89,18 +89,18 @@ public partial class EFXAttributeFluidSimulator2D : ReeLib.Efx.EFXAttribute
     public float unkn1_23;
     public float unkn1_24;
     public float unkn1_25;
-    public float unkn1_26;
     public float InternalInherit;
+    public float unkn1_27;
     // NOTE: the fields here seem to have gotten order swapped around past this point
     // TODO figure out correct re-ordering, match up names and read/write procedures
-    [RszVersion(EfxVersion.RE8, EndAt = nameof(FlowStrength))]
-    public float unkn1_28_re8;
+    [RszVersion(EfxVersion.RE8, EndAt = nameof(ProjectionAdjustment))]
     public float FlowStrength;
+    public float ProjectionAdjustment;
     [RszVersion('<', EfxVersion.RE8, EndAt = nameof(unkn1_29_re3))] // else
     public int unkn1_28_re3;
     public int unkn1_29_re3;
-    public float ProjectionAdjustment;
     public float ProjectionTimeScale;
+    public float unkn1_31;
     public float unkn1_32;
     public float unkn1_33;
 

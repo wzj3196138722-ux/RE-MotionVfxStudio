@@ -13,13 +13,13 @@
       "samples": 8,
       "fields": {
         "unkn0": "2",
-        "unkn1": "1",
-        "unkn3": "0.2",
+        "Radius.s": "1",
+        "AddRadius.s": "0.2",
         "AddRadiusCoef": "1",
-        "unkn8": "0.5",
-        "unkn10": "0.1",
-        "radians12": "0.017453292",
-        "radians14": "1"
+        "RotationScaleX.s": "0.5",
+        "RotationScaleY.s": "0.1",
+        "RotationSpeed.s": "0.017453292",
+        "RotationSpeedCoef": "1"
       }
     },
     "AngularVelocity3D": {
@@ -90,8 +90,8 @@
       "samples": 249,
       "fields": {
         "unkn0": "72",
-        "unkn1": "0.2",
-        "unkn2": "53.99"
+        "Distance": "0.2",
+        "YNormalRange": "53.99"
       }
     },
     "Distortion": {
@@ -231,25 +231,25 @@
         "unkn4": "4",
         "unkn5": "0.01",
         "unkn6": "0.05",
-        "unkn7": "0.85",
-        "PostEdgeDropoff": "0.25",
+        "PostEdgeDropoff": "0.85",
+        "unkn8": "0.25",
         "unkn12": "63",
         "unkn13": "1",
         "unkn14": "1",
-        "DensityColorMin": "1",
-        "DensityColorMax": "0.1",
-        "DensityAlphaMin": "5",
+        "DensityColorMax": "1",
+        "DensityAlphaMin": "0.1",
+        "DensityAlphaMax": "5",
         "unkn22": "63",
         "re4_unkn1": "0.5",
         "re4_unkn2": "0.5",
         "unkn1_23": "0.008",
         "unkn1_24": "0.1",
         "unkn1_25": "0.0075",
-        "unkn1_26": "1",
-        "InternalInherit": "0.1",
-        "unkn1_28_re8": "0.5",
-        "FlowStrength": "1",
-        "ProjectionAdjustment": "0.2",
+        "InternalInherit": "1",
+        "unkn1_27": "0.1",
+        "FlowStrength": "0.5",
+        "ProjectionAdjustment": "1",
+        "ProjectionTimeScale": "0.2",
         "unkn1_35": "0.1",
         "re4_unk2_0": "0.1",
         "re4_unk2_3": "3",

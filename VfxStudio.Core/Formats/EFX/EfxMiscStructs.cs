@@ -18,24 +18,23 @@ public partial class EFXAttributeDepthOperator : ReeLib.Efx.EFXAttribute
 {
     public EFXAttributeDepthOperator() : base(EfxAttributeType.DepthOperator) { }
 
+    // 名字取自 re4.exe 文本解析器（slot 18），文件偏移由原生标记实验（加载器 slot 5 → 构建器 slot 15）对上；
+    // 成对值的抽样方式没读，按 via.Range 声明。
     public uint unkn0;
-    public float unkn1;
-    public float unkn2;
+    public float Distance;      // 解析器里 FrontDistance、StickDistance 写同一个位置
+    public float YNormalRange;  // 度；构建器换算后写入（BackDistance 与它同位）
     [RszVersion(EfxVersion.RE8)]
     public float unkn3;
 
-    [RszVersion(EfxVersion.RE4, EndAt = nameof(unkn12))]
+    [RszVersion(EfxVersion.RE4, EndAt = nameof(DripSpeedCoef))]
     public float unkn4;
     public UndeterminedFieldType unkn5;
     [RszVersion(EfxVersion.MHWilds)] public float mhws_unkn1;
-    public float unkn6;
-    public UndeterminedFieldType unkn7;
-    public float unkn8;
-    public UndeterminedFieldType unkn9;
-    public float radians10;
+    public via.Range DripSpeed;
+    public via.Range DripLength;
+    public float DripThreshold;
     [RszVersion(EfxVersion.MHWilds)] public UndeterminedFieldType mhws_unkn2;
-    public float unkn11;
-    public UndeterminedFieldType unkn12;
+    public via.Range DripSpeedCoef;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.Distortion, EfxVersion.RE7, EfxVersion.RE2, EfxVersion.DMC5, EfxVersion.RE3, EfxVersion.RE8, EfxVersion.RERT, EfxVersion.RE4)]
