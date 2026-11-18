@@ -168,6 +168,9 @@ public partial class EFXAttributeTypeMeshV2 : EFXAttribute
             }
         }
         texPaths = pathlist.ToArray();
+        // The reader takes the entry count from this byte size; DefaultWrite does not recompute it, so a table that
+        // gained or lost entries would be read back with the old count.
+        propertiesDataSize = properties.Count * MdfProperty.GetSize(Version);
         return DefaultWrite(handler);
     }
 

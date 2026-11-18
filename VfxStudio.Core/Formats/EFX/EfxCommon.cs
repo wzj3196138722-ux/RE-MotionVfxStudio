@@ -225,6 +225,8 @@ public partial class EfxMaterialStructV2 : EfxMaterialStructBase
             }
         }
         texPaths = pathlist.ToArray();
+        // DefaultWrite does not recompute this byte size; keep it in step when entries are added or removed.
+        propDataSize = (uint)(properties.Count * MdfProperty.GetSize(Version));
         return DefaultWrite(handler);
     }
 }
