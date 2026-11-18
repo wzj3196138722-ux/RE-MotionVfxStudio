@@ -18,7 +18,14 @@ emitter.py; addresses and what they match in re4.exe are listed below).
 | 1e1de0 | 4748b80 | render slot allocation, stored at block+0x38 by the Type builders |
 
 E offsets: state +0x100 (RE4 +0x170), particle capacity +0x84 (from Spawn attr+0x3c), particle slots
-+0x120 (RE4 +0x190) with stride 0x150 (RE4 0x140), attribute blocks +0x2c8 (RE4 +0x288).
++0x120 (RE4 +0x190) with stride 0x150 (RE4 0x140), attribute blocks +0x2c8 (RE4 +0x288), E.seed +0x98
+(RE4 +0x110) and E.state +0xa8 (RE4 +0x120), read by the seeding function b0510f0 (RE4 3d09990),
+claimed-particle counter +0xc8, per-particle side data at [E+0x128] with stride E+0xd0.
+
+Particle slot (RE4 offset in brackets): [p] flags, [p+4] flags2 (phase = bits 3..6), +0x18 id, +0x28 previous
+position, +0x34 position (+0x28), +0x60 life fraction, +0x64 age (+0x58), +0x68 velocity (+0x5c), +0x80 SpeedCoef
+(+0x74), +0x84 gravity accel (+0x78), +0x88 gravity velocity (+0x7c), +0x8c size slots U X Y Z (+0x80),
++0xa8 rotation X Y Z (+0x9c), +0x4c displacement when Velocity3D Flags bit 2 is set (+0x40).
 """
 import ctypes
 import os
@@ -255,6 +262,31 @@ class Emitter:
     def alive(self):
         """Slots whose [p] has bit 0 (alive) set."""
         return [p for p in self.particles() if wn.u32(p) & 1]
+
+    def state(self, life_type=94):
+        """Live particles of this tick, in the field names exp_emitter.check() reads."""
+        f, u = wn.f32, wn.u32
+        life = self.block_of(life_type)
+        out = []
+        for i, p in enumerate(self.particles()):
+            w = u(p)
+            if not w & 3:
+                continue
+            rec = dict(slot=i, id=u(p + 0x18), flags=w, flags2=u(p + 4), phase=(u(p + 4) >> 3) & 0xF,
+                       life_alpha=(w >> 2) & 0xFF, uv_seq=(w >> 10) & 0xFF, uv_frame=(w >> 18) & 0xFF,
+                       age=f(p + 0x64), life_t=f(p + 0x60), pos=[f(p + 0x34 + 4 * k) for k in range(3)],
+                       vel=[f(p + 0x68 + 4 * k) for k in range(3)], coef=f(p + 0x80), accel=f(p + 0x84),
+                       gvel=f(p + 0x88), size=[f(p + 0x8C + 4 * k) for k in range(4)], rot=f(p + 0xA8),
+                       disp=[f(p + 0x4C + 4 * k) for k in range(3)])
+            if life:   # Life record: remain, A, A+K, T (as RE4)
+                r = wn.u64(self.E + 0x128) + i * u(self.E + 0xD0) + u(life + 8)
+                rec["life_rec"] = list(struct.unpack("<8h", self.img.read(r, 16)))
+            out.append(rec)
+        return out
+
+    def emitter_state(self):
+        return dict(state=wn.u32(self.E + 0x100) & 7, seed=wn.u32(self.E + 0x98), rng_state=wn.u32(self.E + 0xA8),
+                    counter=wn.u32(self.E + 0xC8))
 
     def block_of(self, type_id):
         for i, a in enumerate(self.entry.attrs):

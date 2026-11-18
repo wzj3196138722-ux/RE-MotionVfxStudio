@@ -124,7 +124,7 @@ call/jmp 0x5fb70
 
 与 RE4 顺序的差别：
 
-- **Type 出生抽样在碰撞之后**。RE4 默认（`[g+0xeb0] == 0`）把类型分派放在 Noise 之后、RotateAnim 之前，`!= 0` 时才移到碰撞之后（RT §1.4 第 6、16 步）。Wilds 的 Type 步骤（53–86）在 PtCollision（51）之后、Blink（91）之前，相当于 RE4 的 `!= 0` 分支，且没有看到另一种排列。因此 Wilds 中 RotateAnim / ScaleAnim / Velocity 的出生抽样先于 Type 的颜色、尺寸抽样，随机数抽取顺序与 RE4 默认路径不同。ScaleAnim 基值捕获仍在后处理（115），所以基值仍是 Type 抽样后的值。步骤顺序已确认；步骤 40 = Velocity 是按读的 ctx 偏移推定。
+- **Type 出生抽样在碰撞之后**。RE4 默认（`[g+0xeb0] == 0`）把类型分派放在 Noise 之后、RotateAnim 之前，`!= 0` 时才移到碰撞之后（RT §1.4 第 6、16 步）。Wilds 的 Type 步骤（53–86）在 PtCollision（51）之后、Blink（91）之前，相当于 RE4 的 `!= 0` 分支，且没有看到另一种排列。因此 Wilds 中 RotateAnim / ScaleAnim / Velocity 的出生抽样先于 Type 的颜色、尺寸抽样。每个采样函数各自重新播种（RT §1.6），这个顺序不改变抽到的值：§6.5 中 Billboard3D、ScaleAnim、RotateAnim、Velocity3D 的抽取都与参照一致。ScaleAnim 基值捕获仍在后处理（115），所以基值仍是 Type 抽样后的值。步骤顺序已确认；步骤 40 = Velocity 是按读的 ctx 偏移推定。
 - 新增的步骤属于 RE4 没有的属性：PtFreezer、PointCloudEmitter、Trigger、PtVortexelWind、RibbonJoint*、PtLightningBranchAction、FlowMap、ParticleTimer、DestinationCSV、RayTracingTarget、TypeLightning3D 等。
 - 后处理段跳过 0x22 / 0x23 类型，与 RE4 相同。
 
@@ -149,8 +149,45 @@ E 的偏移：状态 +0x100（RE4 +0x170），槽数 +0x84，粒子槽 +0x120（
 
 - 工厂：281 个里 271 个原生调用成功，与 §2 的模拟结果在两边都成功的类型上逐个一致，另外多出 86 个模拟没跑通的类型。原生失败的 10 个（24、31、62、157、207、239、251、261、278、280）构造函数在 `.trace` 段。138、255 返回空。
 - 加载器：语料前 120 个条目里，52 个类型的加载器读的字节数都等于文件里的声明长度。PtLife、PtBehavior、VectorFieldParameter 的加载器还会出错，PtLife 要文件对象（RE4 的 `world.make_file`）。
-- 发射器：`exp_wilds_emitter.py` 的 4 个内置条目都能跑完 30 帧：存活数逐帧上升到槽数，最后回到 0。出生段的步骤（12、14、16、19、21）从第 1 帧起每帧对每个槽各调一次；存活段的步骤调用次数等于各帧存活粒子数之和。存活数的变化是否与 Spawn、Life 的参数一致没有核对。抽样 60 个条目：18 个有粒子跑完，11 个能跑完但没有粒子（没有 Spawn 等），31 个出错。出错的主要是 GPU 的 Type*（14 个，构建器经 `.trace` 对空对象加引用计数）、PtVortexelWind 一类的逐帧步骤、VortexelCollider、TypeMesh 的网格资源。
-- 粒子的具体数值（位置、尺寸、颜色）还没有和任何参照比对过。
+- 发射器：`exp_wilds_emitter.py` 的 4 个内置条目都能跑完 30 帧：存活数逐帧上升到槽数，最后回到 0。出生段的步骤（12、14、16、19、21）从第 1 帧起每帧对每个槽各调一次；存活段的步骤调用次数等于各帧存活粒子数之和。抽样 60 个条目：18 个有粒子跑完，11 个能跑完但没有粒子（没有 Spawn 等），31 个出错。出错的主要是 GPU 的 Type*（14 个，构建器经 `.trace` 对空对象加引用计数）、PtVortexelWind 一类的逐帧步骤、VortexelCollider、TypeMesh 的网格资源。
+- 粒子数值与参照的比对见 §6.5。
+
+### 6.5 与参照比对
+
+参照是 RE4 运行时规格（[RE4-EFX-RUNTIME.zh-CN.md](RE4-EFX-RUNTIME.zh-CN.md)，下称 RT）的公式和 `tools/Re4Native/refsim.py` 的随机数。期望值由 ReeLib 读出的字段值（`VfxStudio.Core` 的 MHWilds 结构）按这些公式算出，`tools/Re4Native/exp_wilds_reference.py` 与原生运行逐帧比较。比较了 6 个 Billboard3D 条目、8 个场景，其中一个用可变 dt，一个在另一个进程里重跑（两次结果相同）。
+
+粒子槽字段的偏移（括号里是 RE4）：`p+0x18` 编号，`+0x34` 位置（+0x28），`+0x64` 年龄（+0x58），`+0x68` 速度（+0x5c），`+0x80` SpeedCoef（+0x74），`+0x84` / `+0x88` 重力加速度与重力速度（+0x78 / +0x7c），`+0x8c` 四个尺寸槽（+0x80），`+0xa8` 角度（+0x9c），`+0x4c` Velocity3D Flags 位 2 时的位移（+0x40）；`[p+4]` 位 3..6 为 Life 阶段码，`[p]` 位 2..9 为 8 位 alpha，与 RE4 相同。Life 的逐粒子记录在 `[E+0x128] + 槽号 × [E+0xd0]`，内容与 RE4 相同（remain、A、A+K、T）。播种函数 0xb0510f0 与 RE4 的 3d09990 指令相同，读 E.state `+0xa8`（RE4 +0x120）与 E.seed `+0x98`（RE4 +0x110）；salt 也与 RE4 相同。
+
+| 项 | 规则（RT 章节） | 结果 |
+|---|---|---|
+| 出生时刻 | §2.3.2 的倒数与 LoopNum；每批 SpawnNum、IntervalFrame 的抽取（salt 1，key 0）；每批后的 E.state | 8 个场景的批次时刻、每批粒子数、每批后的 E.state 都一致，含 IntervalFrame 30..60 随机、EmitterDelayFrame 115、可变 dt |
+| Life | §1.6.3 的抽取（salt 0x29）；§2.4.2 模式 0 的逐帧阶段码与 alpha | 80 个粒子全部一致 |
+| 积分 | §3.2：`gvel += n·accel; pos += (vel + (0,1,0)·gvel)·n; vel *= powf(coef, n)` | 2,155 步逐位一致 |
+| 出生位置 | §3.1：Cylinder、Sphere 的 UseExtension 采样（salt 0x30），`p·R` | 24 个粒子，误差 ≤ 3.7e-7 |
+| 出生速度 | §3.2 Normal：`d = (Size − 1) ⊙ (P·R⁻¹) + Offset`，归一化后乘 R（Flags 位 2 时不乘）；Speed、GravityRate、SpeedCoef 的抽取（salt 0x23） | 34 个粒子，误差 < 4e-9 |
+| Billboard3D | salt 0x0f：SizeScalar、SizeX、SizeY、Rotation 依次抽取，spread 为 0 的不抽 | 全部一致 |
+| ScaleAnim | §3.3：`U = base + Add·t`（Coef 1）或 `base + Add·c·(1 − c^t)/(1 − c)`（Coef 0.99）；抽取 salt 0x27 | 1,714 帧，误差 ≤ 3e-8 |
+| RotateAnim | §3.4：速度、系数、方向的抽取（salt 0x25）；每帧 `angle += n·v`，折回 [0, 2π)，再 `v *= powf(c, n)` | 911 帧，误差 ≤ 3.6e-7 |
+| UVSequence 起始图案 | salt 0x2b，第 1 次抽取给 SequenceNo，第 2 次给 `PatternNo.min + x % (max − min)` | 全部一致 |
+
+把参照里的任意一个字段值改一点（速度、Offset、KeepFrame、旋转范围、ScaleAnim Add、形状半径、图案区间、IntervalFrame），对应的那一项就报 FAIL，其他项不变。所以上表也说明这些字段在 C# 结构里的位置是对的。
+
+与 RE4 不同的地方：
+
+- **第一批不推进 E.state。** 重启时 E.state = xs(seed)，第一批用它抽取、出生的粒子也看到它；之后每批先抽取，再推进一次 xs。RE4 的第一批也推进，所以它的第一批粒子看到 xs(xs(seed))（`tools/Re4Native/README.md` 的 E.state 一行）。依据是两个带 FixRandomGenerator 的条目：em0021_00_206（种子 1，第一批在第 115 帧）和 slinger_000（种子 406056259，第一批在第 1 帧）。
+
+RT 没有写、原生运行中观察到的：
+
+- 槽满时这一批不出粒子，但仍消耗一次 LoopNum；同一帧死亡的粒子要到下一帧才让出槽位。slinger_055_jimen（3 个槽、每 2 帧一批、寿命 6 帧）的第 7、15 帧因此没有出生。
+
+替身的影响：
+
+- 合成的 .uvs 只有 16 个图案时，UVSequence Flags 为 553 / 554 的条目在帧号越过最后一个图案时杀掉粒子。em0002_00_800 的粒子因此只活 6 帧，而 Life 是 49 帧。比对时把合成序列加长到 255 个图案。真实的 .uvs 不在解包目录里。
+
+没有比对的：
+
+- PlaySpeed 为非整数随机值时 UV 帧的推进（em0002 的 1..1.25 与"每粒子抽一个速度后累加"对不上）。RT 只确认了 PlaySpeed 为 1 的情形，这里 1 和 0.5 的推进与之相符。
+- 颜色（Color、Rgb*）、Noise、ParentOptions 跟随、形状的均分模式（RangeDivide*）、GPU 类型。
 
 ## 7. 对 C# 读取器的修改
 
@@ -216,6 +253,7 @@ exe 给出了、但没有改的：
 | `p20.py` | 内层解析器形式的字段名 → 块偏移 |
 | `rawdump/` | C# 工具：从语料读出指定类型的载荷字节（只读内存流，写到内存里的 FileHandler） |
 | `tools/Re4Native/exp_wilds_emitter.py` | §6.4：内置条目或 `sweep <entries.json>`，每个条目一个子进程，报告步骤列表、槽数、逐帧存活数、执行过的步骤 |
+| `tools/Re4Native/exp_wilds_reference.py` | §6.5：8 个场景，每个一个子进程，逐项对照 RT 的公式与 `refsim.py`，最后一行 `RESULT` 汇总各项 PASS / FAIL |
 
 ## 附录：Wilds 属性类型表
 
