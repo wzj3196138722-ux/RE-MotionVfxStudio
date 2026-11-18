@@ -272,7 +272,7 @@ exe 给出了、但没有改的：
 
 ## 8. 复核
 
-脚本在共享笔记目录 `side-session-notes/local_73f294ed…/wilds-exe-scripts/`。前几个只读 exe；`emu.py` 起的脚本会执行 exe 代码（模拟或原生），都在独立子进程里跑，不碰游戏进程、不写游戏目录：
+脚本在 `tools/EfxNames/`（用法见那里的 README）。前几个只读 exe；`emu.py` 起的脚本会执行 exe 代码（模拟或原生），都在独立子进程里跑，不碰游戏进程、不写游戏目录：
 
 | 脚本 | 产出 |
 |---|---|
@@ -288,7 +288,9 @@ exe 给出了、但没有改的：
 | `wn.py` | 转发到 `tools/Re4Native/mhwildsnative.py`（映射 Wilds exe，分配器 0xb020830 / 0xf5b0 换成线性分配） |
 | `n8.py` / `n9.py` | §5 的构建器原生标记实验，结果 `bm_*.json`；`W_GLOBALS`、`W_PATCH` 环境变量给 Spawn / EmitterShape3D 补单例与桩函数 |
 | `p20.py` | 内层解析器形式的字段名 → 块偏移 |
-| `rawdump/` | C# 工具：从语料读出指定类型的载荷字节（只读内存流，写到内存里的 FileHandler） |
+| `RawDump/` | C# 工具：从语料读出指定类型的载荷字节（只读内存流，写到内存里的 FileHandler） |
+| `re4vt.py` / `r4mark.py` / `r4join.py` | RE4：原生跑全部 240 个工厂取 vtable 与解析器名字，再用原生标记实验把名字落到文件偏移，与 C# 逐项对照 |
+| `unkn_list.py` / `unkn_md.py` | 生成 `EFX-UNKNOWN-FIELDS.zh-CN.md` |
 | `tools/Re4Native/exp_wilds_emitter.py` | §6.4：内置条目或 `sweep <entries.json>`，每个条目一个子进程，报告步骤列表、槽数、逐帧存活数、执行过的步骤 |
 | `tools/Re4Native/exp_noise.py`、`noise_ref.py` | §6.5：Noise 参考实现，以及它在 RE4 原生运行上的核对 |
 | `tools/Re4Native/exp_equidistant.py`、`equidistant_ref.py` | §6.5：等距圆柱参考实现，以及它在 RE4 原生运行上的核对 |

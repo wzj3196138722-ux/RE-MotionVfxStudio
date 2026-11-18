@@ -36,3 +36,6 @@ last-replay.json
 .env
 .env.*
 
+
+# tools/EfxNames intermediate data (exe caches, corpus dumps)
+tools/EfxNames/out/
