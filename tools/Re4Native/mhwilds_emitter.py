@@ -25,7 +25,7 @@ claimed-particle counter +0xc8, per-particle side data at [E+0x128] with stride 
 Particle slot (RE4 offset in brackets): [p] flags, [p+4] flags2 (phase = bits 3..6), +0x18 id, +0x28 previous
 position, +0x34 position (+0x28), +0x60 life fraction, +0x64 age (+0x58), +0x68 velocity (+0x5c), +0x80 SpeedCoef
 (+0x74), +0x84 gravity accel (+0x78), +0x88 gravity velocity (+0x7c), +0x8c size slots U X Y Z (+0x80),
-+0xa8 rotation X Y Z (+0x9c), +0x4c displacement when Velocity3D Flags bit 2 is set (+0x40), +0x58 colour
++0xa8 rotation X Y Z (+0x9c), +0x40 Noise offset (+0x34), +0x4c displacement when Velocity3D Flags bit 2 is set (+0x40), +0x58 colour
 RGBA8 (+0x4c), +0x5c Blink factor (+0x50). UV sequence and frame sit in [p] bits 10..17 / 18..25 as in RE4.
 """
 import ctypes
@@ -278,7 +278,8 @@ class Emitter:
                        age=f(p + 0x64), life_t=f(p + 0x60), pos=[f(p + 0x34 + 4 * k) for k in range(3)],
                        vel=[f(p + 0x68 + 4 * k) for k in range(3)], coef=f(p + 0x80), accel=f(p + 0x84),
                        gvel=f(p + 0x88), size=[f(p + 0x8C + 4 * k) for k in range(4)], rot=f(p + 0xA8),
-                       disp=[f(p + 0x4C + 4 * k) for k in range(3)], rgba=u(p + 0x58), blink=f(p + 0x5C))
+                       disp=[f(p + 0x4C + 4 * k) for k in range(3)], rgba=u(p + 0x58), blink=f(p + 0x5C),
+                       noise=[f(p + 0x40 + 4 * k) for k in range(3)])
             if life:   # Life record: remain, A, A+K, T (as RE4)
                 r = wn.u64(self.E + 0x128) + i * u(self.E + 0xD0) + u(life + 8)
                 rec["life_rec"] = list(struct.unpack("<8h", self.img.read(r, 16)))

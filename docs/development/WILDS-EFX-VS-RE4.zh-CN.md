@@ -154,16 +154,18 @@ E 的偏移：状态 +0x100（RE4 +0x170），槽数 +0x84，粒子槽 +0x120（
 
 ### 6.5 与参照比对
 
-参照是 RE4 运行时规格（[RE4-EFX-RUNTIME.zh-CN.md](RE4-EFX-RUNTIME.zh-CN.md)，下称 RT）的公式和 `tools/Re4Native/refsim.py` 的随机数。期望值由 ReeLib 读出的字段值（`VfxStudio.Core` 的 MHWilds 结构）按这些公式算出，`tools/Re4Native/exp_wilds_reference.py` 与原生运行逐帧比较。比较了 7 个 Billboard3D 条目、10 个场景：其中一个用可变 dt，一个在另一个进程里重跑（两次结果相同），一个把合成 .uvs 缩短到 16 个图案，让 PlayMode 2 播到末帧。
+参照是 RE4 运行时规格（[RE4-EFX-RUNTIME.zh-CN.md](RE4-EFX-RUNTIME.zh-CN.md)，下称 RT）的公式和 `tools/Re4Native/refsim.py` 的随机数。期望值由 ReeLib 读出的字段值（`VfxStudio.Core` 的 MHWilds 结构）按这些公式算出，`tools/Re4Native/exp_wilds_reference.py` 与原生运行逐帧比较。比较了 10 个 Billboard3D 条目、13 个场景：其中一个用可变 dt，一个在另一个进程里重跑（两次结果相同），一个把合成 .uvs 缩短到 16 个图案，让 PlayMode 2 播到末帧，三个只比出生位置（Box 均分、横向范围不足一圈的圆柱、H / V 同时均分且绕 Y 轴旋转的圆柱）。
 
-粒子槽字段的偏移（括号里是 RE4）：`p+0x18` 编号，`+0x34` 位置（+0x28），`+0x58` 颜色 RGBA8（+0x4c），`+0x5c` Blink 系数（+0x50），`+0x64` 年龄（+0x58），`+0x68` 速度（+0x5c），`+0x80` SpeedCoef（+0x74），`+0x84` / `+0x88` 重力加速度与重力速度（+0x78 / +0x7c），`+0x8c` 四个尺寸槽（+0x80），`+0xa8` 角度（+0x9c），`+0x4c` Velocity3D Flags 位 2 时的位移（+0x40）。`[p+4]` 位 3..6 为 Life 阶段码，`[p]` 位 2..9 为 8 位 alpha、位 10..17 为 UV 序列号、位 18..25 为 UV 帧，与 RE4 相同。各属性的逐粒子记录在 `[E+0x128] + 槽号 × [E+0xd0] + [块+8]`：Life 的内容与 RE4 相同（remain、A、A+K、T）；RgbCommon / RgbWater 是三个通道各一组 (remain, 时长, 阶段码)，后接各通道的系数（float）。播种函数 0xb0510f0 与 RE4 的 3d09990 指令相同，读 E.state `+0xa8`（RE4 +0x120）与 E.seed `+0x98`（RE4 +0x110）；salt 也与 RE4 相同。
+RT 没有 Noise 的公式，形状均分模式在 RT 里也只到"部分待确认"。这两项的参照是从 re4.exe 读出来的（见下文），读出的 Noise 公式先在 RE4 原生运行上核对过，再用来比 Wilds。
+
+粒子槽字段的偏移（括号里是 RE4）：`p+0x18` 编号，`+0x34` 位置（+0x28），`+0x58` 颜色 RGBA8（+0x4c），`+0x5c` Blink 系数（+0x50），`+0x64` 年龄（+0x58），`+0x68` 速度（+0x5c），`+0x80` SpeedCoef（+0x74），`+0x84` / `+0x88` 重力加速度与重力速度（+0x78 / +0x7c），`+0x8c` 四个尺寸槽（+0x80），`+0xa8` 角度（+0x9c），`+0x40` Noise 偏移（+0x34），`+0x4c` Velocity3D Flags 位 2 时的位移（+0x40）。`[p+4]` 位 3..6 为 Life 阶段码，`[p]` 位 2..9 为 8 位 alpha、位 10..17 为 UV 序列号、位 18..25 为 UV 帧，与 RE4 相同。各属性的逐粒子记录在 `[E+0x128] + 槽号 × [E+0xd0] + [块+8]`：Life 的内容与 RE4 相同（remain、A、A+K、T）；RgbCommon / RgbWater 是三个通道各一组 (remain, 时长, 阶段码)，后接各通道的系数（float）；Noise 是 9 个 float（k0..k3、两个相位、空位、二维方向），与 RE4 相同。播种函数 0xb0510f0 与 RE4 的 3d09990 指令相同，读 E.state `+0xa8`（RE4 +0x120）与 E.seed `+0x98`（RE4 +0x110）；salt 也与 RE4 相同。
 
 | 项 | 规则（RT 章节） | 结果 |
 |---|---|---|
 | 出生时刻 | §2.3.2 的倒数与 LoopNum；每批 SpawnNum、IntervalFrame 的抽取（salt 1，key 0）；每批后的 E.state | 9 个场景的批次时刻、每批粒子数、每批后的 E.state 都一致，含 IntervalFrame 30..60 随机、EmitterDelayFrame 115、可变 dt |
 | Life | §1.6.3 的抽取（salt 0x29）；§2.4.2 模式 0 的逐帧阶段码与 alpha | 88 个粒子全部一致 |
 | 积分 | §3.2：`gvel += n·accel; pos += (vel + (0,1,0)·gvel)·n; vel *= powf(coef, n)` | 2,434 步逐位一致 |
-| 出生位置 | §3.1：Cylinder、Sphere 的 UseExtension 采样（salt 0x30），`p·R` | 24 个粒子，误差 ≤ 3.7e-7 |
+| 出生位置 | §3.1 的 Box、Sphere、Cylinder 采样（salt 0x30），`p·R`，含 UseExtension 与下面的均分规则 | 10 个条目、128 个粒子，误差 ≤ 3.7e-7；另用临时脚本在 39 个带均分的语料条目上跑过一次，全部一致 |
 | 出生速度 | §3.2 Normal：`d = (Size − 1) ⊙ (P·R⁻¹) + Offset`，归一化后乘 R（Flags 位 2 时不乘）；Speed、GravityRate、SpeedCoef 的抽取（salt 0x23） | 42 个粒子，误差 < 7e-9 |
 | Billboard3D | salt 0x0f：SizeScalar、SizeX、SizeY、Rotation 依次抽取，spread 为 0 的不抽 | 88 个粒子全部一致 |
 | 出生颜色 | §4.2：Flags 位 4 时先多抽一次 u，每个字节 `trunc(lerp(Color, ColorRange, u))`，四个通道共用 u；之后每帧不变 | em0009_00_204 的 8 个粒子、295 帧一致；另在 24 个 em0009 条目上用临时脚本跑过一次，76 个粒子都一致 |
@@ -171,9 +173,29 @@ E 的偏移：状态 +0x100（RE4 +0x170），槽数 +0x84，粒子槽 +0x120（
 | RotateAnim | §3.4：速度、系数、方向的抽取（salt 0x25）；每帧 `angle += n·v`，折回 [0, 2π)，再 `v *= powf(c, n)` | 911 帧，误差 ≤ 3.6e-7 |
 | UV 帧 | §4.1：SequenceNo、PatternNo（起始帧）、PlaySpeed 的抽取（salt 0x2b，PlaySpeed 为 MinMax 线性插值）；每帧 `acc += dt`，到 T = (1/60)/speed 时前进 `int(acc/T)` 帧，`acc = frac(acc/T)·(1/60)`；PlayMode 0 不动、1 回到 0、2 停在末帧并杀死粒子（下一帧消失） | 2,596 帧一致，含随机 PlaySpeed 1..1.25、1..1.5，以及 6 次 PlayMode 2 的杀死 |
 | UVSequenceModifier | §4.1：从下一帧起替换 T，`speed = m·Init + (1 − m)·Final`，m 从 1 开始、每帧 `m *= powf(c, n)` | em0021 的 918 帧一致 |
+| Noise | 下面从 re4.exe 读出的公式 | slinger_055_jimen 与 em0021_00_206 共 954 帧，偏移与逐粒子记录逐位一致 |
 | Rgb* 寿命 | §4.9：Keep 段系数 1，Vanish 段 remain/V，结束为 0；RgbWater 的 GtoB 系数再乘 GtoB。第一个启用寿命的通道的 Appear、Keep、Vanish 是第 1..3 次抽取（RgbCommon salt 0x7625a743、RgbWater 0xe107eec2，key = 槽号） | RgbCommon（slinger_055_jimen 的绿、红两层）和 RgbWater（em0009_00_204 的 GtoB）共 957 项一致 |
 
-把参照里的任意一个字段值改一点（速度、Offset、KeepFrame、旋转范围、ScaleAnim Add、形状半径、图案区间、IntervalFrame、ColorRange、PlaySpeed、PlayMode、Modifier 系数、Rgb 的 Keep / Vanish），对应的那一项就报 FAIL，其他项不变。所以上表也说明这些字段在 C# 结构里的位置是对的。
+形状均分（re4.exe 3d231b0、3d223c0 及其调用处）：
+
+- Sphere / Cylinder：形状块 +0x158 是计数器 c，每次采样后加 1、不回绕。Hn、Vn = RangeDivideHorizontalNum、RangeDivideVerticalNum 乘 LOD 系数后取整（至少 1）。纵向下标 = c % Vn，横向下标 = (c / Vn + c % Vn) % Hn，即对角交错。b = 纵向下标 / (Vn − 1)；a = 横向下标 / Hn（H.span 与 float 2π 逐位相等时，避免首尾重合）或 / (Hn − 1)。只有 1 格时取 0.5，均分数为 0 时照常抽取。用了均分的轴不消耗抽取。
+- Box：只读 RangeDivideNum 与 RangeDivideAxis。均分轴的坐标 = (c % Dn) / (Dn − 1)·2 − 1，Dn 为 1 时为 0，其余两轴照常抽取，不再抽轴号。Box 有自己的计数器，到 Dn − 1 后回到 0。
+- Sphere、Cylinder 不读 RangeDivideNum；Box 不读 H / V 均分数。语料里这三种组合都有（如 slinger_000、slinger_053、em0002_00_302），原生结果与此一致。
+- Box 的空心壳判断是级联的：先看抽中的轴是否落在 inner 以内，是则第一条其余轴走 `(outer − inner)·u + inner·sign(u)`，第二条其余轴只在第一条也落在 inner 以内时才这样算，否则取 `outer·u`。RT §3.1 写的是两条其余轴都走空心公式。这一条只是从代码读出：比过的 Box 条目 inner 都是 0，两种写法结果相同，原生运行没有区分出来。
+
+Noise（re4.exe 3dc7050 逐粒子、3dc6d50 求偏移；`tools/Re4Native/noise_ref.py`）：
+
+```
+出生（salt 0xd17f868f，key = 槽号，8 次抽取）：b = 2π·u1，a = 2π·u2，k2、k0、k3、k1 = 2u3..2u6 − 1，dir = normalize(2u7 − 1, 2u8 − 1)
+每帧（含出生帧）：LW = LowFrequencyWidth.s + .r·k3;  HW = HighFrequencyWidth.s + .r·k1
+  C = cos(a)·LW + cos(b)·HW;  S = sin(a)·LW + sin(b)·HW
+  偏移 = (C·dir.x, C·dir.y, S)（3D；2D 为 (C, S, 0)），每帧覆盖，不累加
+  a += (LowFrequency.s + .r·k2)·dt·2π;  b += (HighFrequency.s + .r·k0)·dt·2π;  各自 fmodf 到 [0, 2π)
+```
+
+频率单位是周 / 秒（dt 为秒）。这个公式在 RE4 上核对过：`tools/Re4Native/exp_noise.py` 用 RE4 语料里唯一带 Noise 的 Billboard3D 条目（csa114 dust，25 个粒子），5,424 帧的偏移与记录逐位一致。偏移另放在粒子的独立字段里，位置本身不变；它怎样进入渲染位置没有追。
+
+把参照里的任意一个字段值改一点（速度、Offset、KeepFrame、旋转范围、ScaleAnim Add、形状半径、图案区间、IntervalFrame、ColorRange、PlaySpeed、PlayMode、Modifier 系数、Rgb 的 Keep / Vanish、H.span、均分数、均分轴、Noise 的频率与幅度），对应的那一项就报 FAIL，其他项不变。所以上表也说明这些字段在 C# 结构里的位置是对的。
 
 与 RE4 不同的地方：
 
@@ -193,7 +215,8 @@ RT 没有写、原生运行中观察到的：
 没有比对的：
 
 - 顶点颜色与着色器里的合成（RT §4.10 第 4 步起）、ColorRate / Intensity、RgbCommon 的红层系数（AlphaToB 驱动，记录里第 7、8 个字在红层结束后变为 1.0，含义没有对）、Rgb* 的 Appear 段和第二个通道的抽取位置（样本里都是定值）。
-- Noise、ParentOptions 跟随、形状的均分模式（RangeDivide*）、GPU 类型、UV 的翻转 / 倒放（Reverse 只在 CPU 路径影响帧号，样本里都关着）。
+- ParentOptions 跟随、GPU 类型、UV 的翻转 / 倒放（Reverse 只在 CPU 路径影响帧号，样本里都关着）。
+- 形状：DivideEquidistant（语料里没有打开的条目）、RotationCorrect 的相机模式（3 个条目跳过）、绕多个轴的 LocalRotation（模型只写了单轴旋转）；Noise 偏移进入渲染位置的方式。
 
 ## 7. 对 C# 读取器的修改
 
@@ -259,7 +282,8 @@ exe 给出了、但没有改的：
 | `p20.py` | 内层解析器形式的字段名 → 块偏移 |
 | `rawdump/` | C# 工具：从语料读出指定类型的载荷字节（只读内存流，写到内存里的 FileHandler） |
 | `tools/Re4Native/exp_wilds_emitter.py` | §6.4：内置条目或 `sweep <entries.json>`，每个条目一个子进程，报告步骤列表、槽数、逐帧存活数、执行过的步骤 |
-| `tools/Re4Native/exp_wilds_reference.py` | §6.5：10 个场景，每个一个子进程，逐项对照 RT 的公式与 `refsim.py`，最后一行 `RESULT` 汇总各项 PASS / FAIL |
+| `tools/Re4Native/exp_noise.py`、`noise_ref.py` | §6.5：Noise 参考实现，以及它在 RE4 原生运行上的核对 |
+| `tools/Re4Native/exp_wilds_reference.py` | §6.5：13 个场景，每个一个子进程，逐项对照 RT 的公式与 `refsim.py`，最后一行 `RESULT` 汇总各项 PASS / FAIL |
 
 ## 附录：Wilds 属性类型表
 

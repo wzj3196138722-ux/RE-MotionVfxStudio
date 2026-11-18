@@ -16,7 +16,12 @@ Checks (spec section in brackets):
   life     Life draws (salt 0x29) and every tick's phase code and 8-bit alpha (§2.4.2 mode 0); exp_emitter.check
   motion   every tick: gvel += n*accel; pos += (vel + (0,1,0)*gvel)*n; vel *= powf(coef, n); exp_emitter.check.
            With Velocity3D Flags bit 2 the displacement slot (+0x4c) moves instead of the position
-  shape    spawn position from EmitterShape3D (salt 0x30): Sphere / Cylinder with UseExtension (§3.1)
+  shape    spawn position from EmitterShape3D (salt 0x30, §3.1): Box, Sphere, Cylinder, with and without
+           UseExtension, and the divide modes read from re4.exe: Sphere / Cylinder take a, b from the shape counter
+           c (3d231b0: b index = c % Vn, a index = (c / Vn + c % Vn) % Hn, a = index / Hn when H.span is exactly
+           the float 2pi, else index / (Hn - 1); one cell -> 0.5); Box takes the RangeDivideAxis coordinate as
+           (c % Dn) / (Dn - 1) * 2 - 1 (3d223c0, own counter wrapping at Dn), and its shell test cascades from the
+           first other axis to the second. RangeDivideNum is not read by Sphere / Cylinder, H / V nums not by Box
   vel      Velocity3D spawn draws (salt 0x23): Normal direction, Speed, GravityRate, SpeedCoef (§3.2, §1.6.3)
   bb       TypeBillboard3D spawn draws (salt 0x0f): SizeScalar, SizeX, SizeY, Rotation, each skipped at spread 0
   color    with Billboard3D Flags bit 4: one more draw u first, colour byte = trunc(lerp(Color, ColorRange, u)),
@@ -33,6 +38,12 @@ Checks (spec section in brackets):
            and phase code (5 Keep, 8 Vanish, 9 Terminate), and the channel factor (Keep 1, Vanish remain/V,
            Terminate 0, times GtoB for RgbWater's GtoB). Draws: the first life channel's Appear, Keep, Vanish are
            draws 1..3 (salts 0x7625a743 / 0xe107eec2, key = slot)
+  noise    Noise, read from re4.exe 3dc7050 / 3dc6d50 and checked against RE4 natively (5,424 ticks bit-exact):
+           8 draws at birth (salt 0xd17f868f, key = slot): high and low phase (2pi u), four coefficients (2u - 1),
+           a 2D direction normalized; every tick including the birth tick C = cos(a) * LW + cos(b) * HW and
+           S = sin(a) * LW + sin(b) * HW (LW = LowFrequencyWidth.s + .r * k3, HW = HighFrequencyWidth.s + .r * k1),
+           the particle's noise offset (+0x40, RE4 +0x34) = (C * dir.x, C * dir.y, S) for 3D, then
+           a += (LowFrequency.s + .r * k2) * dt * 2pi, b += (HighFrequency.s + .r * k0) * dt * 2pi, fmodf to 2pi
 """
 import hashlib
 import json
@@ -49,7 +60,7 @@ F = np.float32
 ROOT = os.environ.get("MHWILDS_EXTRACT",
                       r"E:\Program\Steam\steamapps\common\MonsterHunterWilds\MHWILDS_EXTRACT\natives\STM\Art\VFX")
 PI = 3.1415927
-# Field values as ReeLib reads them. shape: (type, inner/outer X, Y, Z, H start/span, V start/span, LocalRotation.X)
+# Field values as ReeLib reads them. shape: ranges as (inner, outer), H / V as (start, span), LocalRotation in radians
 ENTRIES = {
     # Spawn Max 6, SpawnNum 2, IntervalFrame 10, LoopNum 3; Billboard3D SizeScalar 1±0.3, Rotation 0±π; Velocity3D
     # Normal, Speed 1.2±0.5, Offset (0, 0.245, −1), Size (2, 1.5, 2), GravityRate 1.2; ScaleAnim SizeScalarAdd
@@ -59,7 +70,7 @@ ENTRIES = {
                 vel=dict(offset=(0, 0.245, -1), size=(2, 1.5, 2), speed=(1.2, 0.5), gravity=(1.2, 0), coef=(1, 0)),
                 bb=dict(U=(1, 0.3), X=(1, 0), Y=(1, 0), rot=(0, PI)), scale_add=(0.065, 0.01),
                 uv=dict(seq=(2, 3), pat=(5, 11), speed=(1, 1.25), mode=2),
-                shape=("cylinder", (0, 0.3), (-0.5, 0.3), (0, 0.3), (0, PI), (1.25, -0.5), math.pi / 2)),
+                shape=dict(kind="cylinder", X=(0, 0.3), Y=(-0.5, 0.3), Z=(0, 0.3), H=(0, PI), V=(1.25, -0.5), ext=True, rot=(math.pi / 2, 0, 0))),
     # Spawn Max 3, SpawnNum 1, IntervalFrame 2, LoopNum 8; Billboard3D SizeScalar 2±1, SizeY 1±0.2; Velocity3D Normal,
     # Speed 1, Size 1.1; Life 0 / 1 / 5; EmitterShape3D Sphere 1..2, UseExtension, V −10°..90°
     "jimen": dict(path=r"EffectEditor\Common\slinger\11_pl_slinger_055_jimen.efx.5571972", off=15735,
@@ -68,43 +79,57 @@ ENTRIES = {
                   bb=dict(U=(2, 1), X=(1, 0), Y=(1, 0.2), rot=(0, PI)), uv=dict(seq=(0, 1), pat=(0, 64), speed=(0.5, 0.5), mode=1),
                   rgb=dict(type=242, salt=0x7625A743, channels=[dict(base=0, life=((0, 0), (1, 1), (1, 10)), factor=6, scale=1.0, draws=True),
                                                                dict(base=3, life=((0, 0), (2, 2), (0, 0)))]),
-                  shape=("sphere", (1, 2), (1, 2), (1, 2), (0, 6.2831855), (-0.17453294, 1.7453294), math.pi / 2)),
+                  shape=dict(kind="sphere", X=(1, 2), Y=(1, 2), Z=(1, 2), H=(0, 6.2831855), V=(-0.17453294, 1.7453294), ext=True, rot=(math.pi / 2, 0, 0)),
+                  noise=dict(type=112, lf=(5, 0.5), lw=(0.1, 0.1), hf=(11, 0.05), hw=(0.05, 0.01))),
     # Spawn Max 3, SpawnNum 3, LoopNum 1; Velocity3D Normal, Speed 0.1, SpeedCoef 0.95, Offset (0, −0.06, 0);
-    # Life 0 / 5 / 10..20; EmitterShape3D Cylinder with RangeDivideNum (divide mode: shape not checked)
+    # Life 0 / 5 / 10..20; EmitterShape3D Cylinder, RangeDivideVerticalNum 3 (and RangeDivideNum 2, unused by Cylinder)
     "s053": dict(path=r"EffectEditor\Common\slinger\11_pl_slinger_053.efx.5571972", off=6635,
                  delay=0, interval=0, loops=1, spawn_num=3, cap=3, life=((0, 0), (5, 5), (10, 20)),
                  vel=dict(offset=(0, -0.06, 0), size=(1.1, 1.05, 1.1), speed=(0.1, 0), gravity=(0, 0), coef=(0.95, 0)),
-                 bb=dict(U=(0.75, 0.25), X=(0.8, 0), Y=(1, 0), rot=(0, PI)), shape_rot=math.pi / 2,
+                 bb=dict(U=(0.75, 0.25), X=(0.8, 0), Y=(1, 0), rot=(0, PI)),
+                 shape=dict(kind="cylinder", X=(0.01, 0.049999997), Y=(-0.1, 0.1), Z=(0.01, 0.049999997), H=(0, 6.2831855), V=(1, 0), ext=False, rot=(math.pi / 2, 0, 0), div=2, axis=2, vn=3),
                  uv=dict(seq=(0, 1), pat=(20, 41), speed=(1, 1), mode=1)),
     # FixRandomGenerator seed 1; Spawn Max 6, EmitterDelayFrame 115, IntervalFrame 30..60, LoopNum 0 (endless);
     # Billboard3D SizeScalar 0.1±0.025; Velocity3D Flags 4, Normal, Offset (0, 1.8, −0.05), Size (3, 1, 3),
     # GravityRate −0.004; RotateAnim Flags 1, AddX 1°±0.5°, CoefX 0.99; ScaleAnim Add 0.002, Coef 0.99;
-    # Life 15 / 165 / 0; EmitterShape3D Cylinder with RangeDivideHorizontalNum (shape not checked)
+    # Life 15 / 165 / 0; EmitterShape3D Cylinder, RangeDivideHorizontalNum 2; Noise
     "em21": dict(path=r"EffectEditor\Enemy\em0021\11_em0021_00_206.efx.5571972", off=5845,
                  delay=115, interval=(30, 60), loops=None, spawn_num=1, cap=6, life=((15, 15), (165, 165), (0, 0)),
                  vel=dict(offset=(0, 1.8, -0.049999997), size=(3, 1, 3), speed=(0.20000014, 0), gravity=(-0.004, 0),
-                          coef=(1, 0)), flags4=True, shape_rot=0.0,
+                          coef=(1, 0)), flags4=True,
+                 shape=dict(kind="cylinder", X=(0.020000003, 0.1), Y=(0.54999995, 0.54999995), Z=(0.020000003, 0.1), H=(0, 6.2831855), V=(1, 0), ext=False, rot=(0, 0, 0), hn=2),
+                 noise=dict(type=112, lf=(0.05, 0.04), lw=(0.060000006, 0), hf=(0.05, 0.04), hw=(0.1, 0)),
                  bb=dict(U=(0.1, 0.025), X=(1, 0), Y=(1, 0), rot=(0, PI)), scale_add=(0.002, 0), scale_coef=(0.99, 0),
                  rotate=dict(add=(0.017453294, 0.008726647), coef=(0.99, 0), sign=True),
                  uv=dict(seq=(2, 3), pat=(0, 64), speed=(0.5, 0.5), mode=1, modifier=dict(init=1, final=0.3, coef=0.98))),
     # FixRandomGenerator seed 406056259 (state chain with a large seed); Spawn Max 6, IntervalFrame 2, endless;
-    # Life 0 / 2 / 8; no Velocity3D; EmitterShape3D Sphere with RangeDivideNum (shape not checked)
+    # Life 0 / 2 / 8; no Velocity3D; EmitterShape3D Sphere with RangeDivideNum 3 (unused by Sphere)
     "s000": dict(path=r"EffectEditor\Common\slinger\11_pl_slinger_000.efx.5571972", off=6319,
                  delay=0, interval=2, loops=None, spawn_num=1, cap=6, life=((0, 0), (2, 2), (8, 8)),
-                 bb=dict(U=(0.1, 0), X=(1, 0), Y=(1, 0), rot=(0, 0)), uv=dict(seq=(1, 2), pat=(0, 1), speed=(1, 1), mode=0)),
+                 bb=dict(U=(0.1, 0), X=(1, 0), Y=(1, 0), rot=(0, 0)), uv=dict(seq=(1, 2), pat=(0, 1), speed=(1, 1), mode=0),
+                 shape=dict(kind="sphere", X=(0, 0.015), Y=(0, 0.075), Z=(0, 0.015), H=(0, 6.2831855), V=(-1.5707964, 3.1415927), ext=False, rot=(math.pi / 2, 0, 0), div=3, axis=1)),
     # Billboard3D Flags 16 (random colour between 0xffffffff and 0xffb3b3b3), SizeScalar 2±0.4; Spawn 8 at once;
     # Velocity3D Normal, Speed 3.5±2, GravityRate 0.7±0.1; ScaleAnim Add 0.04±0.01; Life 0 / 15 / 20..25;
-    # UVSequence PlayMode 2, PlaySpeed 1..1.5; RgbWater GtoB life 0 / 20 / 20..30 (GtoB 0.7); EmitterShape3D Sphere
-    # with RangeDivideHorizontalNum (shape not checked)
+    # UVSequence PlayMode 2, PlaySpeed 1..1.5; RgbWater GtoB life 0 / 20 / 20..30 (GtoB 0.7); EmitterShape3D Sphere,
+    # UseExtension, RangeDivideHorizontalNum 8
     "em9": dict(path=r"EffectEditor\Enemy\em0009\11_em0009_00_204.efx.5571972", off=473,
                 delay=0, interval=0, loops=1, spawn_num=8, cap=8, life=((0, 0), (15, 15), (20, 25)),
                 vel=dict(offset=(0, 0.5, 0), size=(2, 1.8, 2), speed=(3.5, 2), gravity=(0.7, 0.1), coef=(1, 0)),
-                shape_rot=0.0, bb=dict(U=(2, 0.4), X=(1, 0), Y=(1, 0), rot=(0, 0), color=(0xFFFFFFFF, 0xFFB3B3B3)),
+                shape=dict(kind="sphere", X=(1, 1.2), Y=(0.1, 0.1), Z=(1, 1.2), H=(0, 6.2831855), V=(0, 1.5707964), ext=True, rot=(0, 0, 0), hn=8),
+                bb=dict(U=(2, 0.4), X=(1, 0), Y=(1, 0), rot=(0, 0), color=(0xFFFFFFFF, 0xFFB3B3B3)),
                 scale_add=(0.04, 0.01), uv=dict(seq=(4, 5), pat=(0, 6), speed=(1, 1.5), mode=2),
                 rgb=dict(type=244, salt=0xE107EEC2, channels=[dict(base=0, life=None, factor=9, scale=1.0),
                                                                dict(base=3, life=None, factor=10, scale=1.0),
                                                                dict(base=6, life=((0, 0), (20, 20), (20, 30)), factor=11,
                                                                     scale=0.7, draws=True)])),
+    # Shape-only entries (only the spawn position is compared): Box RangeDivideNum 3 on Z; Cylinder with
+    # RangeDivideHorizontalNum 4 over 140° (H.span not 2pi); Cylinder H 7 / V 7 over 250°, LocalRotation.Y 25°
+    "box_div": dict(path=r"EffectEditor\Enemy\em0005\11_em0005_00_302.efx.5571972", off=6010,
+                    shape=dict(kind="box", X=(0, 0), Y=(0, 0), Z=(1, 1), H=(1, 0), V=(1, 0), ext=False, rot=(0, 0, 0), div=3, axis=2)),
+    "cyl_part": dict(path=r"EffectEditor\Enemy\em0005\11_em0005_00_204.efx.5571972", off=5496,
+                     shape=dict(kind="cylinder", X=(0.7, 1), Y=(0, 0.2), Z=(1, 1.3), H=(0.34906587, 2.4434612), V=(1, 0), ext=True, rot=(0, 0, 0), hn=4)),
+    "cyl_hv": dict(path=r"EffectEditor\Enemy\em0009\11_em0009_00_401.efx.5571972", off=16886,
+                   shape=dict(kind="cylinder", X=(0.5, 0.9), Y=(0, 0.19999999), Z=(0.5, 0.9), H=(0, 4.363323), V=(1, 0), ext=True, rot=(0, 0.43633235, 0), hn=7, vn=7)),
     # Spawn Max 1, LoopNum 1; no Velocity3D; Life 0 / 1 / 3
     "s012": dict(path=r"EffectEditor\Common\slinger\11_pl_slinger_012.efx.5571972", off=906,
                  delay=0, interval=0, loops=1, spawn_num=1, cap=1, life=((0, 0), (1, 1), (3, 3)),
@@ -116,7 +141,9 @@ SCENARIOS = {"em2_60": ("em2", "60"), "em2_60_b": ("em2", "60"), "em2_var": ("em
              "jimen_60": ("jimen", "60"), "em21_60": ("em21", "60_long"),
              "s000_60": ("s000", "60"), "em9_60": ("em9", "60"),
              "s053_60": ("s053", "60"), "s012_60": ("s012", "60"),
-             "em2_uvs16": ("em2", "60", dict(uvs=16, only=("uv",)))}   # PlayMode 2 reaching the last pattern
+             "em2_uvs16": ("em2", "60", dict(uvs=16, only=("uv",))),   # PlayMode 2 reaching the last pattern
+             "box_div": ("box_div", "60", dict(only=("shape",))), "cyl_part": ("cyl_part", "60", dict(only=("shape",))),
+             "cyl_hv": ("cyl_hv", "60", dict(only=("shape",)))}
 
 
 def run(name):
@@ -143,6 +170,11 @@ def run(name):
                 for q in ps:
                     r = wn.u64(m.E + 0x128) + q["slot"] * wn.u32(m.E + 0xD0) + wn.u32(blk + 8)
                     q["rgb"] = list(struct.unpack("<12i", img.read(r, 0x30)))
+            if "noise" in ent:        # Noise per-particle record: k0..k3, high / low phase, -, dir x, dir y
+                blk = m.block_of(ent["noise"]["type"])
+                for q in ps:
+                    r = wn.u64(m.E + 0x128) + q["slot"] * wn.u32(m.E + 0xD0) + wn.u32(blk + 8)
+                    q["noise_rec"] = list(struct.unpack("<9f", img.read(r, 36)))
             out["frames"].append(dict(tick=k, dt=dt, emitter=m.emitter_state(), particles=ps))
         out["status"] = "RAN"
     except Exception as ex:
@@ -152,10 +184,82 @@ def run(name):
 
 
 # ---------------------------------------------------------------------------------------- checks
-def _rx(a):
-    """Shape rotation R about X, row-vector convention (world = local · R)."""
-    c, s = math.cos(a), math.sin(a)
-    return np.array([[1, 0, 0], [0, c, s], [0, -s, c]])
+def _rot(r):
+    """Shape rotation R, row-vector convention (world = local · R), for a LocalRotation about one axis."""
+    nz = [i for i in range(3) if abs(r[i]) > 1e-7]
+    if not nz:
+        return np.eye(3)
+    if len(nz) > 1:
+        raise ValueError("rotations about several axes are not modelled")
+    c, s = math.cos(r[nz[0]]), math.sin(r[nz[0]])
+    return [np.array([[1, 0, 0], [0, c, s], [0, -s, c]]), np.array([[c, 0, -s], [0, 1, 0], [s, 0, c]]),
+            np.array([[c, s, 0], [-s, c, 0], [0, 0, 1]])][nz[0]]
+
+
+TWO_PI_F = float(F(2 * math.pi))
+
+
+def _divide(c, hn, vn, wrap):
+    """3d231b0: a and b from the shape counter; -1 = not divided (drawn)."""
+    rem, q = c % max(vn, 1), c // max(vn, 1)
+    h = (q + rem) % max(hn, 1)
+    a = -1 if hn == 0 else (h / hn if wrap else (h / (hn - 1) if hn > 1 else 0.5))
+    b = -1 if vn == 0 else (rem / (vn - 1) if vn > 1 else 0.5)
+    return a, b
+
+
+def _shape_local(sh, g, c):
+    """Spawn position in shape space (before R). g: the salt 0x30 stream; c: the shape counter."""
+    lerp = lambda a, b, t: a + (b - a) * t   # noqa: E731
+    X, Y, Z, H, V, ext = sh["X"], sh["Y"], sh["Z"], sh["H"], sh["V"], sh["ext"]
+    hn, vn, dn = sh.get("hn", 0), sh.get("vn", 0), sh.get("div", 0)
+    if sh["kind"] == "box":                     # 3d223c0
+        k = sh["axis"] if dn else g.next() % 3
+        u = [(0.0 if dn == 1 else (c % dn) / (dn - 1) * 2 - 1) if dn and j == k else float(g.u()) * 2 - 1
+             for j in range(3)]
+        inner, outer = (X[0], Y[0], Z[0]), (X[1], Y[1], Z[1])
+        v = [0.0] * 3
+        v[k] = outer[k] * u[k]
+        inside = inner[k] >= abs(v[k])
+        for step in (1, 2):                     # the shell test cascades: the second axis only if the first was inside
+            j = (k + step) % 3
+            if inside:
+                sign = 0.0 if u[j] == 0 else math.copysign(1.0, u[j])
+                v[j] = (outer[j] - inner[j]) * u[j] + inner[j] * sign
+                inside = inner[j] >= abs(v[j])
+            else:
+                v[j] = outer[j] * u[j]
+        if ext:
+            t = (Y[1] + v[1]) * 0.5 / Y[1] if Y[1] > 0 else 0.0
+            v[0] *= H[0] + t * H[1]
+            v[2] *= V[0] + t * V[1]
+        return np.array(v)
+    if not ext:                                 # UseExtension 0: H and V take the defaults
+        H, V = ((0, 2 * math.pi), (-math.pi / 2, math.pi)) if sh["kind"] == "sphere" else ((0, 2 * math.pi), (1, 0))
+    a, b = _divide(c, hn, vn, float(F(H[1])) == TWO_PI_F)
+    if sh["kind"] == "sphere":
+        if ext or hn or vn:
+            a = a if a >= 0 else float(g.u())
+            b = b if b >= 0 else float(g.u())
+            t = float(g.u())
+            th, ph = H[0] + a * H[1], V[0] + b * V[1]
+            d = (math.cos(ph) * math.cos(th), math.sin(ph), math.cos(ph) * math.sin(th))
+        else:
+            d = np.array([float(g.u()) * 2 - 1 for _ in range(3)])
+            d = d / np.linalg.norm(d)
+            t = float(g.u())
+        return np.array([lerp(*X, t) * d[0], lerp(*Y, t) * d[1], lerp(*Z, t) * d[2]])
+    if a >= 0 or ext:                           # cylinder
+        a = a if a >= 0 else float(g.u())
+        th = H[0] + a * H[1]
+        cxz = (math.cos(th), math.sin(th))
+    else:
+        w = np.array([float(g.u()) * 2 - 1 for _ in range(2)])
+        cxz = w / np.linalg.norm(w)
+    t = float(g.u())
+    h = b if b >= 0 else float(g.u())
+    sc = V[0] + h * V[1] if ext else 1.0
+    return np.array([lerp(*X, t) * cxz[0] * sc, lerp(*Y, h), lerp(*Z, t) * cxz[1] * sc])
 
 
 def _first(frames):
@@ -214,24 +318,13 @@ def check_spawn(frames, ent, refsim):
 
 
 def check_shape(frames, ent, refsim):
-    if "shape" not in ent:
+    sh = ent.get("shape")
+    if not sh:
         return None
-    kind, X, Y, Z, H, V, rot = ent["shape"]
-    R = _rx(rot)
-    lerp = lambda a, b, t: a + (b - a) * t   # noqa: E731
+    R = _rot(sh["rot"])
     worst, n = 0.0, 0
-    for pid, (fr, p) in _first(frames).items():
-        g = _rng(refsim, 0x30, fr, pid)
-        if kind == "cylinder":            # UseExtension: angle, t, h
-            a, t, h = (float(g.u()) for _ in range(3))
-            th, sc = H[0] + a * H[1], V[0] + h * V[1]
-            local = (lerp(*X, t) * math.cos(th) * sc, lerp(*Y, h), lerp(*Z, t) * math.sin(th) * sc)
-        else:                             # sphere, UseExtension: a, b, t
-            a, b, t = (float(g.u()) for _ in range(3))
-            th, ph = H[0] + a * H[1], V[0] + b * V[1]
-            d = (math.cos(ph) * math.cos(th), math.sin(ph), math.cos(ph) * math.sin(th))
-            local = (lerp(*X, t) * d[0], lerp(*Y, t) * d[1], lerp(*Z, t) * d[2])
-        world = np.array(local) @ R
+    for c, (pid, (fr, p)) in enumerate(sorted(_first(frames).items())):   # c: the shape counter, one per sample
+        world = _shape_local(sh, _rng(refsim, 0x30, fr, pid), c) @ R
         worst = max(worst, float(np.abs(world - np.array(p["pos"])).max()))
         n += 1
     return dict(particles=n, worst_abs=worst, status="PASS" if worst < 1e-6 else "FAIL")
@@ -241,7 +334,7 @@ def check_vel(frames, ent, refsim):
     v = ent.get("vel")
     if not v:
         return None
-    R = _rx(ent["shape"][6] if "shape" in ent else ent["shape_rot"])
+    R = _rot(ent["shape"]["rot"])
     worst, n = 0.0, 0
     for pid, (fr, p) in _first(frames).items():
         g = _rng(refsim, 0x23, fr, pid)   # Normal: no direction draws
@@ -448,30 +541,53 @@ def check_rgb(frames, ent, refsim):
     return dict(checks=n, mismatches=bad[:4], status="PASS" if not bad else "FAIL")
 
 
+def check_noise(frames, ent, refsim):
+    nz = ent.get("noise")
+    if not nz:
+        return None
+    import noise_ref
+    blk = list(nz["lf"]) + list(nz["lw"]) + list(nz["hf"]) + list(nz["hw"])
+    state, n, wo, wr = {}, 0, 0.0, 0.0
+    for fr in frames:
+        for q in fr["particles"]:
+            if q["id"] not in state:
+                state[q["id"]] = noise_ref.birth(fr["emitter"]["rng_state"], fr["emitter"]["seed"], q["slot"])
+            rec = state[q["id"]]
+            off = noise_ref.step(rec, blk, F(F(fr["dt"]) * noise_ref.TWO_PI))
+            wo = max(wo, max(abs(float(off[k]) - q["noise"][k]) for k in range(3)))
+            wr = max(wr, max(abs(float(rec[k]) - q["noise_rec"][k]) for k in range(9)))
+            n += 1
+    return dict(ticks=n, worst_offset=wo, worst_record=wr, status="PASS" if max(wo, wr) < 1e-6 else "FAIL")
+
+
 def check(dump, ent, only=None):
     import exp_emitter
     import refsim
     frames = dump["frames"]
     if not frames:
         return {}
-    moved = dump
-    if ent.get("flags4"):                     # motion is integrated into the displacement slot
-        moved = dict(frames=[dict(fr, particles=[dict(q, pos=q["disp"]) for q in fr["particles"]]) for fr in frames])
-    base = exp_emitter.check(moved, dict(ent, vel=None, interval=0, loops=0))   # life and motion only
-    res = {"spawn": check_spawn(frames, ent, refsim)}
-    if "life" in base:
-        bad = [x for x in base["life"]["particles"] if not (x["draws_match_refsim"] and x["match"] == x["ticks"])]
-        res["life"] = dict(particles=len(base["life"]["particles"]), mismatches=bad[:3], status=base["life"]["status"])
-    if "motion" in base:
-        res["motion"] = base["motion"]
+    want = (lambda k: k in only) if only else (lambda k: True)
+    res = {}
+    if want("spawn"):
+        res["spawn"] = check_spawn(frames, ent, refsim)
+    if want("life") or want("motion"):
+        moved = dump
+        if ent.get("flags4"):                 # motion is integrated into the displacement slot
+            moved = dict(frames=[dict(fr, particles=[dict(q, pos=q["disp"]) for q in fr["particles"]]) for fr in frames])
+        base = exp_emitter.check(moved, dict(ent, vel=None, interval=0, loops=0))   # life and motion only
+        if "life" in base:
+            bad = [x for x in base["life"]["particles"] if not (x["draws_match_refsim"] and x["match"] == x["ticks"])]
+            res["life"] = dict(particles=len(base["life"]["particles"]), mismatches=bad[:3], status=base["life"]["status"])
+        if "motion" in base:
+            res["motion"] = base["motion"]
     for k, fn in (("shape", check_shape), ("vel", check_vel), ("bb", check_bb), ("color", check_color),
-                  ("scale", check_scale), ("rotate", check_rotate), ("rgb", check_rgb)):
-        r = fn(frames, ent, refsim)
-        if r:
-            res[k] = r
-    res["uv"] = check_uv(frames, ent, refsim, dump.get("uvs", 255))
-    if only:
-        res = {k: v for k, v in res.items() if k in only}
+                  ("scale", check_scale), ("rotate", check_rotate), ("rgb", check_rgb), ("noise", check_noise)):
+        if want(k):
+            r = fn(frames, ent, refsim)
+            if r:
+                res[k] = r
+    if want("uv"):
+        res["uv"] = check_uv(frames, ent, refsim, dump.get("uvs", 255))
     return res
 
 
