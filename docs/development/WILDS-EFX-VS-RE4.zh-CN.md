@@ -154,40 +154,46 @@ E 的偏移：状态 +0x100（RE4 +0x170），槽数 +0x84，粒子槽 +0x120（
 
 ### 6.5 与参照比对
 
-参照是 RE4 运行时规格（[RE4-EFX-RUNTIME.zh-CN.md](RE4-EFX-RUNTIME.zh-CN.md)，下称 RT）的公式和 `tools/Re4Native/refsim.py` 的随机数。期望值由 ReeLib 读出的字段值（`VfxStudio.Core` 的 MHWilds 结构）按这些公式算出，`tools/Re4Native/exp_wilds_reference.py` 与原生运行逐帧比较。比较了 6 个 Billboard3D 条目、8 个场景，其中一个用可变 dt，一个在另一个进程里重跑（两次结果相同）。
+参照是 RE4 运行时规格（[RE4-EFX-RUNTIME.zh-CN.md](RE4-EFX-RUNTIME.zh-CN.md)，下称 RT）的公式和 `tools/Re4Native/refsim.py` 的随机数。期望值由 ReeLib 读出的字段值（`VfxStudio.Core` 的 MHWilds 结构）按这些公式算出，`tools/Re4Native/exp_wilds_reference.py` 与原生运行逐帧比较。比较了 7 个 Billboard3D 条目、10 个场景：其中一个用可变 dt，一个在另一个进程里重跑（两次结果相同），一个把合成 .uvs 缩短到 16 个图案，让 PlayMode 2 播到末帧。
 
-粒子槽字段的偏移（括号里是 RE4）：`p+0x18` 编号，`+0x34` 位置（+0x28），`+0x64` 年龄（+0x58），`+0x68` 速度（+0x5c），`+0x80` SpeedCoef（+0x74），`+0x84` / `+0x88` 重力加速度与重力速度（+0x78 / +0x7c），`+0x8c` 四个尺寸槽（+0x80），`+0xa8` 角度（+0x9c），`+0x4c` Velocity3D Flags 位 2 时的位移（+0x40）；`[p+4]` 位 3..6 为 Life 阶段码，`[p]` 位 2..9 为 8 位 alpha，与 RE4 相同。Life 的逐粒子记录在 `[E+0x128] + 槽号 × [E+0xd0]`，内容与 RE4 相同（remain、A、A+K、T）。播种函数 0xb0510f0 与 RE4 的 3d09990 指令相同，读 E.state `+0xa8`（RE4 +0x120）与 E.seed `+0x98`（RE4 +0x110）；salt 也与 RE4 相同。
+粒子槽字段的偏移（括号里是 RE4）：`p+0x18` 编号，`+0x34` 位置（+0x28），`+0x58` 颜色 RGBA8（+0x4c），`+0x5c` Blink 系数（+0x50），`+0x64` 年龄（+0x58），`+0x68` 速度（+0x5c），`+0x80` SpeedCoef（+0x74），`+0x84` / `+0x88` 重力加速度与重力速度（+0x78 / +0x7c），`+0x8c` 四个尺寸槽（+0x80），`+0xa8` 角度（+0x9c），`+0x4c` Velocity3D Flags 位 2 时的位移（+0x40）。`[p+4]` 位 3..6 为 Life 阶段码，`[p]` 位 2..9 为 8 位 alpha、位 10..17 为 UV 序列号、位 18..25 为 UV 帧，与 RE4 相同。各属性的逐粒子记录在 `[E+0x128] + 槽号 × [E+0xd0] + [块+8]`：Life 的内容与 RE4 相同（remain、A、A+K、T）；RgbCommon / RgbWater 是三个通道各一组 (remain, 时长, 阶段码)，后接各通道的系数（float）。播种函数 0xb0510f0 与 RE4 的 3d09990 指令相同，读 E.state `+0xa8`（RE4 +0x120）与 E.seed `+0x98`（RE4 +0x110）；salt 也与 RE4 相同。
 
 | 项 | 规则（RT 章节） | 结果 |
 |---|---|---|
-| 出生时刻 | §2.3.2 的倒数与 LoopNum；每批 SpawnNum、IntervalFrame 的抽取（salt 1，key 0）；每批后的 E.state | 8 个场景的批次时刻、每批粒子数、每批后的 E.state 都一致，含 IntervalFrame 30..60 随机、EmitterDelayFrame 115、可变 dt |
-| Life | §1.6.3 的抽取（salt 0x29）；§2.4.2 模式 0 的逐帧阶段码与 alpha | 80 个粒子全部一致 |
-| 积分 | §3.2：`gvel += n·accel; pos += (vel + (0,1,0)·gvel)·n; vel *= powf(coef, n)` | 2,155 步逐位一致 |
+| 出生时刻 | §2.3.2 的倒数与 LoopNum；每批 SpawnNum、IntervalFrame 的抽取（salt 1，key 0）；每批后的 E.state | 9 个场景的批次时刻、每批粒子数、每批后的 E.state 都一致，含 IntervalFrame 30..60 随机、EmitterDelayFrame 115、可变 dt |
+| Life | §1.6.3 的抽取（salt 0x29）；§2.4.2 模式 0 的逐帧阶段码与 alpha | 88 个粒子全部一致 |
+| 积分 | §3.2：`gvel += n·accel; pos += (vel + (0,1,0)·gvel)·n; vel *= powf(coef, n)` | 2,434 步逐位一致 |
 | 出生位置 | §3.1：Cylinder、Sphere 的 UseExtension 采样（salt 0x30），`p·R` | 24 个粒子，误差 ≤ 3.7e-7 |
-| 出生速度 | §3.2 Normal：`d = (Size − 1) ⊙ (P·R⁻¹) + Offset`，归一化后乘 R（Flags 位 2 时不乘）；Speed、GravityRate、SpeedCoef 的抽取（salt 0x23） | 34 个粒子，误差 < 4e-9 |
-| Billboard3D | salt 0x0f：SizeScalar、SizeX、SizeY、Rotation 依次抽取，spread 为 0 的不抽 | 全部一致 |
-| ScaleAnim | §3.3：`U = base + Add·t`（Coef 1）或 `base + Add·c·(1 − c^t)/(1 − c)`（Coef 0.99）；抽取 salt 0x27 | 1,714 帧，误差 ≤ 3e-8 |
+| 出生速度 | §3.2 Normal：`d = (Size − 1) ⊙ (P·R⁻¹) + Offset`，归一化后乘 R（Flags 位 2 时不乘）；Speed、GravityRate、SpeedCoef 的抽取（salt 0x23） | 42 个粒子，误差 < 7e-9 |
+| Billboard3D | salt 0x0f：SizeScalar、SizeX、SizeY、Rotation 依次抽取，spread 为 0 的不抽 | 88 个粒子全部一致 |
+| 出生颜色 | §4.2：Flags 位 4 时先多抽一次 u，每个字节 `trunc(lerp(Color, ColorRange, u))`，四个通道共用 u；之后每帧不变 | em0009_00_204 的 8 个粒子、295 帧一致；另在 24 个 em0009 条目上用临时脚本跑过一次，76 个粒子都一致 |
+| ScaleAnim | §3.3：`U = base + Add·t`（Coef 1）或 `base + Add·c·(1 − c^t)/(1 − c)`（Coef 0.99）；抽取 salt 0x27 | 2,009 帧，误差 ≤ 3e-8 |
 | RotateAnim | §3.4：速度、系数、方向的抽取（salt 0x25）；每帧 `angle += n·v`，折回 [0, 2π)，再 `v *= powf(c, n)` | 911 帧，误差 ≤ 3.6e-7 |
-| UVSequence 起始图案 | salt 0x2b，第 1 次抽取给 SequenceNo，第 2 次给 `PatternNo.min + x % (max − min)` | 全部一致 |
+| UV 帧 | §4.1：SequenceNo、PatternNo（起始帧）、PlaySpeed 的抽取（salt 0x2b，PlaySpeed 为 MinMax 线性插值）；每帧 `acc += dt`，到 T = (1/60)/speed 时前进 `int(acc/T)` 帧，`acc = frac(acc/T)·(1/60)`；PlayMode 0 不动、1 回到 0、2 停在末帧并杀死粒子（下一帧消失） | 2,596 帧一致，含随机 PlaySpeed 1..1.25、1..1.5，以及 6 次 PlayMode 2 的杀死 |
+| UVSequenceModifier | §4.1：从下一帧起替换 T，`speed = m·Init + (1 − m)·Final`，m 从 1 开始、每帧 `m *= powf(c, n)` | em0021 的 918 帧一致 |
+| Rgb* 寿命 | §4.9：Keep 段系数 1，Vanish 段 remain/V，结束为 0；RgbWater 的 GtoB 系数再乘 GtoB。第一个启用寿命的通道的 Appear、Keep、Vanish 是第 1..3 次抽取（RgbCommon salt 0x7625a743、RgbWater 0xe107eec2，key = 槽号） | RgbCommon（slinger_055_jimen 的绿、红两层）和 RgbWater（em0009_00_204 的 GtoB）共 957 项一致 |
 
-把参照里的任意一个字段值改一点（速度、Offset、KeepFrame、旋转范围、ScaleAnim Add、形状半径、图案区间、IntervalFrame），对应的那一项就报 FAIL，其他项不变。所以上表也说明这些字段在 C# 结构里的位置是对的。
+把参照里的任意一个字段值改一点（速度、Offset、KeepFrame、旋转范围、ScaleAnim Add、形状半径、图案区间、IntervalFrame、ColorRange、PlaySpeed、PlayMode、Modifier 系数、Rgb 的 Keep / Vanish），对应的那一项就报 FAIL，其他项不变。所以上表也说明这些字段在 C# 结构里的位置是对的。
 
 与 RE4 不同的地方：
 
 - **第一批不推进 E.state。** 重启时 E.state = xs(seed)，第一批用它抽取、出生的粒子也看到它；之后每批先抽取，再推进一次 xs。RE4 的第一批也推进，所以它的第一批粒子看到 xs(xs(seed))（`tools/Re4Native/README.md` 的 E.state 一行）。依据是两个带 FixRandomGenerator 的条目：em0021_00_206（种子 1，第一批在第 115 帧）和 slinger_000（种子 406056259，第一批在第 1 帧）。
+- **UVSequenceModifier 的 Flags 1 走指数模式。** RT 写的是位 1 置位时第三项为系数（指数模式），否则为帧数（线性模式）。em0021_00_206 的 Flags 为 1（位 1 清零），但按指数模式（m 从 1 开始）918 帧全部一致，按线性模式几乎全错。可能是 Wilds 改了位的含义，也可能是 RT 的这一条有误；RE4 侧没有原生验证过。
 
 RT 没有写、原生运行中观察到的：
 
 - 槽满时这一批不出粒子，但仍消耗一次 LoopNum；同一帧死亡的粒子要到下一帧才让出槽位。slinger_055_jimen（3 个槽、每 2 帧一批、寿命 6 帧）的第 7、15 帧因此没有出生。
+- Rgb* 的寿命计数在出生那一帧就减 1（Life 的计数不减）；结束后 remain 继续往负数减，阶段码为 9。
+- Rgb* 用槽号作 key，所以 E.state 不变时同一个槽先后出生的粒子抽到相同的时长（jimen 的 0 号、3 号粒子）。
 
 替身的影响：
 
-- 合成的 .uvs 只有 16 个图案时，UVSequence Flags 为 553 / 554 的条目在帧号越过最后一个图案时杀掉粒子。em0002_00_800 的粒子因此只活 6 帧，而 Life 是 49 帧。比对时把合成序列加长到 255 个图案。真实的 .uvs 不在解包目录里。
+- 合成的 .uvs 每个序列只有 16 个图案时，PlayMode 2 的条目（UVSequence Flags 低 2 位为 2，如 em0002_00_800 的 554）很快播到末帧并杀掉粒子：em0002 的粒子只活 6 帧，Life 是 49 帧。这是 RT 写的行为，不是错误；但真实 .uvs 的图案数不同，寿命也会不同。其余场景把合成序列加长到 255 个图案。真实的 .uvs 不在解包目录里。
 
 没有比对的：
 
-- PlaySpeed 为非整数随机值时 UV 帧的推进（em0002 的 1..1.25 与"每粒子抽一个速度后累加"对不上）。RT 只确认了 PlaySpeed 为 1 的情形，这里 1 和 0.5 的推进与之相符。
-- 颜色（Color、Rgb*）、Noise、ParentOptions 跟随、形状的均分模式（RangeDivide*）、GPU 类型。
+- 顶点颜色与着色器里的合成（RT §4.10 第 4 步起）、ColorRate / Intensity、RgbCommon 的红层系数（AlphaToB 驱动，记录里第 7、8 个字在红层结束后变为 1.0，含义没有对）、Rgb* 的 Appear 段和第二个通道的抽取位置（样本里都是定值）。
+- Noise、ParentOptions 跟随、形状的均分模式（RangeDivide*）、GPU 类型、UV 的翻转 / 倒放（Reverse 只在 CPU 路径影响帧号，样本里都关着）。
 
 ## 7. 对 C# 读取器的修改
 
@@ -253,7 +259,7 @@ exe 给出了、但没有改的：
 | `p20.py` | 内层解析器形式的字段名 → 块偏移 |
 | `rawdump/` | C# 工具：从语料读出指定类型的载荷字节（只读内存流，写到内存里的 FileHandler） |
 | `tools/Re4Native/exp_wilds_emitter.py` | §6.4：内置条目或 `sweep <entries.json>`，每个条目一个子进程，报告步骤列表、槽数、逐帧存活数、执行过的步骤 |
-| `tools/Re4Native/exp_wilds_reference.py` | §6.5：8 个场景，每个一个子进程，逐项对照 RT 的公式与 `refsim.py`，最后一行 `RESULT` 汇总各项 PASS / FAIL |
+| `tools/Re4Native/exp_wilds_reference.py` | §6.5：10 个场景，每个一个子进程，逐项对照 RT 的公式与 `refsim.py`，最后一行 `RESULT` 汇总各项 PASS / FAIL |
 
 ## 附录：Wilds 属性类型表
 

@@ -19,15 +19,26 @@ Checks (spec section in brackets):
   shape    spawn position from EmitterShape3D (salt 0x30): Sphere / Cylinder with UseExtension (§3.1)
   vel      Velocity3D spawn draws (salt 0x23): Normal direction, Speed, GravityRate, SpeedCoef (§3.2, §1.6.3)
   bb       TypeBillboard3D spawn draws (salt 0x0f): SizeScalar, SizeX, SizeY, Rotation, each skipped at spread 0
+  color    with Billboard3D Flags bit 4: one more draw u first, colour byte = trunc(lerp(Color, ColorRange, u)),
+           one u for all four channels (§4.2); every tick the colour stays the birth colour
   scale    ScaleAnim (salt 0x27): every tick's U slot = f(age - age0, base, SizeScalarAdd, SizeScalarCoef) (§3.3)
   rotate   RotateAnim (salt 0x25): X speed, coef and sign draws; every tick angle += n*v, wrapped to [0, 2pi),
            then v *= powf(c, n) (§3.4)
-  uv       UVSequence (salt 0x2b): start pattern = PatternNo.min + x2 % (max - min); frame advance not compared
+  uv       UVSequence (salt 0x2b, §4.1): SequenceNo, PatternNo (start frame) and PlaySpeed draws; every tick
+           acc += dt, steps = int(acc/T) with T = (1/60)/speed, acc = frac(acc/T)/60; PlayMode 0 static, 1 loop
+           to 0, 2 clamp to the last pattern and kill (the particle is gone the next tick). UVSequenceModifier
+           replaces T from the next tick: speed = m*Init + (1-m)*Final, m starting at 1 and *= powf(c, n). The
+           .uvs is synthetic (UVS patterns per sequence, see run)
+  rgb      RgbCommon / RgbWater life envelopes (§4.9) in the per-particle record: per channel remain, duration
+           and phase code (5 Keep, 8 Vanish, 9 Terminate), and the channel factor (Keep 1, Vanish remain/V,
+           Terminate 0, times GtoB for RgbWater's GtoB). Draws: the first life channel's Appear, Keep, Vanish are
+           draws 1..3 (salts 0x7625a743 / 0xe107eec2, key = slot)
 """
 import hashlib
 import json
 import math
 import os
+import struct
 import subprocess
 import sys
 
@@ -46,21 +57,25 @@ ENTRIES = {
     "em2": dict(path=r"EffectEditor\Enemy\em0002\11_em0002_00_800.efx.5571972", off=173,
                 delay=0, interval=10, loops=3, spawn_num=2, cap=6, life=((0, 0), (4, 4), (45, 45)),
                 vel=dict(offset=(0, 0.245, -1), size=(2, 1.5, 2), speed=(1.2, 0.5), gravity=(1.2, 0), coef=(1, 0)),
-                bb=dict(U=(1, 0.3), X=(1, 0), Y=(1, 0), rot=(0, PI)), scale_add=(0.065, 0.01), pattern=(5, 11),
+                bb=dict(U=(1, 0.3), X=(1, 0), Y=(1, 0), rot=(0, PI)), scale_add=(0.065, 0.01),
+                uv=dict(seq=(2, 3), pat=(5, 11), speed=(1, 1.25), mode=2),
                 shape=("cylinder", (0, 0.3), (-0.5, 0.3), (0, 0.3), (0, PI), (1.25, -0.5), math.pi / 2)),
     # Spawn Max 3, SpawnNum 1, IntervalFrame 2, LoopNum 8; Billboard3D SizeScalar 2±1, SizeY 1±0.2; Velocity3D Normal,
     # Speed 1, Size 1.1; Life 0 / 1 / 5; EmitterShape3D Sphere 1..2, UseExtension, V −10°..90°
     "jimen": dict(path=r"EffectEditor\Common\slinger\11_pl_slinger_055_jimen.efx.5571972", off=15735,
                   delay=0, interval=2, loops=8, spawn_num=1, cap=3, life=((0, 0), (1, 1), (5, 5)),
                   vel=dict(offset=(0, 0, 0), size=(1.1, 1.1, 1.1), speed=(1, 0), gravity=(0, 0), coef=(1, 0)),
-                  bb=dict(U=(2, 1), X=(1, 0), Y=(1, 0.2), rot=(0, PI)), pattern=(0, 64),
+                  bb=dict(U=(2, 1), X=(1, 0), Y=(1, 0.2), rot=(0, PI)), uv=dict(seq=(0, 1), pat=(0, 64), speed=(0.5, 0.5), mode=1),
+                  rgb=dict(type=242, salt=0x7625A743, channels=[dict(base=0, life=((0, 0), (1, 1), (1, 10)), factor=6, scale=1.0, draws=True),
+                                                               dict(base=3, life=((0, 0), (2, 2), (0, 0)))]),
                   shape=("sphere", (1, 2), (1, 2), (1, 2), (0, 6.2831855), (-0.17453294, 1.7453294), math.pi / 2)),
     # Spawn Max 3, SpawnNum 3, LoopNum 1; Velocity3D Normal, Speed 0.1, SpeedCoef 0.95, Offset (0, −0.06, 0);
     # Life 0 / 5 / 10..20; EmitterShape3D Cylinder with RangeDivideNum (divide mode: shape not checked)
     "s053": dict(path=r"EffectEditor\Common\slinger\11_pl_slinger_053.efx.5571972", off=6635,
                  delay=0, interval=0, loops=1, spawn_num=3, cap=3, life=((0, 0), (5, 5), (10, 20)),
                  vel=dict(offset=(0, -0.06, 0), size=(1.1, 1.05, 1.1), speed=(0.1, 0), gravity=(0, 0), coef=(0.95, 0)),
-                 bb=dict(U=(0.75, 0.25), X=(0.8, 0), Y=(1, 0), rot=(0, PI)), pattern=(20, 41), shape_rot=math.pi / 2),
+                 bb=dict(U=(0.75, 0.25), X=(0.8, 0), Y=(1, 0), rot=(0, PI)), shape_rot=math.pi / 2,
+                 uv=dict(seq=(0, 1), pat=(20, 41), speed=(1, 1), mode=1)),
     # FixRandomGenerator seed 1; Spawn Max 6, EmitterDelayFrame 115, IntervalFrame 30..60, LoopNum 0 (endless);
     # Billboard3D SizeScalar 0.1±0.025; Velocity3D Flags 4, Normal, Offset (0, 1.8, −0.05), Size (3, 1, 3),
     # GravityRate −0.004; RotateAnim Flags 1, AddX 1°±0.5°, CoefX 0.99; ScaleAnim Add 0.002, Coef 0.99;
@@ -70,33 +85,49 @@ ENTRIES = {
                  vel=dict(offset=(0, 1.8, -0.049999997), size=(3, 1, 3), speed=(0.20000014, 0), gravity=(-0.004, 0),
                           coef=(1, 0)), flags4=True, shape_rot=0.0,
                  bb=dict(U=(0.1, 0.025), X=(1, 0), Y=(1, 0), rot=(0, PI)), scale_add=(0.002, 0), scale_coef=(0.99, 0),
-                 rotate=dict(add=(0.017453294, 0.008726647), coef=(0.99, 0), sign=True), pattern=(0, 64)),
+                 rotate=dict(add=(0.017453294, 0.008726647), coef=(0.99, 0), sign=True),
+                 uv=dict(seq=(2, 3), pat=(0, 64), speed=(0.5, 0.5), mode=1, modifier=dict(init=1, final=0.3, coef=0.98))),
     # FixRandomGenerator seed 406056259 (state chain with a large seed); Spawn Max 6, IntervalFrame 2, endless;
     # Life 0 / 2 / 8; no Velocity3D; EmitterShape3D Sphere with RangeDivideNum (shape not checked)
     "s000": dict(path=r"EffectEditor\Common\slinger\11_pl_slinger_000.efx.5571972", off=6319,
                  delay=0, interval=2, loops=None, spawn_num=1, cap=6, life=((0, 0), (2, 2), (8, 8)),
-                 bb=dict(U=(0.1, 0), X=(1, 0), Y=(1, 0), rot=(0, 0)), pattern=(0, 1)),
+                 bb=dict(U=(0.1, 0), X=(1, 0), Y=(1, 0), rot=(0, 0)), uv=dict(seq=(1, 2), pat=(0, 1), speed=(1, 1), mode=0)),
+    # Billboard3D Flags 16 (random colour between 0xffffffff and 0xffb3b3b3), SizeScalar 2±0.4; Spawn 8 at once;
+    # Velocity3D Normal, Speed 3.5±2, GravityRate 0.7±0.1; ScaleAnim Add 0.04±0.01; Life 0 / 15 / 20..25;
+    # UVSequence PlayMode 2, PlaySpeed 1..1.5; RgbWater GtoB life 0 / 20 / 20..30 (GtoB 0.7); EmitterShape3D Sphere
+    # with RangeDivideHorizontalNum (shape not checked)
+    "em9": dict(path=r"EffectEditor\Enemy\em0009\11_em0009_00_204.efx.5571972", off=473,
+                delay=0, interval=0, loops=1, spawn_num=8, cap=8, life=((0, 0), (15, 15), (20, 25)),
+                vel=dict(offset=(0, 0.5, 0), size=(2, 1.8, 2), speed=(3.5, 2), gravity=(0.7, 0.1), coef=(1, 0)),
+                shape_rot=0.0, bb=dict(U=(2, 0.4), X=(1, 0), Y=(1, 0), rot=(0, 0), color=(0xFFFFFFFF, 0xFFB3B3B3)),
+                scale_add=(0.04, 0.01), uv=dict(seq=(4, 5), pat=(0, 6), speed=(1, 1.5), mode=2),
+                rgb=dict(type=244, salt=0xE107EEC2, channels=[dict(base=0, life=None, factor=9, scale=1.0),
+                                                               dict(base=3, life=None, factor=10, scale=1.0),
+                                                               dict(base=6, life=((0, 0), (20, 20), (20, 30)), factor=11,
+                                                                    scale=0.7, draws=True)])),
     # Spawn Max 1, LoopNum 1; no Velocity3D; Life 0 / 1 / 3
     "s012": dict(path=r"EffectEditor\Common\slinger\11_pl_slinger_012.efx.5571972", off=906,
                  delay=0, interval=0, loops=1, spawn_num=1, cap=1, life=((0, 0), (1, 1), (3, 3)),
-                 bb=dict(U=(2, 0), X=(1, 0), Y=(1, 0), rot=(0, 0)), pattern=(0, 1)),
+                 bb=dict(U=(2, 0), X=(1, 0), Y=(1, 0), rot=(0, 0)), uv=dict(seq=(1, 2), pat=(0, 1), speed=(1, 1), mode=0)),
 }
 DTS = {"60": [1 / 60] * 90, "var": ([1 / 30, 1 / 90, 1 / 45, 1 / 60, 1 / 120, 1 / 20] * 15)[:90],
        "60_long": [1 / 60] * 420}   # em21: first batch at tick 115
 SCENARIOS = {"em2_60": ("em2", "60"), "em2_60_b": ("em2", "60"), "em2_var": ("em2", "var"),
              "jimen_60": ("jimen", "60"), "em21_60": ("em21", "60_long"),
-             "s000_60": ("s000", "60"), "s053_60": ("s053", "60"), "s012_60": ("s012", "60")}
+             "s000_60": ("s000", "60"), "em9_60": ("em9", "60"),
+             "s053_60": ("s053", "60"), "s012_60": ("s012", "60"),
+             "em2_uvs16": ("em2", "60", dict(uvs=16, only=("uv",)))}   # PlayMode 2 reaching the last pattern
 
 
 def run(name):
     import mhwildsnative as wn
     import mhwilds_emitter as me
-    key, clock = SCENARIOS[name]
+    key, clock, opt = (SCENARIOS[name] + ({},))[:3]
     ent = ENTRIES[key]
-    me.UVS_SHAPE[:] = [4, 255]   # long sequences: with 16 patterns UVSequence's end-of-sequence kill shortens lives
+    me.UVS_SHAPE[:] = [4, opt.get("uvs", 255)]   # synthetic .uvs: 4 sequences of this many patterns
     img = wn.load()
     me.install_runtime(img)
-    out = dict(scenario=name, entry=f"{os.path.basename(ent['path'])}@{ent['off']}", frames=[])
+    out = dict(scenario=name, entry=f"{os.path.basename(ent['path'])}@{ent['off']}", uvs=me.UVS_SHAPE[1], frames=[])
     try:
         e = me.Entry(img, os.path.join(ROOT, ent["path"]), ent["off"])
         e.set_3d(10 in [a["type"] for a in e.attrs])
@@ -106,7 +137,13 @@ def run(name):
         m.play()
         for k, dt in enumerate(DTS[clock], 1):
             m.tick(dt)
-            out["frames"].append(dict(tick=k, dt=dt, emitter=m.emitter_state(), particles=m.state()))
+            ps = m.state()
+            if "rgb" in ent:          # Rgb* per-particle record: 3 x (remain, duration, phase), then factors (raw)
+                blk = m.block_of(ent["rgb"]["type"])
+                for q in ps:
+                    r = wn.u64(m.E + 0x128) + q["slot"] * wn.u32(m.E + 0xD0) + wn.u32(blk + 8)
+                    q["rgb"] = list(struct.unpack("<12i", img.read(r, 0x30)))
+            out["frames"].append(dict(tick=k, dt=dt, emitter=m.emitter_state(), particles=ps))
         out["status"] = "RAN"
     except Exception as ex:
         out["status"] = "FAULT"
@@ -227,6 +264,8 @@ def check_bb(frames, ent, refsim):
     bad, n = [], 0
     for pid, (fr, p) in _first(frames).items():
         g = _rng(refsim, 0x0F, fr, pid)
+        if "color" in b:
+            g.u()                                    # the colour's u comes first
         U, X, Y, rot = (float(g.rnd_guard(*b[k])) for k in ("U", "X", "Y", "rot"))
         got = (p["size"][0], p["size"][1], p["size"][2], p["rot"])
         if max(abs(a - c) for a, c in zip((U, X, Y, rot), got)) > 1e-6:
@@ -291,20 +330,125 @@ def check_rotate(frames, ent, refsim):
     return dict(ticks=n, worst_abs=worst, status="PASS" if worst < 1e-5 else "FAIL")
 
 
-def check_uv(frames, ent, refsim):
-    lo, hi = ent["pattern"]
-    bad, n = [], 0
+def check_uv(frames, ent, refsim, count):
+    import exp_emitter
+    powf = exp_emitter._powf()
+    u = ent["uv"]
+    mod = u.get("modifier")
+    bad, n, kills = [], 0, 0
     for pid, (fr, p) in _first(frames).items():
         g = _rng(refsim, 0x2B, fr, pid)
-        g.next()                                     # x1: SequenceNo
-        start = lo + g.next() % max(hi - lo, 1)
-        if p["uv_frame"] != start:
-            bad.append((pid, start, p["uv_frame"]))
+        if u["seq"][1] != u["seq"][0]:
+            g.next()                                 # SequenceNo
+        x = g.next() if u["pat"][1] != u["pat"][0] else 0
+        frame = u["pat"][0] + x % max(u["pat"][1] - u["pat"][0], 1)
+        sp = F(F(u["speed"][0]) + F(F(F(u["speed"][1]) - F(u["speed"][0])) * g.u()))
+        m = F(1)
+
+        def mod_speed(m):
+            return F(F(m * F(mod["init"])) + F(F(F(1) - m) * F(mod["final"])))
+        T = F(F(1 / 60) / (mod_speed(m) if mod else sp))
+        acc, dead, expect, last = F(0), False, {fr["tick"]: frame}, p
+        for f2 in frames:
+            if f2["tick"] <= fr["tick"]:
+                continue
+            q = next((x for x in f2["particles"] if x["id"] == pid), None)
+            if dead:                                 # killed in the previous tick: gone now
+                if q is not None:
+                    bad.append((pid, f2["tick"], "alive after kill"))
+                kills += 1
+                break
+            if q is None:                            # gone without a UV kill: only when its Life ran out
+                step = math.floor(f2["dt"] * 60) + 1      # at most this many Life frames pass in this tick
+                if last.get("life_rec") and last["life_rec"][0] > step:
+                    bad.append((pid, f2["tick"], "gone with life remaining", last["life_rec"][0]))
+                break
+            last = q
+            acc = F(acc + F(f2["dt"]))
+            if u["mode"] and acc >= T:
+                r = F(acc / T)
+                steps = int(r)
+                acc = F(F(r - F(steps)) * F(1 / 60))
+                frame += steps
+                if frame >= count:
+                    frame = 0 if u["mode"] == 1 else count - 1
+                    dead = u["mode"] == 2
+            if mod:                                  # the modifier's T applies from the next tick
+                m = F(F(powf(mod["coef"], float(F(F(f2["dt"]) * F(60))))) * m)
+                T = F(F(1 / 60) / mod_speed(m))
+            expect[f2["tick"]] = frame
+        for f2 in frames:
+            q = next((x for x in f2["particles"] if x["id"] == pid), None)
+            if q is not None and f2["tick"] in expect:
+                n += 1
+                if q["uv_frame"] != expect[f2["tick"]]:
+                    bad.append((pid, f2["tick"], expect[f2["tick"]], q["uv_frame"]))
+    return dict(ticks=n, kills=kills, mismatches=bad[:3], status="PASS" if not bad else "FAIL")
+
+
+def check_color(frames, ent, refsim):
+    b = ent["bb"]
+    if "color" not in b:
+        return None
+    c0, c1 = b["color"]
+    bad, n, ticks = [], 0, 0
+    for pid, (fr, p) in _first(frames).items():
+        u = _rng(refsim, 0x0F, fr, pid).u()
+        exp = 0
+        for k in range(4):
+            lo, hi = (c0 >> 8 * k) & 0xFF, (c1 >> 8 * k) & 0xFF
+            exp |= int(F(F(lo) + F(F(F(hi) - F(lo)) * u))) << 8 * k
         n += 1
-    return dict(particles=n, mismatches=bad[:3], status="PASS" if not bad else "FAIL")
+        for f2 in frames:
+            for q in f2["particles"]:
+                if q["id"] == pid:
+                    ticks += 1
+                    if q["rgba"] != exp:
+                        bad.append((pid, f2["tick"], hex(exp), hex(q["rgba"])))
+    return dict(particles=n, ticks=ticks, mismatches=bad[:3], status="PASS" if not bad else "FAIL")
 
 
-def check(dump, ent):
+def check_rgb(frames, ent, refsim):
+    rg = ent.get("rgb")
+    if not rg:
+        return None
+    bad, n = [], 0
+    for pid, (fr, p) in _first(frames).items():
+        g = refsim.Rng(rg["salt"], fr["emitter"]["rng_state"], fr["emitter"]["seed"], p["slot"])
+        xs = [g.next() for _ in range(3)]
+        for ch in rg["channels"]:
+            if ch.get("life"):
+                A, K, V = ((_irange(x, r) if ch.get("draws") else r[0]) for x, r in zip(xs, ch["life"]))
+                assert A == 0, "Appear segments are not modelled"
+            for f2 in frames:
+                if f2["tick"] < fr["tick"]:
+                    continue
+                q = next((x for x in f2["particles"] if x["id"] == pid), None)
+                if q is None:
+                    break
+                rec = q["rgb"]
+                if not ch.get("life"):
+                    exp, f = None, F(ch["scale"])
+                else:
+                    e = f2["tick"] - fr["tick"] + 1           # the birth tick already counts one frame
+                    if e <= K:
+                        exp, f = (K - e, K, 5), F(1)
+                    else:
+                        rem = V - (e - K)
+                        exp = (rem, V, 8 if rem >= 0 else 9)
+                        f = F(F(rem) / F(V)) if rem > 0 else F(0)
+                    f = F(f * F(ch.get("scale", 1.0)))
+                got = tuple(rec[ch["base"]:ch["base"] + 3])
+                if exp is not None and got != exp:
+                    bad.append((pid, f2["tick"], ch["base"], exp, got))
+                got_f = struct.unpack("<f", struct.pack("<i", rec[ch["factor"]]))[0] if "factor" in ch else None
+                if got_f is not None and abs(float(f) - got_f) > 1e-6:
+                    bad.append((pid, f2["tick"], "factor", ch["factor"], float(f), got_f))
+                n += 1
+    return dict(checks=n, mismatches=bad[:4], status="PASS" if not bad else "FAIL")
+
+
+def check(dump, ent, only=None):
     import exp_emitter
     import refsim
     frames = dump["frames"]
@@ -320,11 +464,14 @@ def check(dump, ent):
         res["life"] = dict(particles=len(base["life"]["particles"]), mismatches=bad[:3], status=base["life"]["status"])
     if "motion" in base:
         res["motion"] = base["motion"]
-    for k, fn in (("shape", check_shape), ("vel", check_vel), ("bb", check_bb), ("scale", check_scale),
-                    ("rotate", check_rotate), ("uv", check_uv)):
+    for k, fn in (("shape", check_shape), ("vel", check_vel), ("bb", check_bb), ("color", check_color),
+                  ("scale", check_scale), ("rotate", check_rotate), ("rgb", check_rgb)):
         r = fn(frames, ent, refsim)
         if r:
             res[k] = r
+    res["uv"] = check_uv(frames, ent, refsim, dump.get("uvs", 255))
+    if only:
+        res = {k: v for k, v in res.items() if k in only}
     return res
 
 
@@ -347,7 +494,8 @@ def main():
         r = dict(status=dump["status"], error=dump.get("error"), digest=digest(dump),
                  particles=len({q["id"] for fr in dump["frames"] for q in fr["particles"]}))
         if dump["status"] == "RAN":
-            r["checks"] = check(dump, ENTRIES[SCENARIOS[name][0]])
+            sc = SCENARIOS[name]
+            r["checks"] = check(dump, ENTRIES[sc[0]], (sc[2] if len(sc) > 2 else {}).get("only"))
         results[name] = r
     results["determinism"] = dict(same=results["em2_60"].get("digest") == results["em2_60_b"].get("digest"))
     print(json.dumps(results, indent=1, ensure_ascii=False, default=str))
