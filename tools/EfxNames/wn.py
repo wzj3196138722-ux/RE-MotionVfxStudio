@@ -1,4 +1,4 @@
-"""Forwards to tools/Re4Native/mhwildsnative.py; load() maps the exe named by WILDS_EXE (wk.EXES['wilds'])."""
+"""Forwards to tools/Re4Native/mhwildsnative.py; load() maps the exe named by MHWILDS_EXE (wk.EXES['wilds'])."""
 import os
 import sys
 

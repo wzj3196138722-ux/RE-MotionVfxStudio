@@ -13,7 +13,7 @@
 - Python 3，装 `capstone`、`pefile`、`numpy`；`emu.py` 另需 `unicorn`。
 - 环境变量：
   - `RE4_EXE`：默认 Steam 安装目录下的 re4.exe。
-  - `WILDS_EXE`：默认 `E:\Data\Github\RE-MotionVfxStudio\sample\Wilds\MonsterHunterWilds.exe`。
+  - `MHWILDS_EXE`（与 `tools/Re4Native` 同名）：默认 `E:\Data\Github\RE-MotionVfxStudio\sample\Wilds\MonsterHunterWilds.exe`。
   - `EFXNAMES_OUT`：中间数据目录，默认 `tools/EfxNames/out`（已加进 `.gitignore`）。`wk.py` 的反汇编索引缓存也放在这里。
 - 原生运行复用 `tools/Re4Native`（`re4native.py`、`emitter.py`、`factory.py`；Wilds 经 `wn.py` 转到 `mhwildsnative.py`）。
 
