@@ -39,6 +39,7 @@ public partial class MdfProperty : BaseModel
 	public int mdfPropertyIndex;
     public ushort mdfParameterValueCount;
 	public MaterialParameterType parameterType;
+	/// <summary>非 0 时把结果钳到 [0, 1]（re4.exe 3d334e0：Range 钳抽到的值，Float 逐分量钳）。</summary>
 	public int flags;
 	[RszFixedSizeArray(16)] private byte[] rawValue = new byte[16];
 
@@ -66,7 +67,8 @@ public partial class MdfProperty : BaseModel
         set => MemoryMarshal.Write<Vector4>(rawValue, value);
     }
 
-	/// <summary>Range 参数的取值区间：rawValue 的后 8 字节（Z、W）。RE4 语料 4141 条 Range 的前 8 字节全部 X == Y、基本为 0，
+	/// <summary>Range 参数的抽样区间：rawValue 的后 8 字节（Z、W）。re4.exe：出生时 Y = Z + u·(W − Z)，送进材质的值 = X + Y，
+	/// 所以 X 是固定偏移（REasy 的 base），Y 是抽到的随机值（random），见 RE4-EFX-RUNTIME §4.3.11。RE4 语料 4141 条 Range 的前 8 字节全部 X == Y、基本为 0，
 	/// 取值都在 Z、W，例如 (0, 0, 0.25, 0.25)、(0, 0, 1, 3)；与 .mdf2 的核对见 MHWs-EFX-Editor mdf_catalog.py。</summary>
 	public ReeLib.via.Range RangeValue {
         get => MemoryMarshal.Read<ReeLib.via.Range>(rawValue.AsSpan(8));

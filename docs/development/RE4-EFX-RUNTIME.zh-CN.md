@@ -1157,6 +1157,18 @@ UV：点 +0x40 = 累计弧长 / 总长（默认整条贴一次）
 
 部件索引每帧 `index += speed·dt`，越过 MaxPartsNum 时按 PlayType 处理；索引写入实例，部件选择与插值在渲染侧。
 
+材质参数覆盖表（`properties`，每条 32 字节：哈希、mdf2 参数下标、分量数 u16、类型 i16、`flags`、值 X Y Z W）：
+
+| 项 | 引擎行为 | 状态 | 依据 |
+|---|---|---|---|
+| 粒子参数槽 | 每个粒子每条参数一个 36 字节槽：+0 当前 X Y Z W，+16 文件原值 X Y Z W，+32 字节"曲线已写"标志；创建时两份都填文件原值 | 已确认 | 3e10680（由 3d2e910 调用，缓冲在 ctx +0x108） |
+| Range（类型 2） | 出生时 Y = Z + u·(W − Z)（W ≤ Z 时取 Z），u 为种子随机（3d09990，salt = 类型 + 0x10）；送进材质的值 = **X + Y**，组成 (X+Y, 0, 0, 0)。即 X = 固定偏移（REasy 叫 base），Y = 抽到的随机值（random），Z / W = 抽样下限 / 上限（min / max） | 已确认 | 3d334e0、3d3364c 等（抽样）；3d30350（上传，`mdfPropertyIndex` < 0 的跳过） |
+| Float（类型 1） | 四个分量原样送进材质 | 已确认 | 3d30350 |
+| `flags` | 非 0 时把结果钳到 [0, 1]：Range 钳抽到的 Y，Float 按分量数逐个钳（REasy 的"0-1"勾选） | 已确认 | 3d334e0、3d335d0 |
+| `TypeMeshClip` 的 `valueComponent` | 曲线值写进槽的第 `valueComponent` 个分量（0 X、1 Y、2 Z、3 W），并置"曲线已写"标志。RE4 语料 3 条全部为 0，即曲线驱动 X（base），最终值 = 曲线 + 随机值 | 已确认（写入位置）；语料只有 3 条 | 3e14960 |
+
+RE4 语料的 4141 条 Range 全部 X == Y、基本为 0，取值写在 Z、W（如 (0, 0, 0.25, 0.25)、(0, 0, 1, 3)）。文件里的 Y 只在不抽样的路径上原样参与 X + Y。
+
 #### 4.3.12 GPU 类型
 
 GPU 类型的出生、运动、动画都在计算着色器里完成；CPU 只把各属性的区间与参数作为常量上传（共享 tick 3e1b4e0 依次调用每个属性的 GPU 常量写入函数）。GpuBillboard 的计算着色器见 [RE4-EFX-GPU-BILLBOARD](RE4-EFX-GPU-BILLBOARD.zh-CN.md)（Velocity3D、Attractor、ScaleAnim 与更新顺序已读）；其余 GPU 类型仍按 CPU 公式近似：**折中实现**。
