@@ -21,9 +21,15 @@ public sealed record PreviewBitField(string Summary, PreviewBitGroup[] Groups)
         uint.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out value);
 }
 
+/// <summary>When a field takes effect: a test on another field of the same attribute (LiveEditor FieldCondition).
+/// Shift / Width pick a bit group; In / Not list values; NonZero means "not 0 / false"; Any / All combine tests.</summary>
+public sealed record PreviewFieldCondition(string? Field, int? Shift, int? Width, string[]? In, string[]? Not, bool? NonZero,
+    PreviewFieldCondition[]? Any, PreviewFieldCondition[]? All, string? Why);
+
 /// <summary>A field's meaning as the backend inspector reports it (LiveEditor FieldSemantics, read from re4.exe).</summary>
 /// <param name="Status">What about the field is not settled, or null.</param>
-public sealed record PreviewFieldSemantic(string? Help, string? Unit, string? Status, PreviewBitField? Bits)
+/// <param name="When">The mode in which the engine reads the field, or null when it always does.</param>
+public sealed record PreviewFieldSemantic(string? Help, string? Unit, string? Status, PreviewBitField? Bits, PreviewFieldCondition? When = null)
 {
     /// <summary>Tooltip text: meaning, unit, then the part of it that is not settled.</summary>
     public string Text => string.Join("\n", new[] { Help, Unit == null ? null : "单位：" + Unit, Status == null ? null : "未确定：" + Status }

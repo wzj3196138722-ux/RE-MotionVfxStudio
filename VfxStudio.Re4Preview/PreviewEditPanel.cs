@@ -16,8 +16,12 @@ internal sealed class PreviewEditPanel
     private int entryPosition=-1,selected=-1,page;
     private PreviewPropertyDraft? draft;
     private string filter="",savePath="",cachedFilter="";
-    private bool showReadOnly=true,cachedShowReadOnly;
+    private bool showReadOnly=true,cachedShowReadOnly,hideInactive;
     private PropertyRow[] rows=[],filtered=[];
+    // Mode handling (FieldSemantics "when"): fields by path for reading draft values, and each mode field's dependants.
+    private Dictionary<string,PreviewFieldInfo> byPath=new(StringComparer.Ordinal);
+    private IReadOnlyDictionary<string,string[]> controls=new Dictionary<string,string[]>();
+    private static readonly Vector4 ModeColor=new(.45f,.78f,1,1);
     /// <summary>One table row: a field, an RGBA8 colour, or sibling components (X/Y/Z, min/max, center/spread)
     /// edited side by side.</summary>
     /// <param name="Label">Name shown instead of the path (PtBehavior parameters show their parameter name).</param>
@@ -62,6 +66,8 @@ internal sealed class PreviewEditPanel
     }
     private void BuildRows(PreviewInspection inspection)
     {
+        byPath=inspection.Fields.ToDictionary(f=>f.Path,StringComparer.Ordinal);
+        controls=PreviewFieldActivity.Controls(inspection.Fields);
         var colors=inspection.ColorGroups.Where(c=>c.Storage=="rgba8" && c.Scale==255 && !c.Hdr && c.Channels.Length==4 &&
             c.Channels.All(ch=>inspection.Fields.Any(f=>f.Path==ch.Path))).ToArray();
         var hidden=colors.SelectMany(c=>c.Channels.Select(ch=>ch.Path).Append(c.Path.Length==0?"rgba":c.Path+".rgba")).ToHashSet(StringComparer.Ordinal);
@@ -104,6 +110,26 @@ internal sealed class PreviewEditPanel
         rows=list.OrderBy(r=>r.Order).ToArray();   // stable: other rows keep the inspector's order
         cachedFilter="\0";page=0;
     }
+    /// <summary>Why the row does nothing with the draft's current values (all its fields inactive), or null.</summary>
+    private string? Inactive(PropertyRow row)
+    {
+        if(draft==null) return null;
+        var d=draft;
+        string? Value(string path)=>byPath.ContainsKey(path)?d.Value(path):null;
+        PreviewFieldInfo[] fields=row.Field!=null?[row.Field]:row.Parts??
+            row.Color?.Channels.Select(ch=>byPath.GetValueOrDefault(ch.Path)).OfType<PreviewFieldInfo>().ToArray()??[];
+        string? reason=null;
+        foreach(var f in fields)
+        {
+            var why=PreviewFieldActivity.Inactive(f,Value);
+            if(why==null) return null;
+            reason??=why;
+        }
+        return reason;
+    }
+    /// <summary>Paths of the fields whose activity this row's value decides (it is a mode field), or empty.</summary>
+    private string[] Controlled(PropertyRow row)=>
+        (row.Field!=null?[row.Field.Path]:row.Parts?.Select(p=>p.Path).ToArray()??[]).SelectMany(p=>controls.GetValueOrDefault(p)??[]).Distinct().ToArray();
     /// <summary>How many fields from <paramref name="start"/> form one component row (0 or 1 when none).</summary>
     private static int Components(PreviewFieldInfo[] fields,int start)
     {
@@ -205,9 +231,11 @@ internal sealed class PreviewEditPanel
             if(ImGui.Button(current?"放弃草稿":"丢弃草稿并刷新") && state!=null) {draft=null;command=Inspect(state);}
             ImGui.SameLine();ImGui.TextDisabled(changes.Length>64?"一次最多 64 项":"切换属性前请应用或放弃");
         }
-        ImGui.SetNextItemWidth(Math.Max(80,ImGui.GetContentRegionAvail().X-110));ImGui.InputTextWithHint("##搜索字段","搜索字段",ref filter,256);
+        ImGui.SetNextItemWidth(Math.Max(80,ImGui.GetContentRegionAvail().X-210));ImGui.InputTextWithHint("##搜索字段","搜索字段",ref filter,256);
         ImGui.SameLine();ImGui.Checkbox("只读",ref showReadOnly);
         if(ImGui.IsItemHovered()) ImGui.SetTooltip("也显示只读字段");
+        ImGui.SameLine();ImGui.Checkbox("隐藏未生效",ref hideInactive);
+        if(ImGui.IsItemHovered()) ImGui.SetTooltip("隐藏在当前模式下引擎不读的字段（平时灰显）。\n蓝色名称是模式字段：它的值决定其他字段是否起作用。");
         ImGui.EndDisabled();
 
         // Inspect once per target/revision; failed reads wait for an explicit refresh.
@@ -221,12 +249,17 @@ internal sealed class PreviewEditPanel
                     r.Path.Contains(filter,StringComparison.OrdinalIgnoreCase) || r.Group.Contains(filter,StringComparison.OrdinalIgnoreCase))).ToArray();
                 cachedFilter=filter;cachedShowReadOnly=showReadOnly;page=0;
             }
-            int pages=Math.Max(1,(filtered.Length+63)/64);page=Math.Clamp(page,0,pages-1);
+        }
+        // Activity follows the draft, so an edited mode field updates the list at once.
+        var shown=draft!=null && hideInactive ? filtered.Where(r=>Inactive(r)==null).ToArray() : filtered;
+        if(draft!=null)
+        {
+            int pages=Math.Max(1,(shown.Length+63)/64);page=Math.Clamp(page,0,pages-1);
             if(pages>1)
             {
                 if(ImGui.SmallButton("上一页")) page=Math.Max(0,page-1);
                 ImGui.SameLine();if(ImGui.SmallButton("下一页")) page=Math.Min(pages-1,page+1);
-                ImGui.SameLine();ImGui.Text($"{page+1}/{pages} 页 · {filtered.Length} 项");
+                ImGui.SameLine();ImGui.Text($"{page+1}/{pages} 页 · {shown.Length} 项");
             }
         }
         float footer=ImGui.GetFrameHeightWithSpacing()+ImGui.GetStyle().ItemSpacing.Y*2+(state?.SavedPath!=null?ImGui.GetTextLineHeightWithSpacing():0);
@@ -235,10 +268,10 @@ internal sealed class PreviewEditPanel
         if(draft==null) ImGui.TextWrapped(busy?"正在读取属性…":"选择或刷新属性以读取字段。");
         else
         {
-            if(filtered.Length==0) ImGui.TextWrapped("没有匹配字段，请清空搜索或显示只读字段。");
+            if(shown.Length==0) ImGui.TextWrapped(hideInactive && filtered.Length>0?"匹配的字段在当前模式下都不起作用；取消“隐藏未生效”可以看到。":"没有匹配字段，请清空搜索或显示只读字段。");
             // Label | value table. A first path segment with several rows (a struct, an array) gets a header;
             // single rows stay flat with their full name.
-            foreach(var group in filtered.Skip(page*64).Take(64).GroupBy(r=>r.Group))
+            foreach(var group in shown.Skip(page*64).Take(64).GroupBy(r=>r.Group))
             {
                 var members=group.ToArray();
                 bool header=(members.Length>1 && group.Key!="基本字段") || group.Key is BehaviorParameters or BehaviorStructure;
@@ -255,14 +288,19 @@ internal sealed class PreviewEditPanel
                             ? row.Path[group.Key.Length..].TrimStart('.') : row.Path);
                         if(row.Label==null && row.Color is {} c && c.Label.Length>0) label=c.Label;
                         var pair=row.Parts is {Length:2} pp ? PreviewPairKind.For(pp[0].OwnerType) : null;
-                        var semantic=(row.Field??row.Parts?[0])?.Semantic;
-                        DrawLabel(label,row.Editable,pair,semantic);
-                        if(ImGui.IsItemHovered()) ImGui.SetTooltip(RowTooltip(row,pair,semantic).Replace("%","%%"));
+                        var semantic=(row.Field??row.Parts?[0]??(row.Color is {} rc?byPath.GetValueOrDefault(rc.Channels[0].Path):null))?.Semantic;
+                        string? inactive=Inactive(row);
+                        var controlled=Controlled(row);
+                        // Inactive rows stay editable (a value can be set before the mode is switched on) but are faded.
+                        if(inactive!=null) ImGui.PushStyleVar(ImGuiStyleVar.Alpha,ImGui.GetStyle().Alpha*.42f);
+                        DrawLabel(label,row.Editable,pair,semantic,controlled.Length>0);
+                        if(ImGui.IsItemHovered()) ImGui.SetTooltip(RowTooltip(row,pair,semantic,inactive,controlled.Select(Label).ToArray()).Replace("%","%%"));
                         ImGui.TableNextColumn();
                         if(row.Color is {} color) DrawColor(draft,color);
                         else if(row.Parts is {} parts) DrawParts(draft,parts,PreviewPairKind.For(parts[0].OwnerType));
                         else if(row.Field is {} prefab && row.Label=="DecalPrefab" && prefab.Editable) DrawDecalPrefab(draft,prefab);
                         else if(row.Field is {} field) DrawField(draft,field);
+                        if(inactive!=null) ImGui.PopStyleVar();
                         ImGui.PopID();
                     }
                     ImGui.EndTable();
@@ -353,14 +391,18 @@ internal sealed class PreviewEditPanel
         DrawExact(draft,field,ref value,false);
     }
 
-    /// <summary>Field name, then the unit and the pair reading (dimmed; orange when the pair's use is unconfirmed).</summary>
-    private static void DrawLabel(string label,bool editable,PreviewPairKind? pair,PreviewFieldSemantic? semantic)
+    /// <summary>A dependent field's name in a mode field's tooltip: its first path segment.</summary>
+    private static string Label(string path)=>path.Split('.','[')[0];
+
+    /// <summary>Field name, then the unit and the pair reading (dimmed; orange when the pair's use is unconfirmed).
+    /// A mode field (its value decides whether other fields take effect) has a blue name.</summary>
+    private static void DrawLabel(string label,bool editable,PreviewPairKind? pair,PreviewFieldSemantic? semantic,bool mode=false)
     {
         ImGui.AlignTextToFramePadding();
         var dim=ImGui.GetStyle().Colors[(int)ImGuiCol.TextDisabled];
         ImGui.BeginGroup();
-        if(editable) ImGui.TextUnformatted(label);
-        else {ImGui.PushStyleColor(ImGuiCol.Text,dim);ImGui.TextUnformatted(label);ImGui.PopStyleColor();}
+        if(editable && !mode) ImGui.TextUnformatted(label);
+        else {ImGui.PushStyleColor(ImGuiCol.Text,editable?ModeColor:dim);ImGui.TextUnformatted(label);ImGui.PopStyleColor();}
         string note=string.Join(" · ",new[]{semantic?.Unit,pair?.Label}.Where(n=>n!=null));
         if(note.Length>0)
         {
@@ -373,9 +415,11 @@ internal sealed class PreviewEditPanel
     }
 
     /// <summary>Meaning, unit and pair formula first; the technical path and types after a blank line.</summary>
-    private static string RowTooltip(PropertyRow row,PreviewPairKind? pair,PreviewFieldSemantic? semantic)
+    private static string RowTooltip(PropertyRow row,PreviewPairKind? pair,PreviewFieldSemantic? semantic,string? inactive=null,string[]? controlled=null)
     {
         var lines=new List<string>();
+        if(inactive!=null) lines.Add("当前不起作用："+inactive+"。");
+        if(controlled is {Length:>0}) lines.Add("模式字段：决定 "+string.Join("、",controlled.Distinct())+" 是否起作用。");
         if(semantic?.Text is {Length:>0} text) lines.Add(text);
         if(pair!=null) lines.Add($"{pair.Label}：{pair.Formula}");
         if(semantic?.Bits is {} bits) lines.Add("位："+bits.Summary);

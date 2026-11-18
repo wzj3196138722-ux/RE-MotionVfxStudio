@@ -30,6 +30,43 @@ try
     simple.Reset();Check(!simple.Dirty && simple.Value("name")=="原值","Discard did not restore the draft");
     Console.WriteLine("PASS exact UInt64, bool/enum/text drafts, read-only protection and discard");
 
+    // Mode conditions (FieldSemantics "when"): enum names, bit groups, non-zero, Any / All, and a missing field.
+    {
+        PreviewFieldSemantic When(PreviewFieldCondition c)=>new(null,null,null,null,c);
+        var shape=new PreviewFieldCondition("ShapeType",null,null,["Shape3DType_Box"],null,null,null,null,"只有 Box 读它");
+        var axis=new PreviewFieldCondition(null,null,null,null,null,null,null,
+            [shape,new("RangeDivideNum",null,null,null,null,true,null,null,"RangeDivideNum 为 0")],null);
+        var mode=new PreviewFieldCondition("Flags",0,2,null,["0"],null,null,null,"PlayMode 为静止");
+        var colorRule=new PreviewFieldCondition(null,null,null,null,null,null,
+            [new("Flags",4,1,["1"],null,null,null,null,null),new("Flags",0,4,["3"],null,null,null,null,null)],null,"不随机也不是 EdgeBlend");
+        var nowhere=new PreviewFieldCondition("Nowhere",null,null,["1"],null,null,null,null,"x");
+        var modes=new PreviewInspection("modes",1,0,0,[
+            new("ShapeType","ShapeType","Shape3DType","Shape3DType_Sphere",true,Choices:["Shape3DType_Box","Shape3DType_Sphere"]),
+            new("RangeDivideNum","RangeDivideNum","System.UInt32","0",true,Semantic:When(shape)),
+            new("RangeDivideAxis","RangeDivideAxis","System.UInt32","0",true,Semantic:When(axis)),
+            new("Flags","Flags","System.UInt32","0",true),
+            new("PlaySpeed","PlaySpeed","System.Single","1",true,Semantic:When(mode)),
+            new("ColorRange","ColorRange","System.UInt32","0",true,Semantic:When(colorRule)),
+            new("Unknown","Unknown","System.Single","1",true,Semantic:When(nowhere))],[],0);
+        var md=new PreviewPropertyDraft(modes);
+        var paths=modes.Fields.ToDictionary(f=>f.Path);
+        string? V(string p)=>paths.ContainsKey(p)?md.Value(p):null;
+        string? Off(string p)=>PreviewFieldActivity.Inactive(paths[p],V);
+        Check(Off("RangeDivideNum")=="只有 Box 读它" && Off("RangeDivideAxis")!=null && Off("PlaySpeed")=="PlayMode 为静止" &&
+            Off("ColorRange")!=null && Off("Unknown")==null,"Mode conditions: wrong inactive set for Sphere / Flags 0");
+        md.Set("ShapeType","Shape3DType_Box");md.Set("Flags","1");
+        Check(Off("RangeDivideNum")==null && Off("RangeDivideAxis")!=null && Off("PlaySpeed")==null && Off("ColorRange")!=null,
+            "Mode conditions do not follow the draft (Box, Flags 1)");
+        md.Set("RangeDivideNum","3");md.Set("Flags","3");
+        Check(Off("RangeDivideAxis")==null && Off("ColorRange")==null,"All / Any conditions (RangeDivideNum 3, EdgeBlend)");
+        md.Set("Flags","16");
+        Check(Off("ColorRange")==null && Off("PlaySpeed")=="PlayMode 为静止","Bit 4 alone keeps ColorRange; PlayMode 0 again");
+        var ctl=PreviewFieldActivity.Controls(modes.Fields);
+        Check(ctl["ShapeType"].SequenceEqual(["RangeDivideNum","RangeDivideAxis"]) && ctl["Flags"].SequenceEqual(["PlaySpeed","ColorRange"]) &&
+            ctl["RangeDivideNum"].SequenceEqual(["RangeDivideAxis"]) && !ctl.ContainsKey("Nowhere"),"Mode fields and their dependants");
+        Console.WriteLine("PASS mode conditions: enum, bits, non-zero, Any / All, draft values, missing field counts as met");
+    }
+
     string repo=Directory.GetCurrentDirectory();
     string exe=Environment.GetEnvironmentVariable("RE4_EXE")??@"E:\Program\Steam\steamapps\common\RESIDENT EVIL 4  BIOHAZARD RE4\re4.exe";
     string root=Path.Combine(repo,"test-output","re4-generic-"+Guid.NewGuid().ToString("N"));
@@ -66,6 +103,37 @@ try
             if(!paths.Any(p=>p==key || p.StartsWith(key+".",StringComparison.Ordinal) || p.StartsWith(key+"[",StringComparison.Ordinal))) missing.Add(type+"."+key);
     }
     Check(missing.Count==0,"Field semantics keys without an RE4 field: "+string.Join(", ",missing));
+    // Every field a "when" condition tests exists in the same RE4 attribute.
+    var badModes=new List<string>();
+    int conditions=0;
+    static IEnumerable<string> Tested(VfxStudio.LiveEditor.FieldCondition c)=>
+        (c.Field==null?[]:new[]{c.Field}).Concat((c.Any??[]).Concat(c.All??[]).SelectMany(Tested));
+    foreach(string type in VfxStudio.LiveEditor.FieldSemantics.AttributeTypes)
+    {
+        var attribute=ReeLib.Efx.EFXAttribute.Create(ReeLib.Efx.EfxVersion.RE4,Enum.Parse<ReeLib.Efx.EfxAttributeType>(type));
+        var paths=VfxStudio.LiveEditor.EfxFieldValues.Paths(attribute,ReeLib.Efx.EfxVersion.RE4);
+        foreach(var (key,semantic) in VfxStudio.LiveEditor.FieldSemantics.Fields(type))
+            if(semantic.When is {} when)
+            {
+                conditions++;
+                foreach(string field in Tested(when)) if(!paths.Contains(field)) badModes.Add($"{type}.{key} -> {field}");
+                if(when.Why==null && when.Any==null && when.All==null) badModes.Add($"{type}.{key}: no why");
+            }
+    }
+    Check(conditions>0 && badModes.Count==0,"Mode conditions testing a missing field: "+string.Join(", ",badModes));
+    // On the fixture: Life.KeepHoldFrame is read only with a hold mode, and Flags is reported as its mode field.
+    var lifeInspection=inspections.Single(x=>x.Attribute.Type=="Life").Inspection;
+    var lifeDraft=new PreviewPropertyDraft(lifeInspection);
+    var lifeByPath=lifeInspection.Fields.ToDictionary(f=>f.Path);
+    string? LifeValue(string p)=>lifeByPath.ContainsKey(p)?lifeDraft.Value(p):null;
+    var hold=lifeInspection.Fields.First(f=>f.Path.StartsWith("KeepHoldFrame",StringComparison.Ordinal));
+    uint lifeFlags=uint.Parse(lifeDraft.Value("Flags"),CultureInfo.InvariantCulture);
+    Check(hold.Semantic?.When!=null && (PreviewFieldActivity.Inactive(hold,LifeValue)!=null)==((lifeFlags&3)==0),"Life.KeepHoldFrame activity vs Flags "+lifeFlags);
+    lifeDraft.Set("Flags",((lifeFlags&~3u)|((lifeFlags&3)==0?1u:0u)).ToString(CultureInfo.InvariantCulture));
+    Check((PreviewFieldActivity.Inactive(hold,LifeValue)!=null)!=((lifeFlags&3)==0),"Life.KeepHoldFrame activity does not follow the draft's Flags");
+    Check(PreviewFieldActivity.Controls(lifeInspection.Fields).TryGetValue("Flags",out var holdDeps) && holdDeps.Any(p=>p.StartsWith("KeepHoldFrame",StringComparison.Ordinal)),
+        "Life.Flags is not reported as KeepHoldFrame's mode field");
+    Console.WriteLine($"PASS mode conditions reach inspect ({conditions} conditions, every tested field exists; Life.KeepHoldFrame follows Flags)");
     Console.WriteLine($"PASS field semantics reach inspect ({VfxStudio.LiveEditor.FieldSemantics.AttributeTypes.Count} attribute types, every key resolves)");
     if(args.Contains("--describe")) {Console.WriteLine("SESSION "+root);return;}
     using var resources=new Re4ResourceSource(Path.GetDirectoryName(exe)!);

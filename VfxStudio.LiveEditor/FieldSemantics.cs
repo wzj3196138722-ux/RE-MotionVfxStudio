@@ -10,8 +10,15 @@ namespace VfxStudio.LiveEditor;
 public sealed record FieldBitGroup(int Shift, int Width, string Label, string[]? Options = null,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] bool Locked = false);
 public sealed record FieldBits(string Summary, FieldBitGroup[] Groups);
-/// <summary>What a field means, read from re4.exe. Status names the part that is not settled.</summary>
-public sealed record FieldSemantic(string? Help, string? Unit, string? Status, FieldBits? Bits);
+/// <summary>When a field takes effect, as a test on another field of the same attribute. Field is that field's path;
+/// Shift / Width pick a bit group of it (Width 1 when only Shift is given). In / Not list the values that make the
+/// test true / false (enum names, true / false, or numbers); NonZero is true for any value other than 0 / false.
+/// Any / All combine nested tests. Why says, for the user, what is switched off when the test fails.</summary>
+public sealed record FieldCondition(string? Field, int? Shift, int? Width, string[]? In, string[]? Not, bool? NonZero,
+    FieldCondition[]? Any, FieldCondition[]? All, string? Why);
+/// <summary>What a field means, read from re4.exe. Status names the part that is not settled. When is set for fields
+/// the engine reads only in some mode (another field's value).</summary>
+public sealed record FieldSemantic(string? Help, string? Unit, string? Status, FieldBits? Bits, FieldCondition? When = null);
 
 /// <summary>RE4 field semantics from FieldSemantics.re4.json, keyed by attribute type name and field path.
 /// A key also covers the paths below it (AppearFrame covers AppearFrame.min). Only RE4 files get them:
@@ -39,6 +46,21 @@ public static class FieldSemantics
         return cut > 0 ? path[..cut] : "";
     }
 
+    private static FieldCondition? Condition(JsonNode? node)
+    {
+        if (node is not JsonObject o) return null;
+        static string[]? Values(JsonNode? n) => n is JsonArray a ? a.Select(v => v switch
+        {
+            JsonValue x when x.TryGetValue(out bool b) => b ? "true" : "false",
+            JsonValue x when x.TryGetValue(out string? t) => t!,
+            _ => v!.ToJsonString()
+        }).ToArray() : null;
+        FieldCondition[]? List(JsonNode? n) => n is JsonArray a ? a.Select(v => Condition(v)!).ToArray() : null;
+        int? shift = (int?)o["shift"];
+        return new((string?)o["field"], shift, (int?)o["width"] ?? (shift == null ? null : 1), Values(o["in"]), Values(o["not"]),
+            (bool?)o["nonZero"], List(o["any"]), List(o["all"]), (string?)o["why"]);
+    }
+
     private static Dictionary<string, Dictionary<string, FieldSemantic>> Load()
     {
         using var stream = typeof(FieldSemantics).Assembly.GetManifestResourceStream("VfxStudio.LiveEditor.FieldSemantics.re4.json")
@@ -59,7 +81,7 @@ public static class FieldSemantics
                     JsonObject inline => inline.Deserialize<FieldBits>(options),
                     _ => null
                 };
-                fields[path] = new((string?)item["help"], (string?)item["unit"], (string?)item["status"], bits);
+                fields[path] = new((string?)item["help"], (string?)item["unit"], (string?)item["status"], bits, Condition(item["when"]));
             }
             table[type] = fields;
         }
