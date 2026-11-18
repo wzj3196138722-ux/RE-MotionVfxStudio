@@ -164,7 +164,7 @@ public partial class EFXAttributeAngularVelocity2D : EFXAttribute
 	public float unkn2;
 	public float unkn3;
 	public float unkn4;
-	public float unkn5;
+	public float AddRadiusCoef;   // MonsterHunterWilds.exe 解析器 +20；与 AngularVelocity3D 的 AddRadiusCoef 同序
 	public float unkn6;
 	public float unkn7;
 	public float unkn8;
