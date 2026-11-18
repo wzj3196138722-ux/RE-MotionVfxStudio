@@ -43,6 +43,9 @@ python -I -X utf8 -u pe_image.py "<re4.exe>" 3d1d830 80     # 反汇编一个 RV
 | `exp_scaleanim.py` | ScaleAnim 闭式函数 3cfd420 与逐粒子步 3d1d830 + 基值捕获 3d1dd00 |
 | `exp_blink.py` | Blink 3dc7a20 |
 | `exp_noise.py` | Noise 3dc7050 对照 `noise_ref.py`（RE4 语料中唯一带 Noise 的 Billboard3D 条目，逐帧偏移与逐粒子记录） |
+| `exp_spread.py` | Velocity3D Spread 3d1a470：RE4 语料全部 12 个 CPU 条目的出生速度 |
+| `exp_particle_interval.py` | Spawn ParticleInterval 的槽位分组（3d15e60），改写商 q 后逐帧比对存活槽位 |
+| `exp_rotation_correct.py` | EmitterShape3D RotationCorrect 1、2（伪造相机）；3、4 只报告 |
 | `exp_equidistant.py` | 等距圆柱对照 `equidistant_ref.py`（RE4 语料中唯一的等距条目 csa071 smoke：引擎的表逐项、出生位置） |
 | `exp_loader.py` | 引擎自己的构造函数 → 加载器（槽 5）→ 块构建器（槽 15），输入为语料 .efx 的原始字节 |
 | `exp_rng.py` | 两个播种函数与 ScaleAnim / Blink 出生抽取对照 `refsim.py` |

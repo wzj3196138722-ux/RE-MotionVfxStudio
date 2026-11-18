@@ -64,7 +64,7 @@
     },
     "Spawn": {
       "MaxParticles": { "help": "CPU 粒子池容量；池满时这一批多余的粒子直接丢弃。", "unit": "个" },
-      "ParticleInterval": { "help": "作用未知；引擎算出 MaxParticles / 它后没有使用。通常等于 MaxParticles。", "status": "是否有作用" },
+      "ParticleInterval": { "help": "粒子池分组数：每组 MaxParticles / ParticleInterval 个连续槽位，组头先出生，组内其余槽位每帧接上一个（条带式粒子用）。等于 MaxParticles 时不分组（RE4 官方文件全部如此）。" },
       "SpawnNum": { "help": "每批粒子数，每批重抽。", "unit": "个" },
       "IntervalFrame": { "help": "两批之间的帧数，每批重抽；周期 = max(I, 1)。", "unit": "帧" },
       "UseSpawnFrameInt": { "help": "非 0：停止条件改为发射 SpawnFrame 帧，而不是 LoopNum 批。" },
@@ -114,7 +114,7 @@
       "GravityDelayFrame": { "help": "重力生效前的延迟；只在 Flags 0x40 时生效。", "unit": "帧", "when": {"field": "Flags", "shift": 6, "in": [1], "why": "Flags 0x40（启用 GravityDelayFrame）未置位"} },
       "InheritRate": { "help": "继承发射器速度的比例；只在 Flags 位 0 时使用。", "when": {"field": "Flags", "shift": 0, "in": [1], "why": "Flags 位 0（继承发射器速度）未置位"} },
       "InheritDistance": { "help": "发射器本帧位移长度被夹在 [min, max]，再用于继承速度。", "unit": "米", "when": {"field": "Flags", "shift": 0, "in": [1], "why": "Flags 位 0（继承发射器速度）未置位"} },
-      "Spread": { "help": "VelocityType 3 的锥角：极角 = 0.5·(min + u·extra)。", "unit": "弧度", "status": "锥内方向的具体分布", "when": {"field": "VelocityType", "in": ["VelocityType_Spread"], "why": "只在 VelocityType 为 Spread 时使用"} }
+      "Spread": { "help": "VelocityType 3 的锥角：极角 = 0.5·(min + u·extra)，按角度线性抽样（离轴越远越稀）；方位角均匀。min / extra 是全锥角。", "unit": "弧度", "when": {"field": "VelocityType", "in": ["VelocityType_Spread"], "why": "只在 VelocityType 为 Spread 时使用"} }
     },
     "EmitterShape3D": {
       "RangeX": { "help": "Box：内空心 / 外半边长；Sphere：内 / 外半径；Cylinder：内 / 外半径。", "unit": "米" },
@@ -127,7 +127,7 @@
       "RangeDivideVerticalNum": { "help": "纵向均分数（Sphere、Cylinder）。纵向下标 = c % V，位置 = 下标/(V − 1)，V = 1 时取中点。", "when": {"field": "ShapeType", "in": ["Shape3DType_Sphere", "Shape3DType_Cylinder"], "why": "只有 Sphere、Cylinder 读它；Box 用 RangeDivideNum"} },
       "LocalRotation": { "help": "形状旋转，按 RotationOrder 组合，每帧重建。", "unit": "弧度" },
       "RotationOrder": { "help": "同 Transform3D.RotationOrder。" },
-      "RotationCorrect": { "help": "1、2 时形状旋转随相机变化。", "status": "各取值的具体朝向" },
+      "RotationCorrect": { "help": "形状旋转按相机修正：1 与相机朝向平行；2 只跟相机的偏航；3、4 朝向相机（4 只绕 Y 轴）。", "status": "3、4 的具体基向量" },
       "UseExtension": { "help": "0 时 ScaleHorizontal / ScaleVertical 被默认值覆盖（不起作用）。" },
       "ScaleHorizontal": { "help": "Sphere / Cylinder：方位角区间 θ = start + t·span；Box：锥形收缩系数。", "when": {"field": "UseExtension", "nonZero": true, "why": "UseExtension 为 0：被默认值覆盖"} },
       "ScaleVertical": { "help": "Sphere：仰角区间 φ = start + t·span；Box：锥形收缩系数；Cylinder：沿高度的收缩。", "when": {"field": "UseExtension", "nonZero": true, "why": "UseExtension 为 0：被默认值覆盖"} },
