@@ -156,7 +156,7 @@ E 的偏移：状态 +0x100（RE4 +0x170），槽数 +0x84，粒子槽 +0x120（
 
 参照是 RE4 运行时规格（[RE4-EFX-RUNTIME.zh-CN.md](RE4-EFX-RUNTIME.zh-CN.md)，下称 RT）的公式和 `tools/Re4Native/refsim.py` 的随机数。期望值由 ReeLib 读出的字段值（`VfxStudio.Core` 的 MHWilds 结构）按这些公式算出，`tools/Re4Native/exp_wilds_reference.py` 与原生运行逐帧比较。比较了 10 个 Billboard3D 条目、13 个场景：其中一个用可变 dt，一个在另一个进程里重跑（两次结果相同），一个把合成 .uvs 缩短到 16 个图案，让 PlayMode 2 播到末帧，三个只比出生位置（Box 均分、横向范围不足一圈的圆柱、H / V 同时均分且绕 Y 轴旋转的圆柱）。
 
-RT 没有 Noise 的公式，形状均分模式在 RT 里也只到"部分待确认"。这两项的参照是从 re4.exe 读出来的（见下文），读出的 Noise 公式先在 RE4 原生运行上核对过，再用来比 Wilds。
+Noise 的公式和形状均分规则原先不在 RT 里（均分只到"部分待确认"）。这两项的参照是这次从 re4.exe 读出来的（见下文），Noise 公式先在 RE4 原生运行上核对过，再用来比 Wilds；两者现已写进 RT §3.1 与 §3.8。
 
 粒子槽字段的偏移（括号里是 RE4）：`p+0x18` 编号，`+0x34` 位置（+0x28），`+0x58` 颜色 RGBA8（+0x4c），`+0x5c` Blink 系数（+0x50），`+0x64` 年龄（+0x58），`+0x68` 速度（+0x5c），`+0x80` SpeedCoef（+0x74），`+0x84` / `+0x88` 重力加速度与重力速度（+0x78 / +0x7c），`+0x8c` 四个尺寸槽（+0x80），`+0xa8` 角度（+0x9c），`+0x40` Noise 偏移（+0x34），`+0x4c` Velocity3D Flags 位 2 时的位移（+0x40）。`[p+4]` 位 3..6 为 Life 阶段码，`[p]` 位 2..9 为 8 位 alpha、位 10..17 为 UV 序列号、位 18..25 为 UV 帧，与 RE4 相同。各属性的逐粒子记录在 `[E+0x128] + 槽号 × [E+0xd0] + [块+8]`：Life 的内容与 RE4 相同（remain、A、A+K、T）；RgbCommon / RgbWater 是三个通道各一组 (remain, 时长, 阶段码)，后接各通道的系数（float）；Noise 是 9 个 float（k0..k3、两个相位、空位、二维方向），与 RE4 相同。播种函数 0xb0510f0 与 RE4 的 3d09990 指令相同，读 E.state `+0xa8`（RE4 +0x120）与 E.seed `+0x98`（RE4 +0x110）；salt 也与 RE4 相同。
 
@@ -181,7 +181,7 @@ RT 没有 Noise 的公式，形状均分模式在 RT 里也只到"部分待确�
 - Sphere / Cylinder：形状块 +0x158 是计数器 c，每次采样后加 1、不回绕。Hn、Vn = RangeDivideHorizontalNum、RangeDivideVerticalNum 乘 LOD 系数后取整（至少 1）。纵向下标 = c % Vn，横向下标 = (c / Vn + c % Vn) % Hn，即对角交错。b = 纵向下标 / (Vn − 1)；a = 横向下标 / Hn（H.span 与 float 2π 逐位相等时，避免首尾重合）或 / (Hn − 1)。只有 1 格时取 0.5，均分数为 0 时照常抽取。用了均分的轴不消耗抽取。
 - Box：只读 RangeDivideNum 与 RangeDivideAxis。均分轴的坐标 = (c % Dn) / (Dn − 1)·2 − 1，Dn 为 1 时为 0，其余两轴照常抽取，不再抽轴号。Box 有自己的计数器，到 Dn − 1 后回到 0。
 - Sphere、Cylinder 不读 RangeDivideNum；Box 不读 H / V 均分数。语料里这三种组合都有（如 slinger_000、slinger_053、em0002_00_302），原生结果与此一致。
-- Box 的空心壳判断是级联的：先看抽中的轴是否落在 inner 以内，是则第一条其余轴走 `(outer − inner)·u + inner·sign(u)`，第二条其余轴只在第一条也落在 inner 以内时才这样算，否则取 `outer·u`。RT §3.1 写的是两条其余轴都走空心公式。这一条只是从代码读出：比过的 Box 条目 inner 都是 0，两种写法结果相同，原生运行没有区分出来。
+- Box 的空心壳判断是级联的：先看抽中的轴是否落在 inner 以内，是则第一条其余轴走 `(outer − inner)·u + inner·sign(u)`，第二条其余轴只在第一条也落在 inner 以内时才这样算，否则取 `outer·u`。RT §3.1 原先写的是两条其余轴都走空心公式，现已改为级联。这一条只是从代码读出：比过的 Box 条目 inner 都是 0，两种写法结果相同，原生运行没有区分出来。
 
 Noise（re4.exe 3dc7050 逐粒子、3dc6d50 求偏移；`tools/Re4Native/noise_ref.py`）：
 

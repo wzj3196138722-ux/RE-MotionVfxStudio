@@ -295,7 +295,7 @@ rnd(c, r) = f32( f32( f32(u()·2.0) − 1.0 ) · r ) + c       // CenterSpread�
 | Spawn（1，key 0） | 启动时：LoopNum（3d14b60，未解码）、EmitterDelayFrame、IntervalFrame、SpawnNum；**每批：SpawnNum，然后 IntervalFrame**。复活（0xe4bcc19e）：1 次 `min + x % (extra+1)` | 整数取模，无门控；16 位存储截断。每 tick 用当前 `E.state` 重新播种，所以每次都是新流的头几次抽取 | LoopNum 与 3d154d0 内顺序部分待确认，其余已确认 | ORD 3d14c64..3d14f97 |
 | Life（0x29） | 出生：x1 → AppearFrame，x2 → KeepFrame，x3 → VanishFrame；KeepHoldFrame 复用 x2；KeepHold {0,0} → 0x7fff | 整数，无门控；KeepHold 仅 Flags & 3 ≠ 0 | 已确认 | ORD 3d1bf04..3d1bff8 |
 | ParentOptions（0xf62e295d，槽号） | ① ConstInheritRate `clamp(rnd, 0, 1)` ② ConstFrame ③ ConstReleaseFrame（负值置 0） | 仅 ParticleUseLocal 且新粒子；"不跟随"时跳过 ②③ | 已确认 | ORD 3d36ad0..3d36bde |
-| EmitterShape3D（0x30） | Box：轴 `k = x % 3`，再 u_x、u_y、u_z（各 ∈ [−1,1)），壳逻辑不再抽取。Sphere 默认：3 次方向（[−1,1)，归一化，过小时为 0），再 1 次 t。UseExtension / 均分：角 a（未设时抽）、角 b（同）、再 t。Cylinder 默认：2 次 XZ 方向、t、h（均分未设时）；UseExtension：角、t、h。等距圆柱（3d22b00）：a、h、t（各在未设时抽） | a、b、h 在对应均分数为 0 时为 −1（需抽），否则来自形状计数器 `shape+0x158`（每次采样递增，不抽） | 非均分已确认；均分交错部分待确认 | ORD 3d22444..3d22613、3d22e0b..3d22fdd、3d228a1..3d22a55 |
+| EmitterShape3D（0x30） | Box：轴 `k = x % 3`，再 u_x、u_y、u_z（各 ∈ [−1,1)），壳逻辑不再抽取；均分时不抽轴号，均分轴的 u 也不抽。Sphere 默认：3 次方向（[−1,1)，归一化，过小时为 0），再 1 次 t。UseExtension / 均分：角 a（未设时抽）、角 b（同）、再 t。Cylinder 默认：2 次 XZ 方向、t、h（均分未设时）；横向均分或 UseExtension：角（未设时抽）、t、h（未设时抽）。等距圆柱（3d22b00）：a、h、t（各在未设时抽） | a、b、h 在对应均分数为 0 时为 −1（需抽），否则由形状计数器 `shape+0x158` 按 §3.1 的交错算出，不抽 | 已确认；等距圆柱的交错未核对 | ORD 3d22444..3d22613、3d22e0b..3d22fdd、3d228a1..3d22a55；3d231b0、3d223c0 |
 | Velocity3D（0x23） | init 时延迟：Flags 位 5 时 SpeedDelayFrame、位 6 时 GravityDelayFrame（`x % (2·spread+1) − spread + center`）；无待定延迟时方向：Direction = 3 次 `rnd(DirX/Y/Z)`，Normal / Radial = 0 次，Spread = 2 次（极角、方位角），有形状块的其他类型 = 0 次；然后 **Speed**、**GravityRate**、**SpeedCoef**、**InheritRate**（Flags 位 0） | 方向无门控；Speed 有门控；Gravity 在 center 与 spread 都为 0 时跳过；SpeedCoef、Inherit 无门控 | 已确认 | ORD 3d1af0e、3d1b3f6..3d1b704 |
 | RotateAnim（0x25） | X-Add、X-Coef、[X 符号]、Y-Add、Y-Coef、[Y 符号]、Z-Add、Z-Coef、[Z 符号]；符号抽取仅 Flags 位 0，x 为偶数时取反 | **无门控** | 已确认 | ORD 3d1ce3d..3d1d036 |
 | ScaleAnim（0x27） | ScalarAdd、ScalarCoef、XAdd、XAddCoef、YAdd、YAddCoef、ZAdd、ZAddCoef | 各自有门控 | 已确认 | SCA |
@@ -304,6 +304,7 @@ rnd(c, r) = f32( f32( f32(u()·2.0) − 1.0 ) · r ) + c       // CenterSpread�
 | RibbonLength（`[blk+0x18]`） | Length、ReleaseFixEnd；LengthFlags 位 0 清零时再 3 次方向 `rnd(DirX/Y/Z)` | 无门控 | 已确认 | ORD 3d7a4a8、3cff9ea |
 | UVSequence（0x2b） | SequenceNo（min ≠ maxEx 时）、PatternNo（同）、PlaySpeed（总是 1 次）；再按加载器顺序 FlipU、FlipV、Reverse、Rotate90：取值 2 时各 1 次（`x & 1`） | min == maxEx 时不抽 | 已确认 | ORD 3d1ec84..3d1ee69 |
 | Blink（0x087f7c20） | LowFrequency、LowFrequencyWidth、HighFrequency、HighFrequencyWidth、初相 u | 无门控 | 已确认 | BL |
+| Noise（0xd17f868f，槽号） | 出生 8 次：高频相位、低频相位（各 2π·u）、k2、k0、k3、k1（各 2u − 1）、方向 x、y（2u − 1，再归一化），见 §3.8 | 无门控；仅新粒子 | 已确认 | 3dc70bb..3dc72b6；Re4Native `exp_noise.py` 原生运行 |
 | PtCollision（0x55）/ PtColliderAction（0x54） | Radius（PtCollision 仅 Flags 位 2；PtColliderAction 仅位 3）、BounceNum、BounceRate | 抽取次数未逐条复核 | 部分待确认 | PC |
 | Transform3DModifier（8）/ UVSequenceModifier（0xe2ce689e） | 每组 起始值 XYZ、速度 XYZ、系数 XYZ、符号；PlaySpeedInit、Final、ChangeTimeCoef | 无门控；Transform3DModifier 的具体抽取位置未逐条复核 | 部分待确认 | MOD |
 | RgbCommon / RgbWater、AngularVelocity、Polygon、Trail、Strain、Lightning、材质变体 | 未解码 | | 部分待确认 | ORD §8 |
@@ -351,7 +352,7 @@ E.seed = seed
 | 项 | 影响 |
 |---|---|
 | Spawn LoopNum 抽取（3d14b60）、3d154d0 内的取模顺序、三个 Spawn 调用点之间的流衔接 | 多轮发射的批数 |
-| EmitterShape3D 均分模式的计数器交错、等距 Box | 均分发射点位 |
+| EmitterShape3D 等距圆柱（3d22b00）的均分交错（其余均分规则见 §3.1） | 等距圆柱的发射点位 |
 | PtCollision / PtColliderAction 的抽取次数、Transform3DModifier 抽取位置、Rgb* / AngularVelocity / Polygon / Trail / Strain / Lightning / 材质变体的抽取顺序 | 这些属性与游戏逐粒子对齐 |
 | GPU 类型的计算着色器种子（CPU 种子是否传入未知） | GPU 类型的随机值 |
 | CRT 的 `sqrtf / sinf / cosf / powf` 与 numpy 末位差异 | 浮点逐位一致 |
@@ -565,7 +566,8 @@ RE4 文件里没有 TrySpawnAllParticles、InitializeFull、SpawnChanceFrame、O
 |---|---|---|---|---|
 | `RangeX` / `RangeY` / `RangeZ` | InnerOuter | Box：内空心半边长 / 外半边长；Sphere：每轴内 / 外半径；Cylinder：X、Z 为内 / 外半径，Y 为高度起点 / 终点（单侧，不是 ±） | 已确认 | SEM 3d223c0, 3d22d50, 3d22800 |
 | `ShapeType` | Shape3DType | Box 0、Sphere 1、Cylinder 2 | 已确认 | SEM（枚举注册 4b12a00..） |
-| `RangeDivideNum`、`RangeDivideAxis`、`RangeDivideHorizontalNum`、`RangeDivideVerticalNum` | u32 | 把随机的 a、b、轴换成均分步进（3d231b0，块计数 +0x158）；Box 采样器把 RangeDivideNum 乘以 ctx+0x100 的 float +8 | 部分待确认（交错方式未读完） | SEM, ST |
+| `RangeDivideNum`、`RangeDivideAxis` | u32 | 只有 Box 读：均分轴的坐标按块计数步进，不再抽轴号（见下方采样） | 已确认 | 3d223c0 |
+| `RangeDivideHorizontalNum`、`RangeDivideVerticalNum` | u32 | 只有 Sphere、Cylinder 读：把随机的 a、b 换成按块计数的均分位置（3d231b0，见下方采样） | 已确认（等距圆柱 3d22b00 未核对） | 3d231b0 及调用处 3d22854、3d22b44、3d22da2 |
 | `LocalRotation` | Vector3，弧度 | 形状旋转 R = euler(LocalRotation, RotationOrder)，每帧重建（3d242d0），同时保存 R⁻¹ | 已确认 | SEM |
 | `RotationOrder` | 同 Transform3D | | 已确认 | SEM |
 | `RotationCorrect` | 枚举 | 1、2 时 R 依赖相机（3d21210 调用相机取值） | 部分待确认 | SEM |
@@ -576,9 +578,12 @@ RE4 文件里没有 TrySpawnAllParticles、InitializeFull、SpawnChanceFrame、O
 采样（3d24d00），`u3 ∈ [−1,1]³` 等均为新的随机数：
 
 ```
-Box:      k = 随机轴（或 RangeDivideAxis）；v[k] = outer[k]·u[k]
-          if |v[k]| <= inner[k]:  其余轴 v = (outer − inner)·u + inner·sign(u)      // 落在内外框之间的壳里
-          else:                   其余轴 v = outer·u
+Box:      k = 随机轴（x % 3），均分时为 RangeDivideAxis 且不抽取；v[k] = outer[k]·u[k]
+          均分（Dn = max(RangeDivideNum·q, 1)，RangeDivideNum 为 0 时不均分）：u[k] = (c / (Dn − 1))·2 − 1，Dn = 1 时为 0；
+                c = 块 +0x158，每次采样后加 1，到 Dn − 1 后回到 0（Box 自己维护）；其余两轴照常抽取
+          inside = |v[k]| <= inner[k]
+          第一条其余轴 j1 = k+1：inside 时 v = (outer − inner)·u + inner·sign(u)（落在壳里），inside = |v[j1]| <= inner[j1]；否则 v = outer·u
+          第二条其余轴 j2 = k+2：同上，用更新后的 inside（级联：只有前两轴都在 inner 以内才走壳公式）
           UseExtension: t = (y + RangeY.outer)/(2·RangeY.outer);  x *= H.start + t·H.span;  z *= V.start + t·V.span
 Sphere:   dir = normalize(u3)                                         // 归一化立方体，不是球面均匀
           UseExtension 或均分时: θ = H.start + a·H.span; φ = V.start + b·V.span; dir = (cosφ·cosθ, sinφ, cosφ·sinθ)
@@ -587,9 +592,20 @@ Cylinder: c = normalize(u2) 或 (cosθ, sinθ), θ = H.start + a·H.span
           x = lerp(X.inner,X.outer,t)·c.x;  z = lerp(Z.inner,Z.outer,t)·c.y;  y = lerp(Y.inner, Y.outer, h)
           UseExtension: x、z 再乘 V.start + h·V.span
 粒子位置 = p·R（只旋转，不平移）；粒子标志 0x40000 时为 +=
+
+Sphere / Cylinder 的均分（3d231b0；c = 块 +0x158，调用处每次采样后加 1，不回绕）：
+  Hn = H 均分数·q、Vn = V 均分数·q，各自取整且至少 1；均分数为 0 时该方向不均分（a 或 b 照常抽取）
+  q = 3b89d00(…) × float([ctx+0x100] + 8)（LOD 系数，常为 1；Box 的 Dn 用同一个 q）
+  纵向下标 iv = c % Vn；横向下标 ih = (c / Vn + c % Vn) % Hn            // 对角交错
+  b = iv / (Vn − 1)，Vn = 1 时 0.5
+  a = ih / Hn，当 H.span 与 float 2π（0x40C90FDB）逐位相等（避免首尾重合）；否则 ih / (Hn − 1)，Hn = 1 时 0.5
+  H.span 取 UseExtension 处理后的值（UseExtension 0 时为默认的 2π）
 ```
 
-状态：已确认（SEM），均分模式的步进交错为部分待确认。
+- RangeDivideNum / Axis 只有 Box 读；H / V 均分数只有 Sphere、Cylinder 读。语料里存在 Sphere、Cylinder 带 RangeDivideNum、Box 带 H / V 均分数的条目，这些字段对它们不起作用。
+- 级联的壳判断与旧版本文"两条其余轴都走壳公式"不同。已比过的 Box 条目 inner 都是 0，两种写法结果相同，原生运行没能区分。
+
+状态：已确认（读码 3d24d00、3d223c0、3d231b0 及调用处）。均分规则在 MonsterHunterWilds.exe 的同一套采样代码上原生运行核对过：39 个带均分的条目逐粒子一致，覆盖 H / V 同时均分、横向不足一圈、Box 均分（`docs/development/WILDS-EFX-VS-RE4.zh-CN.md` §6.5）。re4.exe 上没有单独做原生运行。等距圆柱（3d22b00）的交错未核对。
 
 ### 3.2 Velocity3D（初速度与积分）
 
@@ -789,6 +805,38 @@ Flags：位 0 层名、位 1 掩码名、位 2 用 Radius、位 3 最后一次�
 | `LayerName` / `MaskName` | UTF-16 | 先位 0 的层名、后位 1 的掩码名 | 已确认 | PC 3d61c67 |
 
 每帧（3d62430，在 PtCollision 之前）：新粒子只初始化；之后每帧提交 prev → 当前位置的扫掠，查询完成且命中时触发（§5.2）。没有命中计数、没有冷却：静止在表面上的粒子（未置位 2）每帧都会重新触发。门控字节为 `[ctx+0x100]->byte[0]`（PtCollision 用 byte[1]）。已确认（PC）。
+
+### 3.8 Noise（逐帧位置抖动）
+
+| 字段 | 类型 | 运行时含义 | 状态 | 依据 |
+|---|---|---|---|---|
+| `LowFrequency` | (s, r) | 低频相位的速度：每粒子 `s + r·k2`，**周 / 秒** | 已确认 | 3dc7326..3dc7344 |
+| `LowFrequencyWidth` | (s, r) | 低频分量的幅度：每粒子 `s + r·k3`，米 | 已确认 | 3dc6da8..3dc6dbf |
+| `HighFrequency` | (s, r) | 高频相位的速度：每粒子 `s + r·k0`，周 / 秒 | 已确认 | 3dc7326..3dc7344 |
+| `HighFrequencyWidth` | (s, r) | 高频分量的幅度：每粒子 `s + r·k1`，米 | 已确认 | 3dc6d94..3dc6db4 |
+
+四对值的用法都是"中心 + 幅度 × 出生时抽的 [−1, 1) 系数"，即 CenterSpread 的读法，但系数在出生时抽一次后固定。C# 目前声明为 `via.Range`。块布局 +0x10..+0x2c 依次是上表四对 (s, r)。
+
+逐粒子记录（9 个 float，属性块 +8 给出在逐粒子附加数据里的偏移）：k0、k1、k2、k3、高频相位 b、低频相位 a、（空）、方向 x、方向 y。
+
+```
+出生（3dc7050，[p] & 2；salt 0xd17f868f，key = 槽号）：
+  b = 2π·u1;  a = 2π·u2;  k2 = 2u3 − 1;  k0 = 2u4 − 1;  k3 = 2u5 − 1;  k1 = 2u6 − 1
+  dir = normalize(2u7 − 1, 2u8 − 1)；长度 < 1e-6 时为 (1, 0)
+每帧，出生帧也算（3dc6d50）：
+  LW = LowFrequencyWidth.s + .r·k3;   HW = HighFrequencyWidth.s + .r·k1
+  C = cosf(a)·LW + cosf(b)·HW;         S = sinf(a)·LW + sinf(b)·HW
+  偏移 = (C·dir.x, C·dir.y, S)（E+0x168 位 0，3D 族），否则 (C, S, 0)
+  p[+0x34..+0x3c] += 偏移；[p+4] |= 0x1000
+  a += (LowFrequency.s + .r·k2)·dt·2π;   b += (HighFrequency.s + .r·k0)·dt·2π      // dt = ctx+0x10，秒
+  a、b 各自 fmodf(·, 2π)；结果为负时取 2π − r
+```
+
+- 偏移加到粒子 +0x34 起的独立字段，位置 +0x28 本身不变。原生运行里 +0x34 每帧正好等于当帧的偏移，不是累积量，所以它在别处每帧清零（清零位置没有找）。它怎样进入渲染位置没有追踪。
+- 新粒子且 `E+0x174` 符号位置位、位 8 清零时，3dc735c 另调一次 3dc6d50，相位增量取负，结果加到 +0x1c..+0x24（上一位置）。这条路径在语料里的触发条件未核对。
+- GPU 类型只上传常量，着色器公式未读。
+
+状态：已确认（读码 3dc7050、3dc6d50）。`tools/Re4Native/exp_noise.py` 在 re4.exe 上原生运行 csa114 dust（25 个粒子，600 tick），偏移与逐粒子记录 5,424 帧与上式逐位一致，参考实现为 `tools/Re4Native/noise_ref.py`。MonsterHunterWilds.exe 的同一属性也与上式逐位一致（偏移在 Wilds 粒子 +0x40）。
 
 ---
 
@@ -1463,7 +1511,7 @@ frontDirType 0、1 时条带绕自身长度轴转向相机，端视时退化成�
 
 | # | 问题 | 影响 | 现有线索 | 依据 |
 |---|---|---|---|---|
-| 1 | 随机数的剩余缺口（§1.9）：Spawn LoopNum 抽取、形状均分模式、PtCollision / Transform3DModifier / Rgb* 等的抽取位置；参考实现未对照实机 | 与游戏逐粒子对齐 | 执行顺序、播种公式、salt 与主要属性的抽取顺序已确认（§1） | ORD |
+| 1 | 随机数的剩余缺口（§1.9）：Spawn LoopNum 抽取、等距圆柱的均分、PtCollision / Transform3DModifier / Rgb* 等的抽取位置；参考实现未对照实机 | 与游戏逐粒子对齐 | 执行顺序、播种公式、salt 与主要属性的抽取顺序已确认（§1） | ORD |
 | 2 | PS 中 ColorRate / Intensity / EdgeBlendRange / AlphaRate 的组合与各 BlendType 的混合因子 | 所有画面的亮度与叠加 | 常量偏移已知（+0x10c、+0xec、+0x108、+0xe4）；Physical 增益式见 §4.9 | SHE, RW |
 | 3 | primitivevfx 家族的面片构建与条带宽度展开 | CPU 类型的几何 | GPU 家族公式（§7.2） | SFD, SHE |
 | 4 | LegacyMode2018（`[g+0xeb2]`）与 `[g+0xeb0]` 在发行版中的值 | Spawn 首批时刻与周期、ScaleAnim 首帧增量、批次种子；类型分派在积分之前或之后 | 只有 setter 写入 | FRG, SP, SCA, ORD |
@@ -1476,7 +1524,7 @@ frontDirType 0、1 时条带绕自身长度轴转向相机，端视时退化成�
 | 11 | EmitterContextType 7 的委托淡出计时器公式 | 该类型粒子的寿命结束 | 安装 3d53b40 | LF |
 | 12 | Life 模式 1/2 依赖的发射器状态 4、所有者状态 4/5 的含义 | 无限寿命粒子何时进入 Vanish | 推定为停止请求 | LF |
 | 13 | ScaleAnimDelayFrame（86）、RotateAnimDelayFrame（83）、Velocity3DDelayFrame（80）、Transform3DModifierDelayFrame（10） | 延迟起始 | 均未追踪 | SCA, ROT, SEM, MOD |
-| 14 | EmitterShape3D 均分模式的步进交错；RotationCorrect 1/2 | 均分发射的点位 | 3d231b0 | SEM |
+| 14 | EmitterShape3D 等距圆柱（DivideEquidistant）的交错；RotationCorrect 1/2；Box 壳判断的级联（读码所得，原生运行尚未区分）；Noise 偏移（粒子 +0x34）进入渲染位置的方式与它的清零位置 | 等距圆柱与相机朝向形状的点位；Noise 的显示位置 | 3d22b00、3d21210；§3.1、§3.8 | SEM |
 | 15 | Velocity3D Spread 锥面参数化；ScreenSpace 在 CPU 上的实际行为 | Spread / ScreenSpace 速度方向 | 3d1a470 | SEM |
 | 16 | UVSequence 余量 `frac·(1/60)`；Rotate90 方向 | speed ≠ 1 时的帧时刻 | 3d1eee9 | UVS |
 | 17 | RibbonTrail 头部布局：exe 读法与语料、C# 布局冲突（按 exe 读法官方文件 alpha 为 0） | 52 个官方 RibbonTrail 是否可见 | 一次只读实机检查粒子 +0x4c 即可判定 | RT |
