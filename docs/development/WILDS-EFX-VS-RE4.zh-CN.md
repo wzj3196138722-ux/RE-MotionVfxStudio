@@ -104,7 +104,10 @@ call/jmp 0x5fb70
   | A | 表 + 0 | 表 + 230 |
   | B | 表 + 119 | 表 + 281 |
 
-- B 列表在同一循环的另一个分支里用：这个分支先把所有槽重置、重新认领（`[p] |= 3`，重新编号），再按 B 列表的号段执行。进入这个分支的条件没有读完。部分待确认。
+- 循环按模式位 r12 分三路（0xaababe0 起）。r12 来自驱动 0x1c1c0 的 r9：发射器刚开始播放的那一帧（状态 1 → 2）是 3，之后每帧是 1。三遍属性遍历之后，如果某个属性把循环上下文的字节 `+0x12c` 置 1，r12 改成 `(r12 & ~0xa) | 8`；否则 r12 再并上上下文 `+8` 的位 1。已确认。
+  - 位 3（0xaabb1b6）：清掉所有槽的存活位，不执行任何步骤。原生运行中，ParentOptions 的父关节查不到、且效果对象 `+0x1c4` 位 20 为 0 时，它的第二遍（0xb02c6a0）把 `+0x12c` 置 1（0xb02d32a；0xb476680 里有同样的写法）。在已能原生加载的类型的三遍函数及其直接调用里，只有 ParentOptions 写这个字节。
+  - 位 1（0xaabb25a）：用 B 列表 `[X+0x60]` / `[X+0x68]` 执行，即开始播放的那一帧。用探针确认第 0 帧走这一路、第 1 帧起走位 0。上下文 `+8` 位 1 由谁置位没有找。
+  - 位 0（0xaabac46）：逐槽执行 A 列表。
 - 排序在 0x1dec20：先调发射器自身的注册函数 0x386e3e0，再沿 `X+0x10` 链表对每个属性调槽 6，然后把 A、B 两条列表各自排成升序（超过 32 项用 std::sort 0xa548de0，否则希尔排序）。所以执行顺序就是号的顺序。已确认。
 - 发射器自身的注册函数 0x386e3e0 对每个 3D 发射器无条件追加 1、6、7、12、14、19、25、26、40、47、48（B 列表：1、2、6、9、14、17、18、32、39、40）；2D 发射器追加 7、11、13、14、22、25、44（B：1、3、7、8、16、19）。这些步骤不属于任何属性：Velocity3D、Life、Spawn、Transform3D、EmitterShape3D 等的槽 6 都是空函数 0x6de0，它们的逐粒子工作由这组内置步骤做。已确认。内置步骤各自的作用仍按读的 ctx 偏移推定：6 / 19 同一函数 0xb0ccd90，7 / 40 同一函数 0xb050680（读 Velocity 块），12 = 0xb00ead0，14 = 0xad97170（读 Life 块，出生），25 = 0xb010440，26 = 0xaabc420（Life 逐帧），47 = 0xb11a880、48 = 0xb063730（推定积分）。
 - PtLife 在 3D 下还追加 117、118（与 2、3 同一函数），超出 A 列表的所有号段（最高到 0x74），在哪里执行没有找到。部分待确认。
@@ -124,6 +127,30 @@ call/jmp 0x5fb70
 - **Type 出生抽样在碰撞之后**。RE4 默认（`[g+0xeb0] == 0`）把类型分派放在 Noise 之后、RotateAnim 之前，`!= 0` 时才移到碰撞之后（RT §1.4 第 6、16 步）。Wilds 的 Type 步骤（53–86）在 PtCollision（51）之后、Blink（91）之前，相当于 RE4 的 `!= 0` 分支，且没有看到另一种排列。因此 Wilds 中 RotateAnim / ScaleAnim / Velocity 的出生抽样先于 Type 的颜色、尺寸抽样，随机数抽取顺序与 RE4 默认路径不同。ScaleAnim 基值捕获仍在后处理（115），所以基值仍是 Type 抽样后的值。步骤顺序已确认；步骤 40 = Velocity 是按读的 ctx 偏移推定。
 - 新增的步骤属于 RE4 没有的属性：PtFreezer、PointCloudEmitter、Trigger、PtVortexelWind、RibbonJoint*、PtLightningBranchAction、FlowMap、ParticleTimer、DestinationCSV、RayTracingTarget、TypeLightning3D 等。
 - 后处理段跳过 0x22 / 0x23 类型，与 RE4 相同。
+
+### 6.4 原生驱动发射器
+
+`tools/Re4Native/mhwilds_emitter.py` 用 Wilds 自己的代码加载条目、建发射器并逐帧推进，结构与 RE4 的 `emitter.py` 相同。对应关系：
+
+| Wilds | RE4 | 作用 |
+|---|---|---|
+| 0x1c1c0（X, U） | 3d09690（owner, U） | 逐帧驱动：状态机、N 累加，再进 3D / 2D 循环。**rcx 必须是条目描述对象 X**，循环从它读步骤列表；RE4 这里是另一个对象 |
+| 0xaaba300（X, args） | 3d06440 | 发射器构造：args+0x10 = E、+0x18 element、+0x20 effect；按 Spawn 对象 +0x3c（RE4 +0x28）定槽数 |
+| 0x1dec20（X） | 无（固定调用） | 登记并排序步骤列表 |
+| 槽 5（attr, stream, ctx） | 槽 5 | 加载器，流从 UniqueID 开始（类型 id 与声明长度之后） |
+| 0x614a0（manager, type, path） | 39ef530 | 资源查找；资源引用计数都在 +0x28，释放 0xb006090 减到 0 才释放 |
+| 0x1e1de0 | 4748b80 | Type 构建器的渲染槽分配，结果存块 +0x38 |
+
+E 的偏移：状态 +0x100（RE4 +0x170），槽数 +0x84，粒子槽 +0x120（RE4 +0x190），属性块 +0x2c8，3D 标志 +0xf0 位 0（RE4 +0x168）。UVS 资源的序列头在 +0x58、序列表在 +0x78，比 RE4 各后移 8 字节。
+
+运行前要补的东西都在 `mhwilds_emitter.py` 开头：7 个全零单例、两处字节补丁（0xb073170 返回 1.0、0xb04fb00 返回 0）、两个桩函数、静态 TLS。效果对象 `+0x1c4` 置位 20，否则带父关节的条目每帧走位 3 的重置分支（§6.3）。
+
+原生运行的覆盖面：
+
+- 工厂：281 个里 271 个原生调用成功，与 §2 的模拟结果在两边都成功的类型上逐个一致，另外多出 86 个模拟没跑通的类型。原生失败的 10 个（24、31、62、157、207、239、251、261、278、280）构造函数在 `.trace` 段。138、255 返回空。
+- 加载器：语料前 120 个条目里，52 个类型的加载器读的字节数都等于文件里的声明长度。PtLife、PtBehavior、VectorFieldParameter 的加载器还会出错，PtLife 要文件对象（RE4 的 `world.make_file`）。
+- 发射器：`exp_wilds_emitter.py` 的 4 个内置条目都能跑完 30 帧：存活数逐帧上升到槽数，最后回到 0。出生段的步骤（12、14、16、19、21）从第 1 帧起每帧对每个槽各调一次；存活段的步骤调用次数等于各帧存活粒子数之和。存活数的变化是否与 Spawn、Life 的参数一致没有核对。抽样 60 个条目：18 个有粒子跑完，11 个能跑完但没有粒子（没有 Spawn 等），31 个出错。出错的主要是 GPU 的 Type*（14 个，构建器经 `.trace` 对空对象加引用计数）、PtVortexelWind 一类的逐帧步骤、VortexelCollider、TypeMesh 的网格资源。
+- 粒子的具体数值（位置、尺寸、颜色）还没有和任何参照比对过。
 
 ## 7. 对 C# 读取器的修改
 
@@ -184,10 +211,11 @@ exe 给出了、但没有改的：
 | `emu.py` | unicorn 模拟：映射 exe、补 KUSER_SHARED_DATA / PEB / TLS、AVX 指令单步补丁、int3 函数替换 |
 | `e4.py` | §2 的工厂逐个模拟，结果 `emu_fac.json` |
 | `e5.py` | §6.3 的槽 6 与 0x386e3e0 模拟，读两条列表，结果 `emu_steps.json` |
-| `wn.py` | 用 `tools/Re4Native/re4native.py` 原样映射 Wilds exe（换掉版本校验，分配器 0xb020830 换成线性分配） |
+| `wn.py` | 转发到 `tools/Re4Native/mhwildsnative.py`（映射 Wilds exe，分配器 0xb020830 / 0xf5b0 换成线性分配） |
 | `n8.py` / `n9.py` | §5 的构建器原生标记实验，结果 `bm_*.json`；`W_GLOBALS`、`W_PATCH` 环境变量给 Spawn / EmitterShape3D 补单例与桩函数 |
 | `p20.py` | 内层解析器形式的字段名 → 块偏移 |
 | `rawdump/` | C# 工具：从语料读出指定类型的载荷字节（只读内存流，写到内存里的 FileHandler） |
+| `tools/Re4Native/exp_wilds_emitter.py` | §6.4：内置条目或 `sweep <entries.json>`，每个条目一个子进程，报告步骤列表、槽数、逐帧存活数、执行过的步骤 |
 
 ## 附录：Wilds 属性类型表
 

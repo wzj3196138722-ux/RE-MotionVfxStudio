@@ -22,8 +22,8 @@ BUILD = _profile.BUILD
 DEFAULT_EXE = BUILD.default_exe
 
 ALLOC_RVAS = (0xB020830, 0xF5B0)
-FACTORY_TABLE_RVA = 0xBF2000     # std::function x 282, index = attribute type id
-STEP_TABLE_RVA = 0xBF66E8        # bases: A3D 0, B3D 119, A2D 230, B2D 281
+FACTORY_TABLE_RVA = 0x14BF2000     # std::function x 282, index = attribute type id
+STEP_TABLE_RVA = 0x14BF66E8        # bases: A3D 0, B3D 119, A2D 230, B2D 281
 
 _arena: list[int] = []
 

@@ -366,6 +366,57 @@ def install_global(img: ExeImage, rva: int, size: int) -> int:
     return obj
 
 
+def install_static_tls(img: ExeImage, index: int = 100) -> dict:
+    """Static TLS for the mapped exe on this thread: a block holding its TLS template, placed in a new
+    ThreadLocalStoragePointer array at an index past the ones the loader filled, and _tls_index
+    set to it. gs:[0x58] is replaced for the calling thread only (restored at exit)."""
+    tls = IMAGE_BASE + img.layout["tls_rva"]
+    start, end, index_addr = u64(tls), u64(tls + 8), u64(tls + 16)
+    block = img.alloc(max(0x1000, end - start + 0x100))
+    ctypes.memmove(block, start, end - start)
+    code = _k32.VirtualAlloc(None, 0x1000, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE)
+    ctypes.memmove(code, bytes.fromhex("65488B042530000000C3"), 10)   # mov rax, gs:[0x30] ; ret
+    teb = ctypes.CFUNCTYPE(ctypes.c_uint64)(code)()
+    old = u64(teb + 0x58)
+    arr = img.alloc(8 * 128)
+    n = 0
+    if old:                                  # keep the existing modules' slots (stop at the first 0)
+        while n < 64 and u64(old + 8 * n):
+            set_u64(arr + 8 * n, u64(old + 8 * n))
+            n += 1
+    set_u64(arr + 8 * index, block)
+    set_u64(teb + 0x58, arr)
+    import atexit
+    atexit.register(lambda: set_u64(teb + 0x58, old))   # the loader frees its own array at thread exit
+    set_u32(index_addr, index)
+    return dict(index=index, block=block, copied_slots=n, size=end - start)
+
+
+_READ_FN = ctypes.CFUNCTYPE(ctypes.c_size_t, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t)
+
+
+class ReadStream:
+    """The stream object attribute loaders read from: every vtable slot is read(this, buf, size),
+    served from `data` starting at `pos`. Loaders take `handle` (a pointer to the object)."""
+
+    def __init__(self, img: ExeImage, data: bytes, pos: int):
+        self.data, self.pos = data, pos
+        self.cb = img.keep(_READ_FN(self._read))
+        self.vtable = img.alloc(0x100)
+        for i in range(32):
+            set_u64(self.vtable + 8 * i, ctypes.cast(self.cb, ctypes.c_void_p).value)
+        self.obj = img.alloc(0x80)
+        set_u64(self.obj, self.vtable)
+        self.handle = img.alloc(16)
+        set_u64(self.handle, self.obj)
+
+    def _read(self, this, buf, size):
+        chunk = self.data[self.pos:self.pos + size]
+        ctypes.memmove(buf, chunk, len(chunk))
+        self.pos += len(chunk)
+        return len(chunk)
+
+
 def ucrt_powf():
     """The CRT powf the exe imports (api-ms-win-crt-math -> ucrtbase), for bit-exact references."""
     f = ctypes.CDLL("ucrtbase").powf

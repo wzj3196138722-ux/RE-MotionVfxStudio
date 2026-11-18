@@ -90,30 +90,8 @@ def install_singletons(img):
 
 
 def install_tls(img):
-    """Static TLS for re4.exe on this thread: a block holding the TLS template, placed in a new
-    ThreadLocalStoragePointer array at an index past the ones the loader filled, and _tls_index
-    set to it. gs:[0x58] is replaced for the calling thread only."""
-    tls = B + img.layout["tls_rva"]
-    start, end, index_addr = rn.u64(tls), rn.u64(tls + 8), rn.u64(tls + 16)
-    block = img.alloc(0x1000)
-    ctypes.memmove(block, start, end - start)
-    code = _k32.VirtualAlloc(None, 0x1000, 0x3000, 0x40)
-    ctypes.memmove(code, bytes.fromhex("65488B042530000000C3"), 10)   # mov rax, gs:[0x30] ; ret
-    teb = ctypes.CFUNCTYPE(ctypes.c_uint64)(code)()
-    old = rn.u64(teb + 0x58)
-    arr = img.alloc(8 * 128)
-    n = 0
-    if old:                                  # keep the existing modules' slots (stop at the first 0)
-        while n < 64 and rn.u64(old + 8 * n):
-            rn.set_u64(arr + 8 * n, rn.u64(old + 8 * n))
-            n += 1
-    idx = 100
-    rn.set_u64(arr + 8 * idx, block)
-    rn.set_u64(teb + 0x58, arr)
-    import atexit
-    atexit.register(lambda: rn.set_u64(teb + 0x58, old))   # the loader frees its own array at thread exit
-    rn.set_u32(index_addr, idx)
-    return dict(index=idx, block=block, copied_slots=n)
+    """Static TLS for re4.exe on this thread (native_core.install_static_tls)."""
+    return rn.install_static_tls(img)
 
 
 STUB_FN = ctypes.CFUNCTYPE(ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64)
@@ -232,26 +210,7 @@ def install_runtime(img, eb0=0, eb2=0, global_seed=None, collision=False, ptlife
     return dict(settings=settings, singletons=singles, tls=tls)
 
 
-READ_FN = ctypes.CFUNCTYPE(ctypes.c_size_t, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t)
-
-
-class Stream:
-    def __init__(self, img, data, pos):
-        self.data, self.pos = data, pos
-        self.cb = img.keep(READ_FN(self._read))
-        self.vtable = img.alloc(0x100)
-        for i in range(32):
-            rn.set_u64(self.vtable + 8 * i, ctypes.cast(self.cb, ctypes.c_void_p).value)
-        self.obj = img.alloc(0x80)
-        rn.set_u64(self.obj, self.vtable)
-        self.handle = img.alloc(16)
-        rn.set_u64(self.handle, self.obj)
-
-    def _read(self, this, buf, size):
-        chunk = self.data[self.pos:self.pos + size]
-        ctypes.memmove(buf, chunk, len(chunk))
-        self.pos += len(chunk)
-        return len(chunk)
+Stream = rn.ReadStream
 
 
 _TABLE = {}
