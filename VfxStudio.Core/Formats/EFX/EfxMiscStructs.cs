@@ -532,10 +532,17 @@ public partial class EFXAttributeNoise : EFXAttribute
 {
 	public EFXAttributeNoise() : base(EfxAttributeType.Noise) { }
 
-	public via.Range LowFrequency;
-	public via.Range LowFrequencyWidth;
-	public via.Range HighFrequency;
-	public via.Range HighFrequencyWidth;
+	// re4.exe 3dc7050（出生抽取、相位推进）与 3dc6d50（偏移）；MonsterHunterWilds.exe 同式。四个区间对的用法都是
+	// center + spread·k，k ∈ [−1, 1) 每粒子出生时抽一次后固定（docs/development/RE4-EFX-RUNTIME.zh-CN.md §3.8）。
+	// 每帧偏移 = 低频 + 高频两路正弦，加到粒子的独立偏移字段，位置本身不动。
+	// 低频相位的速度，周 / 秒（按 dt 秒推进）。
+	public CenterSpread LowFrequency;
+	// 低频分量的幅度，米。
+	public CenterSpread LowFrequencyWidth;
+	// 高频相位的速度，周 / 秒。
+	public CenterSpread HighFrequency;
+	// 高频分量的幅度，米。
+	public CenterSpread HighFrequencyWidth;
 
 }
 

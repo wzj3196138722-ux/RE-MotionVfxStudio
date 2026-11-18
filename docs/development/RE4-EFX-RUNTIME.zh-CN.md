@@ -810,12 +810,12 @@ Flags：位 0 层名、位 1 掩码名、位 2 用 Radius、位 3 最后一次�
 
 | 字段 | 类型 | 运行时含义 | 状态 | 依据 |
 |---|---|---|---|---|
-| `LowFrequency` | (s, r) | 低频相位的速度：每粒子 `s + r·k2`，**周 / 秒** | 已确认 | 3dc7326..3dc7344 |
-| `LowFrequencyWidth` | (s, r) | 低频分量的幅度：每粒子 `s + r·k3`，米 | 已确认 | 3dc6da8..3dc6dbf |
-| `HighFrequency` | (s, r) | 高频相位的速度：每粒子 `s + r·k0`，周 / 秒 | 已确认 | 3dc7326..3dc7344 |
-| `HighFrequencyWidth` | (s, r) | 高频分量的幅度：每粒子 `s + r·k1`，米 | 已确认 | 3dc6d94..3dc6db4 |
+| `LowFrequency` | CenterSpread | 低频相位的速度：每粒子 `center + spread·k2`，**周 / 秒** | 已确认 | 3dc7326..3dc7344 |
+| `LowFrequencyWidth` | CenterSpread | 低频分量的幅度：每粒子 `center + spread·k3`，米 | 已确认 | 3dc6da8..3dc6dbf |
+| `HighFrequency` | CenterSpread | 高频相位的速度：每粒子 `center + spread·k0`，周 / 秒 | 已确认 | 3dc7326..3dc7344 |
+| `HighFrequencyWidth` | CenterSpread | 高频分量的幅度：每粒子 `center + spread·k1`，米 | 已确认 | 3dc6d94..3dc6db4 |
 
-四对值的用法都是"中心 + 幅度 × 出生时抽的 [−1, 1) 系数"，即 CenterSpread 的读法，但系数在出生时抽一次后固定。C# 目前声明为 `via.Range`。块布局 +0x10..+0x2c 依次是上表四对 (s, r)。
+四对值都是 CenterSpread（C# 原先声明为 `via.Range`，文件字节不变）：中心 + 幅度 × 出生时抽一次的系数 k ∈ [−1, 1)，之后固定。块布局 +0x10..+0x2c 依次是上表四对 (center, spread)。
 
 逐粒子记录（9 个 float，属性块 +8 给出在逐粒子附加数据里的偏移）：k0、k1、k2、k3、高频相位 b、低频相位 a、（空）、方向 x、方向 y。
 
@@ -824,11 +824,11 @@ Flags：位 0 层名、位 1 掩码名、位 2 用 Radius、位 3 最后一次�
   b = 2π·u1;  a = 2π·u2;  k2 = 2u3 − 1;  k0 = 2u4 − 1;  k3 = 2u5 − 1;  k1 = 2u6 − 1
   dir = normalize(2u7 − 1, 2u8 − 1)；长度 < 1e-6 时为 (1, 0)
 每帧，出生帧也算（3dc6d50）：
-  LW = LowFrequencyWidth.s + .r·k3;   HW = HighFrequencyWidth.s + .r·k1
+  LW = LowFrequencyWidth.center + .spread·k3;   HW = HighFrequencyWidth.center + .spread·k1
   C = cosf(a)·LW + cosf(b)·HW;         S = sinf(a)·LW + sinf(b)·HW
   偏移 = (C·dir.x, C·dir.y, S)（E+0x168 位 0，3D 族），否则 (C, S, 0)
   p[+0x34..+0x3c] += 偏移；[p+4] |= 0x1000
-  a += (LowFrequency.s + .r·k2)·dt·2π;   b += (HighFrequency.s + .r·k0)·dt·2π      // dt = ctx+0x10，秒
+  a += (LowFrequency.center + .spread·k2)·dt·2π;   b += (HighFrequency.center + .spread·k0)·dt·2π      // dt = ctx+0x10，秒
   a、b 各自 fmodf(·, 2π)；结果为负时取 2π − r
 ```
 

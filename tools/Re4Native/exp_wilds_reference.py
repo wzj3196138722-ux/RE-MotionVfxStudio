@@ -41,9 +41,9 @@ Checks (spec section in brackets):
   noise    Noise, read from re4.exe 3dc7050 / 3dc6d50 and checked against RE4 natively (5,424 ticks bit-exact):
            8 draws at birth (salt 0xd17f868f, key = slot): high and low phase (2pi u), four coefficients (2u - 1),
            a 2D direction normalized; every tick including the birth tick C = cos(a) * LW + cos(b) * HW and
-           S = sin(a) * LW + sin(b) * HW (LW = LowFrequencyWidth.s + .r * k3, HW = HighFrequencyWidth.s + .r * k1),
+           S = sin(a) * LW + sin(b) * HW (LW = LowFrequencyWidth.center + .spread * k3, HW = HighFrequencyWidth.center + .spread * k1),
            the particle's noise offset (+0x40, RE4 +0x34) = (C * dir.x, C * dir.y, S) for 3D, then
-           a += (LowFrequency.s + .r * k2) * dt * 2pi, b += (HighFrequency.s + .r * k0) * dt * 2pi, fmodf to 2pi
+           a += (LowFrequency.center + .spread * k2) * dt * 2pi, b += (HighFrequency.center + .spread * k0) * dt * 2pi, fmodf to 2pi
 """
 import hashlib
 import json

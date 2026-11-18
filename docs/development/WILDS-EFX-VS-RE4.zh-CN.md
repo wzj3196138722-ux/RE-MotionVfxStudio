@@ -187,10 +187,10 @@ Noise（re4.exe 3dc7050 逐粒子、3dc6d50 求偏移；`tools/Re4Native/noise_r
 
 ```
 出生（salt 0xd17f868f，key = 槽号，8 次抽取）：b = 2π·u1，a = 2π·u2，k2、k0、k3、k1 = 2u3..2u6 − 1，dir = normalize(2u7 − 1, 2u8 − 1)
-每帧（含出生帧）：LW = LowFrequencyWidth.s + .r·k3;  HW = HighFrequencyWidth.s + .r·k1
+每帧（含出生帧）：LW = LowFrequencyWidth.center + .spread·k3;  HW = HighFrequencyWidth.center + .spread·k1
   C = cos(a)·LW + cos(b)·HW;  S = sin(a)·LW + sin(b)·HW
   偏移 = (C·dir.x, C·dir.y, S)（3D；2D 为 (C, S, 0)），每帧覆盖，不累加
-  a += (LowFrequency.s + .r·k2)·dt·2π;  b += (HighFrequency.s + .r·k0)·dt·2π;  各自 fmodf 到 [0, 2π)
+  a += (LowFrequency.center + .spread·k2)·dt·2π;  b += (HighFrequency.center + .spread·k0)·dt·2π;  各自 fmodf 到 [0, 2π)
 ```
 
 频率单位是周 / 秒（dt 为秒）。这个公式在 RE4 上核对过：`tools/Re4Native/exp_noise.py` 用 RE4 语料里唯一带 Noise 的 Billboard3D 条目（csa114 dust，25 个粒子），5,424 帧的偏移与记录逐位一致。偏移另放在粒子的独立字段里，位置本身不变；它怎样进入渲染位置没有追。

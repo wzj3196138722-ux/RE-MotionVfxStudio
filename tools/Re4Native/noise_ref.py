@@ -1,15 +1,15 @@
 """Reference Noise, read from re4.exe 3dc7050 (per particle) and 3dc6d50 (offset); float32 in the engine's order.
 
-Block (+0x10..+0x2c): LowFrequency, LowFrequencyWidth, HighFrequency, HighFrequencyWidth, each (s, r). Per-particle
+Block (+0x10..+0x2c): LowFrequency, LowFrequencyWidth, HighFrequency, HighFrequencyWidth, each (center, spread). Per-particle
 record (9 floats): k0, k1, k2, k3, high phase b, low phase a, unused, dir x, dir y.
 
   birth (salt 0xd17f868f, key = slot): b = 2pi u1, a = 2pi u2, k2 = 2u3 - 1, k0 = 2u4 - 1, k3 = 2u5 - 1, k1 = 2u6 - 1,
         dir = normalize(2u7 - 1, 2u8 - 1), or (1, 0) when its length is below 1e-6
   every tick, the birth tick included:
-        LW = LowFrequencyWidth.s + .r * k3;  HW = HighFrequencyWidth.s + .r * k1
+        LW = LowFrequencyWidth.center + .spread * k3;  HW = HighFrequencyWidth.center + .spread * k1
         C = cos(a) * LW + cos(b) * HW;  S = sin(a) * LW + sin(b) * HW
         offset = (C * dir.x, C * dir.y, S) for 3D emitters, (C, S, 0) for 2D; it replaces the previous tick's offset
-        a += (LowFrequency.s + .r * k2) * dt * 2pi;  b += (HighFrequency.s + .r * k0) * dt * 2pi;  each fmodf 2pi
+        a += (LowFrequency.center + .spread * k2) * dt * 2pi;  b += (HighFrequency.center + .spread * k0) * dt * 2pi;  each fmodf 2pi
 """
 import ctypes
 import math
@@ -49,8 +49,8 @@ def birth(state, seed, slot):
 
 
 def step(rec, blk, K, three_d=True):
-    """This tick's offset; advances the phases in rec. blk: the 8 floats LF.s, LF.r, LW.s, LW.r, HF.s, HF.r, HW.s,
-    HW.r. K = dt * 2pi."""
+    """This tick's offset; advances the phases in rec. blk: the 8 floats (center, spread) of LowFrequency,
+    LowFrequencyWidth, HighFrequency, HighFrequencyWidth. K = dt * 2pi."""
     LFs, LFr, LWs, LWr, HFs, HFr, HWs, HWr = (F(v) for v in blk[:8])
     a, b = rec[5], rec[4]
     hw = F(F(HWr * rec[1]) + HWs)

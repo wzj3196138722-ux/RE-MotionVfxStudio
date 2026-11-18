@@ -320,14 +320,14 @@
     "Noise": {
       "samples": 48,
       "fields": {
-        "LowFrequency.s": "0.6",
-        "LowFrequency.r": "0.1",
-        "LowFrequencyWidth.s": "0.3",
-        "LowFrequencyWidth.r": "0.1",
-        "HighFrequency.s": "0.5",
-        "HighFrequency.r": "0.2",
-        "HighFrequencyWidth.s": "0.1",
-        "HighFrequencyWidth.r": "0.05"
+        "LowFrequency.center": "0.6",
+        "LowFrequency.spread": "0.1",
+        "LowFrequencyWidth.center": "0.3",
+        "LowFrequencyWidth.spread": "0.1",
+        "HighFrequency.center": "0.5",
+        "HighFrequency.spread": "0.2",
+        "HighFrequencyWidth.center": "0.1",
+        "HighFrequencyWidth.spread": "0.05"
       }
     },
     "NoiseExpression": {

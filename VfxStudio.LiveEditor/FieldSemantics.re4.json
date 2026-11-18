@@ -275,6 +275,12 @@
       "FadeInStart": { "help": "是距离不是角度：相机离发射器在 FadeInEnd..FadeInStart 之间时逐渐恢复可见。", "unit": "米", "status": "公式细节" },
       "FadeInEnd": { "help": "见 FadeInStart。", "unit": "米", "status": "公式细节" }
     },
+    "Noise": {
+      "LowFrequency": { "help": "低频相位的速度；每粒子 center + spread·k（k ∈ [−1, 1) 出生时抽一次）。每帧偏移 = 低频 + 高频两路正弦，加到粒子的偏移字段，位置本身不动。", "unit": "周/秒" },
+      "LowFrequencyWidth": { "help": "低频分量的幅度，按粒子抽一次。", "unit": "米" },
+      "HighFrequency": { "help": "高频相位的速度，按粒子抽一次。", "unit": "周/秒" },
+      "HighFrequencyWidth": { "help": "高频分量的幅度，按粒子抽一次。", "unit": "米" }
+    },
     "Blink": {
       "MinRate": { "help": "alpha 系数下限：结果 = clamp(低频 + 高频, MinRate, MaxRate)，乘进粒子 alpha。" },
       "MaxRate": { "help": "alpha 系数上限。" },
