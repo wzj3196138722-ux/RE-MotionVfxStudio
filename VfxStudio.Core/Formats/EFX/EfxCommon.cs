@@ -18,8 +18,8 @@ public enum ExpressionAssignType
 public enum MaterialParameterType : short
 {
 	None = 0,
-	Float = 1, // data structure: float min, float max OR color float4
-	Range = 2, // data structure: float min_a, float min_b, float max_a, float max_b
+	Float = 1, // float4（分量数 4，颜色 / 向量）；分量数 1 时语料形如 (x, x, 0, 0)
+	Range = 2, // 16 字节 = (X, Y, 下限, 上限)：取值区间在后 8 字节（RangeValue）；X、Y 在语料里恒相等、基本为 0
 	Texture = 3,
 }
 
@@ -66,9 +66,11 @@ public partial class MdfProperty : BaseModel
         set => MemoryMarshal.Write<Vector4>(rawValue, value);
     }
 
+	/// <summary>Range 参数的取值区间：rawValue 的后 8 字节（Z、W）。RE4 语料 4141 条 Range 的前 8 字节全部 X == Y、基本为 0，
+	/// 取值都在 Z、W，例如 (0, 0, 0.25, 0.25)、(0, 0, 1, 3)；与 .mdf2 的核对见 MHWs-EFX-Editor mdf_catalog.py。</summary>
 	public ReeLib.via.Range RangeValue {
-        get => MemoryMarshal.Read<ReeLib.via.Range>(rawValue);
-        set => MemoryMarshal.Write<ReeLib.via.Range>(rawValue, value);
+        get => MemoryMarshal.Read<ReeLib.via.Range>(rawValue.AsSpan(8));
+        set => MemoryMarshal.Write<ReeLib.via.Range>(rawValue.AsSpan(8), value);
     }
 
 	public MdfPropertyTextureValue TextureValue {

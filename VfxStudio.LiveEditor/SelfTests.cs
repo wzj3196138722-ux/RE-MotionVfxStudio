@@ -157,6 +157,9 @@ internal static class SelfTests
             var floatMaterial = new MdfProperty(EfxVersion.MHWilds) { parameterType = MaterialParameterType.Float };
             ContentInspector.Describe(floatMaterial, EfxVersion.MHWilds).Single(f => f.Description.Path == "VectorValue.X").Set!(0.75f);
             Check(floatMaterial.VectorValue.X == 0.75f, "Material vector property writes to its serialized raw bytes");
+            var rangeMaterial = new MdfProperty(EfxVersion.RE4) { parameterType = MaterialParameterType.Range };
+            rangeMaterial.RangeValue = new ReeLib.via.Range { s = 0.25f, r = 3f };
+            Check(rangeMaterial.VectorValue == new System.Numerics.Vector4(0, 0, 0.25f, 3f), "Material range property is the last two floats of its raw value");
 
             CurveTests.Run(options, output, Check);
             EntryStructureTests.Run(options, Check);
