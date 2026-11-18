@@ -9,7 +9,7 @@ namespace VfxStudio.Re4Preview;
 internal readonly record struct PreviewGraphPick(int EntryPosition, int AttributeIndex);
 
 /// <summary>Draws <see cref="PreviewEffectGraph"/> with ImNodes: Root → emitters (attribute stacks inline)
-/// → Actions → embedded emitters. Read-only structure; clicking an attribute row of a previewable
+/// → Actions → embedded emitters. Read-only structure; clicking an attribute row of an editable
 /// emitter asks the caller to open it in the property panel.</summary>
 internal sealed class PreviewGraphPanel : IDisposable
 {
@@ -158,10 +158,9 @@ internal sealed class PreviewGraphPanel : IDisposable
                 ImNodes.EndInputAttribute();
             }
             else if (node.Subtitle != null) ImGui.TextDisabled(node.Subtitle);
-            if (node.Kind == PreviewGraphNodeKind.Emitter && !node.Previewable)
-                ImGui.TextDisabled("（预览暂不支持此类型，只能查看）");
+            if (node.Kind == PreviewGraphNodeKind.Emitter && !node.Drawn && node.EntryType != "TypeNoDraw")
+                ImGui.TextDisabled("（预览不绘制此类型，可以编辑）");
             if (node.EntryType == "TypeNoDraw") ImGui.TextDisabled("（NoDraw：不绘制，用来触发子 Action）");
-            if (node.EntryType == "TypeMesh") ImGui.TextDisabled("（Mesh：预览不绘制网格，可以编辑属性和材质参数）");
 
             if (folded) ImGui.TextDisabled($"  已收起 {node.Rows.Count - VisibleRows(node).Count()} 项");
             foreach (var r in VisibleRows(node))
@@ -181,7 +180,7 @@ internal sealed class PreviewGraphPanel : IDisposable
                 if (ImGui.IsItemHovered())
                 {
                     string tip = r.Tooltip ?? (node.Kind == PreviewGraphNodeKind.Emitter
-                        ? node.Previewable ? locked ?? "单击在属性面板中打开" : "此类型的 entry 预览暂不支持，不能在面板中编辑。"
+                        ? node.Editable ? locked ?? "单击在属性面板中打开" : "这个节点不能在面板中编辑。"
                         : node.Kind == PreviewGraphNodeKind.EmbeddedEmitter ? "Action 内嵌的 entry：触发时预览会运行它（Billboard3D / Polygon / Billboard2D），还不能在窗口里编辑。" : "");
                     if (tip.Length > 0) ImGui.SetTooltip(tip);
                 }
@@ -209,7 +208,7 @@ internal sealed class PreviewGraphPanel : IDisposable
                 if (PreviewCatalogPanel.DropTarget(min, max, (uint)node.Id, t =>
                         target.Kind == PreviewGraphNodeKind.Action ? "Action 的属性还不能在窗口里添加"
                         : target.Kind == PreviewGraphNodeKind.EmbeddedEmitter ? "Action 内嵌的 entry 还不能在窗口里编辑"
-                        : !target.Previewable ? "预览暂不支持这个 entry 的类型，不能选中编辑"
+                        : !target.Editable ? "这个节点不能在面板中编辑"
                         : locked ?? PreviewCatalogPanel.Refusal(t, target.EntryType, target.AttributeTypes ?? [])) is { } dropped)
                     Dropped = new PreviewAddRequest(node.EntryPosition!.Value, dropped);
             }
@@ -232,7 +231,7 @@ internal sealed class PreviewGraphPanel : IDisposable
         {
             press = null;
             if (Vector2.Distance(mouse, pressed.At) <= ClickSlop && locked == null && graph.Find(pressed.Node) is
-                { Kind: PreviewGraphNodeKind.Emitter, Previewable: true, EntryPosition: int clickedEntry })
+                { Kind: PreviewGraphNodeKind.Emitter, Editable: true, EntryPosition: int clickedEntry })
                 pick = new PreviewGraphPick(clickedEntry, pressed.Attribute ?? -1);
         }
         if (overCanvas && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
@@ -322,12 +321,12 @@ internal sealed class PreviewGraphPanel : IDisposable
         PreviewStructureRequest? chosen = null;
         if (t.Row is { AttributeIndex: int attribute } row && node.AttributeTypes is { } types && attribute < types.Count)
         {
-            if (node.Previewable) chosen = PreviewStructureMenu.AttributeItems(entry, attribute, types[attribute], types);
+            if (node.Editable) chosen = PreviewStructureMenu.AttributeItems(entry, attribute, types[attribute], types);
             else ImGui.TextDisabled(types[attribute] + "（预览不支持此 entry，不能编辑属性）");
             ImGui.Separator();
         }
         ImGui.TextDisabled(node.Title);
-        chosen ??= PreviewStructureMenu.EntryItems(entry, ClipboardKind, ClipboardName, node.Previewable);
+        chosen ??= PreviewStructureMenu.EntryItems(entry, ClipboardKind, ClipboardName, node.Editable);
         ImGui.Separator();
         chosen ??= PreviewStructureMenu.FileItems(ClipboardKind, ClipboardName);
         return chosen;
@@ -347,7 +346,7 @@ internal sealed class PreviewGraphPanel : IDisposable
             PreviewGraphNodeKind.Root => Rgba(90, 90, 100),
             PreviewGraphNodeKind.Action => Rgba(40, 130, 60),
             PreviewGraphNodeKind.EmbeddedEmitter => Rgba(70, 80, 110),
-            _ => node.Previewable ? Rgba(50, 90, 160) : Rgba(80, 80, 80),
+            _ => node.Drawn ? Rgba(50, 90, 160) : Rgba(80, 80, 80),
         };
         ImNodes.PushColorStyle(ImNodesCol.TitleBar, color);
         ImNodes.PushColorStyle(ImNodesCol.TitleBarHovered, Lighter(color));

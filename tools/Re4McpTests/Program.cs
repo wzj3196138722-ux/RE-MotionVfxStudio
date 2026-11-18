@@ -96,6 +96,11 @@ try
         outcome["result"]?["document"]?["attributes"]?.AsArray().Any(a => a!["type"]?.GetValue<string>() == "TypeMesh") == true &&
         outcome["result"]?["preview"]?["entries"]?.AsArray().Any(e => e!["position"]!.GetValue<int>() == 19 && !e["shown"]!.GetValue<bool>()) == true,
         "a Mesh entry can be selected for editing but is not drawn", outcome.ToJsonString());
+    // Editing does not depend on drawing: even Root (no Type attribute) can be the edited entry and inspected.
+    (error, outcome, _) = await Tool("select_entry", new JsonObject { ["entryPosition"] = 0 });
+    Check(!error && outcome["result"]?["document"]?["entryPosition"]?.GetValue<int>() == 0, "the Root entry (no Type) can be selected for editing", outcome.ToJsonString());
+    (error, outcome, _) = await Tool("inspect", new JsonObject { ["attributeIndex"] = 0 });
+    Check(!error && outcome["result"]?["fields"]?.AsArray().Count > 0, "a Root attribute can be inspected", outcome.ToJsonString());
     (error, outcome, _) = await Tool("select_entry", new JsonObject { ["entryPosition"] = 13 });
     Check(!error && outcome["result"]?["document"]?["entryPosition"]?.GetValue<int>() == 13, "select_entry returns to entry 13");
     (error, outcome, _) = await Tool("inspect");

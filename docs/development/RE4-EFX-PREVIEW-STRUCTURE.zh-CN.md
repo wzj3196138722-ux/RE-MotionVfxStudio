@@ -2,6 +2,8 @@
 
 预览窗口可以直接增删、复制粘贴属性和 entry，不再只能靠 MCP。每个操作是一个新修订，可以撤销。属性面板有未应用的草稿、编辑器正忙或处于压力模式时，这些操作都不可用。
 
+编辑和预览不绑定：文件里任何顶层 entry 都可以作为编辑对象，包括预览还画不了的类型（Mesh、GPU 类型、StrainRibbon 等）和没有 Type 的 Root。预览只绘制它支持的 entry；所选 entry 不绘制时，主面板给出原因，属性照常编辑。节点图里不绘制的 entry 显示为灰色节点，但同样可以单击打开、右键操作。
+
 ## 入口
 
 | 位置 | 操作 |
@@ -16,8 +18,8 @@
 - **复制**放进后端的复制缓冲区，打开其他文件后仍可粘贴，所以属性和 entry 都能跨文件搬。主面板显示当前复制的内容。两份文件的表达式／变量表不同时，后端拒绝粘贴。
 - **粘贴属性**：目标 entry 已有同类属性时先确认替换。内容完全相同时，后端不生成新修订。粘贴后新属性在属性面板里打开。
 - **删除属性**：不能删 Type 属性（删了就无法预览，换类型请新建 entry）；有 Expression / Clip 依赖它时，要先删依赖的属性。
-- **新建 entry**：可选的 Type 是预览能画的 Billboard3D、Polygon、Billboard2D、RibbonFollow、RibbonLength、PolygonTrail。新 entry 带上 RE4 里同 Type 的 entry 有 95% 以上都带的属性，字段取默认值（见下）。例如 Billboard3D 会带 Transform3D、ParentOptions、Spawn、Life、UVSequence、ShaderSettings。新建、创建副本、粘贴的 entry 会切换为当前 entry；预览画不了的类型则保留原来的选择，并在属性面板提示。
-- **删除 entry** 先弹出确认。删除的是当前 entry 时，先改为编辑位置最近的可预览 entry；文件里没有其他可预览 entry 时不能删。
+- **新建 entry**：可选的 Type 是预览能画的 Billboard3D、Polygon、Billboard2D、RibbonFollow、RibbonLength、PolygonTrail。新 entry 带上 RE4 里同 Type 的 entry 有 95% 以上都带的属性，字段取默认值（见下）。例如 Billboard3D 会带 Transform3D、ParentOptions、Spawn、Life、UVSequence、ShaderSettings。新建、创建副本、粘贴的 entry 会切换为当前 entry。
+- **删除 entry** 先弹出确认。删除的是当前 entry 时，先改为编辑位置最近的另一个 entry；它是文件里唯一的 entry 时不能删。
 
 新 entry 不加入任何 effect group。游戏是否播放不在 group 里的 entry，还没有验证。
 
@@ -25,7 +27,7 @@
 
 TypeMesh 的 `properties`（以及 DD2 起材质类 Type 的 `material.properties`）是材质参数的覆盖表：每一项用参数名的 UTF-8 MurMur3 哈希指向材质里的一个参数，并重复它在 .mdf2 参数表里的下标和分量数；贴图项下标恒为 −1。所以名字、能加哪些参数、下标该填多少，只能从材质文件里得到。RE4 语料核对：5065 条数值覆盖的下标和分量数与所引用的 .mdf2 全部一致，298 条贴图覆盖下标全为 −1；另有 17 条覆盖指向 .mdf2 里已经没有的参数，45 个网格的 .mdf2 在本机找不到。
 
-- **TypeMesh entry 可以选中编辑**：预览还不绘制网格（左侧提示“类型 TypeMesh 尚未支持”），但它和 NoDraw 一样可以作为当前 entry，属性面板能打开它的属性。
+- TypeMesh entry 预览还不绘制，但和其他 entry 一样可以选中编辑（见开头）。
 - **参考材质**：属性面板的“材质参数”区默认按属性自己的材质路径读 .mdf2（RE4 为 `.mdf2.32`），查找顺序与贴图相同（文档所在 natives、游戏散文件、解包目录、PAK）；也可以填一个 `.mdf2.<版本>` 文件作为参考。多材质的 .mdf2 拒绝使用（覆盖表没有材质下标）。
 - **显示**：每条覆盖显示参数名、类型（贴图 / 随机区间 / float / float4），与参考材质不一致（参数不存在、下标或分量数不同）时标橙并在提示里说明。字段表里覆盖项按参数名列在最前：Range 的值标为 base · random · min · max（引擎出生时在 [min, max] 抽 random，送进材质的是 base + random，见 RE4-EFX-RUNTIME §4.3.11），`flags` 标为“0-1 钳制”；哈希、下标、分量数等收在默认折叠的“材质参数结构（只读）”。
 - **添加**：从参考材质里没被覆盖的参数和贴图槽中选一个。下标、分量数按材质填写，初值取材质自己的值；单分量参数加成 Range (0, 0, 值, 值)，即不随机。
@@ -55,7 +57,7 @@ TypeMesh 的 `properties`（以及 DD2 起材质类 Type 的 `material.propertie
 
 - `add_attribute` 接受 `fields`（同 `set_fields` 的 path / value），在同一个修订里写入新属性。给出的字段必须存在且可编辑，否则整个请求被拒绝。
 - `add_entry` 接受 `attributes`（`[{type, fields?}]`），entry 和属性一起作为一个修订，回复里的 `selection` 给出新 entry 的位置。
-- 离线预览的目标改为跟随 entry ID：前面的 entry 被删除、恢复或插入时，位置跟着移动。目标 entry 本身消失时（例如撤销创建它的粘贴或副本），改到位置最近的可预览 entry。以前这两种情况都会报“预览目标已变化”。
+- 离线预览的目标改为跟随 entry ID：前面的 entry 被删除、恢复或插入时，位置跟着移动。目标 entry 本身消失时（例如撤销创建它的粘贴或副本），改到位置最近的 entry。编辑目标可以是任何顶层 entry，不要求预览能绘制。以前这两种情况都会报“预览目标已变化”。
 - `EfxFieldValues`（LiveEditor 公开类）按 `set_fields` 的路径读写可编辑字段，供语料工具和后端共用。
 
 ## 验证

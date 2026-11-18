@@ -44,13 +44,13 @@ internal static class PreviewStructureMenu
     }
 
     /// <summary>Items for one entry. <paramref name="clipboard"/> is the backend's copy buffer (kind, attributeType).</summary>
-    public static PreviewStructureRequest? EntryItems(int entry, string? clipboardKind, string? clipboardType, bool previewable)
+    public static PreviewStructureRequest? EntryItems(int entry, string? clipboardKind, string? clipboardType, bool editable)
     {
         PreviewStructureRequest? chosen = null;
         if (clipboardKind == "attribute")
         {
-            if (ImGui.MenuItem("粘贴属性 " + clipboardType, (string?)null, false, previewable)) chosen = new("paste_attribute", entry);
-            if (!previewable && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip("预览暂不支持这个 entry 的类型，不能选中编辑");
+            if (ImGui.MenuItem("粘贴属性 " + clipboardType, (string?)null, false, editable)) chosen = new("paste_attribute", entry);
+            if (!editable && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip("这个节点不能在面板中编辑");
         }
         if (ImGui.MenuItem("复制 entry（可粘贴到其他文件）")) chosen = new("copy_entry", entry);
         if (ImGui.MenuItem("创建副本")) chosen = new("duplicate_entry", entry);

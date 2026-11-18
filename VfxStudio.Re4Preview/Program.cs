@@ -244,8 +244,10 @@ void StartOpenFile(string file)
     editTask=Task.Run(async()=>
     {
         var graph=PreviewEffectGraph.Read(file);
-        int position=graph.Nodes.FirstOrDefault(n=>n.Kind==PreviewGraphNodeKind.Emitter && n.Previewable)?.EntryPosition
-            ?? throw new InvalidDataException("文件里没有预览支持的 entry（Billboard3D、Polygon、Billboard2D、RibbonFollow、RibbonLength）："+Path.GetFileName(file));
+        // Open the first entry the preview draws; a file with none (meshes only, say) still opens for editing.
+        var emitters=graph.Nodes.Where(n=>n.Kind==PreviewGraphNodeKind.Emitter && n.Editable).ToArray();
+        int position=(emitters.FirstOrDefault(n=>n.Drawn)??emitters.FirstOrDefault())?.EntryPosition
+            ?? throw new InvalidDataException("文件里没有 entry："+Path.GetFileName(file));
         return await editor.OpenAtAsync(file,position);
     });
 }
@@ -314,7 +316,7 @@ async Task<PreviewEditorState> Structure(PreviewEditCommand command)
         int count=lastStructureReply?["document"]?["entries"]?.AsArray().Count??0;
         int position=lastStructureReply?["selection"]?["index"]?.GetValue<int>()??count-1;
         try {return await editor.SelectEntryAsync(position);}
-        catch(InvalidOperationException) {structureNote=$"新 entry [{position}] 已加入，但预览不支持它的类型，暂不能选中编辑。";return state;}
+        catch(InvalidOperationException ex) {structureNote=$"新 entry [{position}] 已加入，但没能选中：{ex.Message}";return state;}
     }
     string label=request.Op switch
     {
@@ -409,12 +411,12 @@ void RequestStructure(PreviewStructureRequest request)
     }
     StartEditorCommand(new PreviewEditCommand("structure",editorState.Revision,EntryPosition:request.EntryPosition,Tag:request));
 }
-// The entry to edit after removing one: the current entry, or when that is the one removed, the nearest previewable entry (-1: none).
+// The entry to edit after removing one: the current entry, or when that is the one removed, the nearest other entry (-1: none).
 int RemoveFallback(int removed)
 {
     int current=editorState?.Manifest?.EntryPosition??-1;
     if(removed!=current) return current;
-    return scene?.Graph.Nodes.Where(n=>n.Kind==PreviewGraphNodeKind.Emitter && n.Previewable && n.EntryPosition!=removed)
+    return scene?.Graph.Nodes.Where(n=>n.Kind==PreviewGraphNodeKind.Emitter && n.Editable && n.EntryPosition!=removed)
         .OrderBy(n=>Math.Abs(n.EntryPosition!.Value-removed)).Select(n=>n.EntryPosition!.Value).DefaultIfEmpty(-1).First()??-1;
 }
 void RequestAdd(PreviewAddRequest request) => RequestStructure(new PreviewStructureRequest("add_attribute",request.EntryPosition,Type:request.Type));
@@ -427,10 +429,10 @@ void DrawStructureConfirmations()
         var request=confirmRemoveEntry;
         var node=request==null?null:scene?.Graph.EmitterAt(request.EntryPosition);
         ImGui.Text($"删除 {node?.Title ?? "entry"}？可以撤销。");
-        // Removing the edited entry needs another previewable entry to move to.
+        // Removing the edited entry needs another entry to move to.
         int current=editorState?.Manifest?.EntryPosition??-1;
         int fallback=request==null?-1:RemoveFallback(request.EntryPosition);
-        if(fallback<0) ImGui.TextColored(new Vector4(1,.6f,.35f,1),"这是文件里唯一能预览的 entry，删除后没有可编辑的目标，不能删除。");
+        if(fallback<0) ImGui.TextColored(new Vector4(1,.6f,.35f,1),"这是文件里唯一的 entry，删除后没有可编辑的目标，不能删除。");
         else if(request!=null && request.EntryPosition==current) ImGui.TextDisabled($"删除后改为编辑 [{fallback}]。");
         ImGui.BeginDisabled(fallback<0 || request==null);
         if(ImGui.Button("删除"))
@@ -1072,8 +1074,8 @@ void DrawEntrySelector()
     {
         foreach(var e in scene.Entries)
         {
-            // The editor targets the Types the preview draws; excluded ones stay selectable for fixing.
-            bool selectable=scene.Graph.EmitterAt(e.Position)?.Previewable==true;
+            // Every entry can be edited; ones the preview does not draw are listed with the reason in the tooltip.
+            bool selectable=scene.Graph.EmitterAt(e.Position)?.Editable==true;
             if(ImGui.Selectable(Label(e),e.Position==current?.Position,selectable?ImGuiSelectableFlags.None:ImGuiSelectableFlags.Disabled) && selectable && e.Position!=current?.Position && editorState!=null)
                 StartEditorCommand(new PreviewEditCommand("select_entry",editorState.Revision,EntryPosition:e.Position));
             if(e.Excluded!=null && ImGui.IsItemHovered()) ImGui.SetTooltip(e.Excluded);
@@ -1113,7 +1115,8 @@ void DrawEntrySelector()
         if(ImGui.IsItemHovered()) ImGui.SetTooltip("面板可拖到窗口四边停靠，拖动标题栏离开即可浮动；这里恢复默认停靠布局。");
     }
     ImGui.TextDisabled("把 .efx 文件拖进窗口即可打开");
-    if(current?.Excluded is {} reason) ImGui.TextColored(new Vector4(1,.75f,.35f,1),"所选 entry 未显示："+reason);
+    // Editing does not depend on drawing: a selected entry the preview cannot draw is still edited normally.
+    if(current?.Excluded is {} reason) ImGui.TextDisabled("所选 entry 不绘制（"+reason.TrimEnd('。')+"），属性照常编辑。");
     var placeholders=scene.Entries.Concat(scene.Children).Where(e=>e.Shown && e.Missing.Count>0).ToArray();
     if(placeholders.Length>0)
     {
