@@ -13,7 +13,9 @@ python -I -X utf8 -u exp_emitter.py run bb_60               # 一个发射器场
 python -I -X utf8 -u pe_image.py "<re4.exe>" 3d1d830 80     # 反汇编一个 RVA
 ```
 
-依赖 numpy；`scan_loops.py` 与 `pe_image.py` 另需 pefile、capstone。exe 路径可用环境变量 `RE4_EXE` 覆盖。
+依赖 numpy；`scan_loops.py` 与 `pe_image.py` 另需 pefile、capstone。exe 路径可用环境变量 `RE4_EXE`（Wilds 为 `MHWILDS_EXE`）覆盖。
+
+接入新游戏：在 `games/` 加一个版本配置，再写一个像 `mhwildsnative.py` 那样的绑定，放这个游戏的代码在映射后还缺的东西（分配器、单例）。`emitter.py`、`world.py`、`factory.py`、`re4host.py` 里的地址仍只属于 RE4。
 `run_all.py` 让每个实验在独立子进程中运行：fast fail（0xC0000409）或未捕获的访问违例只结束该子进程，
 汇总里记为 `CRASH`。
 
@@ -27,7 +29,10 @@ python -I -X utf8 -u pe_image.py "<re4.exe>" 3d1d830 80     # 反汇编一个 RV
 
 | 文件 | 内容 |
 |---|---|
-| `re4native.py` | 映射与调用框架：按节复制（不重定位、不运行入口点与 TLS 回调）；kernel32 / MSVC 运行库 / UCRT 导入按名绑定，其余导入指向不可访问的陷阱槽，调用时抛 `UnresolvedImportCalled`（带导入名）；向量化异常处理把访问违例变成 `NativeFault`（故障 RVA、访问地址、exe 内回溯）；`install_settings` 伪造特效设置单例；`Emitter` 提供 E 与 ctx+0x118 |
+| `native_core.py` | 与游戏无关的映射与调用框架：按节复制（不重定位、不运行入口点与 TLS 回调）；kernel32 / MSVC 运行库 / UCRT 导入按名绑定，其余导入指向不可访问的陷阱槽，调用时抛 `UnresolvedImportCalled`（带导入名）；向量化异常处理把访问违例变成 `NativeFault`（故障 RVA、访问地址、exe 内回溯）；`patch_jump`、`install_bump_allocator`、`install_global` 替换引擎分配器和单例。只认 `games/` 里登记的 exe 版本，一个进程只能映射一个 exe |
+| `games/` | 每个游戏一个版本配置：游戏 id（与 `GameProfile.cs` 相同）、EFX 版本、默认 exe 路径与覆盖用的环境变量、文件大小、PE 时间戳。`re4.py`：`RE4_EXE`；`mhwilds.py`：`MHWILDS_EXE`，默认 `~\Downloads\MonsterHunterWilds.exe` |
+| `re4native.py` | RE4 绑定：`load()` 只映射 RE4 的版本；`install_settings` 伪造特效设置单例；`Emitter` 提供 E 与 ctx+0x118。实验和 `re4host.py` 都以 `rn` 导入它 |
+| `mhwildsnative.py` | Wilds 绑定：`load()` 映射 Wilds 的版本并把分配器 b020830 / f5b0 换成 bump 分配器；工厂表、步骤表的地址。地址出处见 [WILDS-EFX-VS-RE4.zh-CN.md](../../docs/development/WILDS-EFX-VS-RE4.zh-CN.md) |
 | `refsim.py` | 规格 §1.6 的参考随机数（种子、xorshift32、CenterSpread、ScaleAnim 与 Blink 的抽取顺序） |
 | `exp_map.py` | 映射、导入绑定、故障与陷阱的捕获 |
 | `exp_scaleanim.py` | ScaleAnim 闭式函数 3cfd420 与逐粒子步 3d1d830 + 基值捕获 3d1dd00 |
