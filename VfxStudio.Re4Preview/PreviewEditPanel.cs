@@ -31,6 +31,10 @@ internal sealed class PreviewEditPanel
     private const string BehaviorParameters="脚本参数",BehaviorStructure="参数结构（只读）";
     private static readonly string[][] ComponentSets=[["X","Y","Z","W"],["x","y","z","w"],["min","max"],["center","spread"],["R","G","B","A"],["r","g","b","a"]];
     public bool HasUnappliedChanges=>draft?.Dirty==true;
+    /// <summary>The open attribute's material property table (TypeMesh, material Types), named from a reference .mdf2.</summary>
+    public PreviewMaterialSection Material {get;}=new();
+    /// <param name="materialLoader">Reads the material at an EFX material path (the preview's resource source).</param>
+    public PreviewEditPanel(Func<string,PreviewMaterialReference>? materialLoader=null)=>Material.Loader=materialLoader;
     public int SelectedAttribute=>selected;
     private PreviewGraphPick? pendingFocus;
 
@@ -67,6 +71,7 @@ internal sealed class PreviewEditPanel
     private void BuildRows(PreviewInspection inspection)
     {
         byPath=inspection.Fields.ToDictionary(f=>f.Path,StringComparer.Ordinal);
+        Material.Detect(inspection,byPath,$"{inspection.DocumentId}:{inspection.EntryPosition}:{inspection.AttributeIndex}");
         controls=PreviewFieldActivity.Controls(inspection.Fields);
         var colors=inspection.ColorGroups.Where(c=>c.Storage=="rgba8" && c.Scale==255 && !c.Hdr && c.Channels.Length==4 &&
             c.Channels.All(ch=>inspection.Fields.Any(f=>f.Path==ch.Path))).ToArray();
@@ -78,6 +83,7 @@ internal sealed class PreviewEditPanel
             if(System.Text.RegularExpressions.Regex.Match(f.Path,@"^(properties\[\d+\])\.behaviorProperty$") is {Success:true} m) names[m.Groups[1].Value]=f.Value;
         (string Group,string? Label,int Order) Place(string path)
         {
+            if(Material.Place(path) is {} material) return material;
             var m=System.Text.RegularExpressions.Regex.Match(path,@"^(properties\[(\d+)\])\.(.*)$");
             if(names.Count>0 && m.Success && names.TryGetValue(m.Groups[1].Value,out var name))
             {
@@ -262,6 +268,10 @@ internal sealed class PreviewEditPanel
                 ImGui.SameLine();ImGui.Text($"{page+1}/{pages} 页 · {shown.Length} 项");
             }
         }
+        // Material property table: reference .mdf2, overrides checked against it, add / remove (each one revision).
+        if(draft!=null && Material.Present &&
+            Material.Draw(entryPosition,selected,!unavailable && current && !dirty) is {} materialRequest) command=Structure(materialRequest);
+        if(Material.TakeRelabel() && draft!=null) BuildRows(draft.Inspection);
         float footer=ImGui.GetFrameHeightWithSpacing()+ImGui.GetStyle().ItemSpacing.Y*2+(state?.SavedPath!=null?ImGui.GetTextLineHeightWithSpacing():0);
         ImGui.BeginChild("属性字段",new Vector2(0,Math.Max(120,ImGui.GetContentRegionAvail().Y-footer)));
         ImGui.BeginDisabled(unavailable || !current);
@@ -274,8 +284,10 @@ internal sealed class PreviewEditPanel
             foreach(var group in shown.Skip(page*64).Take(64).GroupBy(r=>r.Group))
             {
                 var members=group.ToArray();
-                bool header=(members.Length>1 && group.Key!="基本字段") || group.Key is BehaviorParameters or BehaviorStructure;
-                if(header && !ImGui.TreeNodeEx(group.Key,(group.Key==BehaviorStructure?0:ImGuiTreeNodeFlags.DefaultOpen)|ImGuiTreeNodeFlags.SpanAvailWidth)) continue;
+                bool header=(members.Length>1 && group.Key!="基本字段") ||
+                    group.Key is BehaviorParameters or BehaviorStructure or PreviewMaterialSection.ValuesGroup or PreviewMaterialSection.StructureGroup;
+                bool closed=group.Key is BehaviorStructure or PreviewMaterialSection.StructureGroup;
+                if(header && !ImGui.TreeNodeEx(group.Key,(closed?0:ImGuiTreeNodeFlags.DefaultOpen)|ImGuiTreeNodeFlags.SpanAvailWidth)) continue;
                 if(ImGui.BeginTable("##字段表",2,ImGuiTableFlags.Resizable|ImGuiTableFlags.BordersInnerV|ImGuiTableFlags.RowBg))
                 {
                     ImGui.TableSetupColumn("名称",ImGuiTableColumnFlags.WidthStretch,.4f);

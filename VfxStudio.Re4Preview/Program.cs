@@ -66,7 +66,9 @@ var idleBenchmark = options.TryGetValue("idle-benchmark",out string? idleSeconds
     ? new PreviewIdleBenchmark(latency!,editor.Directory,int.Parse(idleSeconds,System.Globalization.CultureInfo.InvariantCulture)) : null;
 if(idleBenchmark!=null && (latencyBenchmark!=null || options.ContainsKey("benchmark") || options.ContainsKey("smoke")))
     throw new ArgumentException("空闲测量不能与其他自动测量模式同时启用。");
-var editPanel = new PreviewEditPanel();
+// Material references for the property panel come through the same lookup as textures (document root, loose files, paks).
+PreviewMaterialReference LoadMaterial(string path)=>PreviewMaterialReference.FromResource(resources,path);
+var editPanel = new PreviewEditPanel(LoadMaterial);
 PreviewGraphPanel? graphPanel = null;
 var curvePanel = new PreviewCurvePanel();
 var catalogPanel = new PreviewCatalogPanel();
@@ -318,7 +320,8 @@ async Task<PreviewEditorState> Structure(PreviewEditCommand command)
     {
         "add_attribute"=>"添加 "+request.Type,"remove_attribute"=>"删除属性","copy_attribute"=>"复制属性","paste_attribute"=>"粘贴属性",
         "copy_entry"=>"复制 entry","paste_entry"=>"粘贴 entry","add_entry"=>"新建 entry","duplicate_entry"=>"创建副本","remove_entry"=>"删除 entry",
-        "emitter_priority"=>request.AttributeIndex>=0?"关闭 EmitterPriority":"开启 EmitterPriority",_=>request.Op
+        "emitter_priority"=>request.AttributeIndex>=0?"关闭 EmitterPriority":"开启 EmitterPriority",
+        "material_parameter"=>request.Label??"修改材质参数",_=>request.Op
     };
     try
     {
@@ -330,6 +333,13 @@ async Task<PreviewEditorState> Structure(PreviewEditCommand command)
             case "remove_attribute":
                 await Select(entry);
                 return await Send("remove_attribute",new(){["target"]=Target(request.AttributeIndex)});
+            case "material_parameter":
+            {
+                await Select(entry);
+                var body=(JsonObject)request.Body!.DeepClone();
+                body["target"]=Target(request.AttributeIndex);
+                return await Send("material_parameter",body);
+            }
             case "copy_attribute":
                 return await Send("copy_efx",new(){["target"]=Target(request.AttributeIndex)},mutation:false);
             case "emitter_priority":
@@ -1188,7 +1198,7 @@ window.Update += dt =>
             string attributeList=$"{editorState.Manifest?.DocumentId}:{editorState.Manifest?.EntryPosition}:{string.Join(",",editorState.Attributes?.Select(a=>a.Type)??[])}";
             if(editAction is "ai:add_attribute" or "ai:remove_attribute" or "ai:paste_attribute" ||
                 attributeList!=lastAttributeList && !editPanel.HasUnappliedChanges &&
-                editAction is not ("select_entry" or "open" or "open_source" or "open_saved" or "ai:open" or "ai:select_entry" or "inspect")) editPanel=new PreviewEditPanel();
+                editAction is not ("select_entry" or "open" or "open_source" or "open_saved" or "ai:open" or "ai:select_entry" or "inspect")) editPanel=new PreviewEditPanel(LoadMaterial);
             lastAttributeList=attributeList;
             // An attribute added or pasted from the window opens in the property panel.
             if(editAction=="structure" && editorState.Manifest is {} edited)

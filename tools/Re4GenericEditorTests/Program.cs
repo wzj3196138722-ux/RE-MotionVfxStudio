@@ -243,5 +243,81 @@ try
     await Reject(()=>editor.ApplyFieldsAsync(new(life,[new("AppearFrame.min","11")])),"old document after reopen");
     File.WriteAllText(Path.Combine(root,"generic-result.json"),JsonSerializer.Serialize(new{status="PASS",saved,attributes=inspections.Count,nativeDigest=digest}));
     Console.WriteLine("PASS attribute inspection, atomic generic color/size/Life, native geometry/digest, stale document/revision, read-only, rollback, save/reopen; "+root);
+
+    // Material overrides on a TypeMesh entry (not drawn, but selectable): every existing override matches the
+    // referenced .mdf2; one parameter and one texture are added from it and removed again (each one revision, undoable);
+    // a duplicate is refused, and so is removing a parameter a material curve drives.
+    {
+        string stm=Path.Combine(Path.GetDirectoryName(exe)!,"RE4_EXTRACT","natives","stm");
+        int IdAt(string path,long start)
+        {
+            var efx=new ReeLib.EfxFile(new ReeLib.FileHandler(new MemoryStream(File.ReadAllBytes(path),false),path));efx.Read();
+            return efx.Entries.Single(e=>e.Start==start).index;
+        }
+        string meshFile=Path.Combine(stm,@"_anotherorder\vfx\effecteditor\efd_character\efd_ao_chc3\efd_0015_ao_chc3_hold_dead_0000.efx.3539837");
+        using var meshEditor=new PreviewEditorSession(repo,Path.Combine(root,"mesh"),protectedRoots:[Path.GetDirectoryName(exe)!]);
+        var ms=await meshEditor.OpenAsync(meshFile,IdAt(meshFile,24102));
+        int mesh=ms.Attributes!.Single(a=>a.Type=="TypeMesh").Index;
+        async Task<Dictionary<string,PreviewFieldInfo>> MeshFieldsAsync()
+        {
+            ms=await meshEditor.InspectAsync(ms.Manifest!.DocumentId,ms.Revision,mesh);
+            return ms.Inspection!.Fields.ToDictionary(f=>f.Path);
+        }
+        int Count(Dictionary<string,PreviewFieldInfo> f){int n=0;while(f.ContainsKey($"properties[{n}].PropertyNameUTF8Hash")) n++;return n;}
+        JsonObject Body(JsonObject b){b["target"]=new JsonObject{["kind"]="entry",["index"]=ms.Manifest!.EntryPosition,["attributeIndex"]=mesh};return b;}
+        var mf=await MeshFieldsAsync();
+        var reference=PreviewMaterialReference.FromResource(resources,mf["MaterialPath"].Value);
+        int before0=Count(mf);
+        var present=new HashSet<uint>();
+        for(int i=0;i<before0;i++)
+        {
+            string F(string leaf)=>mf[$"properties[{i}].{leaf}"].Value;
+            uint hash=uint.Parse(F("PropertyNameUTF8Hash"),CultureInfo.InvariantCulture);present.Add(hash);
+            string? why=reference.Mismatch(hash,int.Parse(F("mdfPropertyIndex"),CultureInfo.InvariantCulture),int.Parse(F("mdfParameterValueCount"),CultureInfo.InvariantCulture),F("parameterType")=="Texture");
+            Check(why==null,$"Existing override {hash} does not match {reference.Source}: {why}");
+        }
+        var slot=reference.Slots.First(s=>!s.Texture && !present.Contains(s.Hash));
+        long rev=ms.Revision;
+        ms=(await meshEditor.SendRawAsync("material_parameter",Body(PreviewMaterialReference.AddBody(slot,"properties")),rev)).State;
+        Check(ms.Revision==rev+1 && ms.CanUndo,"Adding a material override is not one undoable revision");
+        mf=await MeshFieldsAsync();
+        string A(string leaf)=>mf[$"properties[{before0}].{leaf}"].Value;
+        Check(Count(mf)==before0+1 && A("PropertyNameUTF8Hash")==slot.Hash.ToString(CultureInfo.InvariantCulture) &&
+            A("mdfPropertyIndex")==slot.Index.ToString(CultureInfo.InvariantCulture) &&
+            A("parameterType")==(slot.ComponentCount==4?"Float":"Range"),"Added override does not carry the material's name, index and type");
+        if(slot.ComponentCount==1)
+            Check(float.Parse(A("VectorValue.Z"),CultureInfo.InvariantCulture)==slot.Value.X && float.Parse(A("VectorValue.W"),CultureInfo.InvariantCulture)==slot.Value.X &&
+                float.Parse(A("VectorValue.X"),CultureInfo.InvariantCulture)==0,"A one-component override must start as (0, 0, v, v)");
+        await Reject(()=>meshEditor.SendRawAsync("material_parameter",Body(PreviewMaterialReference.AddBody(slot,"properties")),ms.Revision),"duplicate material override");
+        if(reference.Slots.FirstOrDefault(s=>s.Texture && !present.Contains(s.Hash)) is {} tex)
+        {
+            ms=(await meshEditor.SendRawAsync("material_parameter",Body(PreviewMaterialReference.AddBody(tex,"properties")),ms.Revision)).State;
+            mf=await MeshFieldsAsync();
+            Check(mf[$"properties[{before0+1}].texturePath"].Value==tex.TexturePath && mf[$"properties[{before0+1}].mdfPropertyIndex"].Value=="-1",
+                "Added texture override lost its path or index -1");
+            ms=(await meshEditor.SendRawAsync("material_parameter",Body(new(){["op"]="remove",["listPath"]="properties",["index"]=before0+1}),ms.Revision)).State;
+        }
+        ms=(await meshEditor.SendRawAsync("material_parameter",Body(new(){["op"]="remove",["listPath"]="properties",["index"]=before0}),ms.Revision)).State;
+        mf=await MeshFieldsAsync();
+        Check(Count(mf)==before0,"Removing the added override did not restore the table");
+        ms=await meshEditor.CommandAsync("undo");
+        mf=await MeshFieldsAsync();
+        Check(Count(mf)==before0+1,"Undo did not bring the removed override back");
+
+        // A parameter a TypeMeshClip curve drives cannot be removed.
+        string rippleFile=Path.Combine(stm,@"_anotherorder\vfx\effecteditor\efd_event\cs\efd_cse340_s00\efd_0015_cse340_s00_ripple_0000.efx.3539837");
+        ms=await meshEditor.OpenAsync(rippleFile,IdAt(rippleFile,57));
+        mesh=ms.Attributes!.Single(a=>a.Type=="TypeMesh").Index;
+        mf=await MeshFieldsAsync();
+        var efxRipple=new ReeLib.EfxFile(new ReeLib.FileHandler(new MemoryStream(File.ReadAllBytes(rippleFile),false),rippleFile));efxRipple.Read();
+        var curveHashes=efxRipple.Entries.Single(e=>e.Start==57).Attributes.OfType<ReeLib.Efx.IMaterialClipAttribute>()
+            .SelectMany(c=>c.MaterialClip.mdfProperties??Array.Empty<ReeLib.Efx.Structs.Common.EfxMaterialClip_Struct4>()).Select(p=>p.mdfPropertyHash).ToHashSet();
+        int driven=Enumerable.Range(0,Count(mf)).First(i=>curveHashes.Contains(uint.Parse(mf[$"properties[{i}].PropertyNameUTF8Hash"].Value,CultureInfo.InvariantCulture)));
+        long rippleRevision=ms.Revision;
+        await Reject(()=>meshEditor.SendRawAsync("material_parameter",Body(new(){["op"]="remove",["listPath"]="properties",["index"]=driven}),rippleRevision),"remove a curve-driven material override");
+        Check(meshEditor.State!.Revision==rippleRevision,"Refused removal changed the document");
+        Console.WriteLine($"PASS material overrides: {before0} existing match {Path.GetFileName(reference.Source.Split(" :: ")[^1])}; add/duplicate/texture/remove/undo; " +
+            $"curve-driven parameter kept (hash {mf[$"properties[{driven}].PropertyNameUTF8Hash"].Value})");
+    }
 }
 catch(Exception ex) {Console.Error.WriteLine(ex);Environment.ExitCode=1;}

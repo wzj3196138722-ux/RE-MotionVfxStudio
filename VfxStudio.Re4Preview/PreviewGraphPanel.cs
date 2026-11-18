@@ -161,6 +161,7 @@ internal sealed class PreviewGraphPanel : IDisposable
             if (node.Kind == PreviewGraphNodeKind.Emitter && !node.Previewable)
                 ImGui.TextDisabled("（预览暂不支持此类型，只能查看）");
             if (node.EntryType == "TypeNoDraw") ImGui.TextDisabled("（NoDraw：不绘制，用来触发子 Action）");
+            if (node.EntryType == "TypeMesh") ImGui.TextDisabled("（Mesh：预览不绘制网格，可以编辑属性和材质参数）");
 
             if (folded) ImGui.TextDisabled($"  已收起 {node.Rows.Count - VisibleRows(node).Count()} 项");
             foreach (var r in VisibleRows(node))

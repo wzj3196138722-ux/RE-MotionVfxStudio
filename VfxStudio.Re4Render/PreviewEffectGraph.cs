@@ -32,7 +32,7 @@ public sealed record PreviewGraphRow(string Label, PreviewGraphRowRole Role, int
 /// <param name="EntryPosition">For a top-level emitter: its position in the file's entry list.</param>
 /// <param name="ActionIndex">For an Action: its index in the file's Action list; for an embedded emitter: the owning Action.</param>
 /// <param name="Previewable">A top-level emitter the editor can select: a Type the offline preview draws, or NoDraw
-/// (not drawn; its triggers fire child Actions the preview runs).</param>
+/// (not drawn; its triggers fire child Actions the preview runs), or Mesh (not drawn; selectable to edit its attributes).</param>
 /// <param name="EntryType">For emitters: the Type* attribute, or null when the entry has none.</param>
 /// <param name="AttributeTypes">For emitters: the attribute types the entry has, in order.</param>
 public sealed record PreviewGraphNode(int Id, PreviewGraphNodeKind Kind, string Title, string? Subtitle, int Column,
@@ -113,7 +113,7 @@ public sealed class PreviewEffectGraph
             string groups = entry.Groups.Count > 0 ? " · 组 " + string.Join("/", entry.Groups) : "";
             nodes.Add(new(id, PreviewGraphNodeKind.Emitter, $"[{position}] {Name(entry.name, position)}",
                 $"{entry.TypeAttribute?.type.ToString() ?? "无 Type"} · {entry.entryAssignment}{groups}", 1, InputPinOf(id), rows,
-                EntryPosition: position, Previewable: PreviewDocument.KindOf(entry) != null || entry.TypeAttribute is EFXAttributeTypeNoDraw,
+                EntryPosition: position, Previewable: PreviewDocument.KindOf(entry) != null || entry.TypeAttribute is EFXAttributeTypeNoDraw or EFXAttributeTypeMeshV2,
                 EntryType: entry.TypeAttribute?.type.ToString(), AttributeTypes: entry.Attributes.Select(a => a.type.ToString()).ToArray()));
             links.Add(new(linkId++, RootId, rootPin, id, InputPinOf(id), ""));
             foreach (var (row, action, label) in triggers)

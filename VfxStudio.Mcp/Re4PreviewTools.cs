@@ -48,7 +48,7 @@ internal sealed class Re4PreviewToolSet : IToolSet
             new() { ["fixture"] = Fixture(), ["path"] = Path(), ["entryPosition"] = Integer("Zero-based position in the file's entry list."),
                 ["entryId"] = Integer("Native entry index field."), ["offset"] = Offset(),
                 ["discardUnsaved"] = Boolean("Required true when the current document has unsaved edits that should be dropped.") }, []),
-        Define("select_entry", "Make another entry of the open file the edited one (inspect, set_fields and structure tools act on it). The whole file stays loaded, so the preview neither reloads nor moves in time. Billboard3D, Polygon, Billboard2D, RibbonFollow and RibbonLength entries can be selected; status.preview.entries lists them.",
+        Define("select_entry", "Make another entry of the open file the edited one (inspect, set_fields and structure tools act on it). The whole file stays loaded, so the preview neither reloads nor moves in time. Billboard3D, Polygon, Billboard2D, RibbonFollow, RibbonLength, RibbonFixEnd and PolygonTrail entries can be selected, and NoDraw and Mesh entries too (not drawn); status.preview.entries lists them.",
             new() { ["entryPosition"] = Integer("Entry position from status.preview.entries."), }, ["entryPosition"]),
         Define("inspect", "Without attributeIndex: list the selected emitter's attributes. With attributeIndex: return its fields (path, type, value, editable, reason, choices), color groups and curves (path, channels, keys). Use the exact paths for set_fields and curve_key.",
             new() { ["attributeIndex"] = Integer("Attribute index from the attribute list.", 0, 4096) }, [], true, true),

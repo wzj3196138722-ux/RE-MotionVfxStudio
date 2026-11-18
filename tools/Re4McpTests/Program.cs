@@ -90,8 +90,12 @@ try
     Check(!error && outcome["result"]?["document"]?["entryPosition"]?.GetValue<int>() == 12 && Revision(outcome) == revBefore &&
         outcome["result"]?["preview"]?["displayedTick"]?.GetValue<int>() == 45 && outcome["result"]?["document"]?["attributes"]?.AsArray().Count > 0,
         "select_entry switches the edited entry without a revision or a timeline change", outcome.ToJsonString());
+    // A Mesh entry is not drawn, but it can be the edited entry (its attributes and material overrides are editable).
     (error, outcome, _) = await Tool("select_entry", new JsonObject { ["entryPosition"] = 19 });
-    Check(error && Code(outcome) == "backend_rejected", "a Mesh entry cannot be selected for editing", outcome.ToJsonString());
+    Check(!error && outcome["result"]?["document"]?["entryPosition"]?.GetValue<int>() == 19 &&
+        outcome["result"]?["document"]?["attributes"]?.AsArray().Any(a => a!["type"]?.GetValue<string>() == "TypeMesh") == true &&
+        outcome["result"]?["preview"]?["entries"]?.AsArray().Any(e => e!["position"]!.GetValue<int>() == 19 && !e["shown"]!.GetValue<bool>()) == true,
+        "a Mesh entry can be selected for editing but is not drawn", outcome.ToJsonString());
     (error, outcome, _) = await Tool("select_entry", new JsonObject { ["entryPosition"] = 13 });
     Check(!error && outcome["result"]?["document"]?["entryPosition"]?.GetValue<int>() == 13, "select_entry returns to entry 13");
     (error, outcome, _) = await Tool("inspect");
@@ -309,7 +313,8 @@ try
         rev = error ? rev : Revision(outcome);
         for (int i = 0; i < 4; i++) { (error, outcome, _) = await Tool("undo", new JsonObject { ["expectedRevision"] = rev }); rev = error ? rev : Revision(outcome); }
         (error, outcome, _) = await Tool("select_entry", new JsonObject { ["entryPosition"] = 13 });
-        Check(!error && Entries(outcome) == entryCount && Selected(outcome) == 13 && outcome["result"]?["previewError"] == null, "undo removes the four entry edits; entry 13 is selected again", Entries(outcome));
+        Check(!error && Entries(outcome) == entryCount && Selected(outcome) == 13 && outcome["result"]?["previewError"] == null, "undo removes the four entry edits; entry 13 is selected again",
+            $"entries {Entries(outcome)} (expected {entryCount}), selected {Selected(outcome)}, previewError {outcome["result"]?["previewError"]}, error {(error ? outcome.ToJsonString()[..Math.Min(300, outcome.ToJsonString().Length)] : "none")}");
         rev = error ? rev : Revision(outcome);
         // A decal carrier: NoDraw + an EffectDecal PtBehavior with RE4's usual parameters; then undone.
         (error, outcome, _) = await Tool("add_entry", new JsonObject { ["script"] = "via.effect.script.EffectDecal", ["expectedRevision"] = rev });

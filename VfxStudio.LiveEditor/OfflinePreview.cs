@@ -28,17 +28,18 @@ internal sealed partial class EditorEngine
             position = candidates[0].index;
         }
         if (position < 0 || position >= file.Entries.Count || !Previewable(file.Entries[position]))
-            throw new NotSupportedException("请选择一个 Billboard3D、Polygon、Billboard2D、RibbonFollow、RibbonLength、RibbonFixEnd、PolygonTrail 或 NoDraw 发射器。");
+            throw new NotSupportedException("请选择一个 Billboard3D、Polygon、Billboard2D、RibbonFollow、RibbonLength、RibbonFixEnd、PolygonTrail、NoDraw 或 Mesh 发射器。");
         offlinePreviewEntry = position;
         offlinePreviewEntryId = file.Entries[position].index;
         offlinePreviewDocument = documentSessionKey;
         offlinePreviewRevision = -1;
     }
 
-    /// <summary>Type attributes the offline preview draws.</summary>
+    /// <summary>Entries that can be the edited one: the Types the offline preview draws, NoDraw (draws nothing itself,
+    /// but its particles fire child Actions the preview runs) and TypeMesh (not drawn yet; selectable so its
+    /// attributes, material overrides included, can be edited).</summary>
     private static bool Previewable(EFXEntry entry) =>
-        // NoDraw draws nothing itself, but its particles fire child Actions the preview runs; it can be the edited entry.
-        entry.TypeAttribute is EFXAttributeTypeNoDraw or EFXAttributeTypeBillboard3D or EFXAttributeTypePolygon or EFXAttributeTypeBillboard2D or EFXAttributeTypeRibbonFollow or EFXAttributeTypeRibbonLength
+        entry.TypeAttribute is EFXAttributeTypeNoDraw or EFXAttributeTypeMeshV2 or EFXAttributeTypeBillboard3D or EFXAttributeTypePolygon or EFXAttributeTypeBillboard2D or EFXAttributeTypeRibbonFollow or EFXAttributeTypeRibbonLength
             or EFXAttributeTypePolygonTrail || entry.TypeAttribute is EFXAttributeTypeRibbonFixEnd { ShapeDivision: >= 2 };
 
     private void AttachOfflinePreview(JsonObject response, bool force)

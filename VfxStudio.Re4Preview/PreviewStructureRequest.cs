@@ -5,14 +5,16 @@ namespace VfxStudio.Re4Preview;
 
 /// <summary>A structural edit asked for in the window (property panel, node graph menus, entry buttons).</summary>
 /// <param name="Op">add_attribute, remove_attribute, copy_attribute, paste_attribute, copy_entry, paste_entry,
-/// add_entry, duplicate_entry or remove_entry.</param>
+/// add_entry, duplicate_entry, remove_entry or material_parameter.</param>
 /// <param name="Type">The attribute type (add_attribute) or the new entry's Type attribute (add_entry).</param>
 /// <param name="ExpectedRevision">For AI requests: the revision the change must apply to (stale ones are refused);
 /// the window uses the current revision.</param>
 /// <param name="Script">PtBehavior script class: add_attribute of PtBehavior fills it from that class's RE4 template;
 /// add_entry builds that class's usual carrier entry (NoDraw + PtBehavior).</param>
+/// <param name="Body">material_parameter: the backend request (op, listPath and the entry fields; PreviewMaterialReference.AddBody).</param>
+/// <param name="Label">Shown in the undo history and in errors.</param>
 internal sealed record PreviewStructureRequest(string Op, int EntryPosition, int AttributeIndex = -1, string? Type = null, long? ExpectedRevision = null,
-    string? Script = null);
+    string? Script = null, System.Text.Json.Nodes.JsonObject? Body = null, string? Label = null);
 
 /// <summary>Menu items shared by the node graph and the main panel.</summary>
 internal static class PreviewStructureMenu

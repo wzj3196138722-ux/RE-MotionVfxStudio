@@ -277,6 +277,25 @@ internal sealed partial class EditorEngine : IDisposable
                 case "remove_attribute":
                     RemoveAttribute(Target.From(request), response);
                     break;
+                case "material_parameter":
+                {
+                    // Adds or removes one override in a material property table (MaterialParameterEditor);
+                    // one revision, one undo step, checked by reading the saved bytes back.
+                    var target = Target.From(request);
+                    string listPath = OptionalText(request, "listPath") ?? "properties";
+                    uint[]? expected = null;
+                    Mutate(() =>
+                    {
+                        var attribute = (EFXAttribute)Resolve(target);
+                        var siblings = ((EFXEntryBase)Resolve(target with { AttributeIndex = null })).Attributes;
+                        expected = MaterialParameterEditor.Apply(attribute, siblings, ResolveTargetFile(target).Header.Version, request);
+                    }, reopened =>
+                    {
+                        var actual = MaterialParameterEditor.Hashes((EFXAttribute)Resolve(target, reopened), listPath);
+                        if (!actual.SequenceEqual(expected!)) throw new InvalidDataException("The material property table was not preserved by serialization; the change was rolled back.");
+                    });
+                    break;
+                }
                 case "undo": RestoreHistory(undo, redo); break;
                 case "redo": RestoreHistory(redo, undo); break;
                 case "save": response["outputPath"] = Save(OptionalText(request, "path")); break;
