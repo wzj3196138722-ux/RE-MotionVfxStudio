@@ -4,7 +4,8 @@ import numpy as np
 import pefile, capstone
 
 EXES = {'re4': os.environ.get('RE4_EXE') or r"E:\Program\Steam\steamapps\common\RESIDENT EVIL 4  BIOHAZARD RE4\re4.exe",
-        'wilds': os.environ.get('MHWILDS_EXE') or r"E:\Data\Github\RE-MotionVfxStudio\sample\Wilds\MonsterHunterWilds.exe"}
+        'wilds': os.environ.get('MHWILDS_EXE') or r"E:\Data\Github\RE-MotionVfxStudio\sample\Wilds\MonsterHunterWilds.exe",
+        'oni': os.environ.get('ONIWS_EXE') or r"E:\Program\Steam\steamapps\common\OnimushaWotS\OnimushaWotS.exe"}
 from paths import OUT
 CACHE = os.path.join(OUT, 'cache')
 os.makedirs(CACHE, exist_ok=True)

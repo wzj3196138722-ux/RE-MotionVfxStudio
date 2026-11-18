@@ -14,6 +14,7 @@
 - 环境变量：
   - `RE4_EXE`：默认 Steam 安装目录下的 re4.exe。
   - `MHWILDS_EXE`（与 `tools/Re4Native` 同名）：默认 `E:\Data\Github\RE-MotionVfxStudio\sample\Wilds\MonsterHunterWilds.exe`。
+  - `ONIWS_EXE`：默认 Steam 安装目录下的 OnimushaWotS.exe（只做静态读取）。
   - `EFXNAMES_OUT`：中间数据目录，默认 `tools/EfxNames/out`（已加进 `.gitignore`）。`wk.py` 的反汇编索引缓存也放在这里。
 - 原生运行复用 `tools/Re4Native`（`re4native.py`、`emitter.py`、`factory.py`；Wilds 经 `wn.py` 转到 `mhwildsnative.py`）。
 
@@ -58,6 +59,14 @@ python -I -X utf8 ..\n8.py .. raw.json <类型> <vtable>   # 构建器原生标�
 `allmap.py` 读的 `cs.json` 是 CsDump 的输出（与 `cs_now.json` 同一格式）。`corpus_wilds.json` 是每个类型在 Wilds 语料里各种载荷长度的出现次数，只用于报告；产生它的工具没有保留下来。
 
 FluidSimulator2D 在 RE4 上用原生标记实验核对时，Wilds 静态映射整体偏后一个字。Wilds 侧只有静态映射、没跑原生标记实验的结论，改名前要先核对。
+
+## 鬼武者 Way of the Sword（静态）
+
+```powershell
+python -I -X utf8 oni_scan.py          # → out\oni_parsers.json；需要 out\ext.json、re4_parsers.json、cs_now.json
+```
+
+属性 vtable 有 28 个槽，文本解析器在槽 20（与 Wilds 相同）。所有属性类型的槽 13 都指向同一个函数，按它找到 254 个 vtable，其中 162 个的解析器是空函数。脚本按名字集合把每个非空解析器匹配到 Wilds / RE4 的类型，列出多出的名字；匹配只靠名字，相似度低的多半是 Wilds / RE4 没有对应解析器的新类型。类型 id 和文件偏移还没走通，语料也还没有解包。
 
 ## 未知字段清单
 
