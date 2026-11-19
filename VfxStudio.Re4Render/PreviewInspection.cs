@@ -8,9 +8,16 @@ public sealed record PreviewFieldInfo(string Path, string Label, string Type, st
 public sealed record PreviewColorChannel(string Component, string Path, int Value);
 public sealed record PreviewColorGroup(string Path, string Label, string Storage, int Scale, bool Hdr,
     bool Editable, string? Reason, PreviewColorChannel[] Channels);
+/// <param name="EntryPosition">The preview manifest's entry when the attribute was read.</param>
+/// <param name="Target">The entry or Action the attribute belongs to; null means the top-level entry at <paramref name="EntryPosition"/>.</param>
 public sealed record PreviewInspection(string DocumentId, long Revision, int EntryPosition, int AttributeIndex,
     PreviewFieldInfo[] Fields, PreviewColorGroup[] ColorGroups, int CurveCount,
-    PreviewCurveInfo[]? Curves = null, string[]? ClipChannels = null);
+    PreviewCurveInfo[]? Curves = null, string[]? ClipChannels = null, PreviewEditTarget? Target = null)
+{
+    public PreviewEditTarget EditTarget => Target ?? PreviewEditTarget.Root(EntryPosition);
+    /// <summary>Identifies the attribute for UI state that must not carry over to another one.</summary>
+    public string Key => $"{DocumentId}:{EditTarget.Key}:{AttributeIndex}";
+}
 /// <summary>A curve key as the backend reports it (exact protocol text). Interpolation: Type1 holds the value until
 /// the next key, Type2 is linear (both measured in re4.exe); Bezier carries tangents.</summary>
 public sealed record PreviewCurveKey(int Index, string Time, string Value, string Interpolation,
@@ -31,7 +38,7 @@ public sealed class PreviewPropertyDraft(PreviewInspection inspection)
     public string Value(string path)=>values[path];
     public bool Dirty=>changed.Count!=0;
     public bool Matches(PreviewEditorState? state)=>state?.Manifest is {} m && m.DocumentId==Inspection.DocumentId &&
-        m.EntryPosition==Inspection.EntryPosition && state.Revision==Inspection.Revision;
+        Inspection.EditTarget.Equals(state.EditTarget) && state.Revision==Inspection.Revision;
     public void Set(string path,string value)
     {
         var field=fields[path];

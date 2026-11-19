@@ -25,6 +25,8 @@ internal static class PreviewControlReports
             ["documentId"] = manifest?.DocumentId,
             ["source"] = manifest?.Source,
             ["entryPosition"] = manifest?.EntryPosition,
+            // Set while an entry embedded in an Action is the edited one; attributes then lists its attributes.
+            ["editTarget"] = state.Target?.ToJson(),
             ["entryId"] = manifest?.EntryId,
             ["publishedRevision"] = manifest?.Revision,
             ["savedPath"] = state.SavedPath,
@@ -174,6 +176,14 @@ internal static class PreviewControlReports
         ["action"] = e.Action, ["child"] = e.Child, ["label"] = e.Label, ["index"] = e.Index, ["name"] = e.Name, ["type"] = e.Type,
         ["shown"] = e.Shown, ["table"] = e.Shown ? scene.Shown.ToList().IndexOf(e) : null, ["excluded"] = e.Excluded
     }).ToArray());
+
+    /// <summary>Entries embedded in the file's Actions, with the select_entry arguments that edit each one.</summary>
+    public static JsonArray EmbeddedEntries(PreviewEffectGraph graph) => new(graph.Nodes
+        .Where(n => n.Kind == PreviewGraphNodeKind.EmbeddedEmitter && n.Target != null).Select(n => (JsonNode?)new JsonObject
+        {
+            ["entryPosition"] = n.Target!.Index, ["embeddedPath"] = n.Target.ToJson()["embeddedPath"]?.DeepClone(),
+            ["label"] = n.Target.Label, ["title"] = n.Title, ["type"] = n.EntryType
+        }).ToArray());
 
     public static JsonObject Inspection(JsonObject reply, int attributeIndex) => new()
     {

@@ -67,6 +67,27 @@ try
         Console.WriteLine("PASS mode conditions: enum, bits, non-zero, Any / All, draft values, missing field counts as met");
     }
 
+    // Edit targets: a top-level entry, an entry inside an Action's PlayEmitter, and how they are found in the backend's
+    // document tree. Equality is by value (the path is a list), so a target read again from JSON matches the old one.
+    {
+        var top=PreviewEditTarget.Root(3);
+        var nested=new PreviewEditTarget("entry",2,[new("action",1,0)]);
+        var again=PreviewEditTarget.Parse("entry",2,JsonNode.Parse("""[{"kind":"action","index":1,"attributeIndex":0}]"""));
+        Check(top.IsRoot && !nested.IsRoot && nested.Equals(again) && nested.GetHashCode()==again.GetHashCode() && !nested.Equals(top),"Edit target equality");
+        Check(top.ToJson(4).ToJsonString()=="{\"kind\":\"entry\",\"index\":3,\"attributeIndex\":4}" &&
+            nested.ToJson(5)["embeddedPath"]![0]!["attributeIndex"]!.GetValue<int>()==0 && nested.Label=="Action 1 › 属性 0 › [2]","Edit target JSON and label");
+        var doc=JsonNode.Parse("""
+            {"entries":[{"index":0,"attributes":[]}],"actions":[{"index":0,"attributes":[]},{"index":1,"attributes":[
+            {"index":0,"type":"PlayEmitter","embedded":{"entries":[{"index":0,"attributes":[]},{"index":1,"attributes":[]},{"index":2,"attributes":[{"index":0,"type":"Life"}]}],"actions":[]}}]}]}
+            """);
+        Check(nested.Find(doc)?["attributes"]?[0]?["type"]?.GetValue<string>()=="Life" && top.Find(doc)==null &&
+            new PreviewEditTarget("entry",3,[new("action",1,0)]).Find(doc)==null && new PreviewEditTarget("entry",0,[new("action",0,0)]).Find(doc)==null,
+            "Edit target lookup in the document tree");
+        foreach(var bad in new[]{"[{\"index\":0}]","[{\"kind\":\"group\",\"index\":0,\"attributeIndex\":0}]","{}"})
+            await Reject(()=>Task.FromResult(PreviewEditTarget.Parse("entry",0,JsonNode.Parse(bad))),"malformed embeddedPath "+bad);
+        Console.WriteLine("PASS edit targets: equality, JSON, label, document lookup, malformed paths");
+    }
+
     string repo=Directory.GetCurrentDirectory();
     string exe=Environment.GetEnvironmentVariable("RE4_EXE")??@"E:\Program\Steam\steamapps\common\RESIDENT EVIL 4  BIOHAZARD RE4\re4.exe";
     string root=Path.Combine(repo,"test-output","re4-generic-"+Guid.NewGuid().ToString("N"));
@@ -318,6 +339,49 @@ try
         Check(meshEditor.State!.Revision==rippleRevision,"Refused removal changed the document");
         Console.WriteLine($"PASS material overrides: {before0} existing match {Path.GetFileName(reference.Source.Split(" :: ")[^1])}; add/duplicate/texture/remove/undo; " +
             $"curve-driven parameter kept (hash {mf[$"properties[{driven}].PropertyNameUTF8Hash"].Value})");
+    }
+
+    // Entries embedded in an Action's PlayEmitter are edited through the same session calls as top-level ones; the
+    // preview manifest stays on its top-level entry. A draft read from one target is refused on another.
+    {
+        string stm=Path.Combine(Path.GetDirectoryName(exe)!,"RE4_EXTRACT","natives","stm");
+        string damage=Path.Combine(stm,@"_anotherorder\vfx\effecteditor\efd_character\efd_ao_chfa\efd_0015_ao_chfa_0000_damage_0000.efx.3539837");
+        using var ee=new PreviewEditorSession(repo,Path.Combine(root,"embedded"),protectedRoots:[Path.GetDirectoryName(exe)!]);
+        var es=await ee.OpenAtAsync(damage,0);
+        int top=es.Manifest!.EntryPosition;
+        var tree=(await ee.SendRawAsync("status",new())).Reply["document"]!;
+        var hop=tree["actions"]!.AsArray().SelectMany(a=>a!["attributes"]!.AsArray().Where(x=>x!["embedded"]?["entries"]?.AsArray().Count>0)
+            .Select(x=>new PreviewEditHop("action",a!["index"]!.GetValue<int>(),x!["index"]!.GetValue<int>()))).First();
+        var nested=new PreviewEditTarget("entry",0,[hop]);
+        int expected=nested.Find(tree)!["attributes"]!.AsArray().Count;
+        es=await ee.SelectTargetAsync(nested);
+        Check(nested.Equals(es.EditTarget) && es.Attributes!.Length==expected && es.Manifest!.EntryPosition==top,"Selecting an embedded entry lists its attributes and keeps the preview entry");
+        // The first attribute with an editable number.
+        PreviewFieldInfo? number=null;int attribute=-1;
+        foreach(var a in es.Attributes!)
+        {
+            es=await ee.InspectAsync(es.Manifest!.DocumentId,es.Revision,a.Index);
+            number=es.Inspection!.Fields.FirstOrDefault(f=>f.Editable && f.Type=="System.Single" && float.TryParse(f.Value,CultureInfo.InvariantCulture,out _));
+            if(number!=null) {attribute=a.Index;break;}
+        }
+        Check(number!=null && nested.Equals(es.Inspection!.EditTarget),"An embedded attribute can be inspected");
+        string original=number!.Value,next=(float.Parse(original,CultureInfo.InvariantCulture)+0.25f).ToString("R",CultureInfo.InvariantCulture);
+        long rev=es.Revision;
+        es=await ee.ApplyFieldsAsync(new(es.Inspection!,[new(number.Path,next)]));
+        Check(es.Revision==rev+1 && nested.Equals(es.EditTarget) && es.Manifest!.Revision==es.Revision,"Editing an embedded field is one revision and republishes the file");
+        es=await ee.InspectAsync(es.Manifest!.DocumentId,es.Revision,attribute);
+        Check(es.Inspection!.Fields.Single(f=>f.Path==number.Path).Value==next,"Embedded field edit did not stick");
+        var embeddedDraft=es.Inspection!;
+        es=await ee.SelectEntryAsync(top);
+        Check(es.Target==null && es.EditTarget!.IsRoot,"Selecting a top-level entry leaves the embedded one");
+        await Reject(()=>ee.ApplyFieldsAsync(new(embeddedDraft,[new(number.Path,original)])),"embedded draft applied to a top-level entry");
+        await Reject(()=>ee.SelectTargetAsync(new("entry",9999,[hop])),"embedded entry that does not exist");
+        Check(ee.State!.EditTarget!.IsRoot && ee.State.Revision==es.Revision,"A refused selection keeps the current target");
+        es=await ee.CommandAsync("undo");
+        es=await ee.SelectTargetAsync(nested);
+        es=await ee.InspectAsync(es.Manifest!.DocumentId,es.Revision,attribute);
+        Check(es.Inspection!.Fields.Single(f=>f.Path==number.Path).Value==original,"Undo did not restore the embedded field");
+        Console.WriteLine($"PASS embedded entry: {nested.Label} ({expected} attributes) select/inspect/set/undo, preview stays on [{top}], stale draft refused");
     }
 }
 catch(Exception ex) {Console.Error.WriteLine(ex);Environment.ExitCode=1;}

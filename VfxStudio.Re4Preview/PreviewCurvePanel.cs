@@ -56,7 +56,7 @@ internal sealed class PreviewCurvePanel
             ImGui.TextWrapped($"所选属性（{attributeType}）没有曲线。曲线在 *Clip 属性里，RE4 常见的是 EmitterColorClip 和 PtColorClip。");
             ImGui.End(); return null;
         }
-        string key = $"{inspection.DocumentId}:{inspection.EntryPosition}:{inspection.AttributeIndex}";
+        string key = inspection.Key;
         if (inspectionKey != key) { inspectionKey = key; curveIndex = 0; channelIndex = 0; keyIndex = -1; hidden.Clear(); fitKey = null; dragging = false; }
         curveIndex = Math.Clamp(curveIndex, 0, curves.Length - 1);
         var curve = curves[curveIndex];

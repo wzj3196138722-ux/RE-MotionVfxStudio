@@ -4,8 +4,9 @@ using VfxStudio.Re4Render;
 
 namespace VfxStudio.Re4Preview;
 
-/// <summary>Add an attribute of <paramref name="Type"/> to the entry at <paramref name="EntryPosition"/>.</summary>
-internal readonly record struct PreviewAddRequest(int EntryPosition, string Type);
+/// <summary>Add an attribute of <paramref name="Type"/> to the entry at <paramref name="EntryPosition"/>, or to
+/// <paramref name="Target"/> when it is given (an embedded entry).</summary>
+internal readonly record struct PreviewAddRequest(int EntryPosition, string Type, PreviewEditTarget? Target = null);
 
 /// <summary>The attribute catalogue: every attribute type grouped by category, ranked and checked for the current
 /// entry with <see cref="PreviewAttributeCatalog"/>. Items are dragged onto the property panel or an emitter in
@@ -24,7 +25,8 @@ internal sealed class PreviewCatalogPanel
 
     /// <param name="existing">Attribute types of the current entry.</param>
     /// <param name="locked">Why adding is not possible now, or null.</param>
-    public PreviewAddRequest? Draw(int? entryPosition, string? entryName, string? entryType, IReadOnlyList<string>? existing, string? locked)
+    /// <param name="target">The entry the property panel edits (top-level or embedded); double-click adds to it.</param>
+    public PreviewAddRequest? Draw(PreviewEditTarget? target, string? entryName, string? entryType, IReadOnlyList<string>? existing, string? locked)
     {
         // A drag ends on mouse release whether or not something accepted it.
         if (!ImGui.IsMouseDown(ImGuiMouseButton.Left) && !ImGui.IsMouseReleased(ImGuiMouseButton.Left)) Dragging = null;
@@ -33,7 +35,7 @@ internal sealed class PreviewCatalogPanel
         ImGui.SetNextWindowPos(new Vector2(12, 400), ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSize(new Vector2(420, 420), ImGuiCond.FirstUseEver);
         if (!ImGui.Begin("属性目录", ref Visible)) { ImGui.End(); return null; }
-        if (entryPosition is not int position || existing == null)
+        if (target == null || existing == null)
         {
             ImGui.TextWrapped("打开文档并选中一个 entry 后显示可添加的属性。");
             ImGui.End(); return null;
@@ -43,8 +45,8 @@ internal sealed class PreviewCatalogPanel
         if (key != cacheKey) { items = catalog.For(entryType, existing, entryName); cacheKey = key; }
 
         ImGui.TextWrapped(PreviewAttributeCatalog.IsRoot(entryType, entryName, existing)
-            ? $"[{position}] {entryName} · Root entry（全局控制，RE4 共 {catalog.OwnerCount(null)} 个）"
-            : $"[{position}] {entryName} · {entryType ?? "无 Type"}（RE4 同类 entry {catalog.OwnerCount(entryType)} 个）");
+            ? $"{target.Label} {entryName} · Root entry（全局控制，RE4 共 {catalog.OwnerCount(null)} 个）"
+            : $"{target.Label} {entryName} · {entryType ?? "无 Type"}（RE4 同类 entry {catalog.OwnerCount(entryType)} 个）");
         ImGui.TextDisabled(locked ?? "拖到属性面板或节点图的 entry 上添加 · 双击加到当前 entry");
         ImGui.SetNextItemWidth(-60); ImGui.InputTextWithHint("##搜索", "搜索属性", ref filter, 128);
         ImGui.SameLine(); if (ImGui.SmallButton("清空")) filter = "";
@@ -85,7 +87,7 @@ internal sealed class PreviewCatalogPanel
                 ImGui.PushStyleColor(ImGuiCol.Text, color);
                 bool clicked = ImGui.Selectable(mark + item.Type, false, ImGuiSelectableFlags.AllowDoubleClick);
                 ImGui.PopStyleColor();
-                if (enabled && clicked && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) add = new PreviewAddRequest(position, item.Type);
+                if (enabled && clicked && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) add = new PreviewAddRequest(target.Index, item.Type, target);
                 if (enabled && ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
                 {
                     Dragging = item.Type;

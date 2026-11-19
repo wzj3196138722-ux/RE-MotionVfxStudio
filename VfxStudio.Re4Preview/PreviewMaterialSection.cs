@@ -103,7 +103,7 @@ internal sealed class PreviewMaterialSection
     }
 
     /// <summary>Draws the section. Returns a structure request (add or remove an override) or null.</summary>
-    public PreviewStructureRequest? Draw(int entryPosition, int attributeIndex, bool editable)
+    public PreviewStructureRequest? Draw(PreviewEditTarget target, int attributeIndex, bool editable)
     {
         if (table == null) return null;
         Load();
@@ -152,7 +152,7 @@ internal sealed class PreviewMaterialSection
                 ImGui.TableNextColumn();
                 ImGui.BeginDisabled(!editable);
                 if (ImGui.SmallButton("删除"))
-                    request = new("material_parameter", entryPosition, attributeIndex,
+                    request = new("material_parameter", target.Index, attributeIndex, Target: target,
                         Body: new() { ["op"] = "remove", ["listPath"] = table.ListPath, ["index"] = item.Position }, Label: "删除材质参数 " + NameOf(item));
                 ImGui.EndDisabled();
                 ImGui.PopID();
@@ -178,7 +178,7 @@ internal sealed class PreviewMaterialSection
                     ? $"({slot.Value.X:0.###}, {slot.Value.Y:0.###}, {slot.Value.Z:0.###}, {slot.Value.W:0.###})" : slot.Value.X.ToString("0.###", CultureInfo.InvariantCulture);
                 if (ImGui.Selectable($"{slot.Name}##{slot.Hash}"))
                 {
-                    request = new("material_parameter", entryPosition, attributeIndex, Body: PreviewMaterialReference.AddBody(slot, table.ListPath),
+                    request = new("material_parameter", target.Index, attributeIndex, Target: target, Body: PreviewMaterialReference.AddBody(slot, table.ListPath),
                         Label: "添加材质参数 " + slot.Name);
                     ImGui.CloseCurrentPopup();
                 }

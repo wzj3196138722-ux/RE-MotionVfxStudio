@@ -40,7 +40,7 @@ NoDraw entry 本身不画，但它们多数就是用来带触发器的。现在�
 - 内嵌 entry 只运行 Billboard3D、Polygon、Billboard2D。Mesh 和各种条带暂不运行，在悬停列表里标出原因。
 - 每个触发器最多运行 32 个实例槽（引擎的池是 2 × MaxParticles）；超出的槽不显示。
 - 父发射器停止时释放子实例（PtLife Flags 位 0）没有模拟，子特效会继续跑完。
-- 内嵌 entry 还不能在窗口里编辑或选中。
+- 内嵌 entry 可以在节点图里选中、编辑属性（见 RE4-EFX-PREVIEW-STRUCTURE“内嵌 entry”），但 3D 视图不会单独显示它。
 - 一次最多 64 张表（主 entry 加内嵌 entry）。
 
 ## 验证

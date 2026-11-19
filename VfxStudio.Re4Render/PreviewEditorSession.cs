@@ -29,7 +29,12 @@ public sealed record PreviewEditorParameters(int EntryPosition, int BillboardAtt
 
 public sealed record PreviewEditorState(long Revision, bool Dirty, bool CanUndo, bool CanRedo,
     OfflinePreviewManifest? Manifest, PreviewEditorParameters? Parameters, string? PublicationError,
-    string? SavedPath, string? Warning, PreviewAttributeInfo[]? Attributes = null, PreviewInspection? Inspection = null);
+    string? SavedPath, string? Warning, PreviewAttributeInfo[]? Attributes = null, PreviewInspection? Inspection = null,
+    PreviewEditTarget? Target = null)
+{
+    /// <summary>What the property panel edits: <see cref="Target"/>, else the manifest's top-level entry.</summary>
+    public PreviewEditTarget? EditTarget => Target ?? (Manifest is {} m ? PreviewEditTarget.Root(m.EntryPosition) : null);
+}
 
 /// <summary>The backend rejected a request; <see cref="Reply"/> is its full answer.</summary>
 public sealed class PreviewBackendException(string message, JsonObject reply) : InvalidOperationException(message)
@@ -52,6 +57,8 @@ public sealed class PreviewEditorSession : IDisposable
     private Process? process;
     private readonly Queue<string> logs = new();
     private JsonObject? lastReply;
+    /// <summary>An Action or embedded entry being edited instead of the manifest's entry; null for that entry.</summary>
+    private PreviewEditTarget? editTarget;
     public string Directory { get; }
     public string Mailbox => Path.Combine(Directory, "mailbox");
     public string ManifestPath => Path.Combine(Mailbox, "offline-preview", "preview.json");
@@ -136,18 +143,23 @@ public sealed class PreviewEditorSession : IDisposable
                 // survive it. Otherwise a failed configure_offline_preview would leave set_fields
                 // addressing the old document's attributes.
                 var previous=action=="open"?null:State;
+                if(action is "open" or "configure_offline_preview") editTarget=null;
                 State=new(reply["revision"]?.GetValue<long>()??0,
                     doc?["dirty"]?.GetValue<bool>()??false,doc?["canUndo"]?.GetValue<bool>()??false,doc?["canRedo"]?.GetValue<bool>()??false,
                     reply["offlinePreview"]?.Deserialize<OfflinePreviewManifest>(Json)??previous?.Manifest,
                     reply["offlinePreviewParameters"]?.Deserialize<PreviewEditorParameters>(Json)??previous?.Parameters,
                     reply["offlinePreviewError"]?.GetValue<string>(),reply["outputPath"]?.GetValue<string>()??previous?.SavedPath,
-                    doc?["warning"]?.GetValue<string>());
-                if(State.Manifest is {} manifest && doc?["entries"] is JsonArray entries)
+                    doc?["warning"]?.GetValue<string>(),Target:editTarget);
+                if(State.Manifest is {} manifest && doc?["entries"] is JsonArray)
                 {
-                    var selected=entries.FirstOrDefault(e=>e?["index"]?.GetValue<int>()==manifest.EntryPosition);
-                    State=State with {Attributes=selected?["attributes"]?.Deserialize<PreviewAttributeInfo[]>(Json)??[]};
+                    // An edit can remove the Action or embedded entry being edited: fall back to the manifest's entry.
+                    var selected=editTarget?.Find(doc);
+                    if(selected==null) editTarget=null;
+                    var target=editTarget??PreviewEditTarget.Root(manifest.EntryPosition);
+                    selected??=target.Find(doc);
+                    State=State with {Target=editTarget,Attributes=selected?["attributes"]?.Deserialize<PreviewAttributeInfo[]>(Json)??[]};
                     if(previous?.Inspection is {} inspected && inspected.DocumentId==manifest.DocumentId &&
-                        inspected.Revision==State.Revision && inspected.EntryPosition==manifest.EntryPosition)
+                        inspected.Revision==State.Revision && inspected.EditTarget.Equals(target))
                         State=State with {Inspection=inspected};
                 }
                 if(reply["ok"]?.GetValue<bool>()!=true) throw new InvalidOperationException(reply["error"]?.GetValue<string>()??"编辑操作失败。");
@@ -192,6 +204,29 @@ public sealed class PreviewEditorSession : IDisposable
         finally {gate.Release();}
     }
 
+    /// <summary>Makes <paramref name="target"/> the edited one. A top-level entry also becomes the preview's entry; an
+    /// Action or embedded entry leaves the preview where it is (the whole file is simulated either way).</summary>
+    public async Task<PreviewEditorState> SelectTargetAsync(PreviewEditTarget target)
+    {
+        if(target.IsRoot) return await SelectEntryAsync(target.Index);
+        await gate.WaitAsync();
+        try
+        {
+            if(State?.Manifest==null) throw new InvalidOperationException("编辑文档未就绪。");
+            var previous=editTarget;
+            editTarget=target;
+            var state=await Call("status");
+            if(state.Target==null || !state.Target.Equals(target))
+            {
+                editTarget=previous;
+                await Call("status");
+                throw new InvalidOperationException("文件里没有这个编辑目标："+target.Label);
+            }
+            return state;
+        }
+        finally {gate.Release();}
+    }
+
     public async Task<PreviewEditorState> OpenSavedAsync()
     {
         await gate.WaitAsync();
@@ -199,8 +234,12 @@ public sealed class PreviewEditorSession : IDisposable
         {
             string saved=State?.SavedPath??throw new InvalidOperationException("请先保存副本。");
             int position=State?.Manifest?.EntryPosition??throw new InvalidOperationException("未选择预览目标。");
+            var kept=editTarget;
             await Call("open",new(){["path"]=saved});
-            return await Call("configure_offline_preview",new(){["entryPosition"]=position});
+            var state=await Call("configure_offline_preview",new(){["entryPosition"]=position});
+            if(kept==null) return state;
+            editTarget=kept;
+            return await Call("status");
         }
         finally {gate.Release();}
     }
@@ -255,21 +294,21 @@ public sealed class PreviewEditorSession : IDisposable
         {
             var manifest=State?.Manifest??throw new InvalidOperationException("编辑文档未就绪。");
             if(manifest.DocumentId!=documentId || State!.Revision!=revision) throw new InvalidOperationException("属性请求来自旧文档或旧修订，请刷新。");
-            var state=await Call("inspect",new(){["target"]=AttributeTarget(manifest.EntryPosition,attributeIndex)},revision);
-            if(state.Manifest?.DocumentId!=documentId || state.Revision!=revision || state.Manifest.EntryPosition!=manifest.EntryPosition)
+            var target=State.EditTarget!;
+            var state=await Call("inspect",new(){["target"]=target.ToJson(attributeIndex)},revision);
+            if(state.Manifest?.DocumentId!=documentId || state.Revision!=revision || state.Manifest.EntryPosition!=manifest.EntryPosition ||
+                !target.Equals(state.EditTarget))
                 throw new InvalidOperationException("读取属性期间文档已变化，请刷新。");
             var inspection=new PreviewInspection(documentId,state.Revision,manifest.EntryPosition,attributeIndex,
                 lastReply!["fields"]?.Deserialize<PreviewFieldInfo[]>(Json)??[],
                 lastReply["colorGroups"]?.Deserialize<PreviewColorGroup[]>(Json)??[],
                 (lastReply["curves"] as JsonArray)?.Count??0,
                 lastReply["curves"]?.Deserialize<PreviewCurveInfo[]>(Json)??[],
-                lastReply["clipChannels"]?.Deserialize<string[]>(Json));
+                lastReply["clipChannels"]?.Deserialize<string[]>(Json),target);
             State=state with {Inspection=inspection};return State;
         }
         finally {gate.Release();}
     }
-
-    private static JsonObject AttributeTarget(int entry,int attribute)=>new(){["kind"]="entry",["index"]=entry,["attributeIndex"]=attribute};
 
     public async Task<PreviewEditorState> ApplyFieldsAsync(PreviewFieldBatch batch)
     {
@@ -278,7 +317,7 @@ public sealed class PreviewEditorSession : IDisposable
         {
             var snapshot=batch.Inspection;
             if(State?.Manifest is not {} manifest || manifest.DocumentId!=snapshot.DocumentId ||
-                manifest.EntryPosition!=snapshot.EntryPosition || State.Revision!=snapshot.Revision)
+                !snapshot.EditTarget.Equals(State.EditTarget) || State.Revision!=snapshot.Revision)
                 throw new InvalidOperationException("草稿来自旧文档或旧修订，请先刷新属性。");
             if(batch.Fields.Length is <1 or >64 || batch.Fields.Select(f=>f.Path).Distinct(StringComparer.Ordinal).Count()!=batch.Fields.Length)
                 throw new ArgumentException("一次应用需要 1–64 个不重复字段；超出时请减少本次修改。");
@@ -290,7 +329,7 @@ public sealed class PreviewEditorSession : IDisposable
                     throw new InvalidOperationException(field?.Reason??"字段不存在或只读："+edit.Path);
                 changes.Add(Field(edit.Path,edit.Value));
             }
-            return await Call("set_fields",new(){["target"]=AttributeTarget(snapshot.EntryPosition,snapshot.AttributeIndex),["fields"]=changes},snapshot.Revision);
+            return await Call("set_fields",new(){["target"]=snapshot.EditTarget.ToJson(snapshot.AttributeIndex),["fields"]=changes},snapshot.Revision);
         }
         finally {gate.Release();}
     }

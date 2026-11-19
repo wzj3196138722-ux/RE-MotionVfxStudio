@@ -5,12 +5,16 @@ using VfxStudio.Re4Render;
 
 namespace VfxStudio.Re4Preview;
 
-/// <summary>A pick in the graph: an emitter's attribute to open in the property panel.</summary>
-internal readonly record struct PreviewGraphPick(int EntryPosition, int AttributeIndex);
+/// <summary>A pick in the graph: an emitter's attribute to open in the property panel. The emitter is a top-level
+/// entry or one embedded in an Action's PlayEmitter.</summary>
+internal readonly record struct PreviewGraphPick(PreviewEditTarget Target, int AttributeIndex)
+{
+    public PreviewGraphPick(int entryPosition, int attributeIndex) : this(PreviewEditTarget.Root(entryPosition), attributeIndex) { }
+}
 
 /// <summary>Draws <see cref="PreviewEffectGraph"/> with ImNodes: Root → emitters (attribute stacks inline)
-/// → Actions → embedded emitters. Read-only structure; clicking an attribute row of an editable
-/// emitter asks the caller to open it in the property panel.</summary>
+/// → Actions → embedded emitters. Clicking an attribute row of an emitter (top-level or embedded) asks the
+/// caller to open it in the property panel.</summary>
 internal sealed class PreviewGraphPanel : IDisposable
 {
     private readonly ImNodesContextPtr context;
@@ -52,11 +56,12 @@ internal sealed class PreviewGraphPanel : IDisposable
     public void Dispose() => ImNodes.DestroyContext(context);
 
     /// <param name="documentId">Node positions reset when the document changes and are kept across its revisions.</param>
-    /// <param name="selectedEntry">Entry open in the property panel, highlighted.</param>
+    /// <param name="selectedEntry">The preview's top-level entry (where "定位所选 entry" goes when it is edited).</param>
+    /// <param name="selectedTarget">Entry open in the property panel, highlighted; top-level or embedded.</param>
     /// <param name="selectedAttribute">Attribute open in the property panel, highlighted in that entry.</param>
     /// <param name="locked">Why picking is not possible now (busy, unapplied draft), or null.</param>
     public PreviewGraphPick? Draw(PreviewEffectGraph? graph, string? documentId, string? sourceName,
-        int? selectedEntry, int selectedAttribute, string? locked)
+        int? selectedEntry, PreviewEditTarget? selectedTarget, int selectedAttribute, string? locked)
     {
         Dropped = null; Requested = null; this.graph = graph;
         if (!Visible) return null;
@@ -91,7 +96,9 @@ internal sealed class PreviewGraphPanel : IDisposable
         ImGui.SameLine();
         if (ImGui.SmallButton("适配全部")) fitRequested = true;
         ImGui.SameLine();
-        if (ImGui.SmallButton("定位所选 entry") && selectedEntry is int s) focusNode = graph.EmitterAt(s)?.Id;
+        if (ImGui.SmallButton("定位所选 entry"))
+            focusNode = (selectedTarget == null ? null : graph.Nodes.FirstOrDefault(n => selectedTarget.Equals(n.Target)))?.Id
+                ?? (selectedEntry is int s ? graph.EmitterAt(s)?.Id : null);
         ImGui.SameLine();
         if (ImGui.SmallButton("100%")) requestedZoom = 1;
         ImGui.SameLine();
@@ -136,7 +143,7 @@ internal sealed class PreviewGraphPanel : IDisposable
 
         foreach (var node in graph.Nodes)
         {
-            bool selectedNode = node.Kind == PreviewGraphNodeKind.Emitter && node.EntryPosition == selectedEntry;
+            bool selectedNode = node.Target != null && node.Target.Equals(selectedTarget);
             int pushed = PushTitleColors(node, selectedNode);
             ImNodes.BeginNode(node.Id);
             bool folded = collapsed.Contains(node.Id);
@@ -181,7 +188,8 @@ internal sealed class PreviewGraphPanel : IDisposable
                 {
                     string tip = r.Tooltip ?? (node.Kind == PreviewGraphNodeKind.Emitter
                         ? node.Editable ? locked ?? "单击在属性面板中打开" : "这个节点不能在面板中编辑。"
-                        : node.Kind == PreviewGraphNodeKind.EmbeddedEmitter ? "Action 内嵌的 entry：触发时预览会运行它（Billboard3D / Polygon / Billboard2D），还不能在窗口里编辑。" : "");
+                        : node.Kind == PreviewGraphNodeKind.EmbeddedEmitter ? "Action 内嵌的 entry：触发时预览会运行它（Billboard3D / Polygon / Billboard2D）。" +
+                            (locked == null ? "单击在属性面板中打开。" : locked) : "");
                     if (tip.Length > 0) ImGui.SetTooltip(tip);
                 }
                 if (r.OutputPin is not null) ImNodes.EndOutputAttribute();
@@ -207,10 +215,9 @@ internal sealed class PreviewGraphPanel : IDisposable
                 var target = node;
                 if (PreviewCatalogPanel.DropTarget(min, max, (uint)node.Id, t =>
                         target.Kind == PreviewGraphNodeKind.Action ? "Action 的属性还不能在窗口里添加"
-                        : target.Kind == PreviewGraphNodeKind.EmbeddedEmitter ? "Action 内嵌的 entry 还不能在窗口里编辑"
-                        : !target.Editable ? "这个节点不能在面板中编辑"
+                        : !target.Editable || target.Target == null ? "这个节点不能在面板中编辑"
                         : locked ?? PreviewCatalogPanel.Refusal(t, target.EntryType, target.AttributeTypes ?? [])) is { } dropped)
-                    Dropped = new PreviewAddRequest(node.EntryPosition!.Value, dropped);
+                    Dropped = new PreviewAddRequest(node.Target!.Index, dropped, node.Target);
             }
 
         var io = ImGui.GetIO();
@@ -231,8 +238,8 @@ internal sealed class PreviewGraphPanel : IDisposable
         {
             press = null;
             if (Vector2.Distance(mouse, pressed.At) <= ClickSlop && locked == null && graph.Find(pressed.Node) is
-                { Kind: PreviewGraphNodeKind.Emitter, Editable: true, EntryPosition: int clickedEntry })
-                pick = new PreviewGraphPick(clickedEntry, pressed.Attribute ?? -1);
+                { Editable: true, Target: { } clicked })
+                pick = new PreviewGraphPick(clicked, pressed.Attribute ?? -1);
         }
         if (overCanvas && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
         {
@@ -312,20 +319,27 @@ internal sealed class PreviewGraphPanel : IDisposable
             return chosenRoot;
         }
         var node = t.Node;
-        if (node.Kind != PreviewGraphNodeKind.Emitter)
+        if (node.Target is not { } owner)
         {
-            ImGui.TextDisabled(node.Kind == PreviewGraphNodeKind.Action ? "Action 还不能在窗口里编辑" : "Action 内嵌的 entry 还不能在窗口里编辑");
+            ImGui.TextDisabled("Action 还不能在窗口里编辑");
             return null;
         }
-        int entry = node.EntryPosition!.Value;
         PreviewStructureRequest? chosen = null;
         if (t.Row is { AttributeIndex: int attribute } row && node.AttributeTypes is { } types && attribute < types.Count)
         {
-            if (node.Editable) chosen = PreviewStructureMenu.AttributeItems(entry, attribute, types[attribute], types);
+            if (node.Editable) chosen = PreviewStructureMenu.AttributeItems(owner, attribute, types[attribute], types);
             else ImGui.TextDisabled(types[attribute] + "（预览不支持此 entry，不能编辑属性）");
             ImGui.Separator();
         }
         ImGui.TextDisabled(node.Title);
+        if (!owner.IsRoot)
+        {
+            // The backend edits attributes inside embedded EFX; adding, copying or removing embedded entries is not offered yet.
+            if (ClipboardKind == "attribute" && ImGui.MenuItem("粘贴属性 " + ClipboardName)) chosen = new("paste_attribute", owner.Index, Target: owner);
+            ImGui.TextDisabled("内嵌 entry 的新建、副本、删除还不支持");
+            return chosen;
+        }
+        int entry = owner.Index;
         chosen ??= PreviewStructureMenu.EntryItems(entry, ClipboardKind, ClipboardName, node.Editable);
         ImGui.Separator();
         chosen ??= PreviewStructureMenu.FileItems(ClipboardKind, ClipboardName);

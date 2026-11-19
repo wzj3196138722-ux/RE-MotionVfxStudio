@@ -13,7 +13,8 @@ internal sealed record PreviewEditCommand(string Action,long Revision=0,Billboar
 internal sealed class PreviewEditPanel
 {
     private string? documentId,attemptedInspection;
-    private int entryPosition=-1,selected=-1,page;
+    private PreviewEditTarget? target;
+    private int selected=-1,page;
     private PreviewPropertyDraft? draft;
     private string filter="",savePath="",cachedFilter="";
     private bool showReadOnly=true,cachedShowReadOnly,hideInactive;
@@ -44,7 +45,7 @@ internal sealed class PreviewEditPanel
     public bool Focus(PreviewGraphPick pick)
     {
         if(HasUnappliedChanges) return false;
-        if(pick.EntryPosition!=entryPosition) {pendingFocus=pick;return true;}
+        if(!pick.Target.Equals(target)) {pendingFocus=pick;return true;}
         if(pick.AttributeIndex<0) return true;
         if(selected!=pick.AttributeIndex) {selected=pick.AttributeIndex;draft=null;attemptedInspection=null;page=0;filter="";}
         return true;
@@ -52,10 +53,10 @@ internal sealed class PreviewEditPanel
 
     public void Reset(PreviewEditorState state,bool discardDraft=false)
     {
-        if(documentId!=state.Manifest?.DocumentId || entryPosition!=state.Manifest?.EntryPosition)
+        if(documentId!=state.Manifest?.DocumentId || !Equals(target,state.EditTarget))
         {
-            documentId=state.Manifest?.DocumentId;entryPosition=state.Manifest?.EntryPosition??-1;
-            selected=pendingFocus is {} focus && focus.EntryPosition==entryPosition && state.Attributes?.Any(a=>a.Index==focus.AttributeIndex)==true
+            documentId=state.Manifest?.DocumentId;target=state.EditTarget;
+            selected=pendingFocus is {} focus && focus.Target.Equals(target) && state.Attributes?.Any(a=>a.Index==focus.AttributeIndex)==true
                 ? focus.AttributeIndex
                 : state.Attributes?.FirstOrDefault(a=>a.Type.StartsWith("Type",StringComparison.Ordinal))?.Index??state.Attributes?.FirstOrDefault()?.Index??-1;
             pendingFocus=null;
@@ -64,14 +65,14 @@ internal sealed class PreviewEditPanel
         if(discardDraft) {draft=null;attemptedInspection=null;}
         if(draft!=null && !draft.Matches(state) && !draft.Dirty) draft=null;
         if(draft?.Dirty!=true && state.Inspection is {} inspection && inspection.DocumentId==documentId &&
-            inspection.EntryPosition==entryPosition && inspection.AttributeIndex==selected && inspection.Revision==state.Revision &&
+            inspection.EditTarget.Equals(target) && inspection.AttributeIndex==selected && inspection.Revision==state.Revision &&
             !ReferenceEquals(draft?.Inspection,inspection))
         {draft=new(inspection);BuildRows(inspection);}
     }
     private void BuildRows(PreviewInspection inspection)
     {
         byPath=inspection.Fields.ToDictionary(f=>f.Path,StringComparer.Ordinal);
-        Material.Detect(inspection,byPath,$"{inspection.DocumentId}:{inspection.EntryPosition}:{inspection.AttributeIndex}");
+        Material.Detect(inspection,byPath,inspection.Key);
         controls=PreviewFieldActivity.Controls(inspection.Fields);
         var colors=inspection.ColorGroups.Where(c=>c.Storage=="rgba8" && c.Scale==255 && !c.Hdr && c.Channels.Length==4 &&
             c.Channels.All(ch=>inspection.Fields.Any(f=>f.Path==ch.Path))).ToArray();
@@ -159,7 +160,7 @@ internal sealed class PreviewEditPanel
 
     private PreviewEditCommand Inspect(PreviewEditorState state)
     {
-        attemptedInspection=$"{documentId}:{state.Revision}:{selected}";
+        attemptedInspection=$"{documentId}:{state.Revision}:{target?.Key}:{selected}";
         return new("inspect",state.Revision,AttributeIndex:selected,DocumentId:documentId);
     }
 
@@ -188,6 +189,12 @@ internal sealed class PreviewEditPanel
         {
             ImGui.PushStyleColor(ImGuiCol.Text,new Vector4(1,.75f,.35f,1));ImGui.TextWrapped(note.Replace("%","%%"));ImGui.PopStyleColor();
         }
+        if(state?.Target is {} embedded)
+        {
+            ImGui.TextColored(new Vector4(.55f,.85f,.6f,1),"编辑内嵌："+embedded.Label);
+            if(ImGui.IsItemHovered()) ImGui.SetTooltip("Action 的 PlayEmitter 里内嵌的 entry。3D 视图仍显示原来的 entry；\n"+
+                "改动会随整个文件重新发布，触发这个 Action 时就能看到。在节点图里单击顶层 entry 回到它。");
+        }
 
         bool unavailable=busy || stressMode || state?.Manifest==null || state.Attributes?.Length is not >0;
         ImGui.BeginDisabled(unavailable);
@@ -207,20 +214,20 @@ internal sealed class PreviewEditPanel
         ImGui.EndDisabled();ImGui.SameLine();ImGui.BeginDisabled(state?.CanRedo!=true);
         if(ImGui.Button("重做")) command=new("redo");
         ImGui.EndDisabled();
-        if(attribute!=null && state?.Manifest is {} m)
+        if(attribute!=null && state?.EditTarget is {} t)
         {
             var existing=state.Attributes!.Select(a=>a.Type).ToArray();
             ImGui.SameLine();ImGui.TextDisabled("|");ImGui.SameLine();
-            if(ImGui.Button("复制")) command=Structure(new("copy_attribute",m.EntryPosition,attribute.Index));
+            if(ImGui.Button("复制")) command=Structure(new("copy_attribute",t.Index,attribute.Index,Target:t));
             if(ImGui.IsItemHovered()) ImGui.SetTooltip("复制这个属性（可以粘贴到其他 entry 或其他文件）");
             ImGui.SameLine();ImGui.BeginDisabled(clipboardKind!="attribute");
-            if(ImGui.Button("粘贴")) command=Structure(new("paste_attribute",m.EntryPosition));
+            if(ImGui.Button("粘贴")) command=Structure(new("paste_attribute",t.Index,Target:t));
             ImGui.EndDisabled();
             if(ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip(clipboardKind=="attribute"?"粘贴 "+clipboardType:"先复制一个属性（可以来自其他文件）");
             ImGui.SameLine();
             string? refusal=PreviewStructureMenu.RemoveRefusal(attribute.Type,existing);
             ImGui.BeginDisabled(refusal!=null);
-            if(ImGui.Button("删除")) command=Structure(new("remove_attribute",m.EntryPosition,attribute.Index));
+            if(ImGui.Button("删除")) command=Structure(new("remove_attribute",t.Index,attribute.Index,Target:t));
             ImGui.EndDisabled();
             if(ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip(refusal??"删除这个属性");
         }
@@ -246,7 +253,7 @@ internal sealed class PreviewEditPanel
 
         // Inspect once per target/revision; failed reads wait for an explicit refresh.
         if(command==null && !unavailable && !dirty && (draft==null || !current) &&
-            attemptedInspection!=$"{documentId}:{state!.Revision}:{selected}") command=Inspect(state!);
+            attemptedInspection!=$"{documentId}:{state!.Revision}:{target?.Key}:{selected}") command=Inspect(state!);
         if(draft!=null)
         {
             if(cachedFilter!=filter || cachedShowReadOnly!=showReadOnly)
@@ -269,8 +276,8 @@ internal sealed class PreviewEditPanel
             }
         }
         // Material property table: reference .mdf2, overrides checked against it, add / remove (each one revision).
-        if(draft!=null && Material.Present &&
-            Material.Draw(entryPosition,selected,!unavailable && current && !dirty) is {} materialRequest) command=Structure(materialRequest);
+        if(draft!=null && Material.Present && target!=null &&
+            Material.Draw(target,selected,!unavailable && current && !dirty) is {} materialRequest) command=Structure(materialRequest);
         if(Material.TakeRelabel() && draft!=null) BuildRows(draft.Inspection);
         float footer=ImGui.GetFrameHeightWithSpacing()+ImGui.GetStyle().ItemSpacing.Y*2+(state?.SavedPath!=null?ImGui.GetTextLineHeightWithSpacing():0);
         ImGui.BeginChild("属性字段",new Vector2(0,Math.Max(120,ImGui.GetContentRegionAvail().Y-footer)));
@@ -359,14 +366,14 @@ internal sealed class PreviewEditPanel
             if(ImGui.IsItemHovered()) ImGui.SetTooltip(saved);
         }
         // The whole panel accepts attributes dragged from the catalogue, for the current entry.
-        if(state?.Manifest!=null && state.Attributes is {} attributes)
+        if(state?.Manifest!=null && state.Attributes is {} attributes && target!=null)
         {
             var existing=attributes.Select(a=>a.Type).ToArray();
             string? entryType=existing.FirstOrDefault(PreviewAttributeCatalog.IsTypeAttribute);
             var min=ImGui.GetWindowPos();
             if(PreviewCatalogPanel.DropTarget(min,min+ImGui.GetWindowSize(),ImGui.GetID("属性目录拖放"),
                 t=>busy?"编辑器忙，稍候再试":stressMode?"压力模式下不能编辑":dirty?"先应用或放弃属性草稿":PreviewCatalogPanel.Refusal(t,entryType,existing)) is {} dropped)
-                command=Structure(new("add_attribute",entryPosition,Type:dropped));
+                command=Structure(new("add_attribute",target.Index,Type:dropped,Target:target));
         }
         ImGui.End();return command;
     }

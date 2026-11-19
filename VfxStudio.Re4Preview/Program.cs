@@ -295,14 +295,13 @@ async Task<PreviewEditorState> Structure(PreviewEditCommand command)
 {
     var request=(PreviewStructureRequest)command.Tag!;
     int entry=request.EntryPosition;
-    JsonObject Target(int? attribute=null)
-    {
-        var t=new JsonObject{["kind"]="entry",["index"]=entry};
-        if(attribute is int a) t["attributeIndex"]=a;
-        return t;
-    }
+    var owner=request.Owner;
+    if(!owner.IsRoot && request.Op is not ("add_attribute" or "remove_attribute" or "copy_attribute" or "paste_attribute" or "material_parameter"))
+        throw new InvalidOperationException("内嵌 entry 只支持属性的增删、复制粘贴和字段编辑。");
+    // Attribute operations address the owner, which may be an embedded entry; entry operations the top-level entry.
+    JsonObject Target(int? attribute=null)=>owner.ToJson(attribute);
     long Revision()=>request.ExpectedRevision??editor.State?.Revision??command.Revision;
-    async Task Select(int position) { if(editor.State?.Manifest?.EntryPosition!=position) await editor.SelectEntryAsync(position); }
+    async Task Select() { if(!owner.Equals(editor.State?.EditTarget)) await editor.SelectTargetAsync(owner); }
     async Task<PreviewEditorState> Send(string action,JsonObject body,bool mutation=true)
     {
         var (state,reply)=await editor.SendRawAsync(action,body,mutation?Revision():null);
@@ -330,14 +329,14 @@ async Task<PreviewEditorState> Structure(PreviewEditCommand command)
         switch(request.Op)
         {
             case "add_attribute":
-                await Select(entry);
+                await Select();
                 return await Send("add_attribute",AddAttributeBody(Target(),request.Type!,request.Script));
             case "remove_attribute":
-                await Select(entry);
+                await Select();
                 return await Send("remove_attribute",new(){["target"]=Target(request.AttributeIndex)});
             case "material_parameter":
             {
-                await Select(entry);
+                await Select();
                 var body=(JsonObject)request.Body!.DeepClone();
                 body["target"]=Target(request.AttributeIndex);
                 return await Send("material_parameter",body);
@@ -353,7 +352,7 @@ async Task<PreviewEditorState> Structure(PreviewEditCommand command)
                 return await Send("copy_efx",new(){["target"]=Target()},mutation:false);
             case "paste_attribute":
             {
-                await Select(entry);
+                await Select();
                 var body=new JsonObject{["target"]=Target(),["clipboardId"]=copyBuffer?["id"]?.GetValue<string>()};
                 if(request.AttributeIndex>=0) {body["replace"]=true;body["replaceAttributeIndex"]=request.AttributeIndex;}
                 var state=await Send("paste_efx",body);
@@ -398,9 +397,9 @@ void RequestStructure(PreviewStructureRequest request)
         {
             // The same type already there: ask before replacing it (the backend refuses otherwise).
             string? type=copyBuffer?["attributeType"]?.GetValue<string>();
-            var existing=request.EntryPosition==manifest.EntryPosition
+            var existing=request.Owner.Equals(editorState.EditTarget)
                 ? editorState.Attributes?.FirstOrDefault(a=>a.Type==type)?.Index
-                : scene?.Graph.EmitterAt(request.EntryPosition)?.AttributeTypes?.ToList().IndexOf(type??"") is int i and >=0 ? i : null;
+                : scene?.Graph.Nodes.FirstOrDefault(n=>request.Owner.Equals(n.Target))?.AttributeTypes?.ToList().IndexOf(type??"") is int i and >=0 ? i : null;
             if(existing is int index) {confirmPaste=request with {AttributeIndex=index};openConfirmation="替换属性";return;}
             break;
         }
@@ -419,7 +418,7 @@ int RemoveFallback(int removed)
     return scene?.Graph.Nodes.Where(n=>n.Kind==PreviewGraphNodeKind.Emitter && n.Editable && n.EntryPosition!=removed)
         .OrderBy(n=>Math.Abs(n.EntryPosition!.Value-removed)).Select(n=>n.EntryPosition!.Value).DefaultIfEmpty(-1).First()??-1;
 }
-void RequestAdd(PreviewAddRequest request) => RequestStructure(new PreviewStructureRequest("add_attribute",request.EntryPosition,Type:request.Type));
+void RequestAdd(PreviewAddRequest request) => RequestStructure(new PreviewStructureRequest("add_attribute",request.EntryPosition,Type:request.Type,Target:request.Target));
 // Confirmation popups for structural edits; drawn every frame at the top level.
 void DrawStructureConfirmations()
 {
@@ -488,6 +487,7 @@ void StartEditorCommand(PreviewEditCommand command, bool warmup=false)
         "inspect" => editor.InspectAsync(command.DocumentId!,command.Revision,command.AttributeIndex),
         "open_saved" => editor.OpenSavedAsync(),
         "select_entry" => editor.SelectEntryAsync(command.EntryPosition),
+        "select_target" => editor.SelectTargetAsync((PreviewEditTarget)command.Tag!),
         "curve_key" => SendCurveKey(command),
         "structure" => Structure(command),
         "open_source" => OpenOriginal(),
@@ -514,6 +514,7 @@ JsonObject PreviewReport() => new()
     ["shownEntries"]=scene?.Shown.Count,
     ["entries"]=scene==null?null:PreviewControlReports.SceneEntries(scene,displayedManifest?.EntryPosition),
     ["childActionEntries"]=scene==null?null:PreviewControlReports.SceneChildren(scene),
+    ["embeddedEntries"]=scene==null?null:PreviewControlReports.EmbeddedEntries(scene.Graph),
     ["soloSelected"]=soloSelected,
     ["view"]=ViewReport()
 };
@@ -601,16 +602,12 @@ void RequireNoDraft()
 {
     if(editPanel.HasUnappliedChanges) throw new InvalidOperationException("窗口里有未应用的属性草稿。请先在窗口中应用或放弃草稿，AI 不会覆盖它。");
 }
-JsonObject AttributeTarget(int attribute)
-{
-    int entry=editorState?.Manifest?.EntryPosition??throw new InvalidOperationException("尚未打开文档。");
-    return new(){["kind"]="entry",["index"]=entry,["attributeIndex"]=attribute};
-}
-JsonObject EntryTarget()
-{
-    int entry=editorState?.Manifest?.EntryPosition??throw new InvalidOperationException("尚未打开文档。");
-    return new(){["kind"]="entry",["index"]=entry};
-}
+// The entry the property panel edits: top-level, or embedded (select_entry with embeddedPath).
+JsonObject AttributeTarget(int attribute)=>(editorState?.EditTarget??throw new InvalidOperationException("尚未打开文档。")).ToJson(attribute);
+JsonObject EntryTarget()=>(editorState?.EditTarget??throw new InvalidOperationException("尚未打开文档。")).ToJson();
+// select_entry: entryPosition alone is a top-level entry; with embeddedPath it is the entry at that position of the embedded file.
+PreviewEditTarget SelectArgument(JsonObject a)=>
+    PreviewEditTarget.Parse("entry",PreviewControlReports.Int(a,"entryPosition",0,1<<20),a["embeddedPath"]);
 JsonObject PasteBody(JsonObject a)
 {
     var body=new JsonObject{["target"]=EntryTarget(),["clipboardId"]=PreviewControlReports.String(a,"clipboardId")};
@@ -745,7 +742,7 @@ void BeginControl(PreviewControlRequest job)
             job.Succeed(CompositionReport()); return;
         }
         case "select_entry":
-            PreviewControlReports.Int(a,"entryPosition",0,1<<20);RequireNoDraft();AttributeTarget(0);
+            SelectArgument(a);RequireNoDraft();AttributeTarget(0);
             job.Phase=1; return;
         case "add_attribute":
             if(PreviewControlReports.String(a,"type") is not {Length:>0}) throw new ArgumentException("缺少属性类型 type。");
@@ -867,7 +864,8 @@ void ContinueControl(PreviewControlRequest job)
                     PreviewControlReports.Long(a,"expectedRevision")),
                 "undo" or "redo"=>StartBackend(job,job.Action,new(),PreviewControlReports.Long(a,"expectedRevision")),
                 "attribute_types"=>StartBackend(job,"status",new(),null),
-                "select_entry"=>StartBackend(job,"configure_offline_preview",new(){["entryPosition"]=PreviewControlReports.Int(a,"entryPosition",0,1<<20)},null),
+                "select_entry"=>SelectArgument(a) is {IsRoot:false} embedded ? Task.Run(()=>editor.SelectTargetAsync(embedded))
+                    : StartBackend(job,"configure_offline_preview",new(){["entryPosition"]=PreviewControlReports.Int(a,"entryPosition",0,1<<20)},null),
                 "add_attribute"=>StartBackend(job,"add_attribute",AddAttributeBody(EntryTarget(),PreviewControlReports.String(a,"type")!,PreviewControlReports.String(a,"script")),
                     PreviewControlReports.Long(a,"expectedRevision")),
                 "remove_attribute"=>StartBackend(job,"remove_attribute",new(){["target"]=AttributeTarget(PreviewControlReports.Int(a,"attributeIndex",0,4096))},PreviewControlReports.Long(a,"expectedRevision")),
@@ -900,7 +898,7 @@ void ContinueControl(PreviewControlRequest job)
                 var result=PreviewControlReports.Inspection(job.BackendReply!,inspectedAttribute);
                 result["document"]=PreviewControlReports.Document(state);
                 // The window's property panel and curve timeline follow what the AI looks at (never over a draft).
-                if(state.Manifest is {} m) result["windowFocused"]=editPanel.Focus(new PreviewGraphPick(m.EntryPosition,inspectedAttribute));
+                if(state.EditTarget is {} t) result["windowFocused"]=editPanel.Focus(new PreviewGraphPick(t,inspectedAttribute));
                 job.Succeed(result);
             }
             else if(job.Action=="save_copy") job.Succeed(new JsonObject{["savedPath"]=state.SavedPath,["document"]=PreviewControlReports.Document(state)});
@@ -1076,7 +1074,7 @@ void DrawEntrySelector()
         {
             // Every entry can be edited; ones the preview does not draw are listed with the reason in the tooltip.
             bool selectable=scene.Graph.EmitterAt(e.Position)?.Editable==true;
-            if(ImGui.Selectable(Label(e),e.Position==current?.Position,selectable?ImGuiSelectableFlags.None:ImGuiSelectableFlags.Disabled) && selectable && e.Position!=current?.Position && editorState!=null)
+            if(ImGui.Selectable(Label(e),e.Position==current?.Position,selectable?ImGuiSelectableFlags.None:ImGuiSelectableFlags.Disabled) && selectable && (e.Position!=current?.Position || editorState?.Target!=null) && editorState!=null)
                 StartEditorCommand(new PreviewEditCommand("select_entry",editorState.Revision,EntryPosition:e.Position));
             if(e.Excluded!=null && ImGui.IsItemHovered()) ImGui.SetTooltip(e.Excluded);
             else if(e.Missing.Count>0 && ImGui.IsItemHovered()) ImGui.SetTooltip("找不到这些资源，用黄白格子占位贴图代替：\n"+string.Join("\n",e.Missing));
@@ -1198,16 +1196,16 @@ window.Update += dt =>
             // AI edits ("ai:*") never discard the panel's draft; mutations are refused while one exists.
             // Structural edits shift attribute indices, so the panel starts over on the new list.
             // Structural edits (and their undo/redo) shift attribute indices: the panel starts over on the new list.
-            string attributeList=$"{editorState.Manifest?.DocumentId}:{editorState.Manifest?.EntryPosition}:{string.Join(",",editorState.Attributes?.Select(a=>a.Type)??[])}";
+            string attributeList=$"{editorState.Manifest?.DocumentId}:{editorState.EditTarget?.Key}:{string.Join(",",editorState.Attributes?.Select(a=>a.Type)??[])}";
             if(editAction is "ai:add_attribute" or "ai:remove_attribute" or "ai:paste_attribute" ||
                 attributeList!=lastAttributeList && !editPanel.HasUnappliedChanges &&
-                editAction is not ("select_entry" or "open" or "open_source" or "open_saved" or "ai:open" or "ai:select_entry" or "inspect")) editPanel=new PreviewEditPanel(LoadMaterial);
+                editAction is not ("select_entry" or "select_target" or "open" or "open_source" or "open_saved" or "ai:open" or "ai:select_entry" or "inspect")) editPanel=new PreviewEditPanel(LoadMaterial);
             lastAttributeList=attributeList;
             // An attribute added or pasted from the window opens in the property panel.
-            if(editAction=="structure" && editorState.Manifest is {} edited)
+            if(editAction=="structure" && editorState.EditTarget is {} edited)
             {
                 int open=focusAttributeIndex>=0?focusAttributeIndex:editorState.Attributes?.FirstOrDefault(a=>a.Type==focusAttributeType)?.Index??-1;
-                if(open>=0) editPanel.Focus(new PreviewGraphPick(edited.EntryPosition,open));
+                if(open>=0) editPanel.Focus(new PreviewGraphPick(edited,open));
             }
             focusAttributeType=null;focusAttributeIndex=-1;
             editPanel.Reset(editorState,discardDraft:editAction is "fields" or "billboard" or "life" or "open" or "open_source" or "open_saved" or "ai:open" or "curve_key");
@@ -1591,7 +1589,7 @@ window.Render += _ =>
     string? graphLock=editTask!=null?"编辑器忙，稍候再选":editPanel.HasUnappliedChanges?"先应用或放弃属性草稿，再从节点图选择":stress!=0?"压力模式下不能编辑":null;
     var manifest=editorState?.Manifest;
     var inspected=editorState?.Inspection;
-    if(inspected!=null && (manifest==null || inspected.DocumentId!=manifest.DocumentId || inspected.EntryPosition!=manifest.EntryPosition ||
+    if(inspected!=null && (manifest==null || inspected.DocumentId!=manifest.DocumentId || !inspected.EditTarget.Equals(editorState!.EditTarget) ||
         inspected.AttributeIndex!=editPanel.SelectedAttribute || inspected.Revision!=editorState!.Revision)) inspected=null;
     string? curveAttributeType=editorState?.Attributes?.FirstOrDefault(a=>a.Index==editPanel.SelectedAttribute)?.Type;
     if(curvePanel.Draw(inspected,curveAttributeType,playback.DisplayedTick,graphLock) is {} curveBody && editorState!=null)
@@ -1601,13 +1599,17 @@ window.Render += _ =>
     }
     if(graphPanel!=null) {graphPanel.ClipboardKind=copyBuffer?["kind"]?.GetValue<string>();graphPanel.ClipboardName=copyBuffer?["attributeType"]?.GetValue<string>()??copyBuffer?["name"]?.GetValue<string>();}
     if(graphPanel?.Draw(scene?.Graph,manifest?.DocumentId,manifest==null?null:Path.GetFileName(manifest.Source),manifest?.EntryPosition,
-        editPanel.SelectedAttribute,graphLock) is {} pick && editorState!=null && editPanel.Focus(pick) && pick.EntryPosition!=manifest?.EntryPosition)
-        StartEditorCommand(new PreviewEditCommand("select_entry",editorState.Revision,EntryPosition:pick.EntryPosition));
+        editorState?.EditTarget,editPanel.SelectedAttribute,graphLock) is {} pick && editorState!=null && editPanel.Focus(pick) && !pick.Target.Equals(editorState.EditTarget))
+        StartEditorCommand(pick.Target.IsRoot ? new PreviewEditCommand("select_entry",editorState.Revision,EntryPosition:pick.Target.Index)
+            : new PreviewEditCommand("select_target",editorState.Revision,Tag:pick.Target));
     if(graphPanel?.Dropped is {} dropOnGraph) RequestAdd(dropOnGraph);
     if(graphPanel?.Requested is {} fromGraph) RequestStructure(fromGraph);
     var catalogTypes=manifest==null?null:editorState?.Attributes?.Select(a=>a.Type).ToArray();
     string? addLock=editTask!=null?"编辑器忙，稍候再添加":editPanel.HasUnappliedChanges?"先应用或放弃属性草稿，再添加属性":stress!=0?"压力模式下不能编辑":null;
-    if(catalogPanel.Draw(manifest?.EntryPosition,manifest==null?null:scene?.Entries.FirstOrDefault(e=>e.Position==manifest.EntryPosition)?.Name,
+    var editTarget=manifest==null?null:editorState?.EditTarget;
+    string? editName=editTarget==null?null:editTarget.IsRoot?scene?.Entries.FirstOrDefault(e=>e.Position==editTarget.Index)?.Name
+        :scene?.Graph.Nodes.FirstOrDefault(n=>editTarget.Equals(n.Target))?.Title;
+    if(catalogPanel.Draw(editTarget,editName,
         catalogTypes?.FirstOrDefault(PreviewAttributeCatalog.IsTypeAttribute),catalogTypes,addLock) is {} doubleClicked)
         RequestAdd(doubleClicked);
     gl.Viewport(0,0,(uint)Math.Max(1,window.FramebufferSize.X),(uint)Math.Max(1,window.FramebufferSize.Y));   // the scene left it at the central node

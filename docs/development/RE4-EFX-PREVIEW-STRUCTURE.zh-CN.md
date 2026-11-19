@@ -4,6 +4,20 @@
 
 编辑和预览不绑定：文件里任何顶层 entry 都可以作为编辑对象，包括预览还画不了的类型（Mesh、GPU 类型、StrainRibbon 等）和没有 Type 的 Root。预览只绘制它支持的 entry；所选 entry 不绘制时，主面板给出原因，属性照常编辑。节点图里不绘制的 entry 显示为灰色节点，但同样可以单击打开、右键操作。
 
+## 内嵌 entry
+
+Action 的 PlayEmitter 里内嵌的 entry 也可以编辑。在节点图里单击内嵌 entry 节点或它的属性行，属性面板就切换到它，顶部显示“编辑内嵌：Action 0 › 属性 0 › [2]”这样的路径。字段、曲线、材质参数覆盖、属性的增删和复制粘贴，都和顶层 entry 一样可用；属性目录的拖拽和双击也加到这个内嵌 entry 上。
+
+- **预览不跟着切换**：3D 视图仍停在原来的顶层 entry 上。每次修改都会重新发布整个文件，子 Action 被触发时就会显示改动（预览运行由 PtLife 触发的内嵌 Billboard3D、Polygon、Billboard2D）。
+- **回到顶层**：在节点图里单击任一顶层 entry，或用“编辑 entry”下拉框。
+- **失效时退回**：撤销或删除属性后，所编辑的内嵌 entry 不存在了（例如撤销了创建 PlayEmitter 的粘贴），就退回编辑预览的顶层 entry。
+- **只到第一层**：节点图只展开顶层 Action 里内嵌的 entry。内嵌文件自己的 Action 不展开，所以第二层以下只能通过 MCP 的 `embeddedPath` 选中。
+- **不支持**：内嵌 entry 的新建、创建副本、删除、复制 entry（后端拒绝带 `embeddedPath` 的 entry 级操作），以及 Action 自身的属性。
+
+会话层用 `PreviewEditTarget`（kind、index、embeddedPath）表示编辑目标，和预览清单的 entry 分开保存。属性草稿、检查结果、曲线时间轴按这个目标区分，所以在内嵌 entry 上读到的草稿不能应用到顶层 entry，反之亦然。
+
+MCP：`select_entry` 增加可选的 `embeddedPath`（每一步是 `{kind, index, attributeIndex}`，指向一个 PlayEmitter），选中后 `inspect`、`set_fields`、`curve_key` 和属性的结构工具都作用于这个内嵌 entry。`status.preview.embeddedEntries` 列出节点图里的内嵌 entry 及其参数，`status.document.editTarget` 给出当前选中的内嵌目标（顶层 entry 时为空）。
+
 ## 入口
 
 | 位置 | 操作 |
@@ -74,11 +88,12 @@ TypeMesh 的 `properties`（以及 DD2 起材质类 Type 的 `material.propertie
   - 删除当前 entry 时确认框提示改为编辑 [30]。
   - 节点图右键 entry 节点创建副本。
 - 材质参数（`tools/Re4GenericEditorTests` 末段）：在 TypeMesh entry 上按参考材质添加一个参数和一个贴图、重复添加被拒、删除、撤销；带 TypeMeshClip 的 ripple 文件里，被曲线驱动的参数不能删。窗口截图核对了 acid_dead 第 12 个 entry 的 4 条覆盖（BaseMetalMap、NormalRoughnessMap、Metallic、Roughness）全部按名字显示、与参考材质一致。
+- 内嵌 entry（ao_chfa damage_0000，Action 0 的 PlayEmitter 内嵌 3 个 entry）：`tools/Re4GenericEditorTests` 选中内嵌 entry 后属性表与文档树一致、预览清单仍指向顶层 entry；改一个 float 字段是一个修订并重新发布；切回顶层后，内嵌 entry 上读到的草稿被拒；不存在的内嵌 entry 选中被拒且目标不变；撤销后字段复原。`tools/Re4McpTests` 新增 7 项：`embeddedEntries` 列出路径，`select_entry` + `embeddedPath` 选中、`inspect` 读 Life、`set_fields` 后预览显示新修订并读回、回到顶层、拒绝不存在的目标（共 76/76）。节点图的点击还没有用鼠标实际试过。
 - 回归：MCP 端到端 57/57、多 entry 27/27、通用编辑通过。LiveEditor 的自检这次没有运行（之前因缺少 Wilds 测试素材会提前中止）。
 
 ## 未做
 
-- Action 和内嵌 entry 的结构编辑。
+- Action 自身的属性编辑；内嵌 entry 的 entry 级操作（新建、副本、删除、复制）。
 - MCP 还没有 entry 级操作（新建、删除、副本）的工具，也没有材质参数覆盖的工具。
 - 预览不绘制 TypeMesh。
 - 新 entry 加入 effect group。

@@ -390,6 +390,41 @@ try
     }
     Console.WriteLine("  curve_key exercised on " + curveDone);
 
+    // An entry embedded in an Action's PlayEmitter: listed in status, selected with embeddedPath, inspected and edited
+    // like a top-level one; the preview stays on its top-level entry and shows the new revision.
+    {
+        string damage = Path.Combine(Path.GetDirectoryName(Environment.GetEnvironmentVariable("RE4_EXE") ?? @"E:\Program\Steam\steamapps\common\RESIDENT EVIL 4  BIOHAZARD RE4\re4.exe")!,
+            @"RE4_EXTRACT\natives\stm\_anotherorder\vfx\effecteditor\efd_character\efd_ao_chfa\efd_0015_ao_chfa_0000_damage_0000.efx.3539837");
+        (error, outcome, _) = await Tool("open", new JsonObject { ["path"] = damage, ["entryPosition"] = 0, ["discardUnsaved"] = true });
+        Check(!error, "open a file whose Action embeds entries", outcome.ToJsonString());
+        (error, outcome, _) = await Tool("status");
+        var embeddedEntry = outcome["result"]?["preview"]?["embeddedEntries"]?.AsArray().FirstOrDefault();
+        Check(!error && embeddedEntry?["embeddedPath"]?.AsArray().Count == 1, "status lists embedded entries with their embeddedPath", outcome.ToJsonString());
+        long embeddedBefore = Revision(outcome);
+        (error, outcome, _) = await Tool("select_entry", new JsonObject { ["entryPosition"] = embeddedEntry?["entryPosition"]?.GetValue<int>() ?? 0,
+            ["embeddedPath"] = embeddedEntry?["embeddedPath"]?.DeepClone() });
+        var embeddedDocument = outcome["result"]?["document"];
+        Check(!error && embeddedDocument?["editTarget"]?["embeddedPath"]?.AsArray().Count == 1 && embeddedDocument["entryPosition"]?.GetValue<int>() == 0 &&
+            Revision(outcome) == embeddedBefore && embeddedDocument["attributes"]?.AsArray().Count > 0,
+            "select_entry with embeddedPath edits the embedded entry and keeps the preview entry", outcome.ToJsonString());
+        int embeddedLife = embeddedDocument?["attributes"]?.AsArray().FirstOrDefault(a => a!["type"]!.GetValue<string>() == "Life")?["index"]?.GetValue<int>() ?? -1;
+        (error, outcome, _) = await Tool("inspect", new JsonObject { ["attributeIndex"] = Math.Max(0, embeddedLife) });
+        string? appear = outcome["result"]?["fields"]?.AsArray().FirstOrDefault(f => f!["path"]!.GetValue<string>() == "AppearFrame.max")?["value"]?.GetValue<string>();
+        Check(!error && embeddedLife >= 0 && appear != null, "inspect reads the embedded entry's Life", outcome.ToJsonString());
+        string nextAppear = ((int.TryParse(appear, out int a0) ? a0 : 0) + 1).ToString();
+        (error, outcome, _) = await Tool("set_fields", new JsonObject { ["attributeIndex"] = embeddedLife,
+            ["fields"] = new JsonArray(new JsonObject { ["path"] = "AppearFrame.max", ["value"] = nextAppear }), ["expectedRevision"] = embeddedBefore });
+        Check(!error && Revision(outcome) == embeddedBefore + 1 && outcome["result"]?["preview"]?["displayedRevision"]?.GetValue<long>() == embeddedBefore + 1,
+            "set_fields on the embedded entry is one revision and the preview shows it", outcome.ToJsonString());
+        (error, outcome, _) = await Tool("inspect", new JsonObject { ["attributeIndex"] = embeddedLife });
+        Check(!error && outcome["result"]?["fields"]?.AsArray().Any(f => f!["path"]!.GetValue<string>() == "AppearFrame.max" && f["value"]!.GetValue<string>() == nextAppear) == true,
+            "the embedded edit reads back", outcome.ToJsonString());
+        (error, outcome, _) = await Tool("select_entry", new JsonObject { ["entryPosition"] = 0 });
+        Check(!error && outcome["result"]?["document"]?["editTarget"] == null, "select_entry without embeddedPath returns to the top-level entry", outcome.ToJsonString());
+        (error, outcome, _) = await Tool("select_entry", new JsonObject { ["entryPosition"] = 999, ["embeddedPath"] = embeddedEntry?["embeddedPath"]?.DeepClone() });
+        Check(error, "select_entry refuses an embedded entry that does not exist", outcome.ToJsonString());
+    }
+
     (error, outcome, _) = await Tool("close", new JsonObject { ["discardUnsaved"] = true });
     Check(!error, "close is accepted");
     bool exited = false;

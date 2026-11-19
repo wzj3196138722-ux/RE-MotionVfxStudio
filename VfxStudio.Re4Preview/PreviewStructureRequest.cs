@@ -13,8 +13,13 @@ namespace VfxStudio.Re4Preview;
 /// add_entry builds that class's usual carrier entry (NoDraw + PtBehavior).</param>
 /// <param name="Body">material_parameter: the backend request (op, listPath and the entry fields; PreviewMaterialReference.AddBody).</param>
 /// <param name="Label">Shown in the undo history and in errors.</param>
+/// <param name="Target">For attribute edits: the entry or Action that owns the attribute, possibly inside an embedded EFX.
+/// Null means the top-level entry at <paramref name="EntryPosition"/>. Entry-level operations take top-level entries only.</param>
 internal sealed record PreviewStructureRequest(string Op, int EntryPosition, int AttributeIndex = -1, string? Type = null, long? ExpectedRevision = null,
-    string? Script = null, System.Text.Json.Nodes.JsonObject? Body = null, string? Label = null);
+    string? Script = null, System.Text.Json.Nodes.JsonObject? Body = null, string? Label = null, PreviewEditTarget? Target = null)
+{
+    public PreviewEditTarget Owner => Target ?? PreviewEditTarget.Root(EntryPosition);
+}
 
 /// <summary>Menu items shared by the node graph and the main panel.</summary>
 internal static class PreviewStructureMenu
@@ -32,13 +37,13 @@ internal static class PreviewStructureMenu
     }
 
     /// <summary>Items for one attribute row. Returns the chosen request or null.</summary>
-    public static PreviewStructureRequest? AttributeItems(int entry, int attribute, string type, IReadOnlyList<string> existing)
+    public static PreviewStructureRequest? AttributeItems(PreviewEditTarget owner, int attribute, string type, IReadOnlyList<string> existing)
     {
         PreviewStructureRequest? chosen = null;
         ImGui.TextDisabled(type);
-        if (ImGui.MenuItem("复制属性")) chosen = new("copy_attribute", entry, attribute);
+        if (ImGui.MenuItem("复制属性")) chosen = new("copy_attribute", owner.Index, attribute, Target: owner);
         string? refusal = RemoveRefusal(type, existing);
-        if (ImGui.MenuItem("删除属性", (string?)null, false, refusal == null)) chosen = new("remove_attribute", entry, attribute);
+        if (ImGui.MenuItem("删除属性", (string?)null, false, refusal == null)) chosen = new("remove_attribute", owner.Index, attribute, Target: owner);
         if (refusal != null && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip(refusal);
         return chosen;
     }
