@@ -38,6 +38,10 @@ internal sealed class PreviewEditPanel
     public PreviewEditPanel(Func<string,PreviewMaterialReference>? materialLoader=null)=>Material.Loader=materialLoader;
     public int SelectedAttribute=>selected;
     private PreviewGraphPick? pendingFocus;
+    /// <summary>A PlayEmitter's embedded file: its entries (position, name). Their fields are not listed here (a PlayEmitter
+    /// has no settings of its own); each entry opens as an embedded target instead.</summary>
+    private (int Position,string Name)[] embeddedEntries=[];
+    private const string EmbeddedPrefix="efxrData.";
 
     /// <summary>Opens an attribute (from the node graph). For another entry the attribute is kept until
     /// that entry becomes current. AttributeIndex -1 opens the entry itself: its Type attribute, or for the
@@ -74,7 +78,10 @@ internal sealed class PreviewEditPanel
         byPath=inspection.Fields.ToDictionary(f=>f.Path,StringComparer.Ordinal);
         Material.Detect(inspection,byPath,inspection.Key);
         controls=PreviewFieldActivity.Controls(inspection.Fields);
-        var colors=inspection.ColorGroups.Where(c=>c.Storage=="rgba8" && c.Scale==255 && !c.Hdr && c.Channels.Length==4 &&
+        embeddedEntries=inspection.Fields.Select(f=>System.Text.RegularExpressions.Regex.Match(f.Path,@"^efxrData\.Entries\[(\d+)\]\.name$"))
+            .Where(m=>m.Success).Select(m=>(int.Parse(m.Groups[1].Value,CultureInfo.InvariantCulture),
+                inspection.Fields.First(f=>f.Path==m.Value).Value)).ToArray();
+        var colors=inspection.ColorGroups.Where(c=>!c.Path.StartsWith(EmbeddedPrefix,StringComparison.Ordinal) && c.Storage=="rgba8" && c.Scale==255 && !c.Hdr && c.Channels.Length==4 &&
             c.Channels.All(ch=>inspection.Fields.Any(f=>f.Path==ch.Path))).ToArray();
         var hidden=colors.SelectMany(c=>c.Channels.Select(ch=>ch.Path).Append(c.Path.Length==0?"rgba":c.Path+".rgba")).ToHashSet(StringComparer.Ordinal);
         // PtBehavior: parameters are properties[i] with the name in behaviorProperty and the value under variable.
@@ -101,7 +108,7 @@ internal sealed class PreviewEditPanel
         PropertyRow Row(string path,bool editable,PreviewFieldInfo? field=null,PreviewColorGroup? color=null,PreviewFieldInfo[]? parts=null)
         {var (group,label,order)=Place(path);return new(path,group,editable,field,color,parts,label,order);}
         var list=colors.Select(c=>Row(c.Path,c.Editable,color:c)).ToList();
-        var fields=inspection.Fields.Where(f=>!hidden.Contains(f.Path)).ToArray();
+        var fields=inspection.Fields.Where(f=>!hidden.Contains(f.Path) && !f.Path.StartsWith(EmbeddedPrefix,StringComparison.Ordinal)).ToArray();
         for(int i=0;i<fields.Length;)
         {
             // Consecutive siblings named like components of one value (LocalScale.X/.Y/.Z, KeepFrame.min/.max)
@@ -191,9 +198,10 @@ internal sealed class PreviewEditPanel
         }
         if(state?.Target is {} embedded)
         {
-            ImGui.TextColored(new Vector4(.55f,.85f,.6f,1),"编辑内嵌："+embedded.Label);
-            if(ImGui.IsItemHovered()) ImGui.SetTooltip("Action 的 PlayEmitter 里内嵌的 entry。3D 视图仍显示原来的 entry；\n"+
-                "改动会随整个文件重新发布，触发这个 Action 时就能看到。在节点图里单击顶层 entry 回到它。");
+            bool isAction=embedded.Kind=="action";
+            ImGui.TextColored(new Vector4(.55f,.85f,.6f,1),(isAction?"编辑 Action：":"编辑内嵌：")+embedded.Label);
+            if(ImGui.IsItemHovered()) ImGui.SetTooltip((isAction?"Action 的属性（PlayEmitter / PlayEfx）。":"Action 的 PlayEmitter 里内嵌的 entry。")+
+                "3D 视图仍显示原来的 entry；\n改动会随整个文件重新发布，触发这个 Action 时就能看到。在节点图里单击顶层 entry 回到它。");
         }
 
         bool unavailable=busy || stressMode || state?.Manifest==null || state.Attributes?.Length is not >0;
@@ -279,6 +287,21 @@ internal sealed class PreviewEditPanel
         if(draft!=null && Material.Present && target!=null &&
             Material.Draw(target,selected,!unavailable && current && !dirty) is {} materialRequest) command=Structure(materialRequest);
         if(Material.TakeRelabel() && draft!=null) BuildRows(draft.Inspection);
+        // PlayEmitter: the embedded file's entries, each opened as its own edit target.
+        if(draft!=null && embeddedEntries.Length>0 && target!=null)
+        {
+            ImGui.TextWrapped($"PlayEmitter 内嵌 {embeddedEntries.Length} 个 entry，自己没有参数。打开内嵌 entry 编辑它的属性：");
+            ImGui.BeginDisabled(unavailable || dirty);
+            foreach(var (position,name) in embeddedEntries)
+            {
+                if(ImGui.SmallButton($"[{position}] {name}##embedded{position}"))
+                    command=new("select_target",Tag:new PreviewEditTarget("entry",position,[..target.Path,new(target.Kind,target.Index,selected)]));
+                ImGui.SameLine();
+                if(ImGui.GetContentRegionAvail().X<120) ImGui.NewLine();
+            }
+            ImGui.NewLine();
+            ImGui.EndDisabled();
+        }
         float footer=ImGui.GetFrameHeightWithSpacing()+ImGui.GetStyle().ItemSpacing.Y*2+(state?.SavedPath!=null?ImGui.GetTextLineHeightWithSpacing():0);
         ImGui.BeginChild("属性字段",new Vector2(0,Math.Max(120,ImGui.GetContentRegionAvail().Y-footer)));
         ImGui.BeginDisabled(unavailable || !current);
@@ -372,7 +395,7 @@ internal sealed class PreviewEditPanel
             string? entryType=existing.FirstOrDefault(PreviewAttributeCatalog.IsTypeAttribute);
             var min=ImGui.GetWindowPos();
             if(PreviewCatalogPanel.DropTarget(min,min+ImGui.GetWindowSize(),ImGui.GetID("属性目录拖放"),
-                t=>busy?"编辑器忙，稍候再试":stressMode?"压力模式下不能编辑":dirty?"先应用或放弃属性草稿":PreviewCatalogPanel.Refusal(t,entryType,existing)) is {} dropped)
+                t=>busy?"编辑器忙，稍候再试":stressMode?"压力模式下不能编辑":dirty?"先应用或放弃属性草稿":PreviewCatalogPanel.Refusal(t,entryType,existing,target.Kind=="action")) is {} dropped)
                 command=Structure(new("add_attribute",target.Index,Type:dropped,Target:target));
         }
         ImGui.End();return command;

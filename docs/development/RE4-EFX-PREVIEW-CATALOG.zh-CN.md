@@ -12,6 +12,7 @@
 | 第二个 Type（secondType） | entry 已有 Type* 属性 |
 | 缺基础属性（missingBase） | Expression / Clip 类属性的基础属性不在，例如没有 EmitterColor 时不能加 EmitterColorClip |
 | Action 专用（actionOnly） | PlayEmitter、PlayEfx 只能挂在 Action 上 |
+| entry 专用（entryOnly） | 当前编辑的是 Action：RE4 的 Action 只放一个 PlayEmitter 或 PlayEfx，其他属性都不能加 |
 | 不能新建（notCreatable） | 编辑器库里没有这个类型的类，不知道字段结构，例如 TypePolygonTrailExpression |
 
 “缺基础属性”和“是不是 Type 属性”按属性类实现的接口判断（`IExpressionAttribute`、`IMaterialExpressionAttribute`、`IClipAttribute`），与后端一致，不按名字猜。例如 Transform2DClip、PtVelocity2DClip 的类不是 Clip 接口，后端不要求基础属性。
@@ -43,7 +44,7 @@ dotnet run -c Release --project tools/Re4AttributeCatalog
 - 类别：Root、类型、发射、变换与运动、生命与动画、外观、UV、淡化与遮挡、粒子行为与碰撞、Action、其他。Expression、Clip、DelayFrame、Modifier 变体按名字归到基础属性下（去掉后缀，例如 Transform3DModifier → Transform3D），和基础属性同一类别，紧跟在它后面缩进显示。类别内按组排序：组里用得最多的那个属性的次数决定组的位置，基础属性排在组首。以前变体按自己的次数单独排序，会落到无关属性下面（例如 Transform3DModifier 显示在 Attractor 下）。
 - 搜索框按名字过滤，搜索时列出所有匹配项（包括不能添加的）。“RE4 未用的组合”“不可添加的”两个勾选框控制默认隐藏的条目。
 - 悬停显示原因：使用比例、缺哪个基础属性、为什么不能加。
-- 拖动：属性面板整个窗口都可以放下，加到当前 entry。节点图里放到 entry 节点上（顶层或内嵌），加到那个 entry，并把它切换为当前 entry。放不下的地方（Action、目录判定不能加的属性）拖到上面时提示原因。
+- 拖动：属性面板整个窗口都可以放下，加到当前 entry。节点图里放到 entry 或 Action 节点上（顶层或内嵌），加到那里，并把它切换为当前编辑对象。目录判定不能加的属性拖到上面时提示原因。
 - 添加成功后，新属性在属性面板中打开。
 - 属性面板有未应用的草稿、编辑器正忙或处于压力模式时不能添加，目录顶部显示原因。
 - 停靠：默认布局里目录在主面板下方。以前保存过布局的，第一次打开时目录作为标签页停在主面板旁边；“重置布局”恢复新的默认布局。主面板有“属性目录”勾选框可以重新打开它。

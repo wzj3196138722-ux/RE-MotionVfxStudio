@@ -12,11 +12,21 @@ Action 的 PlayEmitter 里内嵌的 entry 也可以编辑。在节点图里单�
 - **回到顶层**：在节点图里单击任一顶层 entry，或用“编辑 entry”下拉框。
 - **失效时退回**：撤销或删除属性后，所编辑的内嵌 entry 不存在了（例如撤销了创建 PlayEmitter 的粘贴），就退回编辑预览的顶层 entry。
 - **只到第一层**：节点图只展开顶层 Action 里内嵌的 entry。内嵌文件自己的 Action 不展开，所以第二层以下只能通过 MCP 的 `embeddedPath` 选中。
-- **不支持**：内嵌 entry 的新建、创建副本、删除、复制 entry（后端拒绝带 `embeddedPath` 的 entry 级操作），以及 Action 自身的属性。
+- **不支持**：内嵌 entry 的新建、创建副本、删除、复制 entry（后端拒绝带 `embeddedPath` 的 entry 级操作）。
 
 会话层用 `PreviewEditTarget`（kind、index、embeddedPath）表示编辑目标，和预览清单的 entry 分开保存。属性草稿、检查结果、曲线时间轴按这个目标区分，所以在内嵌 entry 上读到的草稿不能应用到顶层 entry，反之亦然。
 
-MCP：`select_entry` 增加可选的 `embeddedPath`（每一步是 `{kind, index, attributeIndex}`，指向一个 PlayEmitter），选中后 `inspect`、`set_fields`、`curve_key` 和属性的结构工具都作用于这个内嵌 entry。`status.preview.embeddedEntries` 列出节点图里的内嵌 entry 及其参数，`status.document.editTarget` 给出当前选中的内嵌目标（顶层 entry 时为空）。
+## Action
+
+Action 节点也可以单击打开，属性面板顶部显示“编辑 Action：Action 0”。RE4 语料里 536 个 Action 每个只有一个属性：PlayEmitter（475 个）或 PlayEfx（61 个）。
+
+- **PlayEmitter** 自己没有可编辑的参数，读出来的字段全是内嵌文件的内容（damage_0000 的一个 PlayEmitter 有 994 个字段，只有 efxrSize、type、UniqueID 等 5 个是它自己的，且都只读）。属性面板不列这些字段，改为列出内嵌的 entry，按钮直接打开对应的内嵌 entry。
+- **PlayEfx** 的字段（外部 EFX 路径等）照常列出、编辑。
+- **属性目录**：Action 只能加 PlayEmitter 和 PlayEfx，按 RE4 里的使用次数排序；其他属性标为“entry 专用（entryOnly）”，不能加。entry 上的 PlayEmitter / PlayEfx 仍是“Action 专用”。
+- **结构操作**：属性的删除、复制粘贴可用，例如把 PlayEmitter 换成 PlayEfx。删除 PlayEmitter 会连同内嵌的 entry 一起删掉，可以撤销。Action 本身的新建、副本、删除还不支持。
+- 预览同样不跟着切换，改动随文件重新发布。
+
+MCP：`select_entry` 增加可选的 `embeddedPath`（每一步是 `{kind, index, attributeIndex}`，指向一个 PlayEmitter），选中后 `inspect`、`set_fields`、`curve_key` 和属性的结构工具都作用于这个内嵌 entry。`status.preview.embeddedEntries` 列出节点图里的内嵌 entry 及其参数，`status.document.editTarget` 给出当前选中的内嵌目标（顶层 entry 时为空）。`select_entry` 用 `actionIndex` 代替 `entryPosition` 时选中 Action（`status.preview.actions` 列出 Action 及其属性），这时 `attribute_types` 的目录 `owner` 为 `action`。
 
 ## 入口
 
@@ -88,12 +98,14 @@ TypeMesh 的 `properties`（以及 DD2 起材质类 Type 的 `material.propertie
   - 删除当前 entry 时确认框提示改为编辑 [30]。
   - 节点图右键 entry 节点创建副本。
 - 材质参数（`tools/Re4GenericEditorTests` 末段）：在 TypeMesh entry 上按参考材质添加一个参数和一个贴图、重复添加被拒、删除、撤销；带 TypeMeshClip 的 ripple 文件里，被曲线驱动的参数不能删。窗口截图核对了 acid_dead 第 12 个 entry 的 4 条覆盖（BaseMetalMap、NormalRoughnessMap、Metallic、Roughness）全部按名字显示、与参考材质一致。
-- 内嵌 entry（ao_chfa damage_0000，Action 0 的 PlayEmitter 内嵌 3 个 entry）：`tools/Re4GenericEditorTests` 选中内嵌 entry 后属性表与文档树一致、预览清单仍指向顶层 entry；改一个 float 字段是一个修订并重新发布；切回顶层后，内嵌 entry 上读到的草稿被拒；不存在的内嵌 entry 选中被拒且目标不变；撤销后字段复原。`tools/Re4McpTests` 新增 7 项：`embeddedEntries` 列出路径，`select_entry` + `embeddedPath` 选中、`inspect` 读 Life、`set_fields` 后预览显示新修订并读回、回到顶层、拒绝不存在的目标（共 76/76）。节点图的点击还没有用鼠标实际试过。
+- 内嵌 entry（ao_chfa damage_0000，Action 0 的 PlayEmitter 内嵌 3 个 entry）：`tools/Re4GenericEditorTests` 选中内嵌 entry 后属性表与文档树一致、预览清单仍指向顶层 entry；改一个 float 字段是一个修订并重新发布；切回顶层后，内嵌 entry 上读到的草稿被拒；不存在的内嵌 entry 选中被拒且目标不变；撤销后字段复原。`tools/Re4McpTests` 新增 7 项：`embeddedEntries` 列出路径，`select_entry` + `embeddedPath` 选中、`inspect` 读 Life、`set_fields` 后预览显示新修订并读回、回到顶层、拒绝不存在的目标（共 76/76）。
+- Action（同一文件的 Action 0）：`tools/Re4GenericEditorTests` 选中 Action 后列出 PlayEmitter、预览清单不变；目录里 PlayEmitter 为已有、PlayEfx 可加、Life 为 entry 专用；删 PlayEmitter、加带默认字段的 PlayEfx 各一个修订，两次撤销后 PlayEmitter 和内嵌 entry 都回来。`tools/Re4McpTests` 再加 5 项（`status.preview.actions`、`actionIndex` 选中、`attribute_types` 的 Action 目录、同时给两个参数被拒、回到顶层），共 81/81；MCP 自检 107 项通过。
+- 节点图和属性面板的点击还没有用鼠标实际试过。
 - 回归：MCP 端到端 57/57、多 entry 27/27、通用编辑通过。LiveEditor 的自检这次没有运行（之前因缺少 Wilds 测试素材会提前中止）。
 
 ## 未做
 
-- Action 自身的属性编辑；内嵌 entry 的 entry 级操作（新建、副本、删除、复制）。
+- Action 和内嵌 entry 的新建、副本、删除、复制。
 - MCP 还没有 entry 级操作（新建、删除、副本）的工具，也没有材质参数覆盖的工具。
 - 预览不绘制 TypeMesh。
 - 新 entry 加入 effect group。

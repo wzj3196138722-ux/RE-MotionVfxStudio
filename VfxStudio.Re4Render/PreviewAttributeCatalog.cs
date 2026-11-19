@@ -26,6 +26,8 @@ public enum PreviewCatalogStatus
     NotOnRoot,
     /// <summary>The editor library has no class for this type, so the backend cannot create it.</summary>
     NotCreatable,
+    /// <summary>An entry attribute on an Action: every RE4 Action holds one PlayEmitter or PlayEfx and nothing else.</summary>
+    EntryOnly,
 }
 
 /// <param name="Base">For Expression, Clip and DelayFrame/Modifier variants: the attribute they extend.</param>
@@ -53,6 +55,7 @@ public sealed record PreviewCatalogItem(string Type, string Category, string? Ba
         PreviewCatalogStatus.RootOnly => "RE4 里这个属性只出现在 Root entry 上（文件第一个、没有 Type 的 entry），用于全局控制。可以添加，但普通 entry 带它没有依据。",
         PreviewCatalogStatus.NotOnRoot => "Root entry 在 RE4 里只放全局控制属性（UnitCulling、EmitterPriority、DrawOverlay、RenderTarget）。可以添加，但没有依据。",
         PreviewCatalogStatus.NotCreatable => "编辑器还不认识这个属性的字段结构，不能新建。",
+        PreviewCatalogStatus.EntryOnly => "RE4 的 Action 只放一个 PlayEmitter 或 PlayEfx，这个属性要加在 entry 上。",
         _ => "",
     };
 }
@@ -176,9 +179,12 @@ public sealed class PreviewAttributeCatalog
     /// <param name="entryType">The entry's Type* attribute, or null when it has none.</param>
     /// <param name="existing">Attribute types the entry already has.</param>
     /// <param name="entryName">The entry's name; with no Type, "Root" marks the Root entry (see <see cref="IsRoot"/>).</param>
-    public IReadOnlyList<PreviewCatalogItem> For(string? entryType, IEnumerable<string> existing, string? entryName = null)
+    /// <param name="action">The owner is an Action (top-level or embedded): only PlayEmitter and PlayEfx can be added,
+    /// ranked by how many RE4 Actions use each.</param>
+    public IReadOnlyList<PreviewCatalogItem> For(string? entryType, IEnumerable<string> existing, string? entryName = null, bool action = false)
     {
         var have = existing.ToHashSet(StringComparer.Ordinal);
+        if (action) return ForAction(have);
         bool root = IsRoot(entryType, entryName, have);
         var (count, uses) = Owner(entryType);
         int usualAt = Math.Max(1, (int)Math.Ceiling(count * .95));
@@ -213,19 +219,39 @@ public sealed class PreviewAttributeCatalog
             .ThenByDescending(i => i.Uses).ThenBy(i => i.Type, StringComparer.Ordinal).ToArray();
     }
 
+    private IReadOnlyList<PreviewCatalogItem> ForAction(HashSet<string> have)
+    {
+        var (count, uses) = Merge("action", "embedded-action");
+        return types.Select(type =>
+            {
+                int n = uses.GetValueOrDefault(type);
+                var status = have.Contains(type) ? PreviewCatalogStatus.Present
+                    : !creatable.Contains(type) ? PreviewCatalogStatus.NotCreatable
+                    : type is not ("PlayEmitter" or "PlayEfx") ? PreviewCatalogStatus.EntryOnly
+                    : n > 0 ? PreviewCatalogStatus.Common : PreviewCatalogStatus.Unused;
+                return new PreviewCatalogItem(type, CategoryOf(type), BaseOf(type), status, n, count, totals.GetValueOrDefault(type), false);
+            })
+            .OrderBy(i => i.Category == "Action" ? 0 : 1).ThenBy(i => Array.IndexOf(Categories, i.Category))
+            .ThenByDescending(i => i.Uses).ThenBy(i => i.Type, StringComparer.Ordinal).ToArray();
+    }
+
+    /// <summary>Actions in the corpus (top-level and embedded).</summary>
+    public int ActionCount => Merge("action", "embedded-action").Count;
+
     /// <summary>The attribute a catalogue row is listed under: its base when that is an RE4 type, else itself.</summary>
     public string GroupOf(PreviewCatalogItem item) => BaseOf(item.Type) is { } b && types.Contains(b, StringComparer.Ordinal) ? b : item.Type;
 
     /// <summary>Checks one type for an entry: the catalogue item, or null for a name that is not an RE4 attribute type.</summary>
-    public PreviewCatalogItem? Check(string type, string? entryType, IEnumerable<string> existing, string? entryName = null)
-        => types.Contains(type, StringComparer.Ordinal) ? For(entryType, existing, entryName).First(i => i.Type == type) : null;
+    public PreviewCatalogItem? Check(string type, string? entryType, IEnumerable<string> existing, string? entryName = null, bool action = false)
+        => types.Contains(type, StringComparer.Ordinal) ? For(entryType, existing, entryName, action).First(i => i.Type == type) : null;
 
-    private (int Count, Dictionary<string, int> Attributes) Owner(string? entryType)
+    private (int Count, Dictionary<string, int> Attributes) Owner(string? entryType) => Merge("entry:" + (entryType ?? ""), "embedded:" + (entryType ?? ""));
+
+    private (int Count, Dictionary<string, int> Attributes) Merge(params string[] keys)
     {
-        string type = entryType ?? "";
         var merged = new Dictionary<string, int>(StringComparer.Ordinal);
         int count = 0;
-        foreach (var key in new[] { "entry:" + type, "embedded:" + type })
+        foreach (var key in keys)
             if (owners.TryGetValue(key, out var o))
             {
                 count += o.Count;

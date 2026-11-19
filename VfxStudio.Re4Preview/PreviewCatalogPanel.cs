@@ -41,10 +41,12 @@ internal sealed class PreviewCatalogPanel
             ImGui.End(); return null;
         }
         var catalog = PreviewAttributeCatalog.Re4;
-        string key = entryType + "|" + entryName + "|" + string.Join(",", existing);
-        if (key != cacheKey) { items = catalog.For(entryType, existing, entryName); cacheKey = key; }
+        bool action = target.Kind == "action";
+        string key = target.Kind + "|" + entryType + "|" + entryName + "|" + string.Join(",", existing);
+        if (key != cacheKey) { items = catalog.For(entryType, existing, entryName, action); cacheKey = key; }
 
-        ImGui.TextWrapped(PreviewAttributeCatalog.IsRoot(entryType, entryName, existing)
+        ImGui.TextWrapped(action ? $"{target.Label} {entryName} · Action（RE4 共 {catalog.ActionCount} 个，每个只有一个 PlayEmitter 或 PlayEfx）"
+            : PreviewAttributeCatalog.IsRoot(entryType, entryName, existing)
             ? $"{target.Label} {entryName} · Root entry（全局控制，RE4 共 {catalog.OwnerCount(null)} 个）"
             : $"{target.Label} {entryName} · {entryType ?? "无 Type"}（RE4 同类 entry {catalog.OwnerCount(entryType)} 个）");
         ImGui.TextDisabled(locked ?? "拖到属性面板或节点图的 entry 上添加 · 双击加到当前 entry");
@@ -64,7 +66,7 @@ internal sealed class PreviewCatalogPanel
             var shown = items.Where(i => i.Category == category && Shown(i)).ToArray();
             if (shown.Length == 0) continue;
             int addable = shown.Count(i => i.CanAdd);
-            if (!ImGui.CollapsingHeader($"{category}（{addable}）###{category}", category is "类型" or "Action" or "Root" ? ImGuiTreeNodeFlags.None : ImGuiTreeNodeFlags.DefaultOpen)) continue;
+            if (!ImGui.CollapsingHeader($"{category}（{addable}）###{category}", (category is "类型" or "Action" or "Root") != (action && category == "Action") ? ImGuiTreeNodeFlags.None : ImGuiTreeNodeFlags.DefaultOpen)) continue;
             string? lastGroup = null;
             foreach (var item in shown)
             {
@@ -153,9 +155,10 @@ internal sealed class PreviewCatalogPanel
     }
 
     /// <summary>Why <paramref name="type"/> cannot be added to an entry with these attributes, or null.</summary>
-    public static string? Refusal(string type, string? entryType, IEnumerable<string> existing)
+    /// <param name="action">The owner is an Action.</param>
+    public static string? Refusal(string type, string? entryType, IEnumerable<string> existing, bool action = false)
     {
-        var item = PreviewAttributeCatalog.Re4.Check(type, entryType, existing);
+        var item = PreviewAttributeCatalog.Re4.Check(type, entryType, existing, action: action);
         return item == null ? "不是 RE4 的属性类型" : item.CanAdd ? null : item.Reason;
     }
 }

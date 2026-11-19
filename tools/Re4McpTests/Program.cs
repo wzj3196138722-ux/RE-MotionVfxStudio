@@ -423,6 +423,24 @@ try
         Check(!error && outcome["result"]?["document"]?["editTarget"] == null, "select_entry without embeddedPath returns to the top-level entry", outcome.ToJsonString());
         (error, outcome, _) = await Tool("select_entry", new JsonObject { ["entryPosition"] = 999, ["embeddedPath"] = embeddedEntry?["embeddedPath"]?.DeepClone() });
         Check(error, "select_entry refuses an embedded entry that does not exist", outcome.ToJsonString());
+
+        // The Action itself: listed in status, selected with actionIndex; attribute_types offers what an Action holds.
+        (error, outcome, _) = await Tool("status");
+        var firstAction = outcome["result"]?["preview"]?["actions"]?.AsArray().FirstOrDefault();
+        Check(!error && firstAction?["attributes"]?.AsArray().Any(t => t!.GetValue<string>() == "PlayEmitter") == true, "status lists Actions with their attributes", outcome.ToJsonString());
+        (error, outcome, _) = await Tool("select_entry", new JsonObject { ["actionIndex"] = firstAction?["actionIndex"]?.GetValue<int>() ?? 0 });
+        Check(!error && outcome["result"]?["document"]?["editTarget"]?["kind"]?.GetValue<string>() == "action" &&
+            outcome["result"]?["document"]?["attributes"]?.AsArray().Any(a => a!["type"]!.GetValue<string>() == "PlayEmitter") == true &&
+            outcome["result"]?["document"]?["entryPosition"]?.GetValue<int>() == 0, "select_entry with actionIndex edits the Action", outcome.ToJsonString());
+        (error, outcome, _) = await Tool("attribute_types");
+        var actionItems = outcome["result"]?["catalog"]?["items"]?.AsArray() ?? new JsonArray();
+        string? ActionStatus(string type) => actionItems.FirstOrDefault(i => i!["type"]!.GetValue<string>() == type)?["status"]?.GetValue<string>();
+        Check(!error && outcome["result"]?["catalog"]?["owner"]?.GetValue<string>() == "action" && ActionStatus("PlayEmitter") == "present" &&
+            ActionStatus("PlayEfx") == "common" && ActionStatus("Life") == "entryOnly", "attribute_types on an Action offers PlayEmitter / PlayEfx only", outcome["result"]?["catalog"]?["owner"]?.ToJsonString());
+        (error, outcome, _) = await Tool("select_entry", new JsonObject { ["entryPosition"] = 0, ["actionIndex"] = 0 });
+        Check(error, "select_entry refuses entryPosition together with actionIndex", outcome.ToJsonString());
+        (error, outcome, _) = await Tool("select_entry", new JsonObject { ["entryPosition"] = 0 });
+        Check(!error && outcome["result"]?["document"]?["editTarget"] == null, "select_entry returns from the Action to the top-level entry", outcome.ToJsonString());
     }
 
     (error, outcome, _) = await Tool("close", new JsonObject { ["discardUnsaved"] = true });

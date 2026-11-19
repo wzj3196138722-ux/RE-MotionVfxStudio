@@ -382,6 +382,43 @@ try
         es=await ee.InspectAsync(es.Manifest!.DocumentId,es.Revision,attribute);
         Check(es.Inspection!.Fields.Single(f=>f.Path==number.Path).Value==original,"Undo did not restore the embedded field");
         Console.WriteLine($"PASS embedded entry: {nested.Label} ({expected} attributes) select/inspect/set/undo, preview stays on [{top}], stale draft refused");
+
+        // The Action itself: its PlayEmitter is inspected and edited like an entry attribute, the catalogue offers only
+        // PlayEmitter / PlayEfx, and swapping the PlayEmitter for a PlayEfx is two undoable revisions.
+        var action=new PreviewEditTarget("action",hop.Index,[]);
+        es=await ee.SelectTargetAsync(action);
+        Check(action.Equals(es.EditTarget) && es.Manifest!.EntryPosition==top && es.Attributes!.Any(a=>a.Type=="PlayEmitter"),"Selecting an Action lists its attributes");
+        int play=es.Attributes!.Single(a=>a.Type=="PlayEmitter").Index;
+        es=await ee.InspectAsync(es.Manifest!.DocumentId,es.Revision,play);
+        var playFields=es.Inspection!.Fields;
+        Console.WriteLine($"INSPECT PlayEmitter: {playFields.Length} fields; own: "+string.Join(",",playFields.Where(f=>!f.Path.StartsWith("efxrData",StringComparison.Ordinal)).Select(f=>f.Path+(f.Editable?"":"(ro)")+"="+f.Value)));
+        var playNumber=playFields.FirstOrDefault(f=>f.Editable && f.Type is "System.Single" or "System.Int32" or "System.UInt32" &&
+            !f.Path.StartsWith("efxrData",StringComparison.Ordinal) && !f.Path.Contains("Size",StringComparison.Ordinal));
+        if(playNumber!=null)
+        {
+            string was=playNumber.Value,now=playNumber.Type=="System.Single"?(float.Parse(was,CultureInfo.InvariantCulture)+1).ToString("R",CultureInfo.InvariantCulture):(long.Parse(was,CultureInfo.InvariantCulture)+1).ToString(CultureInfo.InvariantCulture);
+            long r0=es.Revision;
+            es=await ee.ApplyFieldsAsync(new(es.Inspection!,[new(playNumber.Path,now)]));
+            es=await ee.InspectAsync(es.Manifest!.DocumentId,es.Revision,play);
+            Check(es.Revision==r0+1 && es.Inspection!.Fields.Single(f=>f.Path==playNumber.Path).Value==now,"An Action field edit did not stick");
+            es=await ee.CommandAsync("undo");
+        }
+        var types=es.Attributes!.Select(a=>a.Type).ToArray();
+        var catalogue=PreviewAttributeCatalog.Re4.For(null,types,action:true).ToDictionary(i=>i.Type);
+        Check(catalogue["PlayEmitter"].Status==PreviewCatalogStatus.Present && catalogue["PlayEfx"].CanAdd && catalogue["PlayEfx"].Uses>0 &&
+            !catalogue["Life"].CanAdd && catalogue["Life"].Status==PreviewCatalogStatus.EntryOnly &&
+            PreviewAttributeCatalog.Re4.For("TypeBillboard3D",[]).Single(i=>i.Type=="PlayEfx").Status==PreviewCatalogStatus.ActionOnly,"Action catalogue");
+        long r1=es.Revision;
+        es=(await ee.SendRawAsync("remove_attribute",new(){["target"]=action.ToJson(play)},r1)).State;
+        Check(es.Revision==r1+1 && action.Equals(es.EditTarget) && es.Attributes!.All(a=>a.Type!="PlayEmitter"),"Removing the PlayEmitter keeps the Action selected");
+        var efxFields=new JsonArray(PreviewAttributeCatalog.Re4.Defaults("PlayEfx").Select(f=>(JsonNode?)new JsonObject{["path"]=f.Key,["value"]=f.Value}).ToArray());
+        es=(await ee.SendRawAsync("add_attribute",new(){["target"]=action.ToJson(),["type"]="PlayEfx",["fields"]=efxFields},es.Revision)).State;
+        Check(es.Revision==r1+2 && es.Attributes!.Any(a=>a.Type=="PlayEfx"),"Adding a PlayEfx to the Action");
+        es=await ee.CommandAsync("undo");es=await ee.CommandAsync("undo");
+        Check(es.Revision==r1+4 && es.Attributes!.Any(a=>a.Type=="PlayEmitter") && action.Equals(es.EditTarget),"Undo brings the PlayEmitter back");
+        es=await ee.SelectTargetAsync(nested);
+        Check(nested.Equals(es.EditTarget),"The embedded entry is reachable again after undo");
+        Console.WriteLine($"PASS Action: {action.Label} select/inspect{(playNumber==null?"":"/set "+playNumber.Path)}, catalogue, PlayEmitter → PlayEfx and undo");
     }
 }
 catch(Exception ex) {Console.Error.WriteLine(ex);Environment.ExitCode=1;}

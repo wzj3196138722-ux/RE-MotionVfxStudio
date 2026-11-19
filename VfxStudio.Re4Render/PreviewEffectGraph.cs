@@ -31,12 +31,12 @@ public sealed record PreviewGraphRow(string Label, PreviewGraphRowRole Role, int
 /// <param name="Column">Layer of the default layout: 0 Root, 1 emitters, 2 Actions, 3 embedded emitters.</param>
 /// <param name="EntryPosition">For a top-level emitter: its position in the file's entry list.</param>
 /// <param name="ActionIndex">For an Action: its index in the file's Action list; for an embedded emitter: the owning Action.</param>
-/// <param name="Editable">An emitter the property panel can edit: every top-level one, whether or not the preview draws it,
-/// and every embedded one.</param>
+/// <param name="Editable">A node the property panel can edit: every top-level emitter, whether or not the preview draws it,
+/// every embedded one, and every Action.</param>
 /// <param name="Drawn">A top-level emitter whose Type the offline preview draws.</param>
 /// <param name="EntryType">For emitters: the Type* attribute, or null when the entry has none.</param>
-/// <param name="AttributeTypes">For emitters: the attribute types the entry has, in order.</param>
-/// <param name="Target">For emitters: the backend target that edits it (an embedded one goes through its PlayEmitter).</param>
+/// <param name="AttributeTypes">For emitters and Actions: the attribute types it has, in order.</param>
+/// <param name="Target">For emitters and Actions: the backend target that edits it (an embedded emitter goes through its PlayEmitter).</param>
 public sealed record PreviewGraphNode(int Id, PreviewGraphNodeKind Kind, string Title, string? Subtitle, int Column,
     int? InputPin, IReadOnlyList<PreviewGraphRow> Rows, int? EntryPosition = null, int? ActionIndex = null, bool Editable = false, bool Drawn = false,
     string? EntryType = null, IReadOnlyList<string>? AttributeTypes = null, PreviewEditTarget? Target = null);
@@ -155,7 +155,8 @@ public sealed class PreviewEffectGraph
                 }
             }
             nodes.Add(new(id, PreviewGraphNodeKind.Action, $"Action {index}", string.IsNullOrEmpty(action.name) ? null : action.name, 2,
-                InputPinOf(id), rows, ActionIndex: index));
+                InputPinOf(id), rows, ActionIndex: index, Editable: true,
+                AttributeTypes: action.Attributes.Select(a => a.type.ToString()).ToArray(), Target: new("action", index, [])));
 
             int embeddedOrdinal = 0;
             foreach (var (row, embedded, attribute) in embeddedLinks)

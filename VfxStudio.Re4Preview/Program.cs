@@ -514,6 +514,7 @@ JsonObject PreviewReport() => new()
     ["shownEntries"]=scene?.Shown.Count,
     ["entries"]=scene==null?null:PreviewControlReports.SceneEntries(scene,displayedManifest?.EntryPosition),
     ["childActionEntries"]=scene==null?null:PreviewControlReports.SceneChildren(scene),
+    ["actions"]=scene==null?null:PreviewControlReports.Actions(scene.Graph),
     ["embeddedEntries"]=scene==null?null:PreviewControlReports.EmbeddedEntries(scene.Graph),
     ["soloSelected"]=soloSelected,
     ["view"]=ViewReport()
@@ -605,9 +606,15 @@ void RequireNoDraft()
 // The entry the property panel edits: top-level, or embedded (select_entry with embeddedPath).
 JsonObject AttributeTarget(int attribute)=>(editorState?.EditTarget??throw new InvalidOperationException("尚未打开文档。")).ToJson(attribute);
 JsonObject EntryTarget()=>(editorState?.EditTarget??throw new InvalidOperationException("尚未打开文档。")).ToJson();
-// select_entry: entryPosition alone is a top-level entry; with embeddedPath it is the entry at that position of the embedded file.
-PreviewEditTarget SelectArgument(JsonObject a)=>
-    PreviewEditTarget.Parse("entry",PreviewControlReports.Int(a,"entryPosition",0,1<<20),a["embeddedPath"]);
+// select_entry: entryPosition alone is a top-level entry, actionIndex an Action; with embeddedPath either is taken in
+// the embedded file the path leads to.
+PreviewEditTarget SelectArgument(JsonObject a)
+{
+    if((a["entryPosition"]==null)==(a["actionIndex"]==null)) throw new ArgumentException("select_entry 需要 entryPosition 或 actionIndex 其中之一。");
+    return a["actionIndex"]!=null
+        ? PreviewEditTarget.Parse("action",PreviewControlReports.Int(a,"actionIndex",0,1<<20),a["embeddedPath"])
+        : PreviewEditTarget.Parse("entry",PreviewControlReports.Int(a,"entryPosition",0,1<<20),a["embeddedPath"]);
+}
 JsonObject PasteBody(JsonObject a)
 {
     var body=new JsonObject{["target"]=EntryTarget(),["clipboardId"]=PreviewControlReports.String(a,"clipboardId")};

@@ -49,12 +49,14 @@ internal sealed class Re4PreviewToolSet : IToolSet
                 ["entryId"] = Integer("Native entry index field."), ["offset"] = Offset(),
                 ["discardUnsaved"] = Boolean("Required true when the current document has unsaved edits that should be dropped.") }, []),
         Define("select_entry", "Make another entry of the open file the edited one (inspect, set_fields, curve_key and the attribute structure tools act on it). The whole file stays loaded, so the preview neither reloads nor moves in time. Any top-level entry can be selected: editing does not depend on drawing. status.preview.entries lists the entries, and shown/excluded tells which the preview draws. " +
-            "With embeddedPath, the entry is one embedded in an Action's PlayEmitter; status.preview.embeddedEntries lists them with the arguments to pass, and status.document.editTarget names the one selected. its attributes are edited the same way, the preview keeps its top-level entry and shows the change when the Action fires. Entry-level tools (duplicate_entry, remove_entry, copy_entry) take top-level entries only.",
+            "With embeddedPath, the entry is one embedded in an Action's PlayEmitter; status.preview.embeddedEntries lists them with the arguments to pass, and status.document.editTarget names the one selected. its attributes are edited the same way, the preview keeps its top-level entry and shows the change when the Action fires. Entry-level tools (duplicate_entry, remove_entry, copy_entry) take top-level entries only. " +
+            "With actionIndex instead of entryPosition, an Action is edited (status.preview.actions lists them): its PlayEmitter or PlayEfx settings; attribute_types then offers what an Action can hold.",
             new() { ["entryPosition"] = Integer("Entry position from status.preview.entries, or inside the embedded file when embeddedPath is given."),
+                ["actionIndex"] = Integer("Action index from status.preview.actions, instead of entryPosition."),
                 ["embeddedPath"] = new JsonObject { ["type"] = "array", ["minItems"] = 0, ["maxItems"] = 16,
                     ["description"] = "Steps into embedded EFX, outermost first. Each step is the PlayEmitter attribute of an Action (kind action) or entry of the file reached so far. One step reaches the entries embedded in a top-level Action.",
                     ["items"] = Object(new() { ["kind"] = Choice("Owner of the PlayEmitter.", "action", "entry"), ["index"] = Integer("Action or entry index."),
-                        ["attributeIndex"] = Integer("Index of the PlayEmitter attribute.", 0, 4096) }, "kind", "index", "attributeIndex") } }, ["entryPosition"]),
+                        ["attributeIndex"] = Integer("Index of the PlayEmitter attribute.", 0, 4096) }, "kind", "index", "attributeIndex") } }, []),
         Define("inspect", "Without attributeIndex: list the selected emitter's attributes. With attributeIndex: return its fields (path, type, value, editable, reason, choices), color groups and curves (path, channels, keys). Use the exact paths for set_fields and curve_key.",
             new() { ["attributeIndex"] = Integer("Attribute index from the attribute list.", 0, 4096) }, [], true, true),
         Define("set_fields", "Change 1–64 fields of one attribute as one revision and one Undo step. Values are the textual form shown by inspect (numbers, enum names or values, true/false, strings). The backend validates types, ranges (min ≤ max) and serialization; a rejected batch changes nothing. Waits until the new revision is shown.",
@@ -160,6 +162,9 @@ internal sealed class Re4PreviewToolSet : IToolSet
                 if ((operation == "add") == Has("keyIndex")) throw new ArgumentException("keyIndex is required for update and remove, and not accepted for add.");
                 if (operation != "remove" && !(Has("time") && Has("value"))) throw new ArgumentException("add and update need time and value.");
                 if (operation == "remove" && new[] { "time", "value", "interpolation", "outX", "outY", "inX", "inY" }.Any(Has)) throw new ArgumentException("remove takes only keyIndex.");
+                break;
+            case "select_entry":
+                if (Has("entryPosition") == Has("actionIndex")) throw new ArgumentException("Give exactly one of entryPosition or actionIndex.");
                 break;
             case "set_fields":
                 var paths = arguments["fields"]!.AsArray().Select(f => f!["path"]!.GetValue<string>()).ToArray();

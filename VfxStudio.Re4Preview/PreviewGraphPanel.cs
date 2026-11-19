@@ -189,7 +189,9 @@ internal sealed class PreviewGraphPanel : IDisposable
                     string tip = r.Tooltip ?? (node.Kind == PreviewGraphNodeKind.Emitter
                         ? node.Editable ? locked ?? "单击在属性面板中打开" : "这个节点不能在面板中编辑。"
                         : node.Kind == PreviewGraphNodeKind.EmbeddedEmitter ? "Action 内嵌的 entry：触发时预览会运行它（Billboard3D / Polygon / Billboard2D）。" +
-                            (locked == null ? "单击在属性面板中打开。" : locked) : "");
+                            (locked == null ? "单击在属性面板中打开。" : locked)
+                        : node.Kind == PreviewGraphNodeKind.Action ? locked ?? "单击在属性面板中打开 Action 的这个属性" : "");
+                    if (r.Tooltip != null && node.Kind == PreviewGraphNodeKind.Action && locked == null) tip += "\n单击在属性面板中打开";
                     if (tip.Length > 0) ImGui.SetTooltip(tip);
                 }
                 if (r.OutputPin is not null) ImNodes.EndOutputAttribute();
@@ -214,9 +216,8 @@ internal sealed class PreviewGraphPanel : IDisposable
                 if (max.X <= min.X || max.Y <= min.Y) continue;
                 var target = node;
                 if (PreviewCatalogPanel.DropTarget(min, max, (uint)node.Id, t =>
-                        target.Kind == PreviewGraphNodeKind.Action ? "Action 的属性还不能在窗口里添加"
-                        : !target.Editable || target.Target == null ? "这个节点不能在面板中编辑"
-                        : locked ?? PreviewCatalogPanel.Refusal(t, target.EntryType, target.AttributeTypes ?? [])) is { } dropped)
+                        !target.Editable || target.Target == null ? "这个节点不能在面板中编辑"
+                        : locked ?? PreviewCatalogPanel.Refusal(t, target.EntryType, target.AttributeTypes ?? [], target.Target.Kind == "action")) is { } dropped)
                     Dropped = new PreviewAddRequest(node.Target!.Index, dropped, node.Target);
             }
 
@@ -319,11 +320,7 @@ internal sealed class PreviewGraphPanel : IDisposable
             return chosenRoot;
         }
         var node = t.Node;
-        if (node.Target is not { } owner)
-        {
-            ImGui.TextDisabled("Action 还不能在窗口里编辑");
-            return null;
-        }
+        if (node.Target is not { } owner) return null;
         PreviewStructureRequest? chosen = null;
         if (t.Row is { AttributeIndex: int attribute } row && node.AttributeTypes is { } types && attribute < types.Count)
         {
@@ -336,7 +333,7 @@ internal sealed class PreviewGraphPanel : IDisposable
         {
             // The backend edits attributes inside embedded EFX; adding, copying or removing embedded entries is not offered yet.
             if (ClipboardKind == "attribute" && ImGui.MenuItem("粘贴属性 " + ClipboardName)) chosen = new("paste_attribute", owner.Index, Target: owner);
-            ImGui.TextDisabled("内嵌 entry 的新建、副本、删除还不支持");
+            ImGui.TextDisabled(owner.Kind == "action" ? "Action 的新建、副本、删除还不支持" : "内嵌 entry 的新建、副本、删除还不支持");
             return chosen;
         }
         int entry = owner.Index;

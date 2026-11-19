@@ -42,13 +42,15 @@ internal static class PreviewControlReports
         var existing = (state?.Attributes ?? []).Select(a => a.Type).ToArray();
         string? entryType = existing.FirstOrDefault(PreviewAttributeCatalog.IsTypeAttribute);
         var catalog = PreviewAttributeCatalog.Re4;
+        bool action = state?.Target?.Kind == "action";
         return new JsonObject
         {
+            ["owner"] = action ? "action" : "entry",
             ["entryType"] = entryType,
             ["root"] = PreviewAttributeCatalog.IsRoot(entryType, null, existing),
             ["sameTypeEntries"] = catalog.OwnerCount(entryType),
             ["corpusFiles"] = catalog.Files,
-            ["items"] = new JsonArray(catalog.For(entryType, existing).Select(i => (JsonNode?)new JsonObject
+            ["items"] = new JsonArray(catalog.For(entryType, existing, action: action).Select(i => (JsonNode?)new JsonObject
             {
                 ["type"] = i.Type,
                 ["category"] = i.Category,
@@ -176,6 +178,14 @@ internal static class PreviewControlReports
         ["action"] = e.Action, ["child"] = e.Child, ["label"] = e.Label, ["index"] = e.Index, ["name"] = e.Name, ["type"] = e.Type,
         ["shown"] = e.Shown, ["table"] = e.Shown ? scene.Shown.ToList().IndexOf(e) : null, ["excluded"] = e.Excluded
     }).ToArray());
+
+    /// <summary>The file's Actions (select_entry with actionIndex edits one).</summary>
+    public static JsonArray Actions(PreviewEffectGraph graph) => new(graph.Nodes
+        .Where(n => n.Kind == PreviewGraphNodeKind.Action && n.ActionIndex != null).Select(n => (JsonNode?)new JsonObject
+        {
+            ["actionIndex"] = n.ActionIndex, ["name"] = n.Subtitle,
+            ["attributes"] = new JsonArray((n.AttributeTypes ?? []).Select(t => (JsonNode?)JsonValue.Create(t)).ToArray())
+        }).ToArray());
 
     /// <summary>Entries embedded in the file's Actions, with the select_entry arguments that edit each one.</summary>
     public static JsonArray EmbeddedEntries(PreviewEffectGraph graph) => new(graph.Nodes
