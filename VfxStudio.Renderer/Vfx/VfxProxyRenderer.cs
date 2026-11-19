@@ -18,8 +18,9 @@ public enum EmitterShapeType
     Cone
 }
 
+// MountBoneName：预览轨道指定的挂点骨骼（界面已传入；渲染器暂未按它挂接，空 = 默认挂点）。
 public readonly record struct PreviewEffectRenderItem(
-    string Id, string Path, ReeLib.EfxFile Efx, float StartFrame, float EndFrame);
+    string Id, string Path, ReeLib.EfxFile Efx, float StartFrame, float EndFrame, string? MountBoneName = null);
 
 public class VfxProxyRenderer : IDisposable
 {

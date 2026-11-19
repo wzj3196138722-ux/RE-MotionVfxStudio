@@ -18,8 +18,8 @@ public enum ExpressionAssignType
 public enum MaterialParameterType : short
 {
 	None = 0,
-	Float = 1, // data structure: float min, float max OR color float4
-	Range = 2, // data structure: float min_a, float min_b, float max_a, float max_b
+	Float = 1, // float4（分量数 4，颜色 / 向量）；分量数 1 时语料形如 (x, x, 0, 0)
+	Range = 2, // 16 字节 = (X, Y, 下限, 上限)：取值区间在后 8 字节（RangeValue）；X、Y 在语料里恒相等、基本为 0
 	Texture = 3,
 }
 
@@ -39,6 +39,7 @@ public partial class MdfProperty : BaseModel
 	public int mdfPropertyIndex;
     public ushort mdfParameterValueCount;
 	public MaterialParameterType parameterType;
+	/// <summary>非 0 时把结果钳到 [0, 1]（re4.exe 3d334e0：Range 钳抽到的值，Float 逐分量钳）。</summary>
 	public int flags;
 	[RszFixedSizeArray(16)] private byte[] rawValue = new byte[16];
 
@@ -66,9 +67,12 @@ public partial class MdfProperty : BaseModel
         set => MemoryMarshal.Write<Vector4>(rawValue, value);
     }
 
+	/// <summary>Range 参数的抽样区间：rawValue 的后 8 字节（Z、W）。re4.exe：出生时 Y = Z + u·(W − Z)，送进材质的值 = X + Y，
+	/// 所以 X 是固定偏移（REasy 的 base），Y 是抽到的随机值（random），见 RE4-EFX-RUNTIME §4.3.11。RE4 语料 4141 条 Range 的前 8 字节全部 X == Y、基本为 0，
+	/// 取值都在 Z、W，例如 (0, 0, 0.25, 0.25)、(0, 0, 1, 3)；与 .mdf2 的核对见 MHWs-EFX-Editor mdf_catalog.py。</summary>
 	public ReeLib.via.Range RangeValue {
-        get => MemoryMarshal.Read<ReeLib.via.Range>(rawValue);
-        set => MemoryMarshal.Write<ReeLib.via.Range>(rawValue, value);
+        get => MemoryMarshal.Read<ReeLib.via.Range>(rawValue.AsSpan(8));
+        set => MemoryMarshal.Write<ReeLib.via.Range>(rawValue.AsSpan(8), value);
     }
 
 	public MdfPropertyTextureValue TextureValue {
@@ -221,6 +225,8 @@ public partial class EfxMaterialStructV2 : EfxMaterialStructBase
             }
         }
         texPaths = pathlist.ToArray();
+        // DefaultWrite does not recompute this byte size; keep it in step when entries are added or removed.
+        propDataSize = (uint)(properties.Count * MdfProperty.GetSize(Version));
         return DefaultWrite(handler);
     }
 }

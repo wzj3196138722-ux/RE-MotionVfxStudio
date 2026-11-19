@@ -27,7 +27,7 @@ internal static class ResourceResolver
     internal static Resolution Resolve(Options options, string input)
     {
         string logical = Normalize(input);
-        string versioned = logical + ".5571972";
+        string versioned = options.Game.Versioned(logical, "efx");
         string fileName = versioned.Split('/')[^1];
         var candidates = new Dictionary<string, Candidate>(StringComparer.OrdinalIgnoreCase);
         string? gameFile = null;
@@ -45,7 +45,7 @@ internal static class ResourceResolver
         if (Directory.Exists(options.Assets))
         {
             var enumeration = new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true, AttributesToSkip = FileAttributes.ReparsePoint };
-            foreach (string file in Directory.EnumerateFiles(options.Assets, "*.efx.5571972", enumeration))
+            foreach (string file in Directory.EnumerateFiles(options.Assets, "*.efx." + options.Game.EfxSuffix, enumeration))
             {
                 if (!string.Equals(Path.GetFileName(file), fileName, StringComparison.OrdinalIgnoreCase)) continue;
                 string relative = Path.GetRelativePath(options.Assets, file).Replace('\\', '/');

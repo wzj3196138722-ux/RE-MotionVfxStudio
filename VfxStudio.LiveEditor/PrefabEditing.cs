@@ -75,7 +75,7 @@ internal sealed partial class EditorEngine
         if (Directory.Exists(directory)) throw new IOException("PFB 预览版本已存在。");
         byte[] content = doc.ExportBytes();
         Directory.CreateDirectory(directory);
-        string output = Path.Combine(directory,"resource.pfb.18");
+        string output = Path.Combine(directory,options.Game.Versioned("resource.pfb","pfb"));
         using(var stream = new FileStream(output, FileMode.CreateNew, FileAccess.Write, FileShare.None)) { stream.Write(content); stream.Flush(true); }
         if (!File.ReadAllBytes(output).AsSpan().SequenceEqual(content)) throw new IOException("PFB 发布回读失败。");
         var plan = new JsonObject { ["schema"]=1,["id"]=id,["revision"]=doc.Revision,["source"]=metadata,["proof"]=proof.DeepClone(),

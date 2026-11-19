@@ -140,6 +140,9 @@ public class ImGuiController : IDisposable
     private static void OnKeyEvent(IKeyboard keyboard, Key keycode, int scancode, bool down)
     {
         var io = Hexa.NET.ImGui.ImGui.GetIO();
+        // Queue modifiers with the key event. Polling legacy io.KeyCtrl alone loses
+        // short Ctrl+A / Ctrl+V chords when key-down and key-up fall between frames.
+        UpdateModifiers(io, keyboard);
         var imGuiKey = TranslateInputKeyToImGuiKey(keycode);
         if (imGuiKey != ImGuiKey.None)
         {
@@ -235,13 +238,15 @@ public class ImGuiController : IDisposable
         }
         _pressedChars.Clear();
 
-        if (_keyboard != null)
-        {
-            io.KeyCtrl = _keyboard.IsKeyPressed(Key.ControlLeft) || _keyboard.IsKeyPressed(Key.ControlRight);
-            io.KeyAlt = _keyboard.IsKeyPressed(Key.AltLeft) || _keyboard.IsKeyPressed(Key.AltRight);
-            io.KeyShift = _keyboard.IsKeyPressed(Key.ShiftLeft) || _keyboard.IsKeyPressed(Key.ShiftRight);
-            io.KeySuper = _keyboard.IsKeyPressed(Key.SuperLeft) || _keyboard.IsKeyPressed(Key.SuperRight);
-        }
+        if (_keyboard != null) UpdateModifiers(io, _keyboard);
+    }
+
+    private static void UpdateModifiers(ImGuiIOPtr io, IKeyboard keyboard)
+    {
+        io.AddKeyEvent(ImGuiKey.ModCtrl, keyboard.IsKeyPressed(Key.ControlLeft) || keyboard.IsKeyPressed(Key.ControlRight));
+        io.AddKeyEvent(ImGuiKey.ModAlt, keyboard.IsKeyPressed(Key.AltLeft) || keyboard.IsKeyPressed(Key.AltRight));
+        io.AddKeyEvent(ImGuiKey.ModShift, keyboard.IsKeyPressed(Key.ShiftLeft) || keyboard.IsKeyPressed(Key.ShiftRight));
+        io.AddKeyEvent(ImGuiKey.ModSuper, keyboard.IsKeyPressed(Key.SuperLeft) || keyboard.IsKeyPressed(Key.SuperRight));
     }
 
     private unsafe void SetupRenderState(ImDrawDataPtr drawDataPtr, int framebufferWidth, int framebufferHeight)

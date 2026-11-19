@@ -59,7 +59,8 @@ namespace ReeLib.Efx
             Version = (EfxVersion)handler.FileVersion;
             if ((int)Version <= 0)
             {
-                Version = EfxVersion.MHWilds;
+                // RE-MotionVfxStudio：版本只能来自 .efx.<版本号> 路径，不再默认当作 MHWilds（游戏配置层，A1）。
+                throw new InvalidDataException("EFX file version is unknown; open it through a path ending in .efx.<version>.");
             }
             DefaultRead(handler);
             if (magic != EfxFile.Magic)
@@ -183,6 +184,14 @@ namespace ReeLib.Efx
         public int UniqueID;
         public EfxVersion Version;
         public bool IsTypeAttribute => type.ToString().StartsWith("Type") && this is not IExpressionAttribute and not IClipAttribute and not IMaterialExpressionAttribute;
+
+        // MHWs-EFX-Editor 本地补丁：MHWilds 起每个 attribute 前面会声明一个字节长度
+        // （下面 EFXEntry/EFXAction.DoRead() 里读到的 expectedSize，含 UniqueID 的 4 字节），
+        // 原本只用来读完之后校验，没有传给 attribute 自己。给完全不认识字段结构的类型
+        // （opaque 透传实现，见 EfxUnknownAttributes.cs）留一个读取自己长度的口子。
+        // -1 = 未提供（非 MHWilds 版本，或者调用方没设置）。
+        [JsonIgnore]
+        public int ExpectedByteSize = -1;
 
         public static EFXAttribute Create(EfxVersion version, EfxAttributeType type, int seqNum = -1)
         {
@@ -684,13 +693,17 @@ namespace ReeLib.Efx
                 };
                 jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableDataColor), PtBehaviorPropType.PropColor.ToString()));
                 jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableFloat), PtBehaviorPropType.PropFloat.ToString()));
-                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableFloat2), PtBehaviorPropType.PropFloat2.ToString()));
-                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableFloat3), PtBehaviorPropType.PropFloat3.ToString()));
+                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableVec2), PtBehaviorPropType.PropVec2.ToString()));
+                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableVec3), PtBehaviorPropType.PropVec3.ToString()));
+                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableRange), PtBehaviorPropType.PropRange.ToString()));
+                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableRangeI), PtBehaviorPropType.PropRangeI.ToString()));
                 jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableInteger), PtBehaviorPropType.PropInt.ToString()));
+                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableUInt), PtBehaviorPropType.PropUint.ToString()));
+                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableBool), PtBehaviorPropType.PropBool.ToString()));
                 jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableEnum), PtBehaviorPropType.PropEnum.ToString()));
-                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableDataWString), PtBehaviorPropType.PropWstringName.ToString()));
-                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableDataPrefabPath), PtBehaviorPropType.PropPrefabpath.ToString()));
-                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableDataPrefabUnknown), "_unknown"));
+                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableDataWString), PtBehaviorPropType.PropString.ToString()));
+                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableDataPrefabPath), PtBehaviorPropType.PropPrefab.ToString()));
+                jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(PtBehaviorVariableRaw), "_unknown"));
                 jsonTypeInfo.PreferredPropertyObjectCreationHandling = JsonObjectCreationHandling.Populate;
             }
 
@@ -722,6 +735,7 @@ namespace ReeLib.Efx
                 var seqNum = handler.Read<int>();
                 var attr = EFXAttribute.Create(Version, type, seqNum);
                 attr.Version = Version;
+                attr.ExpectedByteSize = expectedSize;
                 attr.Read(handler);
                 // Log.Debug($"Read {attr.type} at {attr.Start}");
                 if (expectedSize != -1 && expectedSize - 4 != attr.StructSize) {//UniqueID is included in the struct size, so subtract 4
@@ -851,6 +865,7 @@ namespace ReeLib.Efx
                 var seqNum = handler.Read<int>();
                 var attr = EFXAttribute.Create(Version, type, seqNum);
                 attr.Version = Version;
+                attr.ExpectedByteSize = expectedSize;
                 attr.Read(handler);
                 if (expectedSize != -1 && expectedSize - 4 != attr.StructSize) {//UniqueID is included in the struct size, so subtract 4
                     throw new Exception($"EFX attribute ({attr.type}) was not properly read. Expected: {expectedSize} Actual: {attr.StructSize+4} Start:{attr.Start} End:{attr.Start + attr.StructSize}");
@@ -984,6 +999,9 @@ namespace ReeLib.Efx
     public partial class EFXUvarGroup : BaseModel
     {
         [RszIgnore] public int uvarType;
+        // RE-MotionVfxStudio：文件末尾有两个 uvar 槽位，读取时空槽会被跳过。这里记下组原来在哪个槽（0/1），
+        // 写出时放回原位；-1 表示新建的组，写出时依次填空槽。证据：Wilds 有 37 个文件只用第二个槽，原先写出后被挪到了第一个槽。
+        [RszIgnore] internal int Slot = -1;
 
         [RszInlineWString(ByteSize = true), RszConditional(nameof(uvarType), "==", 2)] public string? path;
         [RszInlineWString(ByteSize = true), RszConditional(nameof(uvarType), "==", 2)] public string? group;
@@ -1175,12 +1193,12 @@ namespace ReeLib
                 // note: found these as either 0 or 1 in DD2
                 // always 0 for RE4,DMC5,RERT
                 if (uvarType1 != 0) {
-                    var grp = new EFXUvarGroup() { uvarType = uvarType1 };
+                    var grp = new EFXUvarGroup() { uvarType = uvarType1, Slot = 0 };
                     grp.Read(handler);
                     UvarGroups.Add(grp);
                 }
                 if (uvarType2 != 0) {
-                    var grp = new EFXUvarGroup() { uvarType = uvarType2 };
+                    var grp = new EFXUvarGroup() { uvarType = uvarType2, Slot = 1 };
                     grp.Read(handler);
                     UvarGroups.Add(grp);
                 }
@@ -1413,10 +1431,14 @@ namespace ReeLib
                 }
 
                 Header.boneAttributeEntryCount = 0;
+                // RE-MotionVfxStudio：必须和 SetupBoneReferences() 用同一张骨骼表。PlayEmitter 内嵌的 EFX
+                // 自己的 Bones 通常是空的，读取时按外层文件的骨骼表解析；写出时如果只查自己的表，
+                // 所有下标都会变成 -1（RE4 22 个、Wilds 104 个文件因此和原文件不同）。
+                var relationBones = parentFile?.Bones ?? Bones;
                 foreach (var entry in Entries) {
                     foreach (var attr in entry.Attributes) {
                         if (attr is IBoneRelationAttribute parented) {
-                            var index = string.IsNullOrEmpty(parented.ParentBone) ? -1 : Bones.FindIndex(b => b.name == parented.ParentBone);
+                            var index = string.IsNullOrEmpty(parented.ParentBone) ? -1 : relationBones.FindIndex(b => b.name == parented.ParentBone);
                             handler.Write((short)index);
                             Header.boneAttributeEntryCount++;
                         }
@@ -1434,16 +1456,20 @@ namespace ReeLib
             Header.effectGroupsLength = (int)(handler.Tell() - writeStart);
 
             if (Header.Version > EfxVersion.DMC5) {
-                handler.Write(UvarGroups.FirstOrDefault()?.uvarType ?? 0);
-                handler.Write(UvarGroups.Skip(1).FirstOrDefault()?.uvarType ?? 0);
-                if (UvarGroups.Count >= 1)
-                {
-                    UvarGroups[0].Write(handler);
+                var uvarSlots = new EFXUvarGroup?[2];
+                foreach (var grp in UvarGroups) {
+                    if (grp.Slot is 0 or 1 && uvarSlots[grp.Slot] == null) uvarSlots[grp.Slot] = grp;
                 }
-                if (UvarGroups.Count >= 2)
-                {
-                    UvarGroups[1].Write(handler);
+                foreach (var grp in UvarGroups) {
+                    if (Array.IndexOf(uvarSlots, grp) >= 0) continue;
+                    int free = Array.IndexOf(uvarSlots, null);
+                    if (free < 0) break;
+                    uvarSlots[free] = grp;
                 }
+                handler.Write(uvarSlots[0]?.uvarType ?? 0);
+                handler.Write(uvarSlots[1]?.uvarType ?? 0);
+                uvarSlots[0]?.Write(handler);
+                uvarSlots[1]?.Write(handler);
             }
 
             var endPosition = handler.Tell();

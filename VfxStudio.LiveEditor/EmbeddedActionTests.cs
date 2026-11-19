@@ -82,7 +82,7 @@ internal static class EmbeddedActionTests
             check(!parentInspection["fields"]!.AsArray().Single(f => f!["path"]!.GetValue<string>() == "efxrSize")!["editable"]!.GetValue<bool>(), "PlayEmitter payload length is derived and read-only");
 
             var ribbon = Target(1, 5); var life = Target(1, 6); var rgb = Target(1, 13);
-            check(Value(ribbon.DeepClone().AsObject(), "SizeScalar.s").Length > 0 && Value(life.DeepClone().AsObject(), "KeepFrame.r").Length > 0,
+            check(Value(ribbon.DeepClone().AsObject(), "SizeScalar.s").Length > 0 && Value(life.DeepClone().AsObject(), "KeepFrame.min").Length > 0,
                 "Nested RibbonFollow size and Life fields can be inspected independently");
             check(Inspect(rgb.DeepClone().AsObject())["colorGroups"]!.AsArray().Any(c => c!["path"]!.GetValue<string>() == "RedChColor"), "Nested RgbCommon exposes its specialized color editor");
             check(Inspect(Target(1, 2))["expressionCurves"]!.AsArray().Count > 0, "Nested Transform3DExpression exposes its specialized expression curves");
@@ -91,14 +91,14 @@ internal static class EmbeddedActionTests
             Request("set_color", new() { ["target"] = rgb.DeepClone(), ["path"] = "RedChColor", ["values"] = new JsonArray(12, 34, 56, 255) });
             Request("set", new() { ["target"] = ribbon.DeepClone(), ["path"] = "SizeScalar.s", ["value"] = "0.375" });
             Request("set_fields", new() { ["target"] = life.DeepClone(), ["fields"] = new JsonArray(
-                new JsonObject { ["path"] = "KeepFrame.r", ["value"] = "17" }, new JsonObject { ["path"] = "KeepFrame.s", ["value"] = "17" }) });
+                new JsonObject { ["path"] = "KeepFrame.min", ["value"] = "17" }, new JsonObject { ["path"] = "KeepFrame.s", ["value"] = "17" }) });
             byte[] edited = Saved();
             var reread = service.Load(edited, fixture);
             try
             {
                 var child = ((EFXAttributePlayEmitter)reread.Actions[0].Attributes[0]).efxrData!;
                 check(ContentInspector.Describe(child.Entries[1].Attributes[5], child.Header.Version).Single(f => f.Description.Path == "SizeScalar.s").Description.Value == "0.375", "Nested size survives complete binary save/reopen");
-                check(ContentInspector.Describe(child.Entries[1].Attributes[6], child.Header.Version).Single(f => f.Description.Path == "KeepFrame.r").Description.Value == "17", "Nested life survives complete binary save/reopen");
+                check(ContentInspector.Describe(child.Entries[1].Attributes[6], child.Header.Version).Single(f => f.Description.Path == "KeepFrame.min").Description.Value == "17", "Nested life survives complete binary save/reopen");
                 check(ColorEditor.Inspect(child.Entries[1].Attributes[13], child.Header.Version).Single(c => c.Path == "RedChColor").Hex == "#0C2238FF", "Nested RGBA survives complete binary save/reopen");
                 check(UntouchedFingerprint(reread) == untouched, "Nested edits preserve root entries and the other two Actions");
                 check(edited.AsSpan().SequenceEqual(service.SaveToBytes(reread)), "Nested edits yield a stable full-file binary round trip");
@@ -124,11 +124,43 @@ internal static class EmbeddedActionTests
             var groupTarget=Target(0);groupTarget["kind"]="group";invalidTargets.Add(groupTarget);
             foreach(var bad in invalidTargets) Request("inspect",new(){["target"]=bad},false);
             foreach(string action in new[]{"duplicate_entry","remove_entry","restore_entry","add_entry","set_group_note"})
-            {
                 Request(action,new(){["index"]=0,["target"]=Target(0),["groupIndex"]=0,["note"]="unsafe"},false);
+            foreach(string action in new[]{"restore_entry","set_group_note"})
                 Request(action,new(){["index"]=0,["embeddedPath"]=new JsonArray(Hop()),["groupIndex"]=0,["note"]="unsafe"},false);
-            }
+            foreach(string action in new[]{"duplicate_entry","remove_entry"})
+                Request(action,new(){["index"]=99,["embeddedPath"]=new JsonArray(Hop())},false);
+            Request("add_entry",new(){["embeddedPath"]=new JsonArray(Hop(0,99))},false);
             check(revision==stableRevision && Saved().AsSpan().SequenceEqual(edited),"Malformed paths and root-only operations cannot change a same-index root entry");
+
+            // Entry operations inside the embedded file: add, duplicate and remove change only that file, allocate ids
+            // inside it, report the selection with the path, and undo restores every byte.
+            {
+                EfxFile Child(EfxFile file)=>((EFXAttributePlayEmitter)file.Actions[0].Attributes[0]).efxrData!;
+                var baseFile=service.Load(edited,fixture);
+                int childCount,childMax;
+                try{childCount=Child(baseFile).Entries.Count;childMax=Child(baseFile).Entries.Max(e=>e.index);}
+                finally{baseFile.FileHandler.Dispose();}
+                var addReply=Request("add_entry",new(){["embeddedPath"]=new JsonArray(Hop()),["name"]="embedded_new",["attributes"]=new JsonArray(new JsonObject{["type"]="Life"})});
+                check(addReply["selection"]?["index"]?.GetValue<int>()==childCount && addReply["selection"]?["embeddedPath"]?.AsArray().Count==1,"Embedded add_entry selects the new entry with its path");
+                var dupReply=Request("duplicate_entry",new(){["embeddedPath"]=new JsonArray(Hop()),["index"]=1});
+                check(dupReply["selection"]?["index"]?.GetValue<int>()==childCount+1,"Embedded duplicate_entry selects the copy");
+                var grown=service.Load(Saved(),fixture);
+                try
+                {
+                    var child=Child(grown);
+                    check(child.Entries.Count==childCount+2 && child.Entries[childCount].name=="embedded_new" && child.Entries[childCount].Attributes.Any(a=>a.type==EfxAttributeType.Life),"Embedded add_entry writes into the embedded file");
+                    check(child.Entries[childCount].index==childMax+1 && child.Entries[childCount+1].index==childMax+2,"Embedded entries get ids inside the embedded file");
+                    check(child.Entries[childCount+1].Attributes.Count==child.Entries[1].Attributes.Count,"Embedded duplicate copies the attributes");
+                    check(UntouchedFingerprint(grown)==untouched && grown.FileHandler.Tell()==grown.FileHandler.FileSize(),"Embedded entry operations leave root entries and other Actions alone");
+                }
+                finally{grown.FileHandler.Dispose();}
+                Request("remove_entry",new(){["embeddedPath"]=new JsonArray(Hop()),["index"]=childCount});
+                var shrunk=service.Load(Saved(),fixture);
+                try{check(Child(shrunk).Entries.Count==childCount+1 && Child(shrunk).Entries.All(e=>e.name!="embedded_new"),"Embedded remove_entry removes that entry");}
+                finally{shrunk.FileHandler.Dispose();}
+                for(int i=0;i<3;i++) Request("undo");
+                check(Saved().AsSpan().SequenceEqual(edited),"Undoing embedded entry operations restores every byte");
+            }
 
             Request("remove_attribute",new(){["target"]=Target(1,12)}); // real child FadeByDepth
             var shortened=Saved();var without=service.Load(shortened,fixture);

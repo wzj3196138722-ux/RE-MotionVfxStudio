@@ -35,14 +35,18 @@ internal sealed record CacheSourceDescriptor(string SourceKind, string SourceId,
                 throw new CacheSourceException("cache_source_invalid", "缓存来源对象标识无效：" + key + "；未打开本地文件。");
             return value;
         }
-        if (Text("sourceKind") != "actual_effect_player_holder" || !Flag("localConfirmed"))
+        // actual_effect_player_holder: the holder of an EffectPlayer the character created.
+        // provider_resource_holder: the ProviderData slot holder passed to a local character's effect creation,
+        // used where created EffectPlayers cannot be read back (RE4 createEffectInternal direct overload).
+        string kind = Text("sourceKind");
+        if (kind is not ("actual_effect_player_holder" or "provider_resource_holder") || !Flag("localConfirmed"))
             throw new CacheSourceException("cache_source_invalid", "必须选择已确认由角色实际创建的特效缓存来源；未打开本地文件。");
         if (!TryEpoch(source["sceneEpoch"], out var epoch))
             throw new CacheSourceException("cache_source_invalid", "缓存来源场景编号无效；未打开本地文件。");
         string actual = Text("actualPath", 4096), shared = Text("sharedTargetPath", 4096);
         try { ResourceResolver.Normalize(actual); ResourceResolver.Normalize(shared); }
         catch (ArgumentException) { throw new CacheSourceException("cache_source_invalid", "缓存来源路径无效；未打开本地文件。"); }
-        return new("actual_effect_player_holder", Text("sourceId"), Text("eventId"), epoch,
+        return new(kind, Text("sourceId"), Text("eventId"), epoch,
             actual, Identity("playerIdentity"), Identity("actualHolderIdentity"), shared, true,
             Text("availability"), Flag("currentPlayerVerified"), Flag("cacheBytesAvailable"));
     }

@@ -10,7 +10,9 @@ using ReeLib.InternalAttributes;
 
 namespace VfxStudio.LiveEditor;
 
-internal sealed record FieldDescription(string Path, string Label, string Type, string Value, bool Editable, string? Reason = null, string[]? Choices = null, string? OwnerType = null);
+/// <param name="Semantic">RE4 meaning, unit and status of the field (FieldSemantics), or null when nothing is documented.</param>
+internal sealed record FieldDescription(string Path, string Label, string Type, string Value, bool Editable, string? Reason = null, string[]? Choices = null, string? OwnerType = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] FieldSemantic? Semantic = null);
 internal sealed record EditableField(FieldDescription Description, Type ValueType, Action<object?>? Set);
 internal sealed record EditableCurve(string Path, EfxClipData Data);
 internal sealed record InspectionContent(IReadOnlyList<EditableField> Fields, IReadOnlyList<EditableCurve> Curves);
@@ -48,13 +50,15 @@ internal static class ContentInspector
     {
         var result = new List<EditableField>();
         var ancestors = new HashSet<object>(ReferenceEqualityComparer.Instance);
+        string? attributeType = (root as EFXAttribute)?.type.ToString();
         Walk(() => root, null, root.GetType(), "", null, 0, true);
         return result;
 
         void Leaf(string path, Type type, object? value, Action<object?>? setter, string? reason, string? ownerType = null)
         {
             result.Add(new(new(path, path, type.FullName ?? type.Name, Format(value), setter != null && reason == null, reason,
-                type.IsEnum ? ExpressionInspector.Choices(type) ?? Enum.GetNames(type) : type == typeof(bool) ? ["false", "true"] : null, ownerType), type, reason == null ? setter : null));
+                type.IsEnum ? ExpressionInspector.Choices(type) ?? Enum.GetNames(type) : type == typeof(bool) ? ["false", "true"] : null, ownerType,
+                FieldSemantics.For(attributeType, path, version)), type, reason == null ? setter : null));
         }
 
         void Walk(Func<object?> get, Action<object?>? set, Type declaredType, string path, string? blocked, int depth, bool isRoot = false, string? ownerType = null)
@@ -154,6 +158,7 @@ internal static class ContentInspector
                 }
                 string? reason = spans.FirstOrDefault(s => !s.Active).Reason;
                 spans.RemoveAll(s => s.End == field.Name);
+                if (owner == typeof(EFXAttribute) && field.Name == "ExpectedByteSize") reason = "读取时记下的属性字节数，不写回文件。";
                 if (field.Name == "Version" || (owner == typeof(EFXAttribute) && field.Name is "type" or "UniqueID") ||
                     (instance is EFXEntryBase && field.Name is "index" or "nameHash")) reason = "Structural identity or derived metadata.";
                 if (instance is EfxHeader && field.Name != "dimensionType") reason = "File identity or derived structure count; managed by the serializer.";
@@ -170,6 +175,14 @@ internal static class ContentInspector
                     if (field.Name is "rawValue" or "mdfPropertyIndex" && material.parameterType == MaterialParameterType.Texture) reason = "Texture binding metadata; edit texturePath or the active TextureValue fields.";
                 }
                 if (instance is EfxClipHeader && field.Name == "frameCount") reason = "Curve segment frame count; changing it requires resizing and remapping the keyframe collection.";
+                // PtBehavior: the script class defines each parameter's name and type. Only values are editable; the writer
+                // recalculates varSize and string sizes (PtBehaviorVariable.DoWrite).
+                if (instance is ReeLib.Efx.Structs.Pt.EFXAttributePtBehavior && field.Name is "behaviorString" or "unkn1")
+                    reason = "脚本类名决定整组参数；换脚本需要换掉全部参数，这里不能直接改。";
+                if (instance is ReeLib.Efx.Structs.Pt.PtBehaviorVariable && field.Name is "varSize" or "dataType" or "behaviorProperty")
+                    reason = "参数的名称、类型和长度由脚本类定义，改了游戏会找不到这个参数。";
+                if (instance is ReeLib.Efx.Structs.Pt.PtBehaviorVariableDataBase && field.Name is "unkn" or "size" or "re4_unkn0" or "re4_unkn1" or "restData" or "data")
+                    reason = "参数的存储信息（长度、序号、未解析的字节），由文件结构决定。";
                 if (field.IsInitOnly) reason ??= "Read-only member.";
                 if (field.IsDefined(typeof(RszIgnoreAttribute)) && !ManualField(instance, field.Name))
                     reason ??= "Runtime-only/cache member; no verified serialization writer.";
@@ -362,5 +375,42 @@ internal sealed class Condition
         var field = instance.GetType().GetField(token, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
         object? value = field?.GetValue(instance) ?? instance.GetType().GetProperty(token)?.GetValue(instance);
         return value == null ? throw new FormatException("Unknown condition member: " + token) : Convert.ToInt64(value, CultureInfo.InvariantCulture);
+    }
+}
+
+/// <summary>Editable field values of an EFX object as path/value text, the same paths and formatting as
+/// set_fields. Used to build and apply initial values for new attributes.</summary>
+public static class EfxFieldValues
+{
+    /// <summary>Editable scalar fields of <paramref name="root"/>, in model order.</summary>
+    public static IReadOnlyList<KeyValuePair<string, string>> Editable(object root, EfxVersion version) =>
+        ContentInspector.Describe(root, version).Where(f => f.Description.Editable && f.Set != null)
+            .Select(f => KeyValuePair.Create(f.Description.Path, f.Description.Value)).ToArray();
+
+    /// <summary>Every described field path of <paramref name="root"/>, editable or not, in model order.</summary>
+    public static IReadOnlyList<string> Paths(object root, EfxVersion version) =>
+        ContentInspector.Describe(root, version).Select(f => f.Description.Path).ToArray();
+
+    /// <summary>Writes the values whose paths exist and are editable. Some fields select which nested object
+    /// exists (and so which paths follow), so the walk repeats until nothing changes.</summary>
+    /// <returns>Paths written, and paths that were not present or editable after the last pass.</returns>
+    public static (int Written, string[] Skipped) Apply(object root, EfxVersion version, IReadOnlyList<KeyValuePair<string, string>> values)
+    {
+        var pending = values.ToDictionary(v => v.Key, v => v.Value, StringComparer.Ordinal);
+        int written = 0;
+        for (int guard = 0; pending.Count > 0 && guard < 10000; guard++)
+        {
+            bool wrote = false;
+            foreach (var field in ContentInspector.Describe(root, version))
+            {
+                if (!field.Description.Editable || field.Set == null || !pending.Remove(field.Description.Path, out var text)) continue;
+                var value = ContentInspector.Parse(text, field.ValueType);
+                if (ContentInspector.Format(value) == field.Description.Value) continue;
+                field.Set(value); written++; wrote = true;
+                break;   // the field list can change after a write: describe again
+            }
+            if (!wrote) break;
+        }
+        return (written, pending.Keys.ToArray());
     }
 }

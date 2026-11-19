@@ -8,42 +8,38 @@ public enum UnaryExpressionOperator
 	Negation = 0,
 }
 
-/// <summary>
-/// Am not 100% sure on the exact operators for 1-4 but they seem reasonable.
-/// </summary>
 public enum BinaryExpressionOperator
 {
-	Max = 0,
-	Add = 1,
-	Sub = 2,
-	Mul = 3,
-	Div = 4,
-	Min = 5,
+	Pow = 0,
+	Mul = 1,
+	Div = 2,
+	Mod = 3,
+	Add = 4,
+	Sub = 5,
 }
 
 public enum EfxExpressionFunction
 {
-	// unary potential candidates: sin/cos/tan/atan2/inverse/reciprocial/sqrt/pow2/pow3/root3/exp/abs/ceil/floor/clamp01/log
-	// When changing any of these names, also add the previous name to EfxExpressionParser.functionArgCount for compatiblity
-	Unary0 = 0,
-	Unary1 = 1,
-	Unary2 = 2,
-	Unary4 = 4,
-	Unary5 = 5,
-	Unary6 = 6,
-	Unary7 = 7,
-	Unary8 = 8,
-	Unary9 = 9,
-	Unary10 = 10,
-	Unary11 = 11,
-	Unary12 = 12,
+	Sin = 0,
+	Cos = 1,
+	Asin = 2,
+	Acos = 3,
+	Floor = 4,
+	Ceil = 5,
+	Log = 6,
+	Log10 = 7,
+	Exp = 8,
+	Abs = 9,
+	Saturate = 10,
+	SinDeg = 11,
+	CosDeg = 12,
 	Lerp = 15,
-	InvLerp = 16,
-	Clamp = 17,
-	Func18 = 18,
-	Func19 = 19,
-	Func20 = 20,
-	Func21 = 21,
+	Clamp = 16,
+	SmoothStep = 17,
+	Min = 18,
+	Max = 19,
+	Pow = 20,
+	Remap = 21,
 }
 
 public enum ExpressionParameterSource
@@ -148,6 +144,8 @@ public class ExpressionBinaryOperation : ExpressionAtom
         BinaryExpressionOperator.Sub => $"({left} - {right})",
         BinaryExpressionOperator.Mul => $"({left} * {right})",
         BinaryExpressionOperator.Div => $"({left} / {right})",
+        BinaryExpressionOperator.Mod => $"({left} % {right})",
+        BinaryExpressionOperator.Pow => $"({left} ^ {right})",
         _ => $"{oper}({left}, {right})",
     };
 
@@ -156,68 +154,52 @@ public class ExpressionBinaryOperation : ExpressionAtom
 		return op switch {
 			BinaryExpressionOperator.Add => 1,
 			BinaryExpressionOperator.Sub => 1,
-			BinaryExpressionOperator.Mul => 2,
+			BinaryExpressionOperator.Mod => 2,
 			BinaryExpressionOperator.Div => 2,
-			BinaryExpressionOperator.Max => 3,
-			BinaryExpressionOperator.Min => 3,
-			_ => 4,
+			BinaryExpressionOperator.Mul => 2,
+			BinaryExpressionOperator.Pow => 3,
+			_ => 5,
 		};
 	}
 
     internal override void AppendString(StringBuilder sb)
     {
-		switch (oper) {
-			case BinaryExpressionOperator.Add:
-			case BinaryExpressionOperator.Sub:
-			case BinaryExpressionOperator.Div:
-			case BinaryExpressionOperator.Mul:
-				var p0 = GetPrecedence(oper);
-				if (left is ExpressionBinaryOperation l) {
-					var p1 = GetPrecedence(l.oper);
-					if (p1 >= p0) {
-						l.AppendString(sb);
-					} else {
-						sb.Append('(');
-						l.AppendString(sb);
-						sb.Append(')');
-					}
-				} else {
-					left.AppendString(sb);
-				}
-				sb.Append(' ');
-				sb.Append(oper switch {
-					BinaryExpressionOperator.Add => "+",
-					BinaryExpressionOperator.Sub => "-",
-					BinaryExpressionOperator.Mul => "*",
-					BinaryExpressionOperator.Div => "/",
-					_ => "?"
-				});
-				sb.Append(' ');
-				if (right is ExpressionBinaryOperation r) {
-					var p2 = GetPrecedence(r.oper);
-					if (p2 >= p0) {
-						r.AppendString(sb);
-					} else {
-						sb.Append('(');
-						r.AppendString(sb);
-						sb.Append(')');
-					}
-				} else {
-					right.AppendString(sb);
-				}
-
-				break;
-			case BinaryExpressionOperator.Min:
-			case BinaryExpressionOperator.Max:
-				sb.Append(oper);
+		var p0 = GetPrecedence(oper);
+		if (left is ExpressionBinaryOperation l) {
+			var p1 = GetPrecedence(l.oper);
+			if (p1 >= p0) {
+				l.AppendString(sb);
+			} else {
 				sb.Append('(');
-				left.AppendString(sb);
-				sb.Append(", ");
-				right.AppendString(sb);
+				l.AppendString(sb);
 				sb.Append(')');
-				break;
-			default:
-				throw new Exception("Unsupported binary operator " + oper);
+			}
+		} else {
+			left.AppendString(sb);
+		}
+
+		sb.Append(' ');
+		sb.Append(oper switch {
+			BinaryExpressionOperator.Add => "+",
+			BinaryExpressionOperator.Sub => "-",
+			BinaryExpressionOperator.Mul => "*",
+			BinaryExpressionOperator.Div => "/",
+			BinaryExpressionOperator.Pow => "^",
+			BinaryExpressionOperator.Mod => "%",
+			_ => "?"
+		});
+		sb.Append(' ');
+		if (right is ExpressionBinaryOperation r) {
+			var p2 = GetPrecedence(r.oper);
+			if (p2 >= p0) {
+				r.AppendString(sb);
+			} else {
+				sb.Append('(');
+				r.AppendString(sb);
+				sb.Append(')');
+			}
+		} else {
+			right.AppendString(sb);
 		}
     }
 }

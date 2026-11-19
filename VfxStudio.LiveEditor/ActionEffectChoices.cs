@@ -14,7 +14,7 @@ internal sealed partial class EditorEngine
             if (paths.TryGetValue(resource, out string? actual)) resource = actual;
         }
         var snapshot = new GameInstallResourceReader(options).ReadActionResource(resource, "efx");
-        var efx = new EfxEditorService().Load(snapshot.Content, resource + ".5571972");
+        var efx = new EfxEditorService().Load(snapshot.Content, options.Game.Versioned(resource, "efx"));
         try
         {
             return new { resourcePath = resource, groups = efx.EffectGroups.Select(g => g.groupName).Distinct(StringComparer.Ordinal).ToArray() };

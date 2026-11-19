@@ -12,8 +12,8 @@ public partial class EFXAttributeSpawn : EFXAttribute
 	public uint MaxParticles;
 	[RszVersion('>', EfxVersion.RE3)]
 	public uint ParticleInterval;
-	public via.Int2 SpawnNum;
-	public via.Int2 IntervalFrame;
+	public MinMaxI SpawnNum;
+	public MinMaxI IntervalFrame;
 	[RszVersion("<=", EfxVersion.RE3)]
 	public via.RangeI LoopNumDmc5;
 
@@ -22,39 +22,42 @@ public partial class EFXAttributeSpawn : EFXAttribute
 	public uint UseSpawnFrameInt;
 	[RszVersion(EfxVersion.DD2)] public bool UseSpawnFrame;
 
-	public via.RangeI SpawnFrame;
+	public MinExtraI SpawnFrame;
 
 	[RszVersion(">", EfxVersion.RE3, EndAt = nameof(OriginalMaxParticles))]
-	public via.RangeI LoopNum;
+	public MinExtraI LoopNum;
 
-	public via.Int2 EmitterDelayFrame;
+	public MinMaxI EmitterDelayFrame;
 
-	[RszVersion(EfxVersion.DD2, EndAt = nameof(UseRevival))]
-	public bool RingBufferMode;
-	public bool UseLoopNumRatio;
-	public bool Interpolate;
+	// RE4 起就有这一段（re4.exe 加载器 3d15720 读 UniqueID + 0x58 字节，tick 3d14c20 使用），字段顺序与 DD2 相同；
+	// RE4 的开关是 4 字节，DD2 起是 1 字节 bool，所以 RE4 用 *Int 版本（同 UseSpawnFrameInt 的约定）。
+	// RingBufferMode：仅 GPU 类型，写入位置在粒子池内循环、覆盖最旧粒子。
+	// UseLoopNumRatio：LoopNum 改为 r + s·t，t 由 SpawnExpression 给出。
+	// Interpolate：开启按距离发射（DistancePerSpawn 米一个），并把本帧粒子沿发射器路径摊开。
+	// RevivalNum：额外的轮数 = r + randint[0, s]，{0,0} = 无限；RevivalInterval：下一轮前等待的帧数 = r + randint[0, s]。
+	[RszVersion(EfxVersion.RE4, EndAt = nameof(RevivalInterval))]
+	[RszVersion('<', EfxVersion.DD2)] public uint RingBufferModeInt;
+	[RszVersion(EfxVersion.DD2)] public bool RingBufferMode;
+	[RszVersion('<', EfxVersion.DD2)] public uint UseLoopNumRatioInt;
+	[RszVersion(EfxVersion.DD2)] public bool UseLoopNumRatio;
+	[RszVersion('<', EfxVersion.DD2)] public uint InterpolateInt;
+	[RszVersion(EfxVersion.DD2)] public bool Interpolate;
 	public float DistancePerSpawn;
-	public bool UseRevival;
-    //TODO FIX Check these are correct on older games
-	[RszVersion(EfxVersion.RE4)]
-    public via.RangeI RevivalNum;
-	[RszVersion(EfxVersion.DD2)]
-    public via.RangeI RevivalInterval;
-
-
-	[RszVersionExact(EfxVersion.RE4, EndAt = nameof(re4_unkn4))] // TODO recheck
-	public uint re4_unkn0;
-	public float re4_unkn1;
-	public uint re4_unkn2;
-	public uint re4_unkn3;
-	public uint re4_unkn4; // TODO need to verify where to place these relative to SpawnChanceFrame
+	[RszVersion('<', EfxVersion.DD2)] public uint UseRevivalInt;
+	[RszVersion(EfxVersion.DD2)] public bool UseRevival;
+	public MinExtraI RevivalNum;
+	public MinExtraI RevivalInterval;
 
 	[RszVersion(EfxVersion.DD2)] public bool TrySpawnAllParticles;
 
-	[RszVersion(EfxVersion.RE8)]
+	// RE4 文件里没有下面两个字段（该位置是 RevivalInterval）；其他版本保持原样，未核对。
+	[RszVersion(EfxVersion.RE8, EndAt = nameof(SpawnChanceFrame))]
+	[RszVersion("!=", EfxVersion.RE4)]
 	public uint SpawnChanceFrame;
     [RszVersion(EfxVersion.DD2)] public bool InitializeFull;
-    [RszVersion(EfxVersion.RERT)] public uint OriginalMaxParticles;
+    [RszVersion(EfxVersion.RERT, EndAt = nameof(OriginalMaxParticles))]
+    [RszVersion("!=", EfxVersion.RE4)]
+    public uint OriginalMaxParticles;
 
     /*
 	[RszVersion(EfxVersion.RE4, EndAt = nameof(re4_unkn6))]
@@ -77,16 +80,17 @@ public partial class EFXAttributeSpawnExpression : EFXAttribute, IExpressionAttr
 
 	public EFXAttributeSpawnExpression() : base(EfxAttributeType.SpawnExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(7) { BitNames = [nameof(spawnNum), nameof(spawnNumRange), nameof(intervalFrame), nameof(intervalFrameRange), nameof(emitterDelayFrame), nameof(emitterDelayFrameRange), nameof(speed) ] };
-	public ExpressionAssignType spawnNum;
-	public ExpressionAssignType spawnNumRange;
-	public ExpressionAssignType intervalFrame;
-	public ExpressionAssignType intervalFrameRange;
-	[RszVersion(EfxVersion.RE3, EndAt = nameof(emitterDelayFrameRange))]
-	public ExpressionAssignType emitterDelayFrame;
-	public ExpressionAssignType emitterDelayFrameRange;
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；EmitterDelayFrame 只在第一帧生效；EmitterDelayFrame/LoopNumRatio 无引擎名。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(7) { BitNames = [ nameof(SpawnNum), nameof(SpawnNumRange), nameof(IntervalFrame), nameof(IntervalFrameRange), nameof(EmitterDelayFrame), nameof(EmitterDelayFrameRange), nameof(LoopNumRatio) ] };
+	public ExpressionAssignType SpawnNum;
+	public ExpressionAssignType SpawnNumRange;
+	public ExpressionAssignType IntervalFrame;
+	public ExpressionAssignType IntervalFrameRange;
+	[RszVersion(EfxVersion.RE3, EndAt = nameof(EmitterDelayFrameRange))]
+	public ExpressionAssignType EmitterDelayFrame;
+	public ExpressionAssignType EmitterDelayFrameRange;
     [RszVersion(EfxVersion.RERT)]
-	public ExpressionAssignType speed;
+	public ExpressionAssignType LoopNumRatio;
 
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
@@ -103,9 +107,9 @@ public partial class EFXAttributeParentOptions : EFXAttribute, IBoneRelationAttr
 	public uint ParticleUseLocal_re7;
 	[RszVersion(EfxVersion.RE8, EndAt = nameof(ConstInheritReleaseRate))]
 	public byte ParticleUseLocal;
-	public via.Range ConstInheritRate;
-	public via.RangeI ConstFrame;
-    public via.RangeI ConstReleaseFrame;
+	public CenterSpread ConstInheritRate;
+	public MinExtraI ConstFrame;
+    public MinExtraI ConstReleaseFrame;
 	public float ConstInheritReleaseRate;
 
 	[RszVersion(EfxVersion.Pragmata)] public uint PragUkn1;
@@ -143,12 +147,15 @@ public partial class EFXAttributeParentOptionsExpression : EFXAttribute, IExpres
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.Life, EfxVersion.RE7, EfxVersion.DMC5, EfxVersion.RE4, EfxVersion.DD2)]
 public partial class EFXAttributeLife : EFXAttribute
 {
-	public via.RangeI AppearFrame;
-	public via.RangeI KeepFrame;
-	public via.RangeI VanishFrame;
-	public via.RangeI KeepHoldFrame;
+	public MinMaxI AppearFrame;
+	public MinMaxI KeepFrame;
+	public MinMaxI VanishFrame;
+	public MinMaxI KeepHoldFrame;
+	// 低 2 位是保持模式（re4.exe 3d1be80）：0 不保持（忽略 KeepHoldFrame）；1 Keep 后满 alpha 保持 KeepHoldFrame 帧，
+	// {0,0} = 直到发射器停止；2 同 1，但释放时再播一遍 Keep；3 CPU 每帧把 alpha 置 0（不要用）。
+	// 四个 *Frame 在 [min, max] 内均匀取整（不是中心 ± 幅度），max = min − 1 会除以零。
 	[RszVersion(EfxVersion.RE2)]
-	public uint Flags;//VanishEvent flags
+	public uint Flags;
 
 	public EFXAttributeLife() : base(EfxAttributeType.Life) { }
 
@@ -163,24 +170,21 @@ public partial class EFXAttributeLifeExpression : EFXAttribute, IExpressionAttri
 
 	public EFXAttributeLifeExpression() : base(EfxAttributeType.LifeExpression) { }
 
-	// re7 and dd2 have value + rand pairs: 1-2 = appear, 3-4 = keep, 5-6 = vanish
-	// rest have just singular values
-	// TODO bitset versioning
-	[RszClassInstance] public BitSet expressionBits = new BitSet(6)  { BitNameDict = new () {
-		[1] = nameof(appearLife),
-		[2] = nameof(keepLife),
-		[3] = nameof(vanishLife),
-	} };
+	// re4.exe（applier 读宿主 Life 的 RangeI {min, max}）：6 个表达式槽，bit i = 槽位 i：
+	// AppearFrame、AppearFrameRange、KeepFrame、KeepFrameRange、VanishFrame、VanishFrameRange（Range = 区间的 max，整数）。
+	// RE4 文件里只有 3 个运算类型，每对槽位共用一个；RE7 / DD2 起每个槽位各有一个。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(6) { BitNames = [
+		nameof(AppearFrame), nameof(AppearFrameRange), nameof(KeepFrame), nameof(KeepFrameRange), nameof(VanishFrame), nameof(VanishFrameRange) ] };
 
-	public ExpressionAssignType appearLife;
+	public ExpressionAssignType AppearFrame;
 	[RszVersion(nameof(Version), ">=", EfxVersion.DD2, "||", nameof(Version), "==", EfxVersion.RE7)]
-	public ExpressionAssignType appearLifeRand;
-	public ExpressionAssignType keepLife;
+	public ExpressionAssignType AppearFrameRange;
+	public ExpressionAssignType KeepFrame;
 	[RszVersion(nameof(Version), ">=", EfxVersion.DD2, "||", nameof(Version), "==", EfxVersion.RE7)]
-	public ExpressionAssignType keepLifeRand;
-	public ExpressionAssignType vanishLife;
+	public ExpressionAssignType KeepFrameRange;
+	public ExpressionAssignType VanishFrame;
 	[RszVersion(nameof(Version), ">=", EfxVersion.DD2, "||", nameof(Version), "==", EfxVersion.RE7)]
-	public ExpressionAssignType vanishLifeRand;
+	public ExpressionAssignType VanishFrameRange;
 
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
@@ -292,10 +296,17 @@ public partial class EFXAttributeUVSequence : EFXAttribute
 {
 	public EFXAttributeUVSequence() : base(EfxAttributeType.UVSequence) { }
 
-	public via.RangeI SequenceNo;
-    public via.RangeI PatternNo;
-    public via.Range PlaySpeed;
-	public uint Flags;//<comment="0 - Show only starting frame,1 - Looped Animation, 2 - Play once and disappear after last frame, 3 - Play once and stay on last frame until end of duration in Life struct.">;
+	// re4.exe（vtable 7a0b668，加载器 3d1e030）。引擎名只有 PatternNo、PlaySpeed（文本解析器）；其余沿用原名。
+	// .uvs 里第几个序列：在 [r, s) 内随机（s 不含），只存 8 位。RE4 官方全是 {0,1}。
+	public MinMaxExclusiveI SequenceNo;
+	// 起始格：在 [r, s) 内随机（s 不含），只存 8 位。不要超过序列的格数。
+    public MinMaxExclusiveI PatternNo;
+	// 在 [s, r] 内均匀取（r 是最大值，不是幅度）；单位：每 1/60 秒前进的格数，1.0 = 60 fps 序列帧。
+    public MinMax PlaySpeed;
+	// 位 0-1 播放模式：0 只显示起始格（忽略 PlaySpeed）、1 循环（从第 0 格重开）、2 播一遍后粒子死亡、3 播一遍停在最后一格。
+	// 位 2-3 水平翻转、位 4-5 垂直翻转、位 6-7 倒放、位 8-9 旋转 90°：各为 0 关、1 总是、2 每粒子随机（3 未定义，别用）。
+	// 位 10 = 相邻格交叉淡入；位 11 写入发射器标志（用途未追）；更高位不读。例：21 = 循环 + 固定水平翻转 + 固定垂直翻转。
+	public uint Flags;
 	[RszInlineWString] public string? UVSPath;
 
     public override string ToString() => $"UVS path: {UVSPath}";
@@ -305,10 +316,16 @@ public partial class EFXAttributeUVSequenceModifier : EFXAttribute
 {
 	public EFXAttributeUVSequenceModifier() : base(EfxAttributeType.UVSequenceModifier) { }
 
+	// re4.exe：vtable 7a141e8，加载器 3d9c0f0，逐粒子 3d9c260。名字来自解析器。逐粒子覆盖宿主 UVSequence 的播放速度。
+	// Flags 无引擎名：bit0 = 启用；bit1 = 第三个区间是系数（1）还是帧数（0）。
 	public uint Flags;
-	public via.Range PlaySpeedInit;
-    public via.Range PlaySpeedFinal;
-    public via.Range PlaySpeedChangeTimeCoef;
+	// 出生时的播放速度，lerp(min, max, u)。
+	public MinMax PlaySpeedInit;
+	// 最终稳定的播放速度。
+    public MinMax PlaySpeedFinal;
+	// 引擎里同一对数有两个名字：PlaySpeedChangeTime（bit1 = 0，用这么多帧从 Init 线性变到 Final）/
+	// PlaySpeedChangeCoef（bit1 = 1，速度 = Final + (Init − Final)·Coef^t）。官方多为 bit1 = 1、Coef 0.94–0.995。
+    public MinMax PlaySpeedChangeTimeCoef;
 }
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.UVSequenceExpression, EfxVersion.DMC5, EfxVersion.RE4)]
 public partial class EFXAttributeUVSequenceExpression : EFXAttribute, IExpressionAttribute
@@ -318,20 +335,14 @@ public partial class EFXAttributeUVSequenceExpression : EFXAttribute, IExpressio
 
 	public EFXAttributeUVSequenceExpression() : base(EfxAttributeType.UVSequenceExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(6) { BitNameDict = new () {
-		[1] = nameof(speed),
-		[2] = nameof(speedRand),
-		// [3] = nameof(unkn3),
-		// [4] = nameof(unkn4),
-		// [5] = nameof(unkn5),
-		// [6] = nameof(unkn6),
-	} };
-	public ExpressionAssignType speed;
-	public ExpressionAssignType speedRand;
-	public ExpressionAssignType unkn3;
-	public ExpressionAssignType unkn4;
-	public ExpressionAssignType unkn5;
-	public ExpressionAssignType unkn6;
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；SequenceNo 只在第一帧生效。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(6) { BitNames = [ nameof(PlaySpeed), nameof(PlaySpeedRange), nameof(SequenceNo), nameof(SequenceNoRange), nameof(PatternNo), nameof(PatternNoRange) ] };
+	public ExpressionAssignType PlaySpeed;
+	public ExpressionAssignType PlaySpeedRange;
+	public ExpressionAssignType SequenceNo;
+	public ExpressionAssignType SequenceNoRange;
+	public ExpressionAssignType PatternNo;
+	public ExpressionAssignType PatternNoRange;
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 
@@ -340,10 +351,22 @@ public partial class EFXAttributeAlphaCorrection : EFXAttribute
 {
 	public EFXAttributeAlphaCorrection() : base(EfxAttributeType.AlphaCorrection) { }
 
+	// re4.exe：加载器 3d25d60 读 UniqueID + 0x10 字节，解析器 3d25b10。CPU 把每粒子 4 字节打包给着色器
+	// （Hi、Lo、Curve、模式）；公式读自 billboarddraw.vsdf（VSGpuBillboard + PSGpuParticle）。
+	// V = 修正前的顶点 alpha（含各渐隐系数），A = 贴图 alpha：
+	//   模式 0：A·V；模式 1：saturate((A − T)/(LoPass − T))，T = 1 − HiPass·f(V)（溶解/侵蚀）；
+	//   模式 2：smoothstep(LoPass, HiPass, A·V)；模式 3：pow(A·V, lerp(Hi·8, Lo·8, z))·z（z 推测为 Life 渐隐）。
+	// 无引擎名（按作用起名）：低 2 位 = 模式 0 Disable / 1 AlphaCurve / 2 AlphaThreshold / 3 LifePower。
+	// 模式 3 会让 CPU 顶点 alpha 不再乘 Life 渐隐（发射器标志 0x1000）。
 	[RszVersion(EfxVersion.RE2)]
 	public uint Flags;
-	public float LowPass;
-	public float HighPass;
+	// 引擎名 HiPass（别名 Max、LifePow0）。旧名 LowPass（名字原来是反的）。模式 1/2：重映射上限，取 [0,1]，
+	// 打包成 trunc(v·255.5) 的 8 位，超出会回绕；模式 3：[0,8) 的指数。
+	public float HiPass;
+	// 引擎名 LoPass（别名 Min、LifePow1）。旧名 HighPass。模式 1/2：重映射下限（语料里模式 2 时总有 Hi > Lo）；模式 3：指数。
+	public float LoPass;
+	// 无引擎名：带符号曲线项，-3..+3（打包成 c/3·127+127.5），只在模式 1 起作用：
+	// f(V) = (1 − e^(−sV))/(1 − e^(−s))，s ≈ 9.07·CurveConst，0 = 线性。对应 MHWI 的 unkn3。
 	public float CurveConst;
 }
 
@@ -352,89 +375,119 @@ public partial class EFXAttributeShaderSettings : EFXAttribute
 {
 	public EFXAttributeShaderSettings() : base(EfxAttributeType.ShaderSettings) { }
 
-	public float Saturation;
-	public uint unkn2;
-    [RszVersion(EfxVersion.RE8, EndAt = nameof(re8_unkn2))]
-	public float re8_unkn1;
-	public float re8_unkn2;
+	// 名字来自 re4.exe（vtable 7a0bd38，加载器 3d27990 读 UniqueID + 0xa4 字节，块 3d27b60，文本解析器 3d26dd0，
+	// 每发射器更新 3d281e0）。没有引擎名的字段按作用起名并注明。语义只在 RE4 上核对过。
+	// 软粒子距离（米，旧名 Saturation）；只在 Flags 位 2 置位时生效。
+	public float SoftParticleDistance;
+	// 无引擎名（旧名 unkn2）：0 = 不受光，1–4 = 受光、逐粒子光照分辨率 1/2/4/8（门控已证实，档位含义为推测；
+	// 低光照画质时 2–4 被压成 1）。对应 MHWI 的 particleLighting。
+	public uint ParticleLighting;
+    [RszVersion(EfxVersion.RE8, EndAt = nameof(PriorityBias))]
+	// 排序距离偏移（旧名 re8_unkn1）。
+	public float DistanceBias;
+	// 排序优先级偏移（旧名 re8_unkn2；exe 按整数读，旧代码按 float）。
+	public int PriorityBias;
 
-	public float LayerNegative;
+	// 加到着色器 depthBias 上的深度偏移（旧名 LayerNegative）。
+	public float DepthBias;
     [RszVersion('<', EfxVersion.RE8)]
 	public uint LayerPositive;
 	[RszVersionExact(EfxVersion.RE7)]
 	public uint toggle_re7;
+	// 无引擎名（旧名 re8_unkn000）：位 2 = 软粒子（官方 99.8% 打开），位 13 = 启用 StencilTarget，位 16 = 分配逐粒子光照缓冲。
     [RszVersion(EfxVersion.RE8)]
-	public uint re8_unkn000;
+	public uint Flags;
 
-	public via.Color color0;
-	public float unkn6;
-	public float unkn7;
-	public float unkn8;
-	public float unkn9;
-	public float unkn10;
-	public float unkn11;
-	public float unkn12;
+	// 阴影颜色，只用 RGB（旧名 color0）。
+	public via.Color ShadowColor;
+	// 体积散射块（旧名 unkn6..12）：ScatteringMode = 0 时引擎忽略这些值、改用默认 0.15 / 0.15 / 0.2；RE4 从不打开。
+	public float RayleighCoeff;
+	public float MieCoeff;
+	public float MieDropoff;
+	public float AlphaScale;
+	public float DensityScale;
+	// 百分比，运行时 ×0.01。
+	public float DensityMax;
+	public float DensityMin;
+	// 只用位 0，写入发射器标志位 13（含义未追）。
 	public uint unkn13;
-	public uint unkn14;
-	public float unkn15;
-	public float unkn16;
+	// 无引擎名（旧名 unkn14）：0 = 不用散射参数。
+	public uint ScatteringMode;
+	// 受光块（旧名 unkn15、unkn16、unkn17）。BackfaceLightRatio 运行时 ×8。
+	public float LightShadowRatio;
+	public float BackfaceLightRatio;
+	// MHWilds 起新增。MHWilds 这一段（LightingGrayscaleRatio .. SSRAlphaThreshold）的顺序由 MonsterHunterWilds.exe
+	// 构建器（vtable e0fdc90，slot 16）在语料字节上实跑确定：每个字换成标记值，看它落到块里哪个解析器名的位置。
+	[RszVersion(EfxVersion.MHWilds)]
+	public float LightingGrayscaleRatio;
 	[RszVersion(EfxVersion.RE2)]
-	public float unkn17;
+	public float MieShadowRatio;
 
-	[RszVersion(EfxVersion.RE4, EndAt = nameof(re4_unkn3))]
-	public float re4_unkn1;
-	public float re4_unkn2;
-	public float re4_unkn3;
+	// 光照采样偏移（旧名 re4_unkn1..3）。
+	[RszVersion(EfxVersion.RE4, EndAt = nameof(LightingOffsetZ))]
+	public float LightingOffsetX;
+	public float LightingOffsetY;
+	public float LightingOffsetZ;
 
-    [RszVersion('<', EfxVersion.DD2)]
-	public uint unkn19;
+	// 旧名 unkn19；exe 按 float 读（旧代码按 uint）。DD2 没有；MHWilds 又有（exe 构建器实跑确认）。
+    [RszVersion(nameof(Version), "<", EfxVersion.DD2, "||", nameof(Version), ">=", EfxVersion.MHWilds)]
+	public float LightingVelocityOffset;
 
-// the below fields aren't quite matched by name across the versions, the value ranges seem wildly different
-    [RszVersion(EfxVersion.RERT, EndAt = nameof(sb_unkn5))]
-	public float sb_unkn2;
-	public float sb_unkn3;
-	public float sb_unkn4;
-	public float sb_unkn5;
+	// 进出阴影的过渡时间，毫秒（旧名 sb_unkn2..5）。
+    [RszVersion(EfxVersion.RERT, EndAt = nameof(TimeToNoShadow))]
+	public float InShadowDelay;
+	public float TimeToFullShadow;
+	public float OutShadowDelay;
+	public float TimeToNoShadow;
 
+	// 引擎按 "== 1" 判断（值 2 等于关闭），含义未追。
     [RszVersionExact(EfxVersion.RE4)]
 	public uint toggle_re4;
+	// MHWilds：exe 构建器不读这个字。
     [RszVersion(EfxVersion.DD2)]
 	public float dd2_unkn1;
+	// 着色器 detonemapRate：粒子颜色绕过色调映射的比例（旧名 ColorBrightness，**不是亮度**）。
     [RszVersion(EfxVersion.RE2)]
-	public float ColorBrightness;
+	public float DetonemapRatio;
 
-    [RszVersion(EfxVersion.DD2)] public uint toggle_dd2;
-    [RszVersion(EfxVersion.RE3, EndAt = nameof(unkn29))]
-	public float unkn21;
+    [RszVersion(nameof(Version), ">=", EfxVersion.DD2, "&&", nameof(Version), "<", EfxVersion.MHWilds)] public uint toggle_dd2;
+    [RszVersion(EfxVersion.RE3, EndAt = nameof(StochasticShadingRate))]
+	public float VolumeDepth;
 
-    [RszVersion(">", EfxVersion.RERT, EndAt = nameof(sb_unkn12))]
-	public float sb_unkn9;
-	public float sb_unkn10;
-	public float sb_unkn11;
-	public float sb_unkn12;
+	// 旧名 sb_unkn9..12；AlphaCoverage、SSRAlphaThreshold 与着色器常量名对得上。
+    [RszVersion(">", EfxVersion.RERT, EndAt = nameof(SSRAlphaThreshold))]
+	public float VolumetricIntensityBlend;
+	public float DeinterlaceDistance;
+	public float AlphaCoverage;
+	public float SSRAlphaThreshold;
 
-    [RszVersion(EfxVersion.DD2)]
+    [RszVersion(nameof(Version), ">=", EfxVersion.DD2, "&&", nameof(Version), "<", EfxVersion.MHWilds)]
 	public float dd2_unkn2;
-	public uint unkn22;
+	// 只用低字节；Flags 位 13 打开时生效（旧名 unkn22；MHWilds 实跑确认同样受位 13 控制）。
+	public uint StencilTarget;
 
     [RszVersionExact(EfxVersion.RE8, EndAt = nameof(re8_unkn5))]
 	public float re8_unkn3;
 	public float re8_unkn4;
 	public float re8_unkn5;
 
+	// 含义未追。
     [RszVersion(EfxVersion.RE8)]
 	public uint unkn24;
 
-    [RszVersion(nameof(Version), ">=", EfxVersion.RERT, "&&", nameof(Version), "<", EfxVersion.MHWilds, EndAt = nameof(unkn29))]
-	public uint unkn25;
-	public uint unkn26;
-	public uint unkn27;
-	public uint unkn28;
-	public uint unkn29;
+	// 可变速率着色（旧名 unkn25..29）：只用低 3 位，255 = 默认。
+    [RszVersion(nameof(Version), ">=", EfxVersion.RERT, "&&", nameof(Version), "<", EfxVersion.MHWilds, EndAt = nameof(StochasticShadingRate))]
+	public uint ParticleShadingRate;
+	public uint LightingShadingRate;
+	public uint ShadowShadingRate;
+	public uint ZPrepassShadingRate;
+	public uint StochasticShadingRate;
 
-	[RszVersion(EfxVersion.MHWilds, EndAt = nameof(mhws_unkn_short))] public float mhws_unkn1;
+	// MHWilds：mhws_unkn1 / 2 exe 构建器不读。ShadingRates 是 Particle / Lighting / Shadow / ZPrepass / Stochastic
+	// 五个 *ShadingRate 共用的 u16（解析器把五个名字都写到块的同一个 u16，构建器原样拷贝；官方全是 0x7fff）。
+	[RszVersion(EfxVersion.MHWilds, EndAt = nameof(ShadingRates))] public float mhws_unkn1;
 	public float mhws_unkn2;
-	public short mhws_unkn_short;
+	public short ShadingRates;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.ShaderSettingsExpression, EfxVersion.DMC5, EfxVersion.RE8, EfxVersion.RERT, EfxVersion.DD2)]
@@ -480,7 +533,7 @@ public partial class EFXAttributePlayEfx : EFXAttribute
 	public EFXAttributePlayEfx() : base(EfxAttributeType.PlayEfx) { }
 
 	// [RszVersion(EfxVersion.MHWilds)] public uint mhws_unkn;
-	[RszInlineWString] public string? efxPath;
+	[RszInlineWString(ByteSize = true)] public string? efxPath;
 
     protected override bool DoRead(FileHandler handler)
     {
@@ -556,7 +609,7 @@ public partial class EFXAttributeRenderTarget : EFXAttribute
 	public EFXAttributeRenderTarget() : base(EfxAttributeType.RenderTarget) { }
 
 	public uint unkn_toggle;
-	[RszInlineWString] public string? rtexPath;
+	[RszInlineWString(ByteSize = true)] public string? rtexPath;
 
     public override string ToString() => $"RenderTarget: {rtexPath}";
 }

@@ -14,7 +14,7 @@ internal sealed partial class EditorEngine : IDisposable
     private readonly Options options;
     private readonly IGameCacheResourceReader cacheReader;
     private readonly GroupNoteStore groupNotes;
-    private readonly EfxEditorService service = new();
+    private readonly EfxEditorService service;
     private readonly Dictionary<string, (string Payload, JsonObject Response)> responses = new();
     private readonly HashSet<string> processedIds = new(StringComparer.Ordinal);
     private readonly List<byte[]> undo = [], redo = [];
@@ -39,6 +39,7 @@ internal sealed partial class EditorEngine : IDisposable
     public EditorEngine(Options options, IGameCacheResourceReader? cacheReader = null)
     {
         this.options = options;
+        service = new EfxEditorService(options.Game.EfxSuffix);
         this.cacheReader = cacheReader ?? new UnavailableGameCacheResourceReader();
         groupNotes = new GroupNoteStore(options.Mailbox);
         // A restarted mailbox must never execute the last mutation again merely because request.json remains present.
@@ -78,12 +79,17 @@ internal sealed partial class EditorEngine : IDisposable
         try
         {
             string action = Text(request, "action").ToLowerInvariant();
-            if (action is "duplicate_entry" or "remove_entry" or "restore_entry" or "add_entry" or "rename_group" or "set_group_note") RejectEmbeddedRootOperation(request);
+            // add_entry, duplicate_entry and remove_entry take an optional top-level "embeddedPath" (EntryFileTarget);
+            // restoring an entry and group notes stay top-level only.
+            if (action is "restore_entry" or "rename_group" or "set_group_note") RejectEmbeddedRootOperation(request);
+            RejectUnsupportedFeature(action);
             if (!action.StartsWith("pfb_", StringComparison.Ordinal) && action is not ("catalog" or "resolve_resource" or "open" or "open_motion" or "open_cached_resource" or "open_game_resource" or "status" or "inspect" or "shutdown" or
                 "cache_list" or "cache_import" or "cache_reload" or "cache_rename" or "cache_materialize" or "desktop_start" or "desktop_stop" or "file_browse" or "file_stat" or "open_action" or "action_effect_groups" or "add_action_slot" or "remove_action_slot" or "reset_action_slots" or "publish_action_preview" or "begin_export" or "prepare_export" or "finish_export")) CheckRevision(request);
             switch (action)
             {
                 case "status": break;
+                case "configure_offline_preview": ConfigureOfflinePreview(request); break;
+                case "publish_offline_preview": break;
                 case "file_browse": response["fileBrowser"] = JsonSerializer.SerializeToNode(FileBrowser.Browse(options, request), Host.Json); break;
                 case "file_stat": response["fileStat"] = JsonSerializer.SerializeToNode(FileBrowser.Stat(Text(request, "path")), Host.Json); break;
                 case "pfb_open": case "pfb_add": case "pfb_copy": case "pfb_paste": case "pfb_set":
@@ -223,40 +229,60 @@ internal sealed partial class EditorEngine : IDisposable
                     SetGroupNote(Int(request, "groupIndex"), Text(request, "note")); NoteSaved(response); break;
                 case "curve_key": EditCurve(Target.From(request), Text(request, "path"), request); break;
                 case "duplicate_entry":
+                {
+                    var at = EntryFileTarget(request);
+                    var file = ResolveTargetFile(at);
+                    int position = Int(request, "index");
+                    if (position < 0 || position >= file.Entries.Count) throw new ArgumentOutOfRangeException("index", "Entry index is invalid.");
                     Mutate(() =>
                     {
-                        var original = Entry(Int(request, "index"));
                         int nextId = NextAttributeId();
-                        var clone = service.DeepCloneEntry(Require(), original);
-                        clone.index = AllocateEntryId();
+                        var clone = service.DeepCloneEntry(file, file.Entries[position]);
+                        clone.index = NextEntryId(file);
                         foreach (var attribute in clone.Attributes) attribute.UniqueID = checked(nextId++);
                     });
+                    response["selection"] = Selection(at, file.Entries.Count - 1);
                     break;
+                }
                 case "copy_efx": CopyEfx(Target.From(request)); response["message"] = "已复制，请选择目标后粘贴。"; break;
                 case "paste_efx": PasteEfx(request, response); break;
                 case "clear_efx_clipboard": efxClipboard = null; break;
+                case "add_action": AddAction(request, response); break;
+                case "duplicate_action": DuplicateAction(request, response); break;
+                case "remove_action": RemoveAction(request, response); break;
                 case "remove_entry":
-                    RemoveEntry(Int(request, "index"), response);
+                    RemoveEntry(EntryFileTarget(request), Int(request, "index"), response);
                     break;
                 case "restore_entry":
                     RestoreEntry(Int(request, "index"));
                     response["message"] = "已还原当前特效块；其他特效块保持不变。请应用到角色资源以更新游戏。";
                     break;
                 case "add_entry":
-                    Mutate(() => { var entry = new EFXEntry { Version = Require().Header.Version, name = OptionalText(request, "name") ?? "New effect", entryAssignment = EfxEntryEnum.NoAssignment }; service.AddEntry(Require(), entry); entry.index = AllocateEntryId(); });
+                {
+                    // Optional "attributes": [{type, fields?, behavior?}] are created and checked before the entry is added,
+                    // so the entry and its attributes are one revision.
+                    var at = EntryFileTarget(request);
+                    var file = ResolveTargetFile(at);
+                    var version = file.Header.Version;
+                    var entry = new EFXEntry { Version = version, name = OptionalText(request, "name") ?? "New effect", entryAssignment = EfxEntryEnum.NoAssignment };
+                    if (request["attributes"] is JsonArray initial)
+                        foreach (var item in initial)
+                        {
+                            var spec = item as JsonObject ?? throw new ArgumentException("Each attribute needs a type.");
+                            if (!entry.AddAttribute(NewAttribute(version, Text(spec, "type"), spec["fields"] as JsonArray, spec["behavior"] as JsonObject)))
+                                throw new InvalidOperationException("Attribute cannot be added to the new entry: " + Text(spec, "type"));
+                        }
+                    else if (request["attributes"] != null) throw new ArgumentException("attributes must be an array.");
+                    Mutate(() => { service.AddEntry(file, entry); entry.index = NextEntryId(file); });
+                    response["selection"] = Selection(at, file.Entries.Count - 1);
                     break;
+                }
                 case "add_attribute":
                     Mutate(() =>
                     {
                         var target = Target.From(request) with { AttributeIndex = null };
                         var container = (EFXEntryBase)Resolve(target);
-                        string name = Text(request, "type");
-                        if (!Enum.TryParse<EfxAttributeType>(name, ignoreCase: false, out var type) || !Enum.IsDefined(type))
-                            throw new ArgumentException("Unknown attribute type: " + name);
-                        var version = ResolveTargetFile(target).Header.Version;
-                        var attribute = EFXAttribute.Create(version, type);
-                        attribute.Version = version;
-                        attribute.UniqueID = NextAttributeId();
+                        var attribute = NewAttribute(ResolveTargetFile(target).Header.Version, Text(request, "type"), request["fields"] as JsonArray, request["behavior"] as JsonObject);
                         if (!service.AddAttributeToEntry(container, attribute))
                             throw new InvalidOperationException("Attribute cannot be added: it may already exist, require a matching base attribute, or be invalid for this entry kind.");
                     });
@@ -264,6 +290,25 @@ internal sealed partial class EditorEngine : IDisposable
                 case "remove_attribute":
                     RemoveAttribute(Target.From(request), response);
                     break;
+                case "material_parameter":
+                {
+                    // Adds or removes one override in a material property table (MaterialParameterEditor);
+                    // one revision, one undo step, checked by reading the saved bytes back.
+                    var target = Target.From(request);
+                    string listPath = OptionalText(request, "listPath") ?? "properties";
+                    uint[]? expected = null;
+                    Mutate(() =>
+                    {
+                        var attribute = (EFXAttribute)Resolve(target);
+                        var siblings = ((EFXEntryBase)Resolve(target with { AttributeIndex = null })).Attributes;
+                        expected = MaterialParameterEditor.Apply(attribute, siblings, ResolveTargetFile(target).Header.Version, request);
+                    }, reopened =>
+                    {
+                        var actual = MaterialParameterEditor.Hashes((EFXAttribute)Resolve(target, reopened), listPath);
+                        if (!actual.SequenceEqual(expected!)) throw new InvalidDataException("The material property table was not preserved by serialization; the change was rolled back.");
+                    });
+                    break;
+                }
                 case "undo": RestoreHistory(undo, redo); break;
                 case "redo": RestoreHistory(redo, undo); break;
                 case "save": response["outputPath"] = Save(OptionalText(request, "path")); break;
@@ -279,6 +324,7 @@ internal sealed partial class EditorEngine : IDisposable
                 }
                 default: throw new ArgumentException("Unknown action: " + action);
             }
+            AttachOfflinePreview(response, action == "publish_offline_preview");
         }
         catch (Exception ex)
         {
@@ -329,7 +375,7 @@ internal sealed partial class EditorEngine : IDisposable
         if (snapshot.Content.Length > 128 * 1024 * 1024)
             throw new CacheSourceException("cache_snapshot_invalid", "缓存 EFX 内容超出大小限制；现有编辑文档保持不变。");
         string logical = ResourceResolver.Normalize(descriptor.ActualPath);
-        string virtualPath = "game-cache://" + Uri.EscapeDataString(descriptor.SourceId) + "/" + logical.Split('/')[^1] + ".5571972";
+        string virtualPath = "game-cache://" + Uri.EscapeDataString(descriptor.SourceId) + "/" + logical.Split('/')[^1] + "." + options.Game.EfxSuffix;
         // The constructor-injected reader is the only byte source. There is no
         // path lookup, same-name fallback or request-provided file/byte payload.
         OpenContent(snapshot.Content.ToArray(), virtualPath, "game_cache", descriptor);
@@ -446,10 +492,72 @@ internal sealed partial class EditorEngine : IDisposable
 
     private static string EmbeddedGroupsFingerprint(EfxFile file, EFXAttribute? removed = null) => string.Join("\n", EnumerateEmbeddedFiles(file, removed).Select(GroupsFingerprint));
 
-    private void RemoveEntry(int index, JsonObject response)
+    /// <summary>A new attribute with default values, then the optional initial "fields" ([{path, value}] as in
+    /// set_fields). Every given path must exist and be editable.</summary>
+    /// <param name="behavior">For PtBehavior: {class, unkn1?, parameters: [{name, type, value}]}, the script class and its
+    /// parameter list (type = PtBehaviorPropType name, value as PtBehaviorVariable.Create reads it). A PtBehavior
+    /// without it has no class and no parameters, which the game cannot use.</param>
+    private EFXAttribute NewAttribute(EfxVersion version, string name, JsonArray? fields, JsonObject? behavior = null)
     {
-        var file = Require();
+        if (!Enum.TryParse<EfxAttributeType>(name, ignoreCase: false, out var type) || !Enum.IsDefined(type))
+            throw new ArgumentException("Unknown attribute type: " + name);
+        var attribute = EFXAttribute.Create(version, type);
+        attribute.Version = version;
+        attribute.UniqueID = NextAttributeId();
+        if (behavior != null)
+        {
+            if (attribute is not ReeLib.Efx.Structs.Pt.EFXAttributePtBehavior script) throw new ArgumentException("behavior applies only to PtBehavior.");
+            if (version != EfxVersion.RE4) throw new NotSupportedException("PtBehavior parameters can be created for RE4 only.");
+            script.behaviorString = Text(behavior, "class");
+            script.unkn1 = behavior["unkn1"] is JsonValue u && u.TryGetValue(out uint unkn) ? unkn : 2;   // 2 in 2189 of 2193 RE4 instances
+            var parameters = behavior["parameters"] as JsonArray ?? throw new ArgumentException("behavior needs a parameters array.");
+            script.properties = parameters.Select((item, index) =>
+            {
+                var o = item as JsonObject ?? throw new ArgumentException("Each behavior parameter needs name, type and value.");
+                if (!Enum.TryParse<ReeLib.Efx.Structs.Pt.PtBehaviorPropType>(Text(o, "type"), false, out var kind))
+                    throw new ArgumentException("Unknown PtBehavior parameter type: " + Text(o, "type"));
+                return ReeLib.Efx.Structs.Pt.PtBehaviorVariable.Create(version, index, Text(o, "name"), kind, o["value"]?.ToString() ?? "");
+            }).ToList();
+        }
+        if (fields != null)
+        {
+            var values = fields.Select(f => f is JsonObject o ? KeyValuePair.Create(Text(o, "path"), Text(o, "value")) : throw new ArgumentException("Each field needs path and value.")).ToArray();
+            var (_, skipped) = EfxFieldValues.Apply(attribute, version, values);
+            if (skipped.Length > 0) throw new ArgumentException($"{name}: initial fields not present or not editable: " + string.Join(", ", skipped.Take(5)));
+        }
+        return attribute;
+    }
+
+    /// <summary>The file an entry-level request works in: the open document, or the embedded file that the request's
+    /// top-level "embeddedPath" leads to.</summary>
+    private static Target EntryFileTarget(JsonObject request)
+    {
+        // These requests address an entry by "index" and ignore "target"; a path given there would otherwise fall
+        // through to the root entry with the same index.
+        if (request["target"]?["embeddedPath"] is JsonArray { Count: > 0 })
+            throw new NotSupportedException("Entry operations take embeddedPath at the top level of the request, not inside target; nothing was changed.");
+        return Target.From(new JsonObject { ["target"] = new JsonObject { ["kind"] = "document", ["index"] = 0, ["embeddedPath"] = request["embeddedPath"]?.DeepClone() } });
+    }
+
+    /// <summary>A new entry id: the session's high-water mark in the open document (the preview follows entries by id),
+    /// one past the largest id in an embedded file.</summary>
+    private int NextEntryId(EfxFile file) => ReferenceEquals(file, Require()) ? AllocateEntryId() : NextNodeId(file);
+
+    private static JsonNode? Selection(Target at, int position)
+    {
+        var selection = new JsonObject { ["kind"] = "entry", ["index"] = position };
+        if (at.EmbeddedPath is { Length: > 0 } path)
+            selection["embeddedPath"] = JsonSerializer.SerializeToNode(path, Host.Json);
+        return selection;
+    }
+
+    private void RemoveEntry(Target at, int index, JsonObject response)
+    {
+        var file = ResolveTargetFile(at);
         if (index < 0 || index >= file.Entries.Count) throw new ArgumentOutOfRangeException(nameof(index));
+        // An embedded file without entries would leave a PlayEmitter that plays nothing; remove the PlayEmitter instead.
+        if (!ReferenceEquals(file, Require()) && file.Entries.Count == 1)
+            throw new InvalidOperationException("这是内嵌 EFX 里唯一的 entry，不能删除；要去掉整个子特效，请删除 Action 的 PlayEmitter。");
         var remaining = file.Entries.Where((_, i) => i != index).Select(e => e.index).ToArray();
         string expectedGroups = string.Join('|', file.EffectGroups.Select(g => g.groupName + ":" + string.Join(',',
             (g.efxEntryIndexes ?? []).Where(i => i != index).Select(i => i > index ? i - 1 : i))));
@@ -458,7 +566,8 @@ internal sealed partial class EditorEngine : IDisposable
         Mutate(() => { if (!service.RemoveEntry(file, index)) throw new InvalidOperationException("Entry was not found."); }, reopened =>
         {
             VerifyCompact(reopened);
-            if (!reopened.Entries.Select(e => e.index).SequenceEqual(remaining) || GroupsFingerprint(reopened) != expectedGroups)
+            var local = ResolveTargetFile(at, reopened);
+            if (!local.Entries.Select(e => e.index).SequenceEqual(remaining) || GroupsFingerprint(local) != expectedGroups)
                 throw new InvalidDataException("Entry deletion changed surviving IDs or ordered group references; rolled back.");
         });
         response["deletion"] = new JsonObject { ["kind"] = "entry", ["removedGroupReferences"] = references,
@@ -508,7 +617,35 @@ internal sealed partial class EditorEngine : IDisposable
             foreach (var edit in plan)
                 if (!actual.TryGetValue(edit.Field.Description.Path, out var field) || field.Description.Value != edit.Expected)
                     throw new InvalidDataException("Parameter group was not preserved by serialization; all changes were rolled back.");
+            RejectInvertedIntegerRanges(Resolve(target, reopened), plan.Select(p => p.Field.Description.Path));
         });
+    }
+
+    /// <summary>An edited <c>MinMaxI</c> (Life frames, Spawn counts, ...) must keep min ≤ max:
+    /// re4.exe draws <c>min + rand % (max − min + 1)</c>, so max = min − 1 divides by zero and a
+    /// smaller max yields a huge value (docs/development/RE4-EFX-RUNTIME.zh-CN.md §0.4).</summary>
+    private static void RejectInvertedIntegerRanges(object owner, IEnumerable<string> editedPaths)
+    {
+        foreach (string path in editedPaths)
+        {
+            int dot = path.LastIndexOf('.');
+            if (dot < 0 || path[(dot + 1)..] is not ("min" or "max")) continue;
+            object? value = owner;
+            foreach (string name in path[..dot].Split('.'))
+            {
+                if (value == null) break;
+                var type = value.GetType();
+                var member = (System.Reflection.MemberInfo?)type.GetField(name) ?? type.GetProperty(name);
+                value = member switch
+                {
+                    System.Reflection.FieldInfo f => f.GetValue(value),
+                    System.Reflection.PropertyInfo p => p.GetValue(value),
+                    _ => null
+                };
+            }
+            if (value is ReeLib.Efx.Structs.Common.MinMaxI range && range.max < range.min)
+                throw new ArgumentException($"{path[..dot]} 的最大值 {range.max} 小于最小值 {range.min}；区间必须满足 min ≤ max。");
+        }
     }
 
     private EffectGroup Group(int index)
@@ -616,6 +753,16 @@ internal sealed partial class EditorEngine : IDisposable
             ? Path.Combine(options.Output, session, stem + $"_edit_r{revision}_{Guid.NewGuid():N}.efx.{(int)document!.Header.Version}")
             : Path.GetFullPath(requestedPath);
         if (string.Equals(path, source, StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("The imported source is protected. Save to a new path.");
+        foreach (string root in options.ProtectedRoots ?? [])
+        {
+            string prefix = Path.TrimEndingDirectorySeparator(root) + Path.DirectorySeparatorChar;
+            if (path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) || string.Equals(path, root, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("不能保存到受保护目录（游戏目录或解包目录）：" + root);
+        }
+        if (options.ProtectedRoots is { Count: > 0 })
+            for (var folder = new DirectoryInfo(Path.GetDirectoryName(path)!); folder != null; folder = folder.Parent)
+                if (folder.Exists && folder.Attributes.HasFlag(FileAttributes.ReparsePoint))
+                    throw new InvalidOperationException("保存路径经过符号链接或目录联接，无法确认不在受保护目录内：" + folder.FullName);
         if (!path.EndsWith($".efx.{(int)document!.Header.Version}", StringComparison.OrdinalIgnoreCase))
             throw new ArgumentException("Output suffix must match the loaded EFX version.");
         WriteNewFile(path, ResolvePrecache(Validate(Require(), path), path));
@@ -623,16 +770,28 @@ internal sealed partial class EditorEngine : IDisposable
         return path;
     }
 
+    // Features that need per-game formats or runtime APIs stay off until that game's profile enables them.
+    private void RejectUnsupportedFeature(string action)
+    {
+        var game = options.Game;
+        if (action.StartsWith("pfb_", StringComparison.Ordinal) && !game.Features.PfbEditing)
+            throw new NotSupportedException($"{game.DisplayName} 暂不支持独立 PFB 编辑（待实现）。");
+        if (action is "open_motion" or "action_effect_groups" or "open_action" or "add_action_slot" or "remove_action_slot"
+                or "reset_action_slots" or "publish_action_preview" && !game.Features.ActionSlots)
+            throw new NotSupportedException($"{game.DisplayName} 暂不支持动作特效槽位（待实现）。");
+    }
+
     private (string Resource, string Output) Publish()
     {
         Require();
         if (options.GameRoot == null) throw new InvalidOperationException("Publishing requires an explicit --game-root configuration.");
-        if (document!.Header.Version != EfxVersion.MHWilds) throw new InvalidOperationException("Only Monster Hunter Wilds EFX files can be published to this preview.");
+        var game = options.Game;
+        if (document!.Header.Version != game.EfxVersion) throw new InvalidOperationException($"Only {game.DisplayName} EFX files can be published to this preview.");
         string gameRoot = Path.GetFullPath(options.GameRoot);
         if (!Directory.Exists(gameRoot)) throw new DirectoryNotFoundException("Configured game directory was not found.");
-        string logical = $"Art/VFX/EffectEditor/MotionVfxLive/{session}/rev_{revision}_{++publishCount}.efx";
-        string output = Path.GetFullPath(Path.Combine(gameRoot, "natives", "STM", logical.Replace('/', Path.DirectorySeparatorChar) + ".5571972"));
-        string allowed = Path.GetFullPath(Path.Combine(gameRoot, "natives", "STM", "Art", "VFX", "EffectEditor", "MotionVfxLive")) + Path.DirectorySeparatorChar;
+        string logical = $"{game.PreviewLogicalRoot}/{session}/rev_{revision}_{++publishCount}.efx";
+        string output = Path.GetFullPath(Path.Combine(gameRoot, "natives", "STM", game.Versioned(logical, "efx").Replace('/', Path.DirectorySeparatorChar)));
+        string allowed = Path.GetFullPath(Path.Combine(gameRoot, "natives", "STM", game.PreviewLogicalRoot.Replace('/', Path.DirectorySeparatorChar))) + Path.DirectorySeparatorChar;
         if (!output.StartsWith(allowed, StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("Publish destination escaped the dedicated preview directory.");
         RejectReparsePoints(gameRoot, Path.GetDirectoryName(output)!);
         WriteNewFile(output, ResolvePrecache(Validate(Require(), output), output));

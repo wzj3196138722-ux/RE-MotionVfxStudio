@@ -60,6 +60,9 @@ local function load_new()
     -- This factory owns no shared captures/backups. Reload it after the old
     -- controller releases input, so fixes do not need Reset scripts.
     package.loaded["MotionVfxLive.fx_debug_hotkeys"] = nil
+    -- Pure data; modules that are reloaded below pick up a fresh copy.
+    package.loaded["MotionVfxLive.fx_game_profile"] = nil
+    _G.MotionVfxGameProfile = nil
     package.loaded["MotionVfxLive.fx_d2d_widgets"] = nil
     package.loaded["MotionVfxLive.fx_d2d_workbench"] = nil
     package.loaded["MotionVfxLive.fx_ai_bridge"] = nil

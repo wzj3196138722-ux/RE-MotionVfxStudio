@@ -493,14 +493,14 @@ public static class Program
             service.Save(efx, output);
             var reopened = service.Load(output).Entries.SelectMany(e => e.Attributes)
                 .OfType<EFXAttributeSpawn>().First();
-            if (reopened.MaxParticles != before + 1 || reopened.SpawnNum.x != nestedBefore + 1)
+            if (reopened.MaxParticles != before + 1 || reopened.SpawnNum.min != nestedBefore + 1)
                 throw new InvalidDataException("Edited fields did not survive save and reopen");
             if (!history.Undo() || !history.Undo())
                 throw new InvalidDataException("Undo history was incomplete");
-            if (spawn.MaxParticles != before || spawn.SpawnNum.x != nestedBefore)
+            if (spawn.MaxParticles != before || spawn.SpawnNum.min != nestedBefore)
                 throw new InvalidDataException("Undo did not restore prior values");
             if (!history.Redo() || !history.Redo() ||
-                spawn.MaxParticles != before + 1 || spawn.SpawnNum.x != nestedBefore + 1)
+                spawn.MaxParticles != before + 1 || spawn.SpawnNum.min != nestedBefore + 1)
                 throw new InvalidDataException("Redo did not restore edited values");
             Console.WriteLine($"Attribute audit passed: {Path.GetFileName(source)}, Spawn, {fields.Count} content fields, MaxParticles {before}->{before+1}, SpawnNum.x {nestedBefore}->{nestedBefore+1}, save/reopen/undo/redo");
         }

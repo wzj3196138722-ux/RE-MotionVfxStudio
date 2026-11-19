@@ -38,7 +38,8 @@ internal sealed partial class EditorEngine
         {
             var doc = prefabDocument ?? throw new InvalidOperationException("请先打开 PFB 文件。");
             string name = Path.GetFileName(doc.SourcePath);
-            if (!name.EndsWith(".pfb.18", StringComparison.OrdinalIgnoreCase)) name += name.EndsWith(".pfb", StringComparison.OrdinalIgnoreCase) ? ".18" : ".pfb.18";
+            string pfbSuffix = "." + options.Game.PfbSuffix;
+            if (!name.EndsWith(".pfb" + pfbSuffix, StringComparison.OrdinalIgnoreCase)) name += name.EndsWith(".pfb", StringComparison.OrdinalIgnoreCase) ? pfbSuffix : ".pfb" + pfbSuffix;
             items.Add(new("pfb", name, "当前 PFB 文件", doc.ExportBytes(), doc.SourceKind == "local_file" ? Path.GetFullPath(doc.SourcePath) : null));
         }
         string token = Guid.NewGuid().ToString("N");

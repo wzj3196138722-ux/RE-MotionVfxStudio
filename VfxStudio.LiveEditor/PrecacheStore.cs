@@ -167,7 +167,7 @@ internal sealed class PrecacheStore
     }
     internal static byte[] RewriteEfx(byte[] bytes, string path, IReadOnlyDictionary<string, string> mapping)
     {
-        var service = new EfxEditorService();
+        var service = new EfxEditorService(); // path always carries the version suffix here
         using var file = service.Load(bytes, path);
         bool changed = false;
         foreach (var field in ContentInspector.Describe(file, file.Header.Version))
@@ -222,10 +222,9 @@ internal sealed class PrecacheStore
     }
     private byte[] RewritePrefab(Entry e, byte[] bytes, IReadOnlyDictionary<string, string> mapping)
     {
-        string schema = Path.Combine(options.Assets, "Lists", "rsz_pfb_classes.json");
-        if (!File.Exists(schema)) schema = Path.Combine(AppContext.BaseDirectory, "formats", "rsz_pfb_classes.json");
-        if (!File.Exists(schema)) throw new InvalidDataException("PFB 的已导入依赖需要 RSZ 类型表；请在素材目录提供 Lists/rsz_pfb_classes.json。原 PFB 未改动。");
-        var option = new RszFileOption(GameName.mhwilds, RszParser.GetInstance(schema));
+        string schema = options.RszSchemaPath();
+        if (!File.Exists(schema)) throw new InvalidDataException($"PFB 的已导入依赖需要 RSZ 类型表；请在素材目录提供 Lists/{options.Game.RszSchemaFile}。原 PFB 未改动。");
+        var option = options.RszOption(schema);
         using var source = new FileHandler(new MemoryStream(bytes), "asset.pfb." + e.Version);
         using var file = new PfbFile(option, source);
         if (!file.Read()) throw new InvalidDataException("无法完整读取 PFB；依赖重定向已取消。");

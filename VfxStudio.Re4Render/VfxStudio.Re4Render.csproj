@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net8.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><AllowUnsafeBlocks>true</AllowUnsafeBlocks></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../VfxStudio.Renderer/VfxStudio.Renderer.csproj" /><ProjectReference Include="../VfxStudio.LiveEditor/VfxStudio.LiveEditor.csproj" /></ItemGroup>
+  <ItemGroup><EmbeddedResource Include="Data/re4-attribute-usage.json" LogicalName="VfxStudio.Re4Render.re4-attribute-usage.json" /><EmbeddedResource Include="Data/re4-attribute-defaults.json" LogicalName="VfxStudio.Re4Render.re4-attribute-defaults.json" /><EmbeddedResource Include="Data/re4-ptbehavior-templates.json" LogicalName="VfxStudio.Re4Render.re4-ptbehavior-templates.json" /></ItemGroup>
+</Project>

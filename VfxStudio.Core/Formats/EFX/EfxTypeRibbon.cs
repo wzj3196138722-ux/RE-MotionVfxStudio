@@ -21,21 +21,28 @@ public partial class EFXAttributeTypeRibbonLength : EFXAttribute
 
 	[RszVersion('>', EfxVersion.RERT)]
     public uint Flags;
-    public via.Range SizeScalar;
-    public via.Range Width;
+    public CenterSpread SizeScalar;
+    public CenterSpread WidthSize;
 
     [RszVersion(EfxVersion.RERT)]
     public float TextureRepeatNum;
     public float ShadowMultiplier;
     [RszVersion(EfxVersion.DD2)] public float FadeSide; // TODO verify type
+    // re4.exe（加载器 3d7b240，布局 3d7c2b0）：
+    // LengthFlags 位 0 = 条带轴取本帧位移方向（跟随速度）；位 1 = 第一次取到方向后锁定；位 2 = 用另一套上下文矩阵测位移；
+    // 位 3 = 固定起点（尾端留在出生点，拉到 ReleaseFixEnd 距离后释放）。位 0 关时轴 = normalize(rnd(DirX, DirY, DirZ))，出生时定死。
     [RszVersion(EfxVersion.RE2)] public uint LengthFlags;
-    public via.Range Length;
-    public uint ShapeDivision; // TODO verify type
-    public via.Range BasingPoint;
-    public via.Range ReleaseFixEnd;
-    public via.Range DirectionX;
-    public via.Range DirectionY;
-    public via.Range DirectionZ;
+    // 长度 = rnd(Length) × 粒子尺寸。
+    public CenterSpread Length;
+    // 沿长度的点数，夹在 [2, 1000]。
+    public uint ShapeDivision;
+    // s = 横向锚点（0.5 居中，着色器侧）；r = 纵向锚点：尾 = P − (1−r)·L·d，头 = P + r·L·d。
+    public AnchorPair BasingPoint;
+    public CenterSpread ReleaseFixEnd;
+    // 引擎名 DirX / DirY / DirZ（旧名 DirectionX/Y/Z）。
+    public CenterSpread DirX;
+    public CenterSpread DirY;
+    public CenterSpread DirZ;
 
 	[RszVersion(EfxVersion.RE2, EndAt = nameof(GhostStretch))]
     public via.Color HeadColor;
@@ -62,35 +69,31 @@ public partial class EFXAttributeTypeRibbonLengthExpression : EFXAttribute, IExp
 
 	public EFXAttributeTypeRibbonLengthExpression() : base(EfxAttributeType.TypeRibbonLengthExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(19) { BitNameDict = new () {
-		[1] = nameof(color),
-		[2] = nameof(alpha),
-		// 3,4 = size (RE7)
-		// 5, 6 = size (RERT)
-	} };
-	public ExpressionAssignType color;
-	public ExpressionAssignType alpha;
-	public ExpressionAssignType size1;
-	public ExpressionAssignType size2;
-	public ExpressionAssignType emissive;
-	[RszVersion(EfxVersion.RE2, EndAt = nameof(size))]
-	public ExpressionAssignType unkn6;
-	public ExpressionAssignType size;
-    [RszVersion(EfxVersion.RE8, EndAt = nameof(unkn9))]
-	public ExpressionAssignType unkn8;
-	public ExpressionAssignType unkn9;
-    [RszVersion(">", EfxVersion.RERT, EndAt = nameof(unkn15))]
-	public ExpressionAssignType unkn10;
-	public ExpressionAssignType unkn11;
-	public ExpressionAssignType unkn12;
-	public ExpressionAssignType unkn13;
-	public ExpressionAssignType unkn14;
-	public ExpressionAssignType unkn15;
-    [RszVersion(EfxVersion.RE4, EndAt = nameof(unkn19))]
-	public ExpressionAssignType unkn16;
-	public ExpressionAssignType unkn17;
-	public ExpressionAssignType unkn18;
-	public ExpressionAssignType unkn19;
+	// re4.exe 槽位名（B 类：引擎按名字登记槽位，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；旋转槽按角度。 引擎别名：ColorRate = ColorRate/EmissionRate/ContrastRate/InnerIntensity/MultiplyColorRate，Intensity = BackIntensity/OuterIntensity/MultiplyBlackRate；*Range 在引擎里有的写作 *_Random。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(19) { BitNames = [ nameof(Color), nameof(ColorAlpha), nameof(ColorRange), nameof(ColorRangeAlpha), nameof(ColorRate), nameof(Intensity), nameof(SizeScalar), nameof(SizeScalarRange), nameof(AlphaRate), nameof(Width), nameof(WidthRange), nameof(HeadColor), nameof(HeadAlpha), nameof(Place1Color), nameof(Place1Alpha), nameof(Place2Color), nameof(Place2Alpha), nameof(Length), nameof(LengthRange) ] };
+	public ExpressionAssignType Color;
+	public ExpressionAssignType ColorAlpha;
+	public ExpressionAssignType ColorRange;
+	public ExpressionAssignType ColorRangeAlpha;
+	public ExpressionAssignType ColorRate;
+	[RszVersion(EfxVersion.RE2, EndAt = nameof(SizeScalar))]
+	public ExpressionAssignType Intensity;
+	public ExpressionAssignType SizeScalar;
+    [RszVersion(EfxVersion.RE8, EndAt = nameof(AlphaRate))]
+	public ExpressionAssignType SizeScalarRange;
+	public ExpressionAssignType AlphaRate;
+    [RszVersion(">", EfxVersion.RERT, EndAt = nameof(Place1Alpha))]
+	public ExpressionAssignType Width;
+	public ExpressionAssignType WidthRange;
+	public ExpressionAssignType HeadColor;
+	public ExpressionAssignType HeadAlpha;
+	public ExpressionAssignType Place1Color;
+	public ExpressionAssignType Place1Alpha;
+    [RszVersion(EfxVersion.RE4, EndAt = nameof(LengthRange))]
+	public ExpressionAssignType Place2Color;
+	public ExpressionAssignType Place2Alpha;
+	public ExpressionAssignType Length;
+	public ExpressionAssignType LengthRange;
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 
@@ -251,55 +254,59 @@ public partial class EFXAttributeTypeRibbonChain : EFXAttribute
 {
 	public EFXAttributeTypeRibbonChain() : base(EfxAttributeType.TypeRibbonChain) { }
 
-	public uint unkn1;
-	public via.Color color1;
-	public via.Color color2;
-	public float unkn2_0;
+	// 名字来自 re4.exe：共用条带头部（3e10150）+ 文本解析器 3d7e570（Length、Acceleration、FrameInfluence、VertexInfluence、
+	// BasingPoint、DirX/Y/Z、BlendDirX/Y/Z、AxisBlendRate、FadeByTwistMin/Max 为引擎名）。加载器 3d7eb40，模拟 3d81580。
+	public uint BlendFlags;
+	public via.Color Color;
+	public via.Color ColorRange;
+	public float ColorRate;
 
-	public float unkn2_1;
-	public float unkn2_2;
-	public float unkn2_3;
-    [RszVersion(EfxVersion.RE4, EndAt = nameof(re4_unkn1_4))]
-	public byte re4_unkn1_1;
-	public byte re4_unkn1_2;
-	public byte re4_unkn1_3;
-	public byte re4_unkn1_4;
+	public float Intensity;
+	public float EdgeBlendRange;
+	public float AlphaRate;
+    [RszVersion(EfxVersion.RE4)]
+	public uint Flags;
 
-	public float unkn2_4;
-	public float unkn2_5;
-	public float unkn2_6;
-	public float unkn2_7;
+	public CenterSpread SizeScalar;
+	public CenterSpread WidthSize;
     [RszVersion(EfxVersion.MHWilds)] public uint mhws_unkn1;
-	public float unkn2_8;
+	public float TextureRepeatNum;
     [RszVersion(EfxVersion.RERT)]
-	public float rert_unkn1;
+	public float ShadowMultiplier;
+	// 同 TypeRibbonLength 在 DD2 的位置（按位置推断）。
     [RszVersion(EfxVersion.DD2)]
-	public float dd2_unkn0;
-	public ByteSet unkn2_9_1;
-    public float unkn2_10;
-
-	public float unkn2_11;
-	public float unkn2_12;
-	public float unkn2_13;
-	public float unkn2_14;
-	public float unkn2_15;
-	public float unkn2_16;
-	public float unkn2_17;
+	public float FadeSide;
+	// 位 0-1 = Dir 取根部本帧位移方向（值 2 为反向）；0x8 = Dir 原样使用；0x10 = 方向不经发射器旋转；
+	// 0x20 = 沿链从 Dir 渐变到 BlendDir（用 AxisBlendRate）；0x4000 = 不步进。名字不是引擎名。
+	public uint ChainFlags;
+	// 链长 = |尺寸 × rnd(Length)|，平均分给 (ShapeDivision − 1) 段，节点被拉回、不可伸长。
+	public CenterSpread Length;
+	// m/s²，沿 Dir 方向（没有内建重力：要下垂就设 Dir = (0,−1,0)、Acceleration ≈ 9.8）。固定 60 Hz 子步。
+	public CenterSpread Acceleration;
+	// 阻尼：每步 vel *= FrameInfluence^(dt·60)，1 = 不衰减。出生时夹在 [0,1]。
+	public CenterSpread FrameInfluence;
+	// 节点被拉回时，拉回量 / dt × VertexInfluence 变成速度（回弹）。出生时夹在 [0,1]。
+	public CenterSpread VertexInfluence;
+	// 关节数，夹在 [2, 1000]（同 TypeRibbonLength.ShapeDivision；名字不是引擎名）。
 	[RszVersion('<', EfxVersion.MHWilds)]
-	public uint unkn2_18;
-	public float unkn2_19;
-	public float unkn2_20;
-	public float unkn2_21;
-	public float rert_unkn0;
+	public uint ShapeDivision;
+	public AnchorPair BasingPoint;
+	public CenterSpread DirX;
 	[RszVersionExact(EfxVersion.RERT)]
 	public float sb_unkn1;
 	[RszVersionExact(EfxVersion.RERT)]
 	public float sb_unkn2;
 
-    public float unkn2_22;
-	public float unkn2_23;
-    [RszVersion(EfxVersion.RE4)]
-	public uint re4_unkn2_hash;
+    public CenterSpread DirY;
+	// RE4 起：DirZ、BlendDirX/Y/Z、AxisBlendRate（旧代码把 DirZ.s 当成 uint re4_unkn2_hash）。
+	// 更早的版本保持原来的未命名字段。
+    [RszVersion(EfxVersion.RE4, EndAt = nameof(AxisBlendRate))]
+	public CenterSpread DirZ;
+	public CenterSpread BlendDirX;
+	public CenterSpread BlendDirY;
+	public CenterSpread BlendDirZ;
+	public CenterSpread AxisBlendRate;
+    [RszVersion('<', EfxVersion.RE4, EndAt = nameof(unkn2_32))]
 	public float unkn2_24;
 	public float unkn2_25;
 	public float unkn2_26;
@@ -310,24 +317,26 @@ public partial class EFXAttributeTypeRibbonChain : EFXAttribute
 	public float unkn2_31;
     [RszVersion('>', EfxVersion.RERT)]
 	public float unkn2_32;
-	public via.Color unkn2_33;
-	public via.Color unkn2_34;
-	public via.Color unkn2_35;
-	public float unkn2_36;
-	public float unkn2_37;
-	public float unkn2_38;
-	public float unkn2_39;
-	public float unkn2_40;
-	public float unkn2_41;
-	public float unkn2_42;
+	// 渐变色 / 渐变尺寸（3d7e215 读取），字段顺序同 TypeRibbonLength。
+	public via.Color HeadColor;
+	public via.Color ColorPlace1;
+	public via.Color ColorPlace2;
+	public float ColorPlace1Ratio;
+	public float ColorPlace2Ratio;
+	public float HeadScale;
+	public float ScalePlace1;
+	public float ScalePlace2;
+	public float ScalePlace1Ratio;
+	public float ScalePlace2Ratio;
+	// 以下 5 个仍未命名（语料 1 / 1 / 1 / 0.5 / 1 居多，疑为另一组渐变）。
 	public float unkn2_43;
 	public float unkn2_44;
 	public float unkn2_45;
 	public float unkn2_46;
 	public float unkn2_47;
-    [RszVersion(EfxVersion.RE3, EndAt = nameof(unkn2_49))]
-	public float unkn2_48;
-	public float unkn2_49;
+    [RszVersion(EfxVersion.RE3, EndAt = nameof(FadeByTwistMax))]
+	public float FadeByTwistMin;
+	public float FadeByTwistMax;
 
     // [RszVersion(EfxVersion.RERT)]
     // [RszVersion("!=", EfxVersion.RE4)]
@@ -506,47 +515,52 @@ public partial class EFXAttributeTypeRibbonFixEnd : EFXAttribute
 {
 	public EFXAttributeTypeRibbonFixEnd() : base(EfxAttributeType.TypeRibbonFixEnd) { }
 
-	public uint Flags;
-	public via.Color color0;
-	public via.Color color1;
-	public float unkn2_0;
-	public float unkn2_1;
-	public float unkn2_2;
-	public float unkn2_3;
+	// re4.exe：加载器 3d91fa0（0x88 字节），初始化 3d91ab0，每帧 3d929c0。文本解析器 3d91e80 只给出
+	// ReleaseInterpolation、FadeByTwistMin/Max 三个引擎名；头部名字同共用条带头部，其余名字按作用起。
+	// 固定端 = 粒子出生位置（每帧经发射器矩阵换算，跟随发射器平移和旋转），另一端 = 粒子当前位置。
+	public uint BlendFlags;
+	public via.Color Color;
+	public via.Color ColorRange;
+	public float ColorRate;
+	public float Intensity;
+	public float EdgeBlendRange;
+	public float AlphaRate;
     [RszVersion(EfxVersion.RE4)]
-	public uint re4_unkn0;
-	public float unkn2_4;
-	public float unkn2_5;
-	public float unkn2_6;
-	public float unkn2_7;
+	public uint Flags;
+	public CenterSpread SizeScalar;
+	public CenterSpread WidthSize;
 	[RszVersion(EfxVersion.MHWilds)]
 	public uint Flags2_Wilds;
-	public float unkn2_8;
+	public float TextureRepeatNum;
 	[RszVersion(EfxVersion.RERT)]
-	public float sb_unkn0;
+	public float ShadowMultiplier;
+	// 同 TypeRibbonLength 在 DD2 的位置（按位置推断）。
     [RszVersion(EfxVersion.DD2)]
-	public float dd2_unkn0;
-    public uint unkn2_9;
-	public float unkn2_10;
-	public float unkn2_11;
-	public uint unkn2_12;
-	public uint unkn2_13;
+	public float FadeSide;
+	// 位 0 = 释放时给粒子置 0x400 并冻结（疑为让粒子死亡）；&6 = 逐点颜色渐变；&0x18 = 逐点尺寸渐变。
+    public uint FixEndFlags;
+	// 疑为 BasingPoint（与 Chain / RibbonLength 同位置）；CPU 代码不读。
+	public via.Range BasingPoint;
+	// 释放前的帧数（60 Hz 步），在两个值之间均匀取（3d91b08、3d92959）；0 = 永不释放。
+	public MinMaxI ReleaseFrame;
+	// 点数：每帧加一个，直到这个数（官方 92% 为 2，即一条直线）。
 	[RszVersion('<', EfxVersion.MHWilds)]
-	public uint Flags2;
-	public float unkn2_15;
-	public int unkn2_16;
-	public int unkn2_17;
-	public int unkn2_18;
-	public float unkn2_19;
-	public float unkn2_20;
-	public float unkn2_21;
-	public float unkn2_22;
-	public float unkn2_23;
-	public float unkn2_24;
-	public float unkn2_25;
-    [RszVersion(EfxVersion.RE3, EndAt = nameof(unkn2_27))]
-	public float unkn2_26;
-	public float unkn2_27;
+	public uint ShapeDivision;
+	// 释放后每帧 t += ReleaseInterpolation / 60（不乘 dt，受帧率影响），固定端侧被拉向粒子侧，t 到 1 后只剩粒子轨迹。
+	public float ReleaseInterpolation;
+	public via.Color HeadColor;
+	public via.Color ColorPlace1;
+	public via.Color ColorPlace2;
+	public float ColorPlace1Ratio;
+	public float ColorPlace2Ratio;
+	public float HeadScale;
+	public float ScalePlace1;
+	public float ScalePlace2;
+	public float ScalePlace1Ratio;
+	public float ScalePlace2Ratio;
+    [RszVersion(EfxVersion.RE3, EndAt = nameof(FadeByTwistMax))]
+	public float FadeByTwistMin;
+	public float FadeByTwistMax;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.TypeRibbonFixEndExpression, EfxVersion.RE8, EfxVersion.DD2)]
@@ -690,27 +704,37 @@ public partial class EFXAttributeTypeRibbonFollow : EFXAttribute
 
 	[RszVersion(EfxVersion.RE4)]
     public uint Flags;
-    public via.Range SizeScalar;
-    public via.Range Width;
+    public CenterSpread SizeScalar;
+    public CenterSpread WidthSize;
 
     public float TextureRepeatNum;
 	[RszVersion(nameof(Version), ">=", EfxVersion.RE2, "&&", nameof(Version), "<", EfxVersion.RE8)]
 	public uint unkn14_re2;
-	[RszVersion(EfxVersion.DD2)]
+	// RE4 的这个位置是共用条带头部的 ShadowMultiplier（3e10150 读入，值 1.0f；解析器名 ShadowMultiplier），
+	// 旧代码在 RE4 上把它当成 uint FadeSide（语料显示为 1065353216）。更早的版本保持原样。
+	[RszVersion(EfxVersion.RE4)]
     public float ShadowMultiplier;
-    public uint FadeSide; // TODO verify values here
+	[RszVersion("!=", EfxVersion.RE4)]
+    public uint FadeSide;
+	// re4.exe（加载器 3d787b0 读 0x8c 字节，每帧 3d79cb0）：
+	// 位 0 = 定长绳模式（长度 = rnd(StretchDistance) 米）；位 1 = 历史点存在发射器局部空间（拖尾随发射器刚性移动）。
 	[RszVersion('>', EfxVersion.RE8)]
     public uint FollowFlags;
 	// [RszVersion(nameof(Version), "<", EfxVersion.RE2, "||", nameof(Version), ">", EfxVersion.RE8)]
 
-    public Vector2 StretchDistance; // TODO verify values here
-	[RszVersion(">=", EfxVersion.RE8)]
-    public uint Unkn;//TODO Check this
+	// {s, r} 范围，单位米，每个粒子出生时 s ± r 抽样（仅定长绳模式使用）。
+    public CenterSpread StretchDistance;
 
-	[RszVersion(EfxVersion.RE3, EndAt = nameof(SplineDivision))]
+	// RE4 的三个计数依次是：历史点数（夹在 [2,1000]，同 TypeRibbonLength.ShapeDivision）、相邻历史点间插入的样条点数、
+	// 采样间隔帧数（0 = 每帧）。旧代码把它们叫 Unkn / ShapeDivision / SplineDivision，名字整体错开一格。
+	// 拖尾时长 = (ShapeDivision − 1) × IntervalFrame 帧；Life 不决定长度。RE8 起才有第三个字段。
+	// 引擎里没有这三个名字的字符串；IntervalFrame 是按作用起的名字。
+	[RszVersion(EfxVersion.RE3, EndAt = nameof(IntervalFrame))]
     public uint ShapeDivision;
-	[RszVersion('>', EfxVersion.RE3, EndAt = nameof(SplineDivision))] // TODO verify values
+	[RszVersion('>', EfxVersion.RE3, EndAt = nameof(IntervalFrame))]
     public uint SplineDivision;
+	[RszVersion(">=", EfxVersion.RE8)]
+    public uint IntervalFrame;
 
     [RszVersionExact(EfxVersion.RE7)]
 	public float unkn_re7;
@@ -735,7 +759,7 @@ public partial class EFXAttributeTypeRibbonFollow : EFXAttribute
     public float FadeByTwistMax;
 
     [RszVersion(EfxVersion.RE8)]
-    public via.Range GhostStretch;
+    public MinExtra GhostStretch;
 }
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.TypeRibbonFollowExpression, EfxVersion.DMC5, EfxVersion.DD2)]
 public partial class EFXAttributeTypeRibbonFollowExpression : EFXAttribute, IExpressionAttribute
@@ -787,7 +811,7 @@ public partial class EFXAttributeTypeRibbonFollowMaterial : EFXAttribute
 
     public uint Flags;
     public via.Range SizeScalar;
-    public via.Range Width;
+    public via.Range WidthSize;
     public float TextureRepeatNum;
     public float ShadowMultiplier;
     public float FadeSide;
@@ -956,7 +980,7 @@ public partial class EFXAttributeTypeRibbonTrail : EFXAttribute
 
 	[RszVersion(">", EfxVersion.RE4)] // TODO verify which field should be gone
     public uint Flags;
-    public via.Range Width;
+    public CenterSpread WidthSize;
 	[RszVersion('<', EfxVersion.RERT)]
     public uint FlagsDmc5; // could be intervalFrame or division?
 	[RszVersion(EfxVersion.RERT, EndAt = nameof(Division))]
@@ -1016,13 +1040,17 @@ public partial class EFXAttributeTypeGpuRibbonFollow : EFXAttribute
     public float AlphaRate;
 
 
+	// re4.exe：加载器 3d999e0 读 0x44 字节，与这里 RE4 读的字段总长一致；GPU 类型，CPU 不逐粒子模拟。
+	// FollowFlags：位 0、1、10 和 (flags>>2)&0xff 分别存入不同开关，含义未追。
+	// 文本解析器只给出 SizeScalar 一个引擎名，其余名字未核实。
 	[RszVersion(EfxVersion.RE4, EndAt = nameof(ControlPointNum))]
     public uint FollowFlags;
     public uint ParticleNum;
     public uint SegmentNum;
     public uint ControlPointNum;
+	// RE4 语料里恒等于 ControlPointNum + 1（含义未追）；exe 存放位置与 ControlPointNum 互换。
 	[RszVersionExact(EfxVersion.RE4)]
-    public uint re4_unkn5; // TODO verify placement with above fields
+    public uint re4_unkn5;
     public via.Range SizeScalar;
 	[RszVersion(EfxVersion.RE3)]
     public Vector2 StretchDistance;
@@ -1037,22 +1065,17 @@ public partial class EFXAttributeTypeGpuRibbonFollowExpression : EFXAttribute, I
 
     public EFXAttributeTypeGpuRibbonFollowExpression() : base(EfxAttributeType.TypeGpuRibbonFollowExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(9) { BitNameDict = new () {
-		[1] = nameof(color),
-		[2] = nameof(alpha),
-		[5] = nameof(colorRate),
-		[8] = nameof(size),
-		[9] = nameof(sizeRange),
-	} };
-	public ExpressionAssignType color;
-	public ExpressionAssignType alpha;
-	public ExpressionAssignType unkn3;
-	public ExpressionAssignType unkn4;
-	public ExpressionAssignType colorRate;
-	public ExpressionAssignType unkn6;
-	public ExpressionAssignType unkn7;
-	public ExpressionAssignType size;
-	public ExpressionAssignType sizeRange;
+	// re4.exe 槽位名（B 类：引擎按名字登记槽位，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；旋转槽按角度。 引擎别名：ColorRate = ColorRate/EmissionRate/ContrastRate/InnerIntensity/MultiplyColorRate，Intensity = BackIntensity/OuterIntensity/MultiplyBlackRate；*Range 在引擎里有的写作 *_Random。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(9) { BitNames = [ nameof(Color), nameof(ColorAlpha), nameof(ColorRange), nameof(ColorRangeAlpha), nameof(ColorRate), nameof(Intensity), nameof(AlphaRate), nameof(SizeScalar), nameof(SizeScalarRange) ] };
+	public ExpressionAssignType Color;
+	public ExpressionAssignType ColorAlpha;
+	public ExpressionAssignType ColorRange;
+	public ExpressionAssignType ColorRangeAlpha;
+	public ExpressionAssignType ColorRate;
+	public ExpressionAssignType Intensity;
+	public ExpressionAssignType AlphaRate;
+	public ExpressionAssignType SizeScalar;
+	public ExpressionAssignType SizeScalarRange;
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 
@@ -1070,21 +1093,30 @@ public partial class EFXAttributeTypeGpuRibbonLength : EFXAttribute
     public float EdgeBlendRange;
     public float AlphaRate;
 
+	// re4.exe（加载器 3de32f0 读 0x6c 字节，块 3de34a0，文本解析器 3de2e60 给出引擎名）。
+	// Flags：位 0 = 使用 TextureRepeatNum（否则按 1.0）；位 1 = FrontDirectionType（0 ParallelCamera，1 ToCamera）；
+	// 位 2-7 另存为开关，含义未追。
 	[RszVersion(EfxVersion.RE4)]
     public uint Flags;
-    public via.Range SizeScalar;
-    public via.Range Width;
-    public float TextureRepeatNum;
+	// RE4 在 SizeScalar 前多一个 dword（存入 attr+0x28，含义未知，语料恒 0）。
+	// 旧代码没有这个字段，于是把它当成 SizeScalar.s，后面的名字整体错开一格。
 	[RszVersionExact(EfxVersion.RE4)]
-    public float unkn_Re4; // TODO verify values
+    public uint unkn_re4;
+    public via.Range SizeScalar;
+	// 引擎名 WidthSize（旧名 Width）。
+    public via.Range WidthSize;
+	// RE4：只有 Flags 位 0 置位时才使用（3de33ed），否则按 1.0。
+    public float TextureRepeatNum;
     public uint ParticleNum;
     public via.Range Length;
 	[RszVersion('>', EfxVersion.DMC5)]
     public uint ShapeDivision;
+	// 端点公式同 TypeRibbonLength：P − (1−r)·L·d 到 P + r·L·d（ribbonlengthcompute 块 061）。
     public via.Range BasingPoint;
-    public via.Range DirectionX;
-    public via.Range DirectionY;
-    public via.Range DirectionZ;
+	// 引擎名 DirX / DirY / DirZ（旧名 DirectionX/Y/Z）。
+    public via.Range DirX;
+    public via.Range DirY;
+    public via.Range DirZ;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.TypeGpuRibbonLengthExpression, EfxVersion.DD2)]

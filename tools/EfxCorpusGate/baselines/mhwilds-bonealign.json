@@ -1,0 +1,70 @@
+{
+  "corpus": "E:\\Program\\Steam\\steamapps\\common\\MonsterHunterWilds\\MHWILDS_EXTRACT\\natives\\STM\\Art\\VFX",
+  "extraConsumerTypes": [],
+  "filesTotal": 9225,
+  "filesScanned": 9179,
+  "filesFailed": 46,
+  "scopes": 11932,
+  "countMismatchScopes": 0,
+  "nameAgree": 95254,
+  "nameDisagree": 2,
+  "mismatched": [
+    {
+      "file": "EffectEditor/Enemy/em0162/11_em0162_00_063.efx.5571972",
+      "scope": "root",
+      "declared": 28,
+      "consumers": 28,
+      "nameDisagree": 1,
+      "types": {
+        "EFXAttributeUnitCulling": 1,
+        "EFXAttributeEmitterPriority": 1,
+        "EFXAttributeTransform3D": 17,
+        "EFXAttributeTransform3DModifier": 15,
+        "EFXAttributeParentOptions": 17,
+        "EFXAttributeSpawn": 17,
+        "EFXAttributeScaleAnim": 15,
+        "EFXAttributeLife": 17,
+        "EFXAttributeUVSequence": 14,
+        "EFXAttributeEmitterShape3D": 15,
+        "EFXAttributeShaderSettings": 14,
+        "EFXAttributeDistortion": 4,
+        "EFXAttributeFadeByEmitterAngle": 11,
+        "EFXAttributeFadeByDepth": 15,
+        "EFXAttributeAttractor": 11,
+        "EFXAttributeTypeGpuBillboard": 3,
+        "EFXAttributeEffectOptimizeShader": 10,
+        "EFXAttributePtSort": 10,
+        "EFXAttributeTypeRibbonFollow": 5,
+        "EFXAttributeVelocity3D": 7,
+        "EFXAttributeRgbCommon": 10,
+        "EFXAttributeTypeGpuPolygon": 1,
+        "EFXAttributePtVortexelPhysics": 1,
+        "EFXAttributeTypeGpuMesh": 1,
+        "EFXAttributeTypeRibbonFixEnd": 3,
+        "EFXAttributeTypeNoDraw": 2,
+        "EFXAttributePtBehavior": 2,
+        "EFXAttributeTypeBillboard3D": 2
+      }
+    },
+    {
+      "file": "EffectEditor/Player/pl_cm/pl_ground/11_pl_pfluid_000.efx.5571972",
+      "scope": "root",
+      "declared": 2,
+      "consumers": 2,
+      "nameDisagree": 1,
+      "types": {
+        "EFXAttributeUnitCulling": 1,
+        "EFXAttributeFluidParticleEmitterTarget": 1,
+        "EFXAttributeEffectOptimizeShader": 1,
+        "EFXAttributeTransform3D": 1,
+        "EFXAttributeParentOptions": 1,
+        "EFXAttributePtSort": 1,
+        "EFXAttributeTypePolygon": 1,
+        "EFXAttributeLife": 1,
+        "EFXAttributeFluidParticle2DSimulator": 1,
+        "EFXAttributeEmitMask": 1,
+        "EFXAttributeFluidParticle2DSimulatorExpression": 1
+      }
+    }
+  ]
+}

@@ -140,21 +140,26 @@ public class GpuTexture : IDisposable
             int imgOffset = BitConverter.ToInt32(data, imageHeaderTableStart + 4);
             int start = imageDataStart + imgOffset;
 
-            if (imgSize > 0 && start >= 0 && start + imgSize <= data.Length)
+            // 64-bit sum: a texture without an image header table has pixel data here, and the 32-bit
+            // sum of two such values can wrap negative and pass the bounds check.
+            if (imgSize > 0 && start >= 0 && (long)start + imgSize <= data.Length)
             {
                 var rawSlice = new ReadOnlySpan<byte>(data, start, imgSize);
                 if (rawSlice.Length >= 2 && rawSlice[0] == 0x04 && rawSlice[1] == 0xFB)
                 {
                     payload = TryGDeflateDecompress(rawSlice);
                 }
-                else if (version != 241106027)
+                // An uncompressed image must hold at least mip 0. Without this check a texture that has
+                // no image header table (mip 0 directly after the mip table) is read from its pixel
+                // data as a tiny "image" (e.g. 128 bytes -> 16x8) and comes out transparent.
+                else if (version != 241106027 && imgSize >= uncompSize)
                 {
                     payload = rawSlice.ToArray();
                 }
             }
         }
 
-        if (payload == null && (int)mip0Offset >= 0 && (int)mip0Offset + uncompSize <= data.Length && uncompSize > 0)
+        if (payload == null && mip0Offset <= int.MaxValue && (long)mip0Offset + uncompSize <= data.Length && uncompSize > 0)
         {
             var rawSlice = new ReadOnlySpan<byte>(data, (int)mip0Offset, uncompSize);
             if (rawSlice.Length >= 2 && rawSlice[0] == 0x04 && rawSlice[1] == 0xFB)
@@ -259,7 +264,7 @@ public class GpuTexture : IDisposable
                     gl.TexImage2D(
                         TextureTarget.Texture2D,
                         0,
-                        InternalFormat.Rgba8,
+                        format is DxgiFormat.R8G8B8A8_UNORM_SRGB or DxgiFormat.B8G8R8A8_UNORM_SRGB ? InternalFormat.Srgb8Alpha8 : InternalFormat.Rgba8,
                         (uint)matchedW,
                         (uint)matchedH,
                         0,
@@ -354,7 +359,7 @@ public class GpuTexture : IDisposable
                     gl.TexImage2D(
                         TextureTarget.Texture2D,
                         0,
-                        InternalFormat.Rgba8,
+                        format is DxgiFormat.R8G8B8A8_UNORM_SRGB or DxgiFormat.B8G8R8A8_UNORM_SRGB ? InternalFormat.Srgb8Alpha8 : InternalFormat.Rgba8,
                         mipData.width,
                         mipData.height,
                         0,
@@ -367,6 +372,25 @@ public class GpuTexture : IDisposable
             gl.GenerateMipmap(TextureTarget.Texture2D);
         }
 
+        gl.BindTexture(TextureTarget.Texture2D, 0);
+        return gpuTex;
+    }
+
+    /// <summary>An uncompressed RGBA8 texture from <paramref name="pixels"/> (width x height x 4 bytes), linear,
+    /// repeating, no mips.</summary>
+    public static GpuTexture CreateRgba(GL gl, int width, int height, byte[] pixels)
+    {
+        var gpuTex = new GpuTexture(gl) { Width = width, Height = height, IsCompressed = false };
+        gl.BindTexture(TextureTarget.Texture2D, gpuTex.Handle);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)GLEnum.Repeat);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)GLEnum.Repeat);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)GLEnum.Linear);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)GLEnum.Nearest);
+        unsafe
+        {
+            fixed (byte* ptr = pixels)
+                gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba8, (uint)width, (uint)height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, ptr);
+        }
         gl.BindTexture(TextureTarget.Texture2D, 0);
         return gpuTex;
     }

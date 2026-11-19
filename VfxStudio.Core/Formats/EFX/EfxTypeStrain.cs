@@ -1,3 +1,4 @@
+using System.Numerics;
 using ReeLib.Efx.Structs.Common;
 using ReeLib.InternalAttributes;
 
@@ -143,82 +144,80 @@ public partial class EFXAttributeTypeStrainRibbonV2 : EFXAttribute, IBoneRelatio
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.TypeStrainRibbon, EfxVersion.RE4)]
-public partial class EFXAttributeTypeStrainRibbonV3 : EFXAttribute
+public partial class EFXAttributeTypeStrainRibbonV3 : EFXAttribute, IBoneRelationAttribute
 {
 	// structure looks vaguely similar to TypeStrainRibbon, but big reodering
 	public EFXAttributeTypeStrainRibbonV3() : base(EfxAttributeType.TypeStrainRibbon) { }
 
-    public uint unkn0_0;
-    public uint unkn0_1;
-    public uint unkn0_2;
-    public uint unkn0_3;
-    public float unkn1_0;
-    public float unkn1_1;
-    public float unkn1_2;
-    public int unkn2;
-    public float unkn3_0;
-    public float unkn3_1;
-    public float unkn3_2;
-    public float unkn3_3;
+	// re4.exe（vtable 7a0f480，加载器 3d5cf70，块 3d5d1b0，逐粒子 3d60310）。粗体意义的名字来自文本解析器 3d59480：
+	// InitialPosition、TerminalPosition、Width、Length（别名 Sag）、FrontDirectionType、AxisRotation、EnableCutoff、Cutoff*、
+	// RangeX/Y/Z、RangeDivideNum、LocalRotation、ColorRange、FadeByTwistMin/Max。其余名字按作用起。
+	// 每个粒子一根从粒子拉到骨骼（boneName）或发射器的"绳/光束"，SegmentNum + 1 个点。
+	// Flags：0x2 = 用内嵌发射形状给终点加抖动；0x4 = 起点只用 InitialPosition；0x100 = 总用悬链线；0x400 = EnableCutoff；
+	// 0x1 = 每段 UV 重复一次；0x2000/0x4000/0x8000 = UV 按世界长度平铺。
+    public uint Flags;
+	// 起点 = 粒子世界位置 + InitialPosition（按粒子旋转）。
+    public Vector3 InitialPosition;
+	// 终点：在 boneName 骨骼（找不到时为发射器）坐标系里。
+    public Vector3 TerminalPosition;
+    public int SegmentNum;
+    public CenterSpread Width;
+	// 绳长；两端距离 < Length × 尺寸且 SegmentNum ≥ 2 时沿 SagAxis 下垂成悬链线（3d5d3c0）。
+    public CenterSpread Length;
     public float unkn3_4;
-    public uint unkn3_5;
-    public uint unkn4_0;
-    public float unkn4_1;
-    public float unkn4_2;
-    public via.Color color0;
-    public via.Color color1;
-    public via.Color color2;
-
-	public float unkn5_0;
-    public float unkn5_1;
-    public float unkn5_2;
-    public float unkn5_3;
-    public float unkn5_4;
-    public float unkn5_5;
-    public float unkn5_6;
-    public float unkn5_7;
-    public float unkn5_8; // TODO verify previous versions type
-    public float unkn5_9;
-    public float unkn5_10;
-    public float unkn5_11;
-    public float unkn5_12;
-	// past this is wild territory for Wilds
+    public uint FrontDirectionType;
+	// 下垂轴：{+X, +Y, +Z, −X, −Y, −Z} 的索引，4 = 向下。
+    public uint SagAxis;
+	// 度（×π/180，3d60608）。
+    public via.Range AxisRotation;
+	// 渐变色块（3cffac0 读取；名字按 TypeRibbonLength 的同类字段推断）。
+    public via.Color HeadColor;
+    public via.Color ColorPlace1;
+    public via.Color ColorPlace2;
+	public float ColorPlace1Ratio;
+    public float ColorPlace2Ratio;
+    public float FadeByTwistMin;
+    public float FadeByTwistMax;
+	// 断绳（Flags 0x400）：拉伸超过 EnduranceLength 并持续超过 EnduranceFrame 帧后断开；断开后的逻辑 3d5fb30 未追。
+    public via.Range CutoffRatio;
+    public MinExtra CutoffEnduranceLength;
+    public MinMaxI CutoffEnduranceFrame;
+    public via.Range CutoffGravity;
+    public via.Range CutoffBendScaleCoef;
+	// Wilds 多出的两个字段，原先放在 CutoffBendScaleCoef 的 s 与 r 之间（位置本来就是猜的），现移到其后；Wilds 读取的字节不变。
 	[RszVersion(EfxVersion.MHWilds, EndAt = nameof(wilds_Ukn2))]
 	public uint wilds_Ukn1;
 	public uint wilds_Ukn2;
-    public float unkn5_13;
-    public float unkn5_14;
-    public float unkn5_15;
-    public float unkn5_16;
-    public float unkn5_17;
-    public float unkn5_18;
-    public float unkn5_19;
-    public float unkn5_20;
-	// past this is wild territory for Wilds
+    public via.Range CutoffBendSmooth;
+	// Flags 0x2000 时按长度平铺 UV 用的系数（名字为推测）。
+    public float LengthUVScale;
+
+	// 内嵌的 EmitterShape3D（加载器读 UniqueID + 0x54 字节），只在 Flags 0x2 时用于终点抖动；字段同 EmitterShape3D。
+    public uint ShapeUniqueID;
+    public InnerOuter ShapeRangeX;
+    public InnerOuter ShapeRangeY;
+    public InnerOuter ShapeRangeZ;
+	// Wilds 多出的两个颜色，原先放在 ShapeRangeY 的 s 与 r 之间，现移到 ShapeRangeZ 之后；Wilds 读取的字节不变。
 	[RszVersion(EfxVersion.MHWilds, EndAt = nameof(wilds_Color2))]
 	public via.Color wilds_Color1;
 	public via.Color wilds_Color2;
-    public float unkn5_21;
-    public float unkn5_22;
-    public float unkn5_23;
-    public uint unkn5_24;
-    public float unkn5_25;
-    public float unkn5_26;
-    public float unkn5_27; // TODO verify if int in previous games
-    public float unkn5_28;
-    public float unkn5_29;
-    public float unkn5_30;
-    public float unkn5_31;
+    public uint ShapeType;
+    public uint ShapeRangeDivideNum;
+    public uint ShapeRangeDivideAxis;
+    public uint ShapeRangeDivideHorizontalNum;
+    public uint ShapeRangeDivideVerticalNum;
+    public Vector3 ShapeLocalRotation;
 
-    public int unkn6;
-	public float unkn7_0;
+    public int ShapeRotationOrder;
+	public uint ShapeRotationCorrect;
 	[RszVersion(EfxVersion.MHWilds)]
 	public uint wilds_Ukn2_1;
-    public float unkn7_1;
-    public float unkn7_2;
-    public float unkn7_3;
-    public float unkn7_4;
-    public float unkn7_5;
+    public bool ShapeDivideEquidistant;
+    public bool ShapeDivideEquidistantCalcOuterCurve;
+    public bool ShapeDivideEquidistantRecalcEveryFrame;
+    public bool ShapeUseExtension;
+    public StartSpan ShapeScaleHorizontal;
+    public StartSpan ShapeScaleVertical;
 	// past this is wild territory for Wilds
 	[RszVersion(EfxVersion.MHWilds, EndAt = nameof(wilds_UknLast))]
 	public uint wilds_Ukn3_1;
@@ -228,16 +227,23 @@ public partial class EFXAttributeTypeStrainRibbonV3 : EFXAttribute
 	public float wilds_Ukn3_5;
 	public float wilds_Ukn3_6;
 	public UndeterminedFieldType wilds_UknLast;
-	[RszInlineWString] public string? boneName;
+	[RszInlineWString(ByteSize = true)] public string? boneName;
 
-	[RszVersion('<', EfxVersion.MHWilds, EndAt = nameof(unkn8_6))]
-	public int unkn8_0;
-	public uint unkn8_color1;
-	public uint unkn8_color2;
-	public float unkn8_3;
-	public float unkn8_4;
-	public int unkn8_5;
-	public float unkn8_6;
+	// 共用颜色头部放在文件末尾（与其他 Type 不同）。
+	[RszVersion('<', EfxVersion.MHWilds, EndAt = nameof(AlphaRate))]
+	public uint BlendFlags;
+	public via.Color Color;
+	public via.Color ColorRange;
+	public float ColorRate;
+	public float Intensity;
+	public float EdgeBlendRange;
+	public float AlphaRate;
+
+    // MHWs-EFX-Editor 本地补丁：这个类型在 MHWilds 下确实会消费一个 BoneRelations 槽位（全语料
+    // 9175 个文件实测：不把它当消费者时，220 个作用域的索引流整体错位、导致 1158 处
+    // ParentBone 被解析成别的骨骼；两个类型（TypeStrainRibbonV3 + FluidParticle2DSimulator）都算上后降到 1 处）。
+    // 见 KNOWN_UPSTREAM_ISSUES.md #9 / tools/vendor-patches/README.md。
+    public string? ParentBone { get; set; }
 
     public override string ToString() => !string.IsNullOrEmpty(boneName) ? boneName : type.ToString();
 }

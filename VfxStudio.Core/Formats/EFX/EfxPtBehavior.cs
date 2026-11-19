@@ -5,19 +5,26 @@ using ReeLib.InternalAttributes;
 
 namespace ReeLib.Efx.Structs.Pt;
 
+// Named after the engine type of the script field the parameter sets: every parameter in the RE4 corpus was matched to
+// its field in the type database inside re4.exe (class = the PtBehavior's script name, field = the parameter name), and
+// each id maps to exactly one field type. 18 and 22 are both enums: 18 the script's own (DecalDirectionEnum,
+// Priority, ...), 22 the engine's via.effect.lensflare.RotationOrder / AxisType.
 public enum PtBehaviorPropType
 {
-    PropUint = 4,
-    PropFloat = 9,
-    PropRange = 10,
-    PropFloat3 = 11,
-    PropInt = 14,
-    PropColor = 15,
-    PropWstringName = 16,
-    PropPrefabpath = 17,
-    PropEnum = 18,
-    PropFloat2 = 19,
-    PropWstring2 = 21,
+    PropInt = 3,            // System.Int32
+    PropUint = 4,           // System.UInt32
+    PropFloat = 9,          // System.Single
+    PropVec2 = 10,          // via.vec2 (x, y), not a random range: EffectDecal UVOffset, UVScale, Alpha0
+    PropVec3 = 11,          // via.vec3
+    PropBool = 14,          // System.Boolean, stored as a 4-byte 0 / 1
+    PropColor = 15,         // via.Color
+    PropString = 16,        // System.String
+    PropPrefab = 17,        // via.Prefab (path)
+    PropEnum = 18,          // script enum
+    PropRange = 19,         // via.Range (s, r): EffectDecal ScaleXY, OBBScalarAdd, PyramidAngle
+    PropRangeI = 20,        // via.RangeI (s, r): ShakeCamera Period
+    PropTexture = 21,       // via.render.TextureResourceHolder (path): EffectDecal FlowTexture
+    PropNativeEnum = 22,    // engine enum
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion))]
@@ -64,6 +71,36 @@ public partial class PtBehaviorVariableInteger : PtBehaviorVariableDataBase
     protected override bool DoWrite(FileHandler handler) => EnsureMinimumSize(4) && base.DoWrite(handler) && DefaultWrite(handler);
 }
 
+[RszGenerate, RszVersionedObject(typeof(EfxVersion))]
+public partial class PtBehaviorVariableUInt : PtBehaviorVariableDataBase
+{
+	public PtBehaviorVariableUInt(EfxVersion version) : base(version) { }
+
+	public uint value;
+	[RszFixedSizeArray(nameof(size), - 4)] public byte[]? restData;
+
+    protected override bool DoRead(FileHandler handler) => base.DoRead(handler) && DefaultRead(handler);
+    protected override bool DoWrite(FileHandler handler) => EnsureMinimumSize(4) && base.DoWrite(handler) && DefaultWrite(handler);
+}
+
+[RszGenerate, RszVersionedObject(typeof(EfxVersion))]
+public partial class PtBehaviorVariableVec2 : PtBehaviorVariableDataBase
+{
+	public PtBehaviorVariableVec2(EfxVersion version) : base(version) { }
+
+	public Vector2 vec;
+	[RszFixedSizeArray(nameof(size), - 8)] public byte[]? restData;
+
+    protected override bool DoRead(FileHandler handler) => base.DoRead(handler) && DefaultRead(handler);
+    protected override bool DoWrite(FileHandler handler) => EnsureMinimumSize(8) && base.DoWrite(handler) && DefaultWrite(handler);
+}
+
+/// <summary>A bool parameter: the payload is a 4-byte 0 / 1.</summary>
+public partial class PtBehaviorVariableBool : PtBehaviorVariableInteger
+{
+	public PtBehaviorVariableBool(EfxVersion version) : base(version) { }
+}
+
 public partial class PtBehaviorVariableEnum : PtBehaviorVariableInteger
 {
 	public PtBehaviorVariableEnum(EfxVersion version) : base(version) { }
@@ -81,20 +118,31 @@ public partial class PtBehaviorVariableFloat : PtBehaviorVariableDataBase
     protected override bool DoWrite(FileHandler handler) => EnsureMinimumSize(4) && base.DoWrite(handler) && DefaultWrite(handler);
 }
 [RszGenerate, RszVersionedObject(typeof(EfxVersion))]
-public partial class PtBehaviorVariableFloat2 : PtBehaviorVariableDataBase
+public partial class PtBehaviorVariableRange : PtBehaviorVariableDataBase
 {
-	public PtBehaviorVariableFloat2(EfxVersion version) : base(version) { }
+	public PtBehaviorVariableRange(EfxVersion version) : base(version) { }
 
-	public Vector2 Vec;
+	public via.Range range;
 	[RszFixedSizeArray(nameof(size), - 8)] public byte[]? restData;
 
     protected override bool DoRead(FileHandler handler) => base.DoRead(handler) && DefaultRead(handler);
     protected override bool DoWrite(FileHandler handler) => EnsureMinimumSize(8) && base.DoWrite(handler) && DefaultWrite(handler);
 }
 [RszGenerate, RszVersionedObject(typeof(EfxVersion))]
-public partial class PtBehaviorVariableFloat3 : PtBehaviorVariableDataBase
+public partial class PtBehaviorVariableRangeI : PtBehaviorVariableDataBase
 {
-	public PtBehaviorVariableFloat3(EfxVersion version) : base(version) { }
+	public PtBehaviorVariableRangeI(EfxVersion version) : base(version) { }
+
+	public via.RangeI range;
+	[RszFixedSizeArray(nameof(size), - 8)] public byte[]? restData;
+
+    protected override bool DoRead(FileHandler handler) => base.DoRead(handler) && DefaultRead(handler);
+    protected override bool DoWrite(FileHandler handler) => EnsureMinimumSize(8) && base.DoWrite(handler) && DefaultWrite(handler);
+}
+[RszGenerate, RszVersionedObject(typeof(EfxVersion))]
+public partial class PtBehaviorVariableVec3 : PtBehaviorVariableDataBase
+{
+	public PtBehaviorVariableVec3(EfxVersion version) : base(version) { }
 
 	public Vector3 vec;
 	[RszFixedSizeArray(nameof(size), - 12)] public byte[]? restData;
@@ -120,9 +168,9 @@ public partial class PtBehaviorVariableDataPrefabPath : PtBehaviorVariableDataWS
 }
 
 [RszGenerate, RszVersionedObject(typeof(EfxVersion))]
-public partial class PtBehaviorVariableDataPrefabUnknown : PtBehaviorVariableDataBase
+public partial class PtBehaviorVariableRaw : PtBehaviorVariableDataBase
 {
-	public PtBehaviorVariableDataPrefabUnknown(EfxVersion version) : base(version) { }
+	public PtBehaviorVariableRaw(EfxVersion version) : base(version) { }
 
 	[RszFixedSizeArray(nameof(size))] public byte[]? data;
 
@@ -156,14 +204,20 @@ public partial class PtBehaviorVariable : BaseModel
 	// }
 	[RszClassInstance, RszConstructorParams(nameof(Version)), RszSwitch(
 		nameof(dataType), "==", PtBehaviorPropType.PropColor, typeof(PtBehaviorVariableDataColor),
-		nameof(dataType), "==", PtBehaviorPropType.PropPrefabpath, typeof(PtBehaviorVariableDataPrefabPath),
+		nameof(dataType), "==", PtBehaviorPropType.PropPrefab, typeof(PtBehaviorVariableDataPrefabPath),
 		nameof(dataType), "==", PtBehaviorPropType.PropInt, typeof(PtBehaviorVariableInteger),
+		nameof(dataType), "==", PtBehaviorPropType.PropBool, typeof(PtBehaviorVariableBool),
 		nameof(dataType), "==", PtBehaviorPropType.PropEnum, typeof(PtBehaviorVariableEnum),
+		nameof(dataType), "==", PtBehaviorPropType.PropNativeEnum, typeof(PtBehaviorVariableEnum),
 		nameof(dataType), "==", PtBehaviorPropType.PropFloat, typeof(PtBehaviorVariableFloat),
-		nameof(dataType), "==", PtBehaviorPropType.PropFloat2, typeof(PtBehaviorVariableFloat2),
-		nameof(dataType), "==", PtBehaviorPropType.PropFloat3, typeof(PtBehaviorVariableFloat3),
-		nameof(dataType), "==", PtBehaviorPropType.PropWstringName, typeof(PtBehaviorVariableDataWString),
-		typeof(PtBehaviorVariableDataPrefabUnknown)
+		nameof(dataType), "==", PtBehaviorPropType.PropVec2, typeof(PtBehaviorVariableVec2),
+		nameof(dataType), "==", PtBehaviorPropType.PropVec3, typeof(PtBehaviorVariableVec3),
+		nameof(dataType), "==", PtBehaviorPropType.PropRange, typeof(PtBehaviorVariableRange),
+		nameof(dataType), "==", PtBehaviorPropType.PropRangeI, typeof(PtBehaviorVariableRangeI),
+		nameof(dataType), "==", PtBehaviorPropType.PropString, typeof(PtBehaviorVariableDataWString),
+		nameof(dataType), "==", PtBehaviorPropType.PropTexture, typeof(PtBehaviorVariableDataWString),
+		nameof(dataType), "==", PtBehaviorPropType.PropUint, typeof(PtBehaviorVariableUInt),
+		typeof(PtBehaviorVariableRaw)
 	)]
 	public PtBehaviorVariableDataBase? variable;
 
@@ -178,8 +232,82 @@ public partial class PtBehaviorVariable : BaseModel
 
 	protected override bool DoWrite(FileHandler handler)
 	{
+		// The stored lengths follow the content, so string values can change (RE4 corpus, every parameter type):
+		// a string takes (length + 1) * 2 bytes with its NUL, and varSize counts what follows it
+		// (dataType 4 + data header 12 + payload + name + NUL) = name length + 17 + size.
+		if (Version == EfxVersion.RE4 && variable != null)
+		{
+			if (variable is PtBehaviorVariableDataWString text) text.size = ((text.str?.Length ?? 0) + 1) * 2;
+			varSize = (behaviorProperty?.Length ?? 0) + 17 + variable.size;
+		}
 		DefaultWrite(handler);
 		return true;
+	}
+
+	/// <summary>The value as <see cref="Create"/> reads it.</summary>
+	public string ValueText()
+	{
+		var inv = System.Globalization.CultureInfo.InvariantCulture;
+		return variable switch
+		{
+			PtBehaviorVariableFloat f => f.value.ToString("R", inv),
+			PtBehaviorVariableVec2 v2 => string.Join(",", v2.vec.X.ToString("R", inv), v2.vec.Y.ToString("R", inv)),
+			PtBehaviorVariableVec3 v3 => string.Join(",", v3.vec.X.ToString("R", inv), v3.vec.Y.ToString("R", inv), v3.vec.Z.ToString("R", inv)),
+			PtBehaviorVariableRange r => string.Join(",", r.range.s.ToString("R", inv), r.range.r.ToString("R", inv)),
+			PtBehaviorVariableRangeI ri => string.Join(",", ri.range.s.ToString(inv), ri.range.r.ToString(inv)),
+			PtBehaviorVariableInteger i => i.value.ToString(inv),
+			PtBehaviorVariableUInt u => u.value.ToString(inv),
+			PtBehaviorVariableDataColor c => $"{c.color.R},{c.color.G},{c.color.B},{c.color.A}",
+			PtBehaviorVariableDataWString s => s.str ?? "",
+			PtBehaviorVariableRaw raw => Convert.ToHexString(raw.data ?? []),
+			_ => "",
+		};
+	}
+
+	/// <summary>A new RE4 parameter from text: Float, Int, Uint, Bool (0 / 1) and the two enums take one number; Vec2,
+	/// Vec3, Range, RangeI and Color take comma-separated numbers (Range: s,r; Color: R,G,B,A); String, Prefab and
+	/// Texture take the text; other types take hex bytes. <paramref name="index"/> is the parameter's position in its
+	/// PtBehavior.</summary>
+	public static PtBehaviorVariable Create(EfxVersion version, int index, string name, PtBehaviorPropType type, string value)
+	{
+		var inv = System.Globalization.CultureInfo.InvariantCulture;
+		float[] Floats(int n)
+		{
+			var parts = value.Split(',').Select(p => float.Parse(p.Trim(), inv)).ToArray();
+			if (parts.Length != n) throw new ArgumentException($"{name}: {type} needs {n} comma-separated numbers.");
+			return parts;
+		}
+		PtBehaviorVariableDataBase data = type switch
+		{
+			PtBehaviorPropType.PropFloat => new PtBehaviorVariableFloat(version) { value = float.Parse(value, inv), size = 4 },
+			PtBehaviorPropType.PropVec2 => Floats(2) is var v2 ? new PtBehaviorVariableVec2(version) { vec = new(v2[0], v2[1]), size = 8 } : null!,
+			PtBehaviorPropType.PropVec3 => Floats(3) is var v3 ? new PtBehaviorVariableVec3(version) { vec = new(v3[0], v3[1], v3[2]), size = 12 } : null!,
+			PtBehaviorPropType.PropRange => Floats(2) is var r ? new PtBehaviorVariableRange(version) { range = new via.Range { s = r[0], r = r[1] }, size = 8 } : null!,
+			PtBehaviorPropType.PropRangeI => value.Split(',').Select(p => int.Parse(p.Trim(), inv)).ToArray() is { Length: 2 } ri
+				? new PtBehaviorVariableRangeI(version) { range = new via.RangeI { s = ri[0], r = ri[1] }, size = 8 }
+				: throw new ArgumentException($"{name}: RangeI needs s,r."),
+			PtBehaviorPropType.PropInt => new PtBehaviorVariableInteger(version) { value = int.Parse(value, inv), size = 4 },
+			PtBehaviorPropType.PropBool => new PtBehaviorVariableBool(version) { value = int.Parse(value, inv), size = 4 },
+			PtBehaviorPropType.PropEnum or PtBehaviorPropType.PropNativeEnum =>
+				new PtBehaviorVariableEnum(version) { value = int.Parse(value, inv), size = 4 },
+			PtBehaviorPropType.PropUint => new PtBehaviorVariableUInt(version) { value = uint.Parse(value, inv), size = 4 },
+			PtBehaviorPropType.PropColor => value.Split(',').Select(p => byte.Parse(p.Trim(), inv)).ToArray() is { Length: 4 } c
+				? new PtBehaviorVariableDataColor(version) { color = new via.Color { R = c[0], G = c[1], B = c[2], A = c[3] }, size = 4 }
+				: throw new ArgumentException($"{name}: Color needs R,G,B,A."),
+			PtBehaviorPropType.PropString or PtBehaviorPropType.PropTexture => new PtBehaviorVariableDataWString(version) { str = value },
+			PtBehaviorPropType.PropPrefab => new PtBehaviorVariableDataPrefabPath(version) { str = value },
+			_ => Convert.FromHexString(value) is var bytes ? new PtBehaviorVariableRaw(version) { data = bytes, size = bytes.Length } : null!,
+		};
+		if (data is PtBehaviorVariableDataWString w) w.size = ((w.str?.Length ?? 0) + 1) * 2;
+		// Header as in every RE4 parameter: unkn 2 for Range and RangeI, else 1; then -1 and the parameter index.
+		data.unkn = type is PtBehaviorPropType.PropRange or PtBehaviorPropType.PropRangeI ? 2 : 1;
+		data.re4_unkn0 = -1;
+		data.re4_unkn1 = (short)index;
+		return new PtBehaviorVariable(version)
+		{
+			dataType = type, variable = data, behaviorProperty = name,
+			varSize = name.Length + 17 + data.size,
+		};
 	}
 }
 
@@ -207,14 +335,18 @@ public partial class EFXAttributePtColliderAction : EFXAttribute
 {
     public EFXAttributePtColliderAction() : base(EfxAttributeType.PtColliderAction) { }
 
-    public uint dataFlags;
+    // re4.exe：逐粒子步骤 3d62430，解析器只有 Radius 一个名字。与 PtCollision 独立的另一次碰撞检测：每次碰撞都在碰撞点
+    // 启动 linkedAction 指向的 Action（+Y 朝法线），没有计数。
+    // 无引擎名（旧名 dataFlags）：bit0 有碰撞层字符串，bit1 有掩码字符串，bit2 碰撞时杀死粒子，bit3 用 Radius 做球投射。
+    public uint Flags;
 
-    public float unkn1;
-    public float unkn2;
+    // 引擎名 Radius，lerp(min, max, u)；只在 Flags bit3 时用。旧名 unkn1 / unkn2。
+    public MinMax Radius;
+    // EFX 文件 Action 列表的下标；0xFFFFFFFF = 不触发。
     public uint linkedAction;
 
-	// found in RE2RT
-	[RszConditional("(dataFlags & (1 << 10)) != 0", EndAt = nameof(ukn_flag2_11))]
+	// found in RE2RT（RE4 的加载器不读这一段，语料里也没有 bit10）
+	[RszConditional("(Flags & (1 << 10)) != 0", EndAt = nameof(ukn_flag2_11))]
 	public uint ukn_flag2_0; // likely some sort of shape type + data
     public float ukn_flag2_2;
     public float ukn_flag2_3;
@@ -233,11 +365,13 @@ public partial class EFXAttributePtColliderAction : EFXAttribute
 	[RszVersionExact(EfxVersion.DD2)]
 	public uint dd2_unkn2;
 
-	[RszConditional("(dataFlags & (1 << 1)) != 0"), RszInlineWString]
-	public string? unknString_flag2;
+	// 引擎先读 bit0 的字符串（碰撞层），再读 bit1 的（掩码）；旧代码顺序反了，两个都有时会互换。
+	// 只在 RE4 上核对过顺序。旧名 unknString_flag1 / unknString_flag2。
+	[RszConditional("(Flags & (1 << 0)) != 0"), RszInlineWString(ByteSize = true)]
+	public string? LayerName;
 
-	[RszConditional("(dataFlags & (1 << 0)) != 0"), RszInlineWString]
-	public string? unknString_flag1;
+	[RszConditional("(Flags & (1 << 1)) != 0"), RszInlineWString(ByteSize = true)]
+	public string? MaskName;
 
 	[RszVersionExact(EfxVersion.MHWilds)]
 	public uint wilds_unkn0;
@@ -248,32 +382,47 @@ public partial class EFXAttributePtCollision : EFXAttribute
 {
     public EFXAttributePtCollision() : base(EfxAttributeType.PtCollision) { }
 
-    public byte stringBitFlag;//<format=binary,comment = "bitflag, determines whether there will be strings read">;
-    public byte unkn0_1;
-    public byte unkn0_2;
-    public byte unkn0_3;
+    // re4.exe：vtable 7a0f980，加载器读 UniqueID + 0x44 字节，解析器 3d63320，逐粒子步骤 3d64580。名字来自解析器。
+    // 不是深度缓冲碰撞：CPU 每帧从上一位置到当前位置投射线/球（异步，晚一帧），对物理世界按碰撞层/掩码过滤。
+    // Gpu* 类型上不起作用。
+    // 无引擎名（按作用起名，旧名 stringBitFlag + unkn0_1..3）：bit0 有碰撞层字符串，bit1 有掩码字符串，bit2 用 Radius 做球投射
+    // （否则射线），bit3 最后一次碰撞时冻结动画器，bit4 投影模式，bit5-6 速度重定向，bit7-8 旋转重定向，bit9-11 欧拉顺序，
+    // bit12 对齐法线，bit13 冻结在碰撞点。
+    public uint Flags;
 
-    public via.Range Radius;
-    public via.RangeI BounceNum;
-    public via.Range BounceRate;
+    // 球投射半径（米），lerp(min, max, u)；只在 Flags bit2 时用。
+    public MinMax Radius;
+    // 碰撞次数 [min, max)，包含结束那一次：2 = 弹一次。
+    public MinMaxExclusiveI BounceNum;
+    // 反射后速度倍率，lerp(min, max, u)。反射按真实碰撞法线，速度大小保持，再乘倍率。
+    public MinMax BounceRate;
+    // ×BounceRate，作用在世界 Y 上（不是法线方向）。
     public float VerticalBounce;
+    // ×BounceRate，作用在世界 X/Z 上。
     public float HorizontalBounce;
+    // 碰撞次数用完时：None 穿过、Kill 杀死、Freeze 停在碰撞点。
     public Finish FinishType;
 	[RszVersion('>', EfxVersion.RE7, EndAt = nameof(DelayFrameCollision))]
-    public float projectionOffset;
-    public float projectionDist;
-    public float unkn12;
+    // 以下三个只在投影模式（Flags bit4，出生时从发射器平面沿局部 -Y 投射）用到。
+    public float ProjectionOffset;
+    public float ProjectionDist;
+    // 引擎里是一个区间对 ProjectionCorrectDist（first + u·second），RE4 存两个 float；旧名 unkn12 / unkn13。
+    public float ProjectionCorrectDist;
 	[RszVersion('<', EfxVersion.MHWilds, EndAt = nameof(DelayFrameCollision))]
-    public float unkn13;
+    public float ProjectionCorrectDistExtra;
 	[RszVersion('>', EfxVersion.RE3, EndAt = nameof(DelayFrameCollision))]
+    // Freeze 时沿碰撞法线的偏移。
     public float LookNormalDirectionOffset;
 	[RszVersion('>', EfxVersion.RERT, EndAt = nameof(DelayFrameCollision))]
-    public via.RangeI DelayFrameCollision;
-	[RszConditional("(stringBitFlag & (1 << 0)) != 0"), RszInlineWString]
-	public string? unknString0;
+    // 无引擎名。粒子年龄达到 center + randint[-spread, spread] 帧之前不做碰撞。
+    public CenterSpreadI DelayFrameCollision;
+	// 碰撞层名（如 "Bullet"、"Character"），在全局 CollisionFilter 里按名字查。旧名 unknString0。
+	[RszConditional("(Flags & (1 << 0)) != 0"), RszInlineWString(ByteSize = true)]
+	public string? LayerName;
 
-	[RszConditional("(stringBitFlag & (1 << 1)) != 0"), RszInlineWString]
-	public string? unknString1;
+	// 碰撞掩码名（如 "TcCameraHit"）。旧名 unknString1。
+	[RszConditional("(Flags & (1 << 1)) != 0"), RszInlineWString(ByteSize = true)]
+	public string? MaskName;
 }
 
 
@@ -290,7 +439,7 @@ public partial class EFXAttributePtProjection : EFXAttribute
     public UndeterminedFieldType unkn6;
     public UndeterminedFieldType unkn7;
 	[RszConditional("(flags & 2) != 0")] // TODO either 64 or 2 for string (or both); 128 is NOT string; see: 11_em0156_00_011.efx.5571972
-	[RszInlineWString] public string? unknString0;
+	[RszInlineWString(ByteSize = true)] public string? unknString0;
 }
 
 
@@ -301,9 +450,9 @@ public partial class EFXAttributePtColor : EFXAttribute
 
 	public PtColorOperator ColorOperator;
 	public PtColorOperator AlphaOperator;
-	public via.Color Color;
+	public via.Color ElementColor;   // re4.exe 文本解析器名；原生标记实验：文件 +8 → 块
 
-	public override string ToString() => $"PtColor: {Color}";
+	public override string ToString() => $"PtColor: {ElementColor}";
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.PtColorClip, EfxVersion.DMC5)]
@@ -343,8 +492,17 @@ public partial class EFXAttributePtLife : EFXAttribute
 {
 	public EFXAttributePtLife() : base(EfxAttributeType.PtLife) { }
 
+	// re4.exe：vtable 7a0ce00，加载器 3d3d3d0 读 UniqueID + 0x0c 字节，触发函数 3d3d110。解析器是空壳，没有引擎名。
+	// 子 Action 出生在粒子当前的位置/尺寸，只拿粒子的变换，不继承速度、颜色、寿命；父粒子死后子特效继续跑，矩阵冻结。
+	// 每个 PtLife 有 2 × Spawn.MaxParticles 个 Action 实例池，满了覆盖最旧的。
+	// 位的作用已读到，名字是描述性的：bit0 = 发射器停止或粒子死亡时释放子特效；bit1 = Mesh 粒子的旋转也继承（语料未用）；
+	// bit2/bit3/bit4 = 子特效每帧跟随粒子的位置/旋转/缩放（不置位则冻结在出生时的快照）。
 	public uint Flags;
-	public uint Status;
+	// 按生命阶段边沿触发，每个粒子每个阶段只触发一次：0 出生帧 / 1 进入 Appear / 2 进入 Keep / 3 进入 Vanish / 4 死亡。
+	// 对应阶段帧数为 0 时该阶段不会触发（Appear 0 → 1 不触发；Vanish 0 → 3 不触发，改用 4）。
+	// -1 不是"未知"：更新循环在无变化的帧传 -1，所以 Status = -1 会每帧触发（语料里没有）。
+	public PtLifeStatus Status;
+	// EFX 文件 Action 列表的下标（[file+0x58] + idx·0x38）；-1 或越界 = 不触发。
 	public int ActionIndex;
 }
 
@@ -401,7 +559,7 @@ public partial class EFXAttributePtFreezer : EFXAttribute
 [RszGenerate, RszAutoReadWrite]
 public partial class PtPathTranslateName : BaseModel
 {
-	[RszInlineWString] public string name = "";
+	[RszInlineWString(ByteSize = true)] public string name = "";
 
     public override string ToString() => name;
 }
@@ -477,10 +635,11 @@ public partial class EFXAttributePtVortexelHeatSource : EFXAttribute
 {
 	public EFXAttributePtVortexelHeatSource() : base(EfxAttributeType.PtVortexelHeatSource) { }
 
-	public float Unkn0;
-	public int unkn1;
-	public short unkn2;
-	public uint unkn3;
+	// 名字取自 MonsterHunterWilds.exe 文本解析器（vtable e103ba0）；文件里 14 字节紧排，OverwritePriority 是 u16。
+	public float Radius;
+	public int OverwriteType;
+	public short OverwritePriority;
+	public uint DurationFrame;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.PtCollisionInfluence, EfxVersion.MHWilds)]
@@ -505,6 +664,5 @@ public partial class EFXAttributePtCollisionInfluence : EFXAttribute
 	public uint Unkn6;
 	public float Unkn7;
 	public uint Unkn8;
-	[RszArraySizeField(nameof(Data))] public int DataCount;
-	[RszFixedSizeArray(nameof(DataCount))] public PtCollisionInfluenceData[]? Data;
+	[RszFixedSizeArray] public PtCollisionInfluenceData[]? Data;
 }

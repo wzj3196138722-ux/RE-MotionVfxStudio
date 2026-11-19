@@ -91,7 +91,8 @@ public struct EfxClipInterpolationTangents
 public struct EfxMaterialClip_Struct4
 {
     public uint mdfPropertyHash;
-    public int unkn1; // values: 0, 1, 2, 3;  NOT a clip index
+    /// <summary>曲线写入参数值的第几个分量：0 X（base）、1 Y（random）、2 Z（min）、3 W（max）。re4.exe 3e14960 写 槽[参数 × 9 + 本值]。</summary>
+    public int valueComponent;
     public int unkn2; // values: 0, 25, 28;   NOT a clip index
 	/// <summary>
 	/// Likely to be <see cref="ClipValueType"/> enum - always 5 in known files.

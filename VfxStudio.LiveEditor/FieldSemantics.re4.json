@@ -1,0 +1,596 @@
+{
+  "_comment": "RE4（EFX 3539837）字段说明，按属性类型名 + 字段路径。键可以是字段本身或它的上级路径（AppearFrame 覆盖 AppearFrame.min / .max）。来源：VfxStudio.Core/Formats/EFX 的注释与 docs/development/RE4-EFX-RUNTIME.zh-CN.md，均为 re4.exe 静态读码；status 写明待确认的项。帧 = 1/60 秒。bits 的 shift/width 是位段，options 表示互斥取值，locked 表示只能用精确值改。",
+  "attributes": {
+    "Transform3D": {
+      "LocalPosition": { "help": "发射器局部平移，矩阵最后一步：v = v本地·S·R + LocalPosition。", "unit": "米" },
+      "LocalRotation": { "help": "欧拉角，按 RotationOrder 组合。90° = 1.5708。", "unit": "弧度" },
+      "LocalScale": { "help": "旋转之前沿发射器自身轴的缩放。" },
+      "RotationOrder": { "help": "0 XYZ、1 YZX、2 ZXY、3 ZYX、4 YXZ、5 XZY；第一个字母先作用。越界 = 不旋转。" }
+    },
+    "Transform3DModifier": {
+      "Flags": {
+        "help": "发射器级，每帧改写同一 entry 的 Transform3D。",
+        "bits": { "summary": "速度启用、随机正负号、起始值替换", "groups": [
+          { "shift": 0, "width": 1, "label": "位 0：平移速度" },
+          { "shift": 1, "width": 1, "label": "位 1：旋转速度" },
+          { "shift": 2, "width": 1, "label": "位 2：缩放速度" },
+          { "shift": 3, "width": 1, "label": "位 3：平移速度随机正负号" },
+          { "shift": 4, "width": 1, "label": "位 4：旋转速度随机正负号" },
+          { "shift": 5, "width": 1, "label": "位 5：缩放速度随机正负号" },
+          { "shift": 6, "width": 1, "label": "位 6：用 TranslationStart 替换平移（三轴一起）" },
+          { "shift": 7, "width": 1, "label": "位 7：用 RotationStart 替换旋转（三轴一起）" },
+          { "shift": 8, "width": 1, "label": "位 8：用 ScaleStart 替换缩放（三轴一起）" }
+        ] }
+      },
+      "TranslationStartX": { "help": "起始平移，Flags 位 6 时替换 Transform3D。", "unit": "米", "when": {"field": "Flags", "shift": 6, "in": [1], "why": "Flags 位 6（替换平移）未置位"} },
+      "TranslationStartY": { "help": "起始平移，Flags 位 6 时替换 Transform3D。", "unit": "米", "when": {"field": "Flags", "shift": 6, "in": [1], "why": "Flags 位 6（替换平移）未置位"} },
+      "TranslationStartZ": { "help": "起始平移，Flags 位 6 时替换 Transform3D。", "unit": "米", "when": {"field": "Flags", "shift": 6, "in": [1], "why": "Flags 位 6（替换平移）未置位"} },
+      "RotationStartX": { "help": "起始旋转，Flags 位 7 时替换 Transform3D。0 ± π = 每次播放朝向随机。", "unit": "弧度", "when": {"field": "Flags", "shift": 7, "in": [1], "why": "Flags 位 7（替换旋转）未置位"} },
+      "RotationStartY": { "help": "起始旋转，Flags 位 7 时替换 Transform3D。0 ± π = 每次播放朝向随机。", "unit": "弧度", "when": {"field": "Flags", "shift": 7, "in": [1], "why": "Flags 位 7（替换旋转）未置位"} },
+      "RotationStartZ": { "help": "起始旋转，Flags 位 7 时替换 Transform3D。0 ± π = 每次播放朝向随机。", "unit": "弧度", "when": {"field": "Flags", "shift": 7, "in": [1], "why": "Flags 位 7（替换旋转）未置位"} },
+      "ScaleStartX": { "help": "起始缩放，Flags 位 8 时替换 Transform3D。", "when": {"field": "Flags", "shift": 8, "in": [1], "why": "Flags 位 8（替换缩放）未置位"} },
+      "ScaleStartY": { "help": "起始缩放，Flags 位 8 时替换 Transform3D。", "when": {"field": "Flags", "shift": 8, "in": [1], "why": "Flags 位 8（替换缩放）未置位"} },
+      "ScaleStartZ": { "help": "起始缩放，Flags 位 8 时替换 Transform3D。", "when": {"field": "Flags", "shift": 8, "in": [1], "why": "Flags 位 8（替换缩放）未置位"} },
+      "TranslationVelocityX": { "help": "每帧 值 += n·v，随后 v *= Coef^n（n = dt·60）。Flags 位 0 启用。", "unit": "米/帧", "when": {"field": "Flags", "shift": 0, "in": [1], "why": "Flags 位 0（平移速度）未置位"} },
+      "TranslationVelocityY": { "help": "每帧 值 += n·v，随后 v *= Coef^n（n = dt·60）。Flags 位 0 启用。", "unit": "米/帧", "when": {"field": "Flags", "shift": 0, "in": [1], "why": "Flags 位 0（平移速度）未置位"} },
+      "TranslationVelocityZ": { "help": "每帧 值 += n·v，随后 v *= Coef^n（n = dt·60）。Flags 位 0 启用。", "unit": "米/帧", "when": {"field": "Flags", "shift": 0, "in": [1], "why": "Flags 位 0（平移速度）未置位"} },
+      "RotationVelocityX": { "help": "每帧 角度 += n·v，随后 v *= Coef^n。Flags 位 1 启用。", "unit": "弧度/帧", "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 位 1（旋转速度）未置位"} },
+      "RotationVelocityY": { "help": "每帧 角度 += n·v，随后 v *= Coef^n。Flags 位 1 启用。", "unit": "弧度/帧", "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 位 1（旋转速度）未置位"} },
+      "RotationVelocityZ": { "help": "每帧 角度 += n·v，随后 v *= Coef^n。Flags 位 1 启用。", "unit": "弧度/帧", "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 位 1（旋转速度）未置位"} },
+      "ScaleVelocityX": { "help": "每帧 缩放 += n·v，随后 v *= Coef^n；不夹到 0，负缩放会镜像。Flags 位 2 启用。", "unit": "每帧", "when": {"field": "Flags", "shift": 2, "in": [1], "why": "Flags 位 2（缩放速度）未置位"} },
+      "ScaleVelocityY": { "help": "每帧 缩放 += n·v，随后 v *= Coef^n；不夹到 0，负缩放会镜像。Flags 位 2 启用。", "unit": "每帧", "when": {"field": "Flags", "shift": 2, "in": [1], "why": "Flags 位 2（缩放速度）未置位"} },
+      "ScaleVelocityZ": { "help": "每帧 缩放 += n·v，随后 v *= Coef^n；不夹到 0，负缩放会镜像。Flags 位 2 启用。", "unit": "每帧", "when": {"field": "Flags", "shift": 2, "in": [1], "why": "Flags 位 2（缩放速度）未置位"} },
+      "TranslationVelocityXCoef": { "help": "速度的每帧系数：1 匀速，< 1 逐渐停下，0 = 第一步后速度归零。", "when": {"field": "Flags", "shift": 0, "in": [1], "why": "Flags 位 0（平移速度）未置位"} },
+      "TranslationVelocityYCoef": { "help": "速度的每帧系数：1 匀速，< 1 逐渐停下，0 = 第一步后速度归零。", "when": {"field": "Flags", "shift": 0, "in": [1], "why": "Flags 位 0（平移速度）未置位"} },
+      "TranslationVelocityZCoef": { "help": "速度的每帧系数：1 匀速，< 1 逐渐停下，0 = 第一步后速度归零。", "when": {"field": "Flags", "shift": 0, "in": [1], "why": "Flags 位 0（平移速度）未置位"} },
+      "RotationVelocityXCoef": { "help": "速度的每帧系数：1 匀速，< 1 逐渐停下，0 = 第一步后速度归零。", "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 位 1（旋转速度）未置位"} },
+      "RotationVelocityYCoef": { "help": "速度的每帧系数：1 匀速，< 1 逐渐停下，0 = 第一步后速度归零。", "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 位 1（旋转速度）未置位"} },
+      "RotationVelocityZCoef": { "help": "速度的每帧系数：1 匀速，< 1 逐渐停下，0 = 第一步后速度归零。", "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 位 1（旋转速度）未置位"} },
+      "ScaleVelocityXCoef": { "help": "速度的每帧系数：1 匀速，< 1 逐渐停下，0 = 第一步后速度归零。", "when": {"field": "Flags", "shift": 2, "in": [1], "why": "Flags 位 2（缩放速度）未置位"} },
+      "ScaleVelocityYCoef": { "help": "速度的每帧系数：1 匀速，< 1 逐渐停下，0 = 第一步后速度归零。", "when": {"field": "Flags", "shift": 2, "in": [1], "why": "Flags 位 2（缩放速度）未置位"} },
+      "ScaleVelocityZCoef": { "help": "速度的每帧系数：1 匀速，< 1 逐渐停下，0 = 第一步后速度归零。", "when": {"field": "Flags", "shift": 2, "in": [1], "why": "Flags 位 2（缩放速度）未置位"} }
+    },
+    "ParentOptions": {
+      "RelationPos": { "help": "平移每轴的跟随模式：0 不跟随、1 每帧跟随父级、2 只在开始时取一次、3 无效（不要用）。" },
+      "RelationRot": { "help": "父级欧拉角每个分量的跟随模式：0 与世界对齐、1 每帧跟随、2 只取一次、3 无效。(0,1,0) = 只跟偏航。" },
+      "RelationScl": { "help": "父级缩放每轴的跟随模式：0 = 1.0、1 每帧跟随、2 只取一次、3 等同 1。" },
+      "ParticleUseLocal": { "help": "逐粒子跟随总开关；0 时跟随率为 0，Const* 全部不起作用。" },
+      "ConstInheritRate": { "help": "出生时的跟随率，结果夹在 [0, 1]：1 完全跟随发射器，0 留在世界中。", "when": {"field": "ParticleUseLocal", "nonZero": true, "why": "ParticleUseLocal 为 0：逐粒子跟随关闭"} },
+      "ConstFrame": { "help": "保持出生跟随率的帧数。", "unit": "帧", "when": {"field": "ParticleUseLocal", "nonZero": true, "why": "ParticleUseLocal 为 0：逐粒子跟随关闭"} },
+      "ConstReleaseFrame": { "help": "保持结束后，用这么多帧线性过渡到 ConstInheritReleaseRate。", "unit": "帧", "when": {"field": "ParticleUseLocal", "nonZero": true, "why": "ParticleUseLocal 为 0：逐粒子跟随关闭"} },
+      "ConstInheritReleaseRate": { "help": "过渡结束时的跟随率，通常 0。", "when": {"field": "ParticleUseLocal", "nonZero": true, "why": "ParticleUseLocal 为 0：逐粒子跟随关闭"} },
+      "BoneName": { "help": "挂点骨骼名，运行时按它查找；空 = 不绑定。字节长度必须 < 0x80，否则文件加载失败。" },
+      "ParentBone": { "help": "骨骼表里的名字，只在全局开关打开时使用。和 BoneName 保持一致。" }
+    },
+    "Spawn": {
+      "MaxParticles": { "help": "CPU 粒子池容量；池满时这一批多余的粒子直接丢弃。", "unit": "个" },
+      "ParticleInterval": { "help": "粒子池分组数：每组 MaxParticles / ParticleInterval 个连续槽位，组头先出生，组内其余槽位每帧接上一个（条带式粒子用）。等于 MaxParticles 时不分组（RE4 官方文件全部如此）。" },
+      "SpawnNum": { "help": "每批粒子数，每批重抽。", "unit": "个" },
+      "IntervalFrame": { "help": "两批之间的帧数，每批重抽；周期 = max(I, 1)。", "unit": "帧" },
+      "UseSpawnFrameInt": { "help": "非 0：停止条件改为发射 SpawnFrame 帧，而不是 LoopNum 批。" },
+      "SpawnFrame": { "help": "仅 UseSpawnFrameInt 开启时：可出生的帧数；{0,0} = 一直发射。", "unit": "帧", "when": {"field": "UseSpawnFrameInt", "nonZero": true, "why": "UseSpawnFrameInt 为 0：按 LoopNum 停止"} },
+      "LoopNum": { "help": "每轮发射的批数；{0,0} = 无限。", "unit": "批" },
+      "EmitterDelayFrame": { "help": "开始前的延迟帧数，只在（重新）启动时生效。", "unit": "帧" },
+      "RingBufferModeInt": { "help": "仅 GPU 类型：写入位置在粒子池内循环，覆盖最旧的粒子。" },
+      "UseLoopNumRatioInt": { "help": "每轮批数改为 min + extra·t，t 由 SpawnExpression 给出。" },
+      "InterpolateInt": { "help": "按距离发射（每 DistancePerSpawn 米一个），并把本帧粒子沿发射器路径摊开。" },
+      "DistancePerSpawn": { "help": "按距离发射的间距，需要 InterpolateInt；不要填 0。", "unit": "米", "when": {"field": "InterpolateInt", "nonZero": true, "why": "InterpolateInt 为 0：不按距离发射"} },
+      "UseRevivalInt": { "help": "开启多轮发射（复活）。" },
+      "RevivalNum": { "help": "额外的轮数；{0,0} = 无限。", "when": {"field": "UseRevivalInt", "nonZero": true, "why": "UseRevivalInt 为 0：不复活"} },
+      "RevivalInterval": { "help": "一轮最后一批之后、下一轮第一批之前等待的帧数。", "unit": "帧", "when": {"field": "UseRevivalInt", "nonZero": true, "why": "UseRevivalInt 为 0：不复活"} }
+    },
+    "Life": {
+      "AppearFrame": { "help": "淡入帧数，alpha 线性 0→255；0 = 出生即满 alpha。总寿命 = Appear + Keep + Vanish。", "unit": "帧" },
+      "KeepFrame": { "help": "满 alpha 的平台帧数。", "unit": "帧" },
+      "VanishFrame": { "help": "淡出帧数，alpha 线性 255→0；0 = 硬切。", "unit": "帧" },
+      "KeepHoldFrame": { "help": "Keep 之后额外保持的帧数，只在 Flags 保持模式非 0 时使用；{0,0} = 一直保持到发射器停止。", "unit": "帧", "when": {"field": "Flags", "shift": 0, "width": 2, "not": [0], "why": "Flags 保持模式为“无”"} },
+      "Flags": {
+        "help": "只读低 2 位。无限寿命 = 保持模式 1 + KeepHoldFrame {0,0}。",
+        "bits": { "summary": "保持模式（低 2 位，互斥）", "groups": [
+          { "shift": 0, "width": 2, "label": "保持模式", "options": [ "无", "KeepHold", "KeepHold，释放时重放 Keep", "每帧 alpha = 0（不要用）" ] }
+        ] }
+      }
+    },
+    "Velocity3D": {
+      "Flags": {
+        "help": "初速度开关。",
+        "bits": { "summary": "继承速度、重力方向、延迟启用", "groups": [
+          { "shift": 0, "width": 1, "label": "位 0：继承发射器速度（InheritRate）" },
+          { "shift": 2, "width": 1, "label": "位 2：法线不乘形状旋转，重力固定 (0,1,0)" },
+          { "shift": 5, "width": 1, "label": "0x20：启用 SpeedDelayFrame" },
+          { "shift": 6, "width": 1, "label": "0x40：启用 GravityDelayFrame" }
+        ] }
+      },
+      "DirectionVectorX": { "help": "VelocityType 0：方向 = normalize(DirX, DirY, DirZ)，每粒子抽样。Spread 模式取三者的 center 作锥轴。", "when": {"field": "VelocityType", "in": ["VelocityType_Direction", "VelocityType_Spread"], "why": "只在 VelocityType 为 Direction（逐粒子抽样）或 Spread（取 center 作锥轴）时使用"} },
+      "DirectionVectorY": { "help": "VelocityType 0：方向 = normalize(DirX, DirY, DirZ)，每粒子抽样。Spread 模式取三者的 center 作锥轴。", "when": {"field": "VelocityType", "in": ["VelocityType_Direction", "VelocityType_Spread"], "why": "只在 VelocityType 为 Direction（逐粒子抽样）或 Spread（取 center 作锥轴）时使用"} },
+      "DirectionVectorZ": { "help": "VelocityType 0：方向 = normalize(DirX, DirY, DirZ)，每粒子抽样。Spread 模式取三者的 center 作锥轴。", "when": {"field": "VelocityType", "in": ["VelocityType_Direction", "VelocityType_Spread"], "why": "只在 VelocityType 为 Direction（逐粒子抽样）或 Spread（取 center 作锥轴）时使用"} },
+      "Speed": { "help": "出生速度大小；内部存成 米/帧（÷60）。实机：1 ± 1 → [0, 2]。", "unit": "米/秒" },
+      "SpeedCoef": { "help": "每 1/60 秒速度乘一次：vel *= Coef^n。1 匀速，> 1 加速，< 1 减速。" },
+      "SpeedDelayFrame": { "help": "开始运动前的延迟；只在 Flags 0x20 时生效。之前速度为 0。", "unit": "帧", "when": {"field": "Flags", "shift": 5, "in": [1], "why": "Flags 0x20（启用 SpeedDelayFrame）未置位"} },
+      "Offset": { "help": "VelocityType 1（Normal）：方向 = normalize((Size − 1)·p + Offset)，p 为出生位置。", "unit": "米", "when": {"field": "VelocityType", "in": ["VelocityType_Normal"], "why": "只在 VelocityType 为 Normal 时使用"} },
+      "Size": { "help": "VelocityType 1（Normal）的方向系数；三轴为 1 时只用 Offset。< 1 向内收、> 1 向外散。", "when": {"field": "VelocityType", "in": ["VelocityType_Normal"], "why": "只在 VelocityType 为 Normal 时使用"} },
+      "VelocityType": { "help": "0 Direction、1 Normal、2 Radial（沿出生位置向外）、3 Spread（锥内随机）、4 ScreenSpace（CPU 不处理）。" },
+      "GravityRate": { "help": "重力倍数：1.0 = 9.80665 m/s²，向下；{0,0} = 无重力。", "unit": "g" },
+      "GravityDelayFrame": { "help": "重力生效前的延迟；只在 Flags 0x40 时生效。", "unit": "帧", "when": {"field": "Flags", "shift": 6, "in": [1], "why": "Flags 0x40（启用 GravityDelayFrame）未置位"} },
+      "InheritRate": { "help": "继承发射器速度的比例；只在 Flags 位 0 时使用。", "when": {"field": "Flags", "shift": 0, "in": [1], "why": "Flags 位 0（继承发射器速度）未置位"} },
+      "InheritDistance": { "help": "发射器本帧位移长度被夹在 [min, max]，再用于继承速度。", "unit": "米", "when": {"field": "Flags", "shift": 0, "in": [1], "why": "Flags 位 0（继承发射器速度）未置位"} },
+      "Spread": { "help": "VelocityType 3 的锥角：极角 = 0.5·(min + u·extra)，按角度线性抽样（离轴越远越稀）；方位角均匀。min / extra 是全锥角。", "unit": "弧度", "when": {"field": "VelocityType", "in": ["VelocityType_Spread"], "why": "只在 VelocityType 为 Spread 时使用"} }
+    },
+    "EmitterShape3D": {
+      "RangeX": { "help": "Box：内空心 / 外半边长；Sphere：内 / 外半径；Cylinder：内 / 外半径。", "unit": "米" },
+      "RangeY": { "help": "Box、Sphere 同 RangeX；Cylinder：高度起点 / 终点（单侧，不是 ±）。", "unit": "米" },
+      "RangeZ": { "help": "Box：内空心 / 外半边长；Sphere：内 / 外半径；Cylinder：内 / 外半径。", "unit": "米" },
+      "ShapeType": { "help": "0 Box、1 Sphere、2 Cylinder。" },
+      "RangeDivideNum": { "help": "均分轴的坐标按发射次数步进：(c % N)/(N − 1)·2 − 1，N = 1 时为 0（仅 Box）。", "when": {"field": "ShapeType", "in": ["Shape3DType_Box"], "why": "只有 Box 读它；Sphere、Cylinder 用 RangeDivideHorizontalNum / VerticalNum"} },
+      "RangeDivideAxis": { "help": "均分的轴（0 X、1 Y、2 Z），仅 Box；设了均分就不再随机选轴。", "when": {"all": [{"field": "ShapeType", "in": ["Shape3DType_Box"], "why": "只有 Box 读它"}, {"field": "RangeDivideNum", "nonZero": true, "why": "RangeDivideNum 为 0（不均分）"}]} },
+      "RangeDivideHorizontalNum": { "help": "方位角均分数（Sphere、Cylinder）。横向下标 = (c / V + c % V) % H，对角交错；ScaleHorizontal 跨度正好 2π 时除以 H，否则除以 H − 1（两端都取到）。", "when": {"field": "ShapeType", "in": ["Shape3DType_Sphere", "Shape3DType_Cylinder"], "why": "只有 Sphere、Cylinder 读它；Box 用 RangeDivideNum"} },
+      "RangeDivideVerticalNum": { "help": "纵向均分数（Sphere、Cylinder）。纵向下标 = c % V，位置 = 下标/(V − 1)，V = 1 时取中点。", "when": {"field": "ShapeType", "in": ["Shape3DType_Sphere", "Shape3DType_Cylinder"], "why": "只有 Sphere、Cylinder 读它；Box 用 RangeDivideNum"} },
+      "LocalRotation": { "help": "形状旋转，按 RotationOrder 组合，每帧重建。", "unit": "弧度" },
+      "RotationOrder": { "help": "同 Transform3D.RotationOrder。" },
+      "RotationCorrect": { "help": "形状旋转按相机修正：1 与相机朝向平行；2 只跟相机的偏航；3、4 朝向相机（4 只绕 Y 轴）。", "status": "3、4 的具体基向量" },
+      "UseExtension": { "help": "0 时 ScaleHorizontal / ScaleVertical 被默认值覆盖（不起作用）。" },
+      "ScaleHorizontal": { "help": "Sphere / Cylinder：方位角区间 θ = start + t·span；Box：锥形收缩系数。", "when": {"field": "UseExtension", "nonZero": true, "why": "UseExtension 为 0：被默认值覆盖"} },
+      "ScaleVertical": { "help": "Sphere：仰角区间 φ = start + t·span；Box：锥形收缩系数；Cylinder：沿高度的收缩。", "when": {"field": "UseExtension", "nonZero": true, "why": "UseExtension 为 0：被默认值覆盖"} },
+      "DivideEquidistant": { "help": "方位角按椭圆弧长等分：椭圆截面上相邻粒子间距相等（不开时按角度等分）。引擎用 64 点弦长近似建表。", "when": {"field": "ShapeType", "in": ["Shape3DType_Cylinder"], "why": "只有 Cylinder 有等距模式"} },
+      "DivideEquidistantCalcOuterCurveData": { "help": "内、外两个椭圆各建一张表，按半径插值点在两表之间；关时用平均半径建一张表。官方文件都关着。", "when": {"all": [{"field": "ShapeType", "in": ["Shape3DType_Cylinder"], "why": "只有 Cylinder 有等距模式"}, {"field": "DivideEquidistant", "nonZero": true, "why": "DivideEquidistant 未开启"}]} },
+      "DivideEquidistantRecalcEveryFrameData": { "help": "每帧重建弧长表（半径或形状矩阵会变时需要）；关时只在开始时建一次。官方文件都关着。", "when": {"all": [{"field": "ShapeType", "in": ["Shape3DType_Cylinder"], "why": "只有 Cylinder 有等距模式"}, {"field": "DivideEquidistant", "nonZero": true, "why": "DivideEquidistant 未开启"}]} }
+    },
+    "ScaleAnim": {
+      "SizeScalarAdd": { "help": "统一尺寸每帧增量。Coef = 1：尺寸 = 基准 + Add·t；否则 基准 + Add·Coef·(1 − Coef^t)/(1 − Coef)；结果 ≥ 0。", "unit": "每帧" },
+      "SizeXAdd": { "help": "X 尺寸每帧增量，公式同 SizeScalarAdd。宽 = 统一 × X。", "unit": "每帧" },
+      "SizeYAdd": { "help": "Y 尺寸每帧增量，公式同 SizeScalarAdd。RibbonLength 的 Y 槽就是条带长度。", "unit": "每帧" },
+      "SizeZAdd": { "help": "Z 尺寸每帧增量；只有 Mesh / NoDraw 读 Z。", "unit": "每帧" },
+      "SizeScalarCoef": { "help": "增量的每帧系数：1 匀速；< 1 增长变慢，总增量收敛到 Add·Coef/(1 − Coef)；0 = 冻结该通道（Add 失效）。" },
+      "SizeXAddCoef": { "help": "增量的每帧系数：1 匀速；< 1 增长变慢；0 = 冻结该通道（Add 失效）。" },
+      "SizeYAddCoef": { "help": "增量的每帧系数：1 匀速；< 1 增长变慢；0 = 冻结该通道（Add 失效）。" },
+      "SizeZAddCoef": { "help": "增量的每帧系数：1 匀速；< 1 增长变慢；0 = 冻结该通道（Add 失效）。" },
+      "SizeDelayFrame": { "help": "RE4 文件里没有这个字段；延迟用独立的 ScaleAnimDelayFrame 属性。" }
+    },
+    "RotateAnim": {
+      "Flags": {
+        "help": "只用位 0，其余位不起作用。",
+        "bits": { "summary": "持续自转", "groups": [
+          { "shift": 0, "width": 1, "label": "位 0：随机方向（每轴 50% 取反）" }
+        ] }
+      },
+      "RotationAddX": { "help": "每轴自转速度，出生时抽一次；每帧 角度 += n·v。0.10472 = 每秒一圈。Billboard3D 滚转 = X + Y。", "unit": "弧度/帧" },
+      "RotationAddY": { "help": "每轴自转速度，出生时抽一次；每帧 角度 += n·v。Billboard3D 滚转 = X + Y。", "unit": "弧度/帧" },
+      "RotationAddZ": { "help": "每轴自转速度；Billboard3D 不用 Z，Mesh 用三轴欧拉角。", "unit": "弧度/帧" },
+      "RotationCoefX": { "help": "速度的每帧系数 v *= Coef^n：< 1 变慢，> 1 加速；0 和 1 都不衰减（0 不会立刻停）。负值会出 NaN。" },
+      "RotationCoefY": { "help": "速度的每帧系数 v *= Coef^n：< 1 变慢，> 1 加速；0 和 1 都不衰减。负值会出 NaN。" },
+      "RotationCoefZ": { "help": "速度的每帧系数 v *= Coef^n：< 1 变慢，> 1 加速；0 和 1 都不衰减。负值会出 NaN。" },
+      "RotationDelayFrame": { "help": "RE4 文件里没有这个字段；延迟用独立的 RotateAnimDelayFrame 属性。" }
+    },
+    "UVSequence": {
+      "SequenceNo": { "help": ".uvs 里第几个序列，8 位；越界夹到最后一个。官方都是 {0,1}。" },
+      "PatternNo": { "help": "起始帧，8 位；越界夹到最后一帧。固定值写 {n, n+1}。" },
+      "PlaySpeed": { "help": "每 1/60 秒前进的帧数，1.0 = 60 帧/秒；≤ 0 不播放。一遍时长 = (帧数 − 起始帧)/(60·speed) 秒。", "unit": "帧/(1/60 秒)", "when": {"field": "Flags", "shift": 0, "width": 2, "not": [0], "why": "PlayMode 为静止：只显示起始帧"} },
+      "UVSPath": { "help": ".uvs 路径；空 = 整张贴图、不做动画。" },
+      "Flags": {
+        "help": "两位字段的值 3 未定义，不要用。例：41 = 循环 + 随机水平翻转 + 随机垂直翻转。",
+        "bits": { "summary": "翻页动画", "groups": [
+          { "shift": 0, "width": 2, "label": "PlayMode", "options": [ "静止（只显示起始帧）", "循环", "播一遍后粒子死亡", "播一遍停在末帧" ] },
+          { "shift": 2, "width": 2, "label": "FlipU", "options": [ "关", "总是", "每粒子 50% 随机", "保留旧值（不要用）" ] },
+          { "shift": 4, "width": 2, "label": "FlipV", "options": [ "关", "总是", "每粒子 50% 随机", "保留旧值（不要用）" ] },
+          { "shift": 6, "width": 2, "label": "Reverse（倒放）", "options": [ "关", "总是", "每粒子 50% 随机", "保留旧值（不要用）" ] },
+          { "shift": 8, "width": 2, "label": "Rotate90（仅 GPU 路径）", "options": [ "关", "总是", "每粒子 50% 随机", "保留旧值（不要用）" ] },
+          { "shift": 10, "width": 1, "label": "位 10：FrameBlend 前后帧交叉淡化" },
+          { "shift": 11, "width": 1, "label": "位 11（用途未追踪）" }
+        ] }
+      }
+    },
+    "UVSequenceModifier": {
+      "Flags": {
+        "help": "逐粒子覆盖宿主 UVSequence 的播放速度。",
+        "bits": { "summary": "翻页速度修正", "groups": [
+          { "shift": 0, "width": 1, "label": "位 0：启用" },
+          { "shift": 1, "width": 1, "label": "第三项", "options": [ "帧数（线性过渡）", "系数（指数过渡）" ] }
+        ] }
+      },
+      "PlaySpeedInit": { "help": "出生时的播放速度。", "unit": "帧/(1/60 秒)", "when": {"field": "Flags", "shift": 0, "in": [1], "why": "Flags 位 0（启用）未置位"} },
+      "PlaySpeedFinal": { "help": "最终的播放速度。", "unit": "帧/(1/60 秒)", "when": {"field": "Flags", "shift": 0, "in": [1], "why": "Flags 位 0（启用）未置位"} },
+      "PlaySpeedChangeTimeCoef": { "help": "Flags 位 1 = 0：用这么多帧从 Init 线性变到 Final；= 1：速度 = Final + (Init − Final)·Coef^t。", "when": {"field": "Flags", "shift": 0, "in": [1], "why": "Flags 位 0（启用）未置位"} }
+    },
+    "ShaderSettings": {
+      "SoftParticleDistance": { "help": "软粒子过渡深度；只在 Flags 位 2 时生效。", "unit": "米", "when": {"field": "Flags", "shift": 2, "in": [1], "why": "Flags 位 2（软粒子）未置位"} },
+      "ParticleLighting": {
+        "help": "0 不受光；1–4 受光，逐粒子光照分辨率 1/2/4/8；5 当 0 分配；6 当 1。",
+        "status": "1–6 各档的确切含义",
+        "bits": { "summary": "粒子受光（取值）", "groups": [
+          { "shift": 0, "width": 32, "label": "受光", "options": [ "不受光", "受光 n=1", "受光 n=2", "受光 n=4", "受光 n=8", "按 0 分配", "按 n=1" ] }
+        ] }
+      },
+      "DistanceBias": { "help": "排序距离偏移，负值视为更近。", "unit": "米", "status": "单位" },
+      "PriorityBias": { "help": "整数绘制优先级偏移。" },
+      "DepthBias": { "help": "深度偏移，负值朝向相机。" },
+      "Flags": {
+        "help": "无引擎名。",
+        "bits": { "summary": "渲染参数开关", "groups": [
+          { "shift": 2, "width": 1, "label": "位 2：软粒子（SoftParticleDistance 生效）" },
+          { "shift": 9, "width": 1, "label": "位 9：光照相关（未细分）" },
+          { "shift": 10, "width": 1, "label": "位 10：光照相关（未细分）" },
+          { "shift": 11, "width": 1, "label": "位 11：恒置" },
+          { "shift": 13, "width": 1, "label": "位 13：启用 StencilTarget" },
+          { "shift": 16, "width": 1, "label": "位 16：每粒子光照缓冲" }
+        ] }
+      },
+      "ShadowColor": { "help": "阴影颜色，只用 RGB。", "status": "作用范围" },
+      "ScatteringMode": { "help": "0 = RayleighCoeff、MieCoeff、MieShadowRatio 不读文件值，改用默认 0.15 / 0.15 / 0.2；RE4 从不打开。" },
+      "DensityMax": { "help": "百分数，运行时 ×0.01。" },
+      "DensityMin": { "help": "百分数，运行时 ×0.01。" },
+      "LightShadowRatio": { "help": "阴影让受光粒子变暗的程度。" },
+      "BackfaceLightRatio": { "help": "背光透射；运行时 = 文件值 × 8。" },
+      "InShadowDelay": { "help": "进入阴影前的延迟。", "unit": "毫秒" },
+      "TimeToFullShadow": { "help": "进入阴影的过渡时间。", "unit": "毫秒" },
+      "OutShadowDelay": { "help": "离开阴影前的延迟。", "unit": "毫秒" },
+      "TimeToNoShadow": { "help": "离开阴影的过渡时间。", "unit": "毫秒" },
+      "DetonemapRatio": { "help": "颜色绕过色调映射的比例：1 = 按作者颜色到达屏幕，0 = 普通色调映射。不是亮度倍数。" },
+      "SSRAlphaThreshold": { "help": "alpha 超过此值写入屏幕空间反射；0 = 不写。" },
+      "StencilTarget": { "help": "只读低字节；Flags 位 13 打开时生效。", "when": {"field": "Flags", "shift": 13, "in": [1], "why": "Flags 位 13（启用 StencilTarget）未置位"} },
+      "ParticleShadingRate": { "help": "可变速率着色，只用低 3 位；255 = 默认。" },
+      "LightingShadingRate": { "help": "可变速率着色，只用低 3 位；255 = 默认。" },
+      "ShadowShadingRate": { "help": "可变速率着色，只用低 3 位；255 = 默认。" },
+      "ZPrepassShadingRate": { "help": "可变速率着色，只用低 3 位；255 = 默认。" },
+      "StochasticShadingRate": { "help": "可变速率着色，只用低 3 位；255 = 默认。" },
+      "RayleighCoeff": { "when": {"field": "ScatteringMode", "nonZero": true, "why": "ScatteringMode 为 0：用默认值"} },
+      "MieCoeff": { "when": {"field": "ScatteringMode", "nonZero": true, "why": "ScatteringMode 为 0：用默认值"} },
+      "MieShadowRatio": { "when": {"field": "ScatteringMode", "nonZero": true, "why": "ScatteringMode 为 0：用默认值"} }
+    },
+    "AlphaCorrection": {
+      "Flags": {
+        "help": "V = 修正前的顶点 alpha，A = 贴图 alpha。模式 1：saturate((A − T)/(LoPass − T))，T = 1 − HiPass·f(V)，淡出时从贴图 alpha 低处先被吃掉；模式 2：smoothstep(LoPass, HiPass, A·V)。",
+        "status": "CPU 粒子是否用同一公式",
+        "bits": { "summary": "alpha 修正模式（只读低 2 位）", "groups": [
+          { "shift": 0, "width": 2, "label": "模式", "options": [ "Disable", "AlphaCurve（溶解）", "AlphaThreshold（软阈值）", "LifePower" ] }
+        ] }
+      },
+      "HiPass": { "help": "模式 1：V = 1 时阈值 T = 1 − HiPass，通常 1；模式 2：上沿。取 [0, 1]，超出会回绕；模式 3：指数。", "when": {"field": "Flags", "shift": 0, "width": 2, "not": [0], "why": "模式为 Disable"} },
+      "LoPass": { "help": "模式 1：贴图 alpha ≥ LoPass 处完全不透明；模式 2：下沿；模式 3：指数。", "when": {"field": "Flags", "shift": 0, "width": 2, "not": [0], "why": "模式为 Disable"} },
+      "CurveConst": { "help": "只在模式 1 起作用：f(V) = (1 − e^(−sV))/(1 − e^(−s))，s ≈ 9.07·CurveConst；0 = 线性。有效范围 −3..+3。", "when": {"field": "Flags", "shift": 0, "width": 2, "in": [1], "why": "只在模式 1（AlphaCurve）起作用"} }
+    },
+    "FadeByDepth": {
+      "NearStart": { "help": "视空间深度 < NearStart 时 alpha 0，到 NearEnd 线性升到 1。Near 0/0 = 不做近处淡入。", "unit": "米" },
+      "NearEnd": { "help": "近处淡入结束深度。Start == End 为硬切。", "unit": "米" },
+      "FarStart": { "help": "从 FarStart 到 FarEnd 线性降到 0。", "unit": "米" },
+      "FarEnd": { "help": "深度 > FarEnd 时完全消失；FarEnd = 0 会隐藏一切。", "unit": "米" }
+    },
+    "FadeByAngle": {
+      "Flags": {
+        "help": "只读低 3 位。",
+        "bits": { "summary": "按角度淡出", "groups": [
+          { "shift": 0, "width": 1, "label": "位 0：双向锥（取 |cos|）" },
+          { "shift": 1, "width": 1, "label": "位 1：反转（锥内淡出、锥外可见）" },
+          { "shift": 2, "width": 1, "label": "位 2：视线从粒子位置算（默认从发射器）" }
+        ] }
+      },
+      "Cone": { "help": "内锥半角，锥内完全可见。", "unit": "弧度" },
+      "Spread": { "help": "过渡宽度，外沿 = Cone + Spread（夹到 π）；过渡在 cos 上线性。0 = 硬边。", "unit": "弧度" },
+      "AlphaRate": { "help": "被淡出一侧的 alpha 系数：0 消失，1 不起作用。" },
+      "ConeDir": { "help": "发射器局部空间的单位方向向量（不是旋转），发射器创建时转到世界。" }
+    },
+    "FadeByEmitterAngle": {
+      "Cone": { "help": "与 FadeByAngle 相同的锥形，夹角取（发射器→粒子）与（发射器→相机）之间。", "unit": "弧度", "status": "公式细节" },
+      "Spread": { "help": "过渡宽度。", "unit": "弧度", "status": "公式细节" },
+      "AlphaRate": { "help": "被淡出一侧的 alpha 系数；与 FadeByAngle 同时存在时取较大者。", "status": "公式细节" },
+      "FadeInStart": { "help": "是距离不是角度：相机离发射器在 FadeInEnd..FadeInStart 之间时逐渐恢复可见。", "unit": "米", "status": "公式细节" },
+      "FadeInEnd": { "help": "见 FadeInStart。", "unit": "米", "status": "公式细节" }
+    },
+    "Noise": {
+      "LowFrequency": { "help": "低频相位的速度；每粒子 center + spread·k（k ∈ [−1, 1) 出生时抽一次）。每帧偏移 = 低频 + 高频两路正弦，加到粒子的偏移字段，位置本身不动。", "unit": "周/秒" },
+      "LowFrequencyWidth": { "help": "低频分量的幅度，按粒子抽一次。", "unit": "米" },
+      "HighFrequency": { "help": "高频相位的速度，按粒子抽一次。", "unit": "周/秒" },
+      "HighFrequencyWidth": { "help": "高频分量的幅度，按粒子抽一次。", "unit": "米" }
+    },
+    "Blink": {
+      "MinRate": { "help": "alpha 系数下限：结果 = clamp(低频 + 高频, MinRate, MaxRate)，乘进粒子 alpha。" },
+      "MaxRate": { "help": "alpha 系数上限。" },
+      "LowFrequency": { "help": "低频三角波的频率，按真实时间推进；0 = 冻结在随机初相位。", "unit": "周期/秒" },
+      "LowFrequencyWidth": { "help": "低频通道峰值；0 关闭该通道。三角波 0 → 峰值 → 0，不为负。" },
+      "HighFrequency": { "help": "不是时间频率：每个低频周期里的波纹数。0 = 关闭高频通道。" },
+      "HighFrequencyWidth": { "help": "高频通道峰值。" }
+    },
+    "RgbCommon": {
+      "Flags": {
+        "help": "无引擎名。",
+        "bits": { "summary": "RGB 通道", "groups": [
+          { "shift": 0, "width": 1, "label": "位 0：绿层颜色在 Color 与 ColorRange 间随机" },
+          { "shift": 1, "width": 1, "label": "位 1：红层颜色在 Color 与 ColorRange 间随机" },
+          { "shift": 2, "width": 1, "label": "位 2：RedChAlphaToB 只作用于红层覆盖" }
+        ] }
+      },
+      "GreenChColor": { "help": "贴图 G 通道这一层的颜色；A 字节是这一层的不透明度。" },
+      "GreenChIntensity": { "help": "绿层亮度，只缩放 RGB，不缩放 alpha。" },
+      "GreenChSaturate": { "help": "发白阈值：G·Intensity 越接近它，颜色越趋向白色。" },
+      "GreenChCurve": { "help": "先对 G 做 pow(G, Curve)：> 1 让过渡变硬。" },
+      "RedChColor": { "help": "贴图 R 通道这一层的颜色；A 字节是这一层的覆盖。" },
+      "RedChIntensity": { "help": "红层亮度，只缩放 RGB。" },
+      "RedChAlphaToB": { "help": "红层颜色取 lerp(R, B, 值)、覆盖取 lerp(A, B, 值)：0 用 R/A，1 改用 B 通道。" },
+      "Alpha": { "help": "最终 alpha = saturate((绿层不透明度 + 红层覆盖) × Alpha)。" },
+      "GreenChLighting": { "help": "该层计入受光部分；只在 Physical / EdgeBlend 混合下有区别。" },
+      "RedChLighting": { "help": "该层计入受光部分；只在 Physical / EdgeBlend 混合下有区别。" },
+      "UseGreenChLife": { "help": "开启绿层生命包络；三段都为 0 时第一帧就结束，这一层直接没了。" },
+      "GreenChColorRange": { "when": {"field": "Flags", "shift": 0, "in": [1], "why": "Flags 位 0（绿层颜色随机）未置位"} },
+      "RedChColorRange": { "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 位 1（红层颜色随机）未置位"} },
+      "GreenChAppearFrame": { "when": {"field": "UseGreenChLife", "nonZero": true, "why": "UseGreenChLife 未开启"} },
+      "GreenChKeepFrame": { "when": {"field": "UseGreenChLife", "nonZero": true, "why": "UseGreenChLife 未开启"} },
+      "GreenChVanishFrame": { "when": {"field": "UseGreenChLife", "nonZero": true, "why": "UseGreenChLife 未开启"} },
+      "GreenChLifeType": { "when": {"field": "UseGreenChLife", "nonZero": true, "why": "UseGreenChLife 未开启"} },
+      "RedChAppearFrame": { "when": {"field": "UseRedChLife", "nonZero": true, "why": "UseRedChLife 未开启"} },
+      "RedChKeepFrame": { "when": {"field": "UseRedChLife", "nonZero": true, "why": "UseRedChLife 未开启"} },
+      "RedChVanishFrame": { "when": {"field": "UseRedChLife", "nonZero": true, "why": "UseRedChLife 未开启"} },
+      "RedChLifeType": { "when": {"field": "UseRedChLife", "nonZero": true, "why": "UseRedChLife 未开启"} }
+    },
+    "RgbWater": {
+      "SpecularColor": { "help": "贴图 R 通道（高光遮罩）的颜色：rgb += SpecularColor·R·SpecularIntensity。" },
+      "SheetColor": { "help": "水面层颜色，遮罩 mix = lerp(G, B, GtoB)。" },
+      "GtoB": { "help": "水面层遮罩从 G 通道（0）过渡到 B 通道（1）。" },
+      "Alpha": { "help": "alpha = saturate(A·Alpha·(SheetColor.a·mix + SpecularColor.a·R)/255)。" },
+      "SpecularAppearFrame": { "when": {"field": "UseSpecularLife", "nonZero": true, "why": "UseSpecularLife 未开启"} },
+      "SpecularKeepFrame": { "when": {"field": "UseSpecularLife", "nonZero": true, "why": "UseSpecularLife 未开启"} },
+      "SpecularVanishFrame": { "when": {"field": "UseSpecularLife", "nonZero": true, "why": "UseSpecularLife 未开启"} },
+      "SpecularLifeType": { "when": {"field": "UseSpecularLife", "nonZero": true, "why": "UseSpecularLife 未开启"} },
+      "SheetAppearFrame": { "when": {"field": "UseSheetLife", "nonZero": true, "why": "UseSheetLife 未开启"} },
+      "SheetKeepFrame": { "when": {"field": "UseSheetLife", "nonZero": true, "why": "UseSheetLife 未开启"} },
+      "SheetVanishFrame": { "when": {"field": "UseSheetLife", "nonZero": true, "why": "UseSheetLife 未开启"} },
+      "SheetLifeType": { "when": {"field": "UseSheetLife", "nonZero": true, "why": "UseSheetLife 未开启"} },
+      "GtoBAppearFrame": { "when": {"field": "UseGtoBLife", "nonZero": true, "why": "UseGtoBLife 未开启"} },
+      "GtoBKeepFrame": { "when": {"field": "UseGtoBLife", "nonZero": true, "why": "UseGtoBLife 未开启"} },
+      "GtoBVanishFrame": { "when": {"field": "UseGtoBLife", "nonZero": true, "why": "UseGtoBLife 未开启"} },
+      "GtoBLifeType": { "when": {"field": "UseGtoBLife", "nonZero": true, "why": "UseGtoBLife 未开启"} }
+    },
+    "PtCollision": {
+      "Flags": {
+        "help": "对物理世界做射线 / 球扫掠，结果晚一帧；Gpu* 类型上不起作用。",
+        "bits": { "summary": "粒子碰撞", "groups": [
+          { "shift": 0, "width": 1, "label": "位 0：有 LayerName（决定字符串是否存在）", "locked": true },
+          { "shift": 1, "width": 1, "label": "位 1：有 MaskName（决定字符串是否存在）", "locked": true },
+          { "shift": 2, "width": 1, "label": "位 2：用 Radius 做球扫掠（否则射线）" },
+          { "shift": 3, "width": 1, "label": "位 3：最后一次碰撞时冻结动画" },
+          { "shift": 4, "width": 1, "label": "位 4：投影模式" },
+          { "shift": 5, "width": 2, "label": "位 5-6：投影模式速度重定向" },
+          { "shift": 7, "width": 2, "label": "位 7-8：投影模式旋转重定向" },
+          { "shift": 9, "width": 3, "label": "位 9-11：投影模式欧拉顺序" },
+          { "shift": 12, "width": 1, "label": "位 12：Freeze 时对齐法线" },
+          { "shift": 13, "width": 1, "label": "位 13：Freeze 以命中点为基准" }
+        ] }
+      },
+      "Radius": { "help": "球扫掠半径，只在 Flags 位 2 时使用。", "unit": "米", "when": {"field": "Flags", "shift": 2, "in": [1], "why": "Flags 位 2（球扫掠）未置位：用射线"} },
+      "BounceNum": { "help": "处理的命中次数，含最后执行 FinishType 的那次：2 = 弹一次；0 = 不碰撞。" },
+      "BounceRate": { "help": "反射后速度倍率；按真实法线反射，速度大小不变，再乘倍率。" },
+      "VerticalBounce": { "help": "反射速度的世界 Y 分量再乘 BounceRate·VerticalBounce（不是法线方向）。" },
+      "HorizontalBounce": { "help": "世界 X、Z 分量再乘 BounceRate·HorizontalBounce。" },
+      "FinishType": { "help": "次数用完时：0 穿过、1 杀死、2 停在碰撞点。" },
+      "LookNormalDirectionOffset": { "help": "Freeze 时沿碰撞法线抬起的距离。", "unit": "米" },
+      "DelayFrameCollision": { "help": "粒子年龄达到这么多帧之前不做碰撞。", "unit": "帧" },
+      "LayerName": { "help": "碰撞层名（如 Bullet、Character）。", "status": "各层的含义" },
+      "MaskName": { "help": "碰撞掩码名（如 TcCameraHit）；空 = 全部层。", "status": "掩码的含义" }
+    },
+    "PtColliderAction": {
+      "Flags": {
+        "help": "每次命中都在碰撞点启动 linkedAction（子特效 +Y 朝法线），没有次数限制。",
+        "bits": { "summary": "命中触发", "groups": [
+          { "shift": 0, "width": 1, "label": "位 0：有 LayerName（决定字符串是否存在）", "locked": true },
+          { "shift": 1, "width": 1, "label": "位 1：有 MaskName（决定字符串是否存在）", "locked": true },
+          { "shift": 2, "width": 1, "label": "位 2：命中即杀死粒子" },
+          { "shift": 3, "width": 1, "label": "位 3：用 Radius 球扫掠" }
+        ] }
+      },
+      "Radius": { "help": "球扫掠半径，只在 Flags 位 3 时使用。", "unit": "米", "when": {"field": "Flags", "shift": 3, "in": [1], "why": "Flags 位 3（球扫掠）未置位：用射线"} },
+      "linkedAction": { "help": "EFX 文件 Action 列表的下标；0xFFFFFFFF = 不触发。" }
+    },
+    "PtLife": {
+      "Flags": {
+        "help": "子特效只拿粒子的变换，不继承速度、颜色、寿命。",
+        "bits": { "summary": "生命阶段触发（只读位 0..4）", "groups": [
+          { "shift": 0, "width": 1, "label": "位 0：发射器停止或粒子死亡时释放子特效" },
+          { "shift": 1, "width": 1, "label": "位 1：Mesh 粒子时子矩阵再乘旋转" },
+          { "shift": 2, "width": 1, "label": "位 2：每帧跟随位置" },
+          { "shift": 3, "width": 1, "label": "位 3：每帧跟随旋转" },
+          { "shift": 4, "width": 1, "label": "位 4：每帧跟随缩放" }
+        ] }
+      },
+      "Status": { "help": "进入该阶段时触发：0 出生帧、1 Appear、2 Keep、3 Vanish、4 死亡。对应阶段帧数为 0 时不触发；−1 会每帧触发。" },
+      "ActionIndex": { "help": "EFX 文件 Action 列表的下标；−1 或越界 = 不触发。" }
+    },
+    "TypeBillboard3D": {
+      "Flags": { "help": "公共颜色头。", "bits": "colorHeader" },
+      "Color": { "help": "出生颜色（RGBA8）。" },
+      "ColorRange": { "help": "Flags 0x10 时出生颜色 = lerp(Color, ColorRange, u)，四通道共用一个 u。EdgeBlend 时是外缘色。", "when": {"any": [{"field": "Flags", "shift": 4, "in": [1]}, {"field": "Flags", "shift": 0, "width": 4, "in": [3], "why": ""}], "why": "Flags 0x10（出生颜色随机）未置位，混合方式也不是 EdgeBlend"} },
+      "ColorRate": { "help": "颜色倍率，官方发光层的亮度旋钮。", "status": "在着色器里怎样参与颜色" },
+      "Intensity": { "help": "无条件上传；官方只在 EdgeBlend / Multiply 时设为非 0。", "status": "在着色器里怎样参与颜色" },
+      "Rotation": { "help": "出生时的滚转角。", "unit": "弧度" },
+      "SizeScalar": { "help": "统一尺寸槽。宽 = SizeScalar·SizeX·发射器最大缩放轴，高 = SizeScalar·SizeY·同。" },
+      "SizeX": { "help": "宽度系数，与 SizeScalar 相乘。" },
+      "SizeY": { "help": "高度系数，与 SizeScalar 相乘。" },
+      "ParticleIgnoreScale": { "help": "RE4 里是位域：位 3 = 尺寸不乘发射器缩放（官方值 8）；其他位未知。" },
+      "Offset": { "help": "第一个数（镜像时取反）与第二个数作为着色器常量。", "status": "作用方向" }
+    },
+    "TypeBillboard2D": {
+      "Flags": { "help": "公共颜色头。", "bits": "colorHeader" },
+      "Rotation": { "help": "出生时的滚转角。", "unit": "弧度" },
+      "SizeX": { "help": "宽度。", "unit": "像素" },
+      "SizeY": { "help": "高度。", "unit": "像素" },
+      "Repeat": { "help": "低 2 位写粒子标志位 30-31，作用在渲染侧。", "status": "作用" }
+    },
+    "TypePolygon": {
+      "Flags": { "help": "公共颜色头。", "bits": "colorHeader" },
+      "Flags2": {
+        "help": "朝向开关。",
+        "status": "各位的确切作用",
+        "bits": { "summary": "Polygon 朝向", "groups": [
+          { "shift": 2, "width": 1, "label": "0x04：某槽向量置 (1,1,1)" },
+          { "shift": 6, "width": 1, "label": "0x40：朝向跟随运动方向" },
+          { "shift": 7, "width": 1, "label": "0x80：非新粒子时锁定朝向" }
+        ] }
+      },
+      "RotationOrder": { "help": "欧拉角组合顺序，同 Transform3D。" },
+      "RotationX": { "help": "世界朝向的四边形（不朝相机）。常用 π/2。", "unit": "弧度" },
+      "RotationY": { "help": "世界朝向的四边形（不朝相机）。", "unit": "弧度" },
+      "RotationZ": { "help": "世界朝向的四边形（不朝相机）。", "unit": "弧度" },
+      "SizeScalar": { "help": "统一尺寸；不乘发射器缩放。" },
+      "Width": { "help": "宽度系数，与 SizeScalar 相乘。" },
+      "Height": { "help": "高度系数，与 SizeScalar 相乘。" },
+      "OrientDirectionUpVector": { "help": "Flags2 0x40 时选上方向轴。", "status": "确切作用", "when": {"field": "Flags2", "shift": 6, "in": [1], "why": "Flags2 0x40（朝向跟随运动方向）未置位"} },
+      "ColorRange": { "when": {"any": [{"field": "Flags", "shift": 4, "in": [1]}, {"field": "Flags", "shift": 0, "width": 4, "in": [3], "why": ""}], "why": "Flags 0x10（出生颜色随机）未置位，混合方式也不是 EdgeBlend"} }
+    },
+    "TypeNoDraw": {
+      "Flags": {
+        "help": "不绘制；出生值供子特效使用。",
+        "bits": { "summary": "NoDraw", "groups": [
+          { "shift": 0, "width": 1, "label": "位 0：出生颜色在 Color 与 ColorRange 间随机" }
+        ] }
+      },
+      "RotationX": { "help": "写入角度槽，供子特效跟随。", "unit": "弧度" },
+      "RotationY": { "help": "写入角度槽，供子特效跟随。", "unit": "弧度" },
+      "RotationZ": { "help": "写入角度槽，供子特效跟随。", "unit": "弧度" },
+      "SizeX": { "help": "写入尺寸槽，供 PtLife 跟随缩放。" },
+      "SizeY": { "help": "写入尺寸槽，供 PtLife 跟随缩放。" },
+      "SizeZ": { "help": "写入尺寸槽，供 PtLife 跟随缩放。" }
+    },
+    "TypeRibbonLength": {
+      "BlendFlags": { "help": "公共颜色头。", "bits": "colorHeader" },
+      "LengthFlags": {
+        "help": "条带轴向与固定起点。",
+        "bits": { "summary": "RibbonLength 轴向与起点", "groups": [
+          { "shift": 0, "width": 1, "label": "位 0：条带轴取本帧位移方向" },
+          { "shift": 1, "width": 1, "label": "位 1：首次取到方向后锁定" },
+          { "shift": 2, "width": 1, "label": "位 2：位移改由上下文矩阵测量" },
+          { "shift": 3, "width": 1, "label": "位 3：固定起点模式" },
+          { "shift": 9, "width": 1, "label": "位 9：固定起点不随发射器重新变换" },
+          { "shift": 10, "width": 1, "label": "位 10（未追踪）" }
+        ] }
+      },
+      "SizeScalar": { "help": "统一尺寸；条带长度 L = Length × SizeScalar。" },
+      "WidthSize": { "help": "条带宽度系数；实机：宽 = SizeScalar × WidthSize。" },
+      "Length": { "help": "出生长度，写入 ScaleAnim 的 Y 槽（SizeYAdd 会拉长它）。", "unit": "米" },
+      "ShapeDivision": { "help": "沿长度的点数，夹在 [2, 1000]。" },
+      "BasingPoint": { "help": "length：纵向锚点 b，尾 = P − (1 − b)·L·d，头 = P + b·L·d（0 全在粒子后，1 全在前）；width：横向锚点，只在 GPU 路径读到。" },
+      "ReleaseFixEnd": { "help": "固定起点模式下拉到这个距离后释放。", "unit": "米", "when": {"field": "LengthFlags", "shift": 3, "in": [1], "why": "LengthFlags 位 3（固定起点模式）未置位"} },
+      "DirX": { "help": "LengthFlags 位 0 关时，条带轴 = normalize(DirX, DirY, DirZ)，出生时定死。", "when": {"field": "LengthFlags", "shift": 0, "not": [0], "why": "LengthFlags 位 0 置位：条带轴取本帧位移方向"} },
+      "DirY": { "help": "LengthFlags 位 0 关时，条带轴 = normalize(DirX, DirY, DirZ)，出生时定死。", "when": {"field": "LengthFlags", "shift": 0, "not": [0], "why": "LengthFlags 位 0 置位：条带轴取本帧位移方向"} },
+      "DirZ": { "help": "LengthFlags 位 0 关时，条带轴 = normalize(DirX, DirY, DirZ)，出生时定死。", "when": {"field": "LengthFlags", "shift": 0, "not": [0], "why": "LengthFlags 位 0 置位：条带轴取本帧位移方向"} }
+    },
+    "TypeRibbonFollow": {
+      "BlendFlags": { "help": "公共颜色头。", "bits": "colorHeader" },
+      "FollowFlags": {
+        "help": "历史点的采样方式。",
+        "bits": { "summary": "RibbonFollow 历史点", "groups": [
+          { "shift": 0, "width": 1, "label": "位 0：定长绳模式（长度 = StretchDistance）" },
+          { "shift": 1, "width": 1, "label": "位 1：历史点存发射器局部坐标" },
+          { "shift": 2, "width": 1, "label": "位 2：调试色（跳过颜色求值）" },
+          { "shift": 3, "width": 1, "label": "位 3：调试色（跳过颜色求值）" },
+          { "shift": 4, "width": 1, "label": "位 4（未追踪）" },
+          { "shift": 5, "width": 1, "label": "位 5（未追踪）" },
+          { "shift": 6, "width": 1, "label": "位 6（未追踪）" }
+        ] }
+      },
+      "SizeScalar": { "help": "统一尺寸；宽 = SizeScalar × WidthSize。" },
+      "WidthSize": { "help": "条带宽度系数。" },
+      "StretchDistance": { "help": "仅定长绳模式（FollowFlags 位 0）：绳长。", "unit": "米", "when": {"field": "FollowFlags", "shift": 0, "in": [1], "why": "FollowFlags 位 0（定长绳模式）未置位"} },
+      "ShapeDivision": { "help": "历史点数，夹在 [2, 1000]。拖尾时长 = (ShapeDivision − 1) × IntervalFrame 帧；改 Life 不会变长。" },
+      "SplineDivision": { "help": "相邻历史点之间插入的样条点数。" },
+      "IntervalFrame": { "help": "采样间隔；0 = 每帧。", "unit": "帧" },
+      "GhostStretch": { "help": "出生时 min + u·extra，参与渲染。", "status": "作用；可能是贴图拉伸" }
+    },
+    "TypeRibbonChain": {
+      "BlendFlags": { "help": "公共颜色头。", "bits": "colorHeader" },
+      "ChainFlags": {
+        "help": "链的方向来源与混合。",
+        "bits": { "summary": "RibbonChain 方向", "groups": [
+          { "shift": 0, "width": 2, "label": "方向取根部本帧位移", "options": [ "否（用 Dir）", "是", "是，取反", "是" ] },
+          { "shift": 3, "width": 1, "label": "位 3：方向原样使用" },
+          { "shift": 4, "width": 1, "label": "0x10：局部、不乘发射器矩阵" },
+          { "shift": 5, "width": 1, "label": "0x20：Dir 与 BlendDir 沿链混合" },
+          { "shift": 13, "width": 1, "label": "0x2000：起点沿链后移（未追踪）" },
+          { "shift": 14, "width": 1, "label": "0x4000：不推进模拟" }
+        ] }
+      },
+      "Length": { "help": "链全长 = 抽样值 × 粒子缩放。", "unit": "米" },
+      "Acceleration": { "help": "沿 Dir 方向的加速度；没有内置重力。", "unit": "米/秒²" },
+      "FrameInfluence": { "help": "每 1/60 秒速度保留系数（阻尼），夹在 [0, 1]。" },
+      "VertexInfluence": { "help": "约束修正量转成速度的比例，夹在 [0, 1]。" },
+      "ShapeDivision": { "help": "关节数，夹在 [2, 1000]。" }
+    },
+    "TypeRibbonFixEnd": {
+      "BlendFlags": { "help": "公共颜色头。", "bits": "colorHeader" },
+      "FixEndFlags": {
+        "help": "释放与逐点渐变。",
+        "bits": { "summary": "RibbonFixEnd 冻结与渐变", "groups": [
+          { "shift": 0, "width": 1, "label": "位 0：释放时冻结整条（可能）" },
+          { "shift": 1, "width": 2, "label": "逐点颜色", "options": [ "恒定", "头尾渐变", "头尾渐变", "头尾渐变" ] },
+          { "shift": 3, "width": 2, "label": "逐点尺寸", "options": [ "1.0", "渐变", "渐变", "渐变" ] }
+        ] }
+      },
+      "ReleaseFrame": { "help": "释放倒计时 = min + trunc((max − min)·u) + 1；min = 0 → 永不释放。", "unit": "帧", "status": "引擎的抽样多 +1，不是普通的 [min, max]" },
+      "ShapeDivision": { "help": "点数（官方多为 2，即锚点到粒子的直线）。" },
+      "ReleaseInterpolation": { "help": "释放后每帧 t += 值/60（不乘 dt）。" }
+    },
+    "TypeRibbonTrail": {
+      "BlendFlags": { "help": "公共颜色头。", "bits": "colorHeader" },
+      "WidthSize": { "help": "出生时宽度 = 发射器最大轴长 × 抽样值。" },
+      "Division": { "help": "历史点数 = Division + 1。" },
+      "IntervalFrame": { "help": "采样间隔；0 = 整数除以零，游戏崩溃。", "unit": "帧" }
+    },
+    "TypePolygonTrail": {
+      "TrailFlags": {
+        "help": "采样模式与逐顶点颜色。",
+        "bits": { "summary": "PolygonTrail 模式", "groups": [
+          { "shift": 3, "width": 1, "label": "位 3：定长模式（清零为间隔模式）" },
+          { "shift": 4, "width": 1, "label": "0x10（未追踪）" },
+          { "shift": 5, "width": 2, "label": "逐顶点颜色", "options": [ "头部颜色", "HeadColor/Place1/Place2 渐变", "HeadColor/Place1/Place2 渐变", "HeadColor/Place1/Place2 渐变" ] },
+          { "shift": 7, "width": 1, "label": "0x80（未追踪）" },
+          { "shift": 8, "width": 1, "label": "0x100（未追踪）" }
+        ] }
+      },
+      "Axis": { "help": "0/1/2 = 采样矩阵的 X/Y/Z 行，3/4/5 = 取反。" },
+      "Length": { "help": "每粒子长度 × 发射器世界矩阵最大行长。", "unit": "米" },
+      "StretchDistance": { "help": "定长模式的长度倍数。", "when": {"field": "TrailFlags", "shift": 3, "in": [1], "why": "TrailFlags 位 3（定长模式）未置位"} },
+      "IntervalFrame": { "help": "间隔模式的采样间隔，读入时 max(1, v)。", "unit": "帧", "when": {"field": "TrailFlags", "shift": 3, "not": [0], "why": "TrailFlags 位 3 置位：定长模式不按间隔采样"} }
+    },
+    "TypeStrainRibbon": {
+      "Flags": {
+        "help": "绳形条带。",
+        "bits": { "summary": "StrainRibbon", "groups": [
+          { "shift": 0, "width": 1, "label": "0x1：U 从 0 到 N−1" },
+          { "shift": 1, "width": 1, "label": "0x2：终点用内嵌形状抖动" },
+          { "shift": 2, "width": 1, "label": "0x4：起点 = InitialPosition 原值" },
+          { "shift": 6, "width": 1, "label": "0x40：逐点颜色渐变" },
+          { "shift": 7, "width": 1, "label": "0x80：逐点颜色渐变" },
+          { "shift": 8, "width": 1, "label": "0x100：总用悬链线" },
+          { "shift": 10, "width": 1, "label": "0x400：启用断裂" },
+          { "shift": 13, "width": 1, "label": "0x2000：U 按世界长度平铺" },
+          { "shift": 14, "width": 1, "label": "0x4000：平铺锚在远端" },
+          { "shift": 15, "width": 1, "label": "0x8000：平铺除以粒子缩放" }
+        ] }
+      },
+      "AxisRotation": { "help": "出生时 ×π/180。", "unit": "度" },
+      "Length": { "help": "绳长 × 最大发射器缩放。", "unit": "米" },
+      "ShapeRangeX": { "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 0x2（终点用内嵌形状抖动）未置位"} },
+      "ShapeRangeY": { "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 0x2（终点用内嵌形状抖动）未置位"} },
+      "ShapeRangeZ": { "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 0x2（终点用内嵌形状抖动）未置位"} },
+      "ShapeType": { "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 0x2（终点用内嵌形状抖动）未置位"} },
+      "ShapeRangeDivideNum": { "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 0x2（终点用内嵌形状抖动）未置位"} },
+      "ShapeRangeDivideAxis": { "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 0x2（终点用内嵌形状抖动）未置位"} },
+      "ShapeRangeDivideHorizontalNum": { "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 0x2（终点用内嵌形状抖动）未置位"} },
+      "ShapeRangeDivideVerticalNum": { "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 0x2（终点用内嵌形状抖动）未置位"} },
+      "ShapeLocalRotation": { "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 0x2（终点用内嵌形状抖动）未置位"} },
+      "ShapeRotationOrder": { "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 0x2（终点用内嵌形状抖动）未置位"} },
+      "ShapeRotationCorrect": { "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 0x2（终点用内嵌形状抖动）未置位"} },
+      "ShapeDivideEquidistant": { "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 0x2（终点用内嵌形状抖动）未置位"} },
+      "ShapeDivideEquidistantCalcOuterCurve": { "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 0x2（终点用内嵌形状抖动）未置位"} },
+      "ShapeDivideEquidistantRecalcEveryFrame": { "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 0x2（终点用内嵌形状抖动）未置位"} },
+      "ShapeUseExtension": { "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 0x2（终点用内嵌形状抖动）未置位"} },
+      "ShapeScaleHorizontal": { "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 0x2（终点用内嵌形状抖动）未置位"} },
+      "ShapeScaleVertical": { "when": {"field": "Flags", "shift": 1, "in": [1], "why": "Flags 0x2（终点用内嵌形状抖动）未置位"} },
+      "CutoffEnduranceLength": { "when": {"field": "Flags", "shift": 10, "in": [1], "why": "Flags 0x400（启用断裂）未置位"} },
+      "CutoffEnduranceFrame": { "when": {"field": "Flags", "shift": 10, "in": [1], "why": "Flags 0x400（启用断裂）未置位"} }
+    }
+  },
+  "bitSets": {
+    "colorHeader": { "summary": "公共颜色头：混合方式与出生颜色随机", "groups": [
+      { "shift": 0, "width": 4, "label": "混合方式（取值对应部分待确认）", "options": [ "AlphaBlend", "Physical", "AddContrast", "EdgeBlend", "Multiply" ] },
+      { "shift": 4, "width": 1, "label": "0x10：出生颜色在 Color 与 ColorRange 之间随机" },
+      { "shift": 5, "width": 1, "label": "0x20（作用未知）" }
+    ] }
+  }
+}

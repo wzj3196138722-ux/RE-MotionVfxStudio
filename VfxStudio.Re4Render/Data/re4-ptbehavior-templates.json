@@ -1,0 +1,710 @@
+{
+  "source": "RE4 natives/stm *.efx.3539837: per PtBehavior class the most common parameter list, values from the instance agreeing with the most per-parameter modes; carrier = most common attribute list of top-level entries with that class",
+  "classes": {
+    "chainsaw.EffectLight1500lm": {
+      "count": 390,
+      "signatureShare": 0.326,
+      "parameters": [
+        {
+          "name": "Intensity",
+          "type": "PropFloat",
+          "value": "3000"
+        },
+        {
+          "name": "Radius",
+          "type": "PropFloat",
+          "value": "0.03"
+        },
+        {
+          "name": "ReferenceEffectiveRange",
+          "type": "PropFloat",
+          "value": "3"
+        }
+      ],
+      "carrier": {
+        "attributes": [
+          "Transform3D",
+          "ParentOptions",
+          "Spawn",
+          "TypeNoDraw",
+          "Life",
+          "PtBehavior"
+        ],
+        "entries": 256
+      }
+    },
+    "chainsaw.EffectShakeCameraCustom": {
+      "count": 27,
+      "signatureShare": 0.444,
+      "parameters": [
+        {
+          "name": "UseDistanceAttenuation",
+          "type": "PropBool",
+          "value": "1"
+        },
+        {
+          "name": "DistanceAttenuationStart",
+          "type": "PropFloat",
+          "value": "10"
+        },
+        {
+          "name": "DistanceAttenuationEnd",
+          "type": "PropFloat",
+          "value": "40"
+        },
+        {
+          "name": "UseAngleAttenuation",
+          "type": "PropBool",
+          "value": "1"
+        },
+        {
+          "name": "CameraTarget",
+          "type": "PropEnum",
+          "value": "1"
+        }
+      ],
+      "carrier": {
+        "attributes": [
+          "Transform3D",
+          "ParentOptions",
+          "Spawn",
+          "TypeNoDraw",
+          "Life",
+          "PtBehavior"
+        ],
+        "entries": 27
+      }
+    },
+    "via.effect.script.EffectDecal": {
+      "count": 1008,
+      "signatureShare": 0.271,
+      "parameters": [
+        {
+          "name": "DecalPrefab",
+          "type": "PropPrefab",
+          "value": "RE_ENGINE_LIBRARY/VFX_Library/Decal/Blood_BDC/decal_capcom_blood_bdc_bloodstain_00.pfb"
+        },
+        {
+          "name": "DecalDirection",
+          "type": "PropEnum",
+          "value": "3"
+        },
+        {
+          "name": "DecalUpDirection",
+          "type": "PropEnum",
+          "value": "4"
+        },
+        {
+          "name": "RandomRollRange",
+          "type": "PropFloat",
+          "value": "180"
+        },
+        {
+          "name": "ProjectionShape",
+          "type": "PropEnum",
+          "value": "0"
+        },
+        {
+          "name": "Extent",
+          "type": "PropVec3",
+          "value": "1,1,1"
+        },
+        {
+          "name": "ScaleXY",
+          "type": "PropRange",
+          "value": "0.35,0.20000002"
+        },
+        {
+          "name": "SearchTerrainDistance",
+          "type": "PropFloat",
+          "value": "2.6"
+        },
+        {
+          "name": "BaseColorMod",
+          "type": "PropColor",
+          "value": "113,3,7,255"
+        },
+        {
+          "name": "EmissiveMod",
+          "type": "PropColor",
+          "value": "255,255,255,255"
+        }
+      ],
+      "carrier": {
+        "attributes": [
+          "Transform3D",
+          "ParentOptions",
+          "Spawn",
+          "TypeNoDraw",
+          "Life",
+          "PtBehavior"
+        ],
+        "entries": 324
+      }
+    },
+    "via.effect.script.EffectFluid2DObstacle": {
+      "count": 21,
+      "signatureShare": 0.952,
+      "parameters": [
+        {
+          "name": "Radius",
+          "type": "PropFloat",
+          "value": "0.75"
+        },
+        {
+          "name": "Length",
+          "type": "PropFloat",
+          "value": "30"
+        },
+        {
+          "name": "CuttedDensity",
+          "type": "PropFloat",
+          "value": "0"
+        },
+        {
+          "name": "PowerScale",
+          "type": "PropFloat",
+          "value": "0.1"
+        }
+      ],
+      "carrier": {
+        "attributes": [
+          "FixRandomGenerator",
+          "Transform3D",
+          "Transform3DExpression",
+          "ParentOptions",
+          "Spawn",
+          "TypeNoDraw",
+          "Velocity3D",
+          "Life",
+          "PtBehavior"
+        ],
+        "entries": 20
+      }
+    },
+    "via.effect.script.EffectFluid2DPressure": {
+      "count": 5,
+      "signatureShare": 1,
+      "parameters": [
+        {
+          "name": "Radius",
+          "type": "PropFloat",
+          "value": "3"
+        },
+        {
+          "name": "Length",
+          "type": "PropFloat",
+          "value": "3"
+        },
+        {
+          "name": "Pressure",
+          "type": "PropFloat",
+          "value": "10000000"
+        }
+      ],
+      "carrier": {
+        "attributes": [
+          "FixRandomGenerator",
+          "Transform3D",
+          "Transform3DExpression",
+          "ParentOptions",
+          "Spawn",
+          "TypeNoDraw",
+          "Life",
+          "PtBehavior"
+        ],
+        "entries": 5
+      }
+    },
+    "via.effect.script.EffectLensFlare": {
+      "count": 41,
+      "signatureShare": 0.756,
+      "parameters": [
+        {
+          "name": "LensflarePrefab",
+          "type": "PropPrefab",
+          "value": "RE_ENGINE_LIBRARY/VFX_Library/Lensflare/LensflarePrefab/lensflare_capcom_asset_0001.pfb"
+        },
+        {
+          "name": "Intensity",
+          "type": "PropFloat",
+          "value": "5000"
+        }
+      ],
+      "carrier": {
+        "attributes": [
+          "FixRandomGenerator",
+          "Transform3D",
+          "ParentOptions",
+          "Spawn",
+          "TypeNoDraw",
+          "Life",
+          "PtBehavior"
+        ],
+        "entries": 31
+      }
+    },
+    "via.effect.script.EffectLight1500lm": {
+      "count": 147,
+      "signatureShare": 0.469,
+      "parameters": [
+        {
+          "name": "Intensity",
+          "type": "PropFloat",
+          "value": "100000"
+        },
+        {
+          "name": "Radius",
+          "type": "PropFloat",
+          "value": "1"
+        },
+        {
+          "name": "ReferenceEffectiveRange",
+          "type": "PropFloat",
+          "value": "20"
+        }
+      ],
+      "carrier": {
+        "attributes": [
+          "Transform3D",
+          "ParentOptions",
+          "Spawn",
+          "TypeNoDraw",
+          "Life",
+          "PtBehavior"
+        ],
+        "entries": 77
+      }
+    },
+    "via.effect.script.EffectMaterialController": {
+      "count": 10,
+      "signatureShare": 1,
+      "parameters": [
+        {
+          "name": "MaterialName",
+          "type": "PropString",
+          "value": "sm84_786_C_Mat__Env_Default"
+        },
+        {
+          "name": "VariableName",
+          "type": "PropString",
+          "value": "Blood_Rate"
+        },
+        {
+          "name": "StartRate",
+          "type": "PropFloat",
+          "value": "0"
+        },
+        {
+          "name": "EndRate",
+          "type": "PropFloat",
+          "value": "0"
+        }
+      ],
+      "carrier": {
+        "attributes": [
+          "Transform3D",
+          "ParentOptions",
+          "Spawn",
+          "TypeNoDraw",
+          "Life",
+          "PtBehavior"
+        ],
+        "entries": 10
+      }
+    },
+    "via.effect.script.EffectRadialBlur": {
+      "count": 92,
+      "signatureShare": 0.326,
+      "parameters": [
+        {
+          "name": "BlurPower",
+          "type": "PropFloat",
+          "value": "10"
+        },
+        {
+          "name": "LookAtType",
+          "type": "PropEnum",
+          "value": "0"
+        }
+      ],
+      "carrier": {
+        "attributes": [
+          "Transform3D",
+          "ParentOptions",
+          "Spawn",
+          "TypeNoDraw",
+          "Life",
+          "PtBehavior"
+        ],
+        "entries": 86
+      }
+    },
+    "via.effect.script.EffectRecord": {
+      "count": 404,
+      "signatureShare": 0.421,
+      "parameters": [
+        {
+          "name": "MarkSystemkAssetID",
+          "type": "PropUint",
+          "value": "1"
+        },
+        {
+          "name": "MarkOrderDataID",
+          "type": "PropUint",
+          "value": "2"
+        },
+        {
+          "name": "MarkOrderDataIndex",
+          "type": "PropUint",
+          "value": "0"
+        },
+        {
+          "name": "OrderDecal",
+          "type": "PropBool",
+          "value": "0"
+        },
+        {
+          "name": "ScaleXY",
+          "type": "PropRange",
+          "value": "0.025,0.003999999"
+        },
+        {
+          "name": "Extent",
+          "type": "PropVec3",
+          "value": "1,1,1"
+        },
+        {
+          "name": "SearchDistance",
+          "type": "PropFloat",
+          "value": "3"
+        }
+      ],
+      "carrier": {
+        "attributes": [
+          "Transform3D",
+          "ParentOptions",
+          "Spawn",
+          "TypeNoDraw",
+          "Life",
+          "PtBehavior"
+        ],
+        "entries": 287
+      }
+    },
+    "via.effect.script.EffectSpotLight": {
+      "count": 1,
+      "signatureShare": 1,
+      "parameters": [
+        {
+          "name": "Intensity",
+          "type": "PropFloat",
+          "value": "20000"
+        },
+        {
+          "name": "UsingSameIntensity",
+          "type": "PropBool",
+          "value": "1"
+        },
+        {
+          "name": "Radius",
+          "type": "PropFloat",
+          "value": "1"
+        },
+        {
+          "name": "ReferenceEffectiveRange",
+          "type": "PropFloat",
+          "value": "50"
+        },
+        {
+          "name": "ShadowEnable",
+          "type": "PropBool",
+          "value": "1"
+        },
+        {
+          "name": "Falloff",
+          "type": "PropFloat",
+          "value": "1"
+        },
+        {
+          "name": "Spread",
+          "type": "PropFloat",
+          "value": "15"
+        },
+        {
+          "name": "Cone",
+          "type": "PropFloat",
+          "value": "20"
+        }
+      ],
+      "carrier": {
+        "attributes": [
+          "Transform3D",
+          "ParentOptions",
+          "Spawn",
+          "TypeNoDraw",
+          "TypeNoDrawExpression",
+          "Life",
+          "PtBehavior"
+        ],
+        "entries": 1
+      }
+    },
+    "via.effect.script.EffectWaterObstacle": {
+      "count": 27,
+      "signatureShare": 0.852,
+      "parameters": [
+        {
+          "name": "Radius",
+          "type": "PropFloat",
+          "value": "2"
+        },
+        {
+          "name": "Length",
+          "type": "PropFloat",
+          "value": "0"
+        },
+        {
+          "name": "MovingPower",
+          "type": "PropFloat",
+          "value": "1"
+        }
+      ],
+      "carrier": {
+        "attributes": [
+          "Transform3D",
+          "ParentOptions",
+          "Spawn",
+          "TypeNoDraw",
+          "Life",
+          "PtBehavior"
+        ],
+        "entries": 9
+      }
+    },
+    "via.effect.script.SoundEffectEvent": {
+      "count": 20,
+      "signatureShare": 0.95,
+      "parameters": [
+        {
+          "name": "TriggerId",
+          "type": "PropUint",
+          "value": "3981851372"
+        },
+        {
+          "name": "MaxDistance",
+          "type": "PropFloat",
+          "value": "20"
+        },
+        {
+          "name": "MaxParticleSounds",
+          "type": "PropUint",
+          "value": "3"
+        },
+        {
+          "name": "FixedPosition",
+          "type": "PropBool",
+          "value": "1"
+        }
+      ],
+      "carrier": {
+        "attributes": [
+          "Transform3D",
+          "ParentOptions",
+          "Spawn",
+          "TypeNoDraw",
+          "Life",
+          "PtLife",
+          "PtBehavior"
+        ],
+        "entries": 6
+      }
+    }
+  },
+  "decalPrefabs": [
+    {
+      "path": "RE_ENGINE_LIBRARY/VFX_Library/Decal/Blood_BDC/decal_capcom_blood_bdc_bloodstain_00.pfb",
+      "uses": 229
+    },
+    {
+      "path": "RE_ENGINE_LIBRARY/VFX_Library/Decal/Blood_BDC/decal_capcom_blood_bdc_bloodstain_01.pfb",
+      "uses": 88
+    },
+    {
+      "path": "RE_ENGINE_LIBRARY/VFX_Library/Decal/MarkSystem/decal_capcom_blood_0002.pfb",
+      "uses": 87
+    },
+    {
+      "path": "_Chainsaw/VFX/Texture/TEX_Character/TEX_ch3530/tex_0012_ch3530_decal_liquid_0002.pfb",
+      "uses": 81
+    },
+    {
+      "path": "_Chainsaw/VFX/Texture/TEX_Character/TEX_ch3530/tex_0012_ch3530_decal_liquid_0003.pfb",
+      "uses": 76
+    },
+    {
+      "path": "_Chainsaw/VFX/RecordSystem/Decal/record_0015_DecalPrefab_100_blood_ground.pfb",
+      "uses": 46
+    },
+    {
+      "path": "_Chainsaw/VFX/Texture/TEX_Character/TEX_ch3530/tex_0012_ch3530_decal_liquid_0001.pfb",
+      "uses": 46
+    },
+    {
+      "path": "_Chainsaw/VFX/Texture/TEX_Wp/TEX_Weapon_Common/tex_0012_common_decal_brunt_0002.pfb",
+      "uses": 45
+    },
+    {
+      "path": "_Chainsaw/VFX/RecordSystem/Decal/record_0015_DecalPrefab_011_FootStep_muddy.pfb",
+      "uses": 34
+    },
+    {
+      "path": "RE_ENGINE_LIBRARY/VFX_Library/Decal/Burnt_BDC/decal_capcom_burnt_bdc_00.pfb",
+      "uses": 33
+    },
+    {
+      "path": "RE_ENGINE_LIBRARY/VFX_Library/Decal/Crack_BDC/decal_capcom_crack_bdc_ground_00.pfb",
+      "uses": 30
+    },
+    {
+      "path": "RE_ENGINE_LIBRARY/VFX_Library/Decal/Blood_BDC/decal_capcom_blood_bdc_drag_00.pfb",
+      "uses": 27
+    },
+    {
+      "path": "_Chainsaw/VFX/Texture/TEX_Wp/TEX_wp0690/tex_0012_ch0690_00_RadialExplosion_00.pfb",
+      "uses": 26
+    },
+    {
+      "path": "RE_ENGINE_LIBRARY/VFX_Library/Decal/Other_BDC/decal_capcom_other_bdc_oil_01.pfb",
+      "uses": 16
+    },
+    {
+      "path": "_Chainsaw/VFX/RecordSystem/Decal/record_DecalPrefab_142_bullethole.pfb",
+      "uses": 12
+    },
+    {
+      "path": "_Chainsaw/VFX/Texture/TEX_Character/TEX_chc000_00/tex_0015_deathbody_0000.pfb",
+      "uses": 12
+    },
+    {
+      "path": "_Chainsaw/VFX/RecordSystem/Decal/record_0015_DecalPrefab_012_blood_ground.pfb",
+      "uses": 11
+    },
+    {
+      "path": "RE_ENGINE_LIBRARY/VFX_Library/Decal/MarkSystem/decal_capcom_blood_ground_0000.pfb",
+      "uses": 8
+    },
+    {
+      "path": "RE_ENGINE_LIBRARY/VFX_Library/Decal/MarkSystem/decal_capcom_liquid_0001.pfb",
+      "uses": 8
+    },
+    {
+      "path": "_AnotherOrder/VFX/RecordSystem/Decal/record_0015_AO_DecalPrefab_000_blood.pfb",
+      "uses": 8
+    },
+    {
+      "path": "_Chainsaw/VFX/RecordSystem/Decal/record_0015_DecalPrefab_010_FootStep_soil.pfb",
+      "uses": 8
+    },
+    {
+      "path": "_Chainsaw/VFX/Texture/TEX_Wp/TEX_Weapon_Common/tex_0012_common_decal_brunt_0001.pfb",
+      "uses": 8
+    },
+    {
+      "path": "RE_ENGINE_LIBRARY/VFX_Library/Decal/Scar_BDC/decal_capcom_scar_bdc_swd_00.pfb",
+      "uses": 7
+    },
+    {
+      "path": "RE_ENGINE_LIBRARY/VFX_Library/Decal/Frost_BDC/decal_capcom_frost_bdc_01.pfb",
+      "uses": 6
+    },
+    {
+      "path": "RE_ENGINE_LIBRARY/VFX_Library/Decal/MarkSystem/decal_capcom_burnt_0001.pfb",
+      "uses": 6
+    },
+    {
+      "path": "_Chainsaw/VFX/Mesh/MESH_Wp/MESH_wp5403/tex_0015_wp5403_wall_00.pfb",
+      "uses": 6
+    },
+    {
+      "path": "_Chainsaw/VFX/RecordSystem/Decal/record_DecalPrefab_020_blood.pfb",
+      "uses": 6
+    },
+    {
+      "path": "_AnotherOrder/VFX/RecordSystem/Decal/record_0015_AO_DacalPrefab_001_blood.pfb",
+      "uses": 4
+    },
+    {
+      "path": "_Chainsaw/VFX/Texture/TEX_Wp/TEX_wp5400/tex_0015_wp5400_00_GrenadeExplosion_00.pfb",
+      "uses": 4
+    },
+    {
+      "path": "_Chainsaw/VFX/Mesh/MESH_Wp/MESH_wp5403/tex_0015_wp5403_00_floor.pfb",
+      "uses": 3
+    },
+    {
+      "path": "_Chainsaw/VFX/RecordSystem/Decal/record_0015_DecalPrefab_013_liquid_ground.pfb",
+      "uses": 3
+    },
+    {
+      "path": "_Chainsaw/VFX/Texture/TEX_Character/TEX_ch2600/tex_0012_ch2600_03_TentacleMarks.pfb",
+      "uses": 3
+    },
+    {
+      "path": "_Chainsaw/VFX/RecordSystem/Decal/record_DecalPrefab_102_landing.pfb",
+      "uses": 2
+    },
+    {
+      "path": "_Chainsaw/VFX/RecordSystem/Decal/record_DecalPrefab_103_landing.pfb",
+      "uses": 2
+    },
+    {
+      "path": "_Chainsaw/VFX/RecordSystem/Decal/record_DecalPrefab_104_landing.pfb",
+      "uses": 2
+    },
+    {
+      "path": "_Chainsaw/VFX/RecordSystem/Decal/record_DecalPrefab_140_bullethole.pfb",
+      "uses": 2
+    },
+    {
+      "path": "_Chainsaw/VFX/RecordSystem/Decal/record_DecalPrefab_144_bullethole.pfb",
+      "uses": 2
+    },
+    {
+      "path": "_Chainsaw/VFX/RecordSystem/Decal/record_DecalPrefab_480_landing.pfb",
+      "uses": 2
+    },
+    {
+      "path": "_Chainsaw/VFX/Texture/TEX_Character/TEX_ch2600/tex_0012_ch2600_00_TentacleMarks.pfb",
+      "uses": 2
+    },
+    {
+      "path": "RE_ENGINE_LIBRARY/VFX_Library/Decal/MarkSystem/decal_capcom_liquid_ground_0000.pfb",
+      "uses": 1
+    },
+    {
+      "path": "RE_ENGINE_LIBRARY/VFX_Library/Decal/MarkSystem/decal_capcom_scar_ax_stab_metal.pfb",
+      "uses": 1
+    },
+    {
+      "path": "_Chainsaw/VFX/RecordSystem/Decal/record_DecalPrefab_100_landing.pfb",
+      "uses": 1
+    },
+    {
+      "path": "_Chainsaw/VFX/RecordSystem/Decal/record_DecalPrefab_110_landing.pfb",
+      "uses": 1
+    },
+    {
+      "path": "_Chainsaw/VFX/RecordSystem/Decal/record_DecalPrefab_143_bullethole.pfb",
+      "uses": 1
+    },
+    {
+      "path": "_Chainsaw/VFX/Texture/TEX_Character/TEX_ch2600/tex_0012_ch2600_01_TentacleMarks.pfb",
+      "uses": 1
+    },
+    {
+      "path": "_Chainsaw/VFX/Texture/TEX_Character/TEX_ch2600/tex_0012_ch2600_02_TentacleMarks.pfb",
+      "uses": 1
+    }
+  ]
+}

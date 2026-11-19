@@ -53,7 +53,7 @@ internal static class ActionSlotAudit
             {
                 string logical=item!["path"]!.GetValue<string>();
                 string native=Path.Combine(previewOptions.GameRoot!,"natives","stm",logical.Replace('/',Path.DirectorySeparatorChar)+
-                    (item["kind"]!.GetValue<string>()=="motlist"?".992":".18"));
+                    "."+previewOptions.Game.SuffixFor(item["kind"]!.GetValue<string>()=="motlist"?"motlist":"pfb"));
                 if(!File.Exists(native))throw new Exception("Preview file missing.");
                 string hash=Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(native)));
                 if(hash!=item["sha256"]!.GetValue<string>())throw new Exception("Preview readback hash differs.");
@@ -156,9 +156,7 @@ internal static class ActionSlotAudit
         var set=new ActionSlotWorkspace.WorkingSet();
         var workspace=new ActionSlotWorkspace(options with {SelfTest=true},proof,proof["auditPrefabIndex"]!.GetValue<int>(),set);
         var checks=new List<object>();
-        string schema=Path.Combine(options.Assets,"Lists","rsz_pfb_classes.json");
-        if(!File.Exists(schema))schema=Path.Combine(AppContext.BaseDirectory,"formats","rsz_pfb_classes.json");
-        var rsz=new RszFileOption(GameName.mhwilds,RszParser.GetInstance(schema));
+        var rsz=options.RszOption();
         IEnumerable<PfbGameObject> Walk(IEnumerable<PfbGameObject> roots)
         {foreach(var go in roots){yield return go;foreach(var child in Walk(go.Children))yield return child;}}
         void VerifyReadback(ActionSlotWorkspace.SlotEdit edit,int child,string joint,int relation)

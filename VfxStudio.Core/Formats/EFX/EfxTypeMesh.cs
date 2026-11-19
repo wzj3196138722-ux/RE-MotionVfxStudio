@@ -99,20 +99,31 @@ public partial class EFXAttributeTypeMeshV2 : EFXAttribute
     public float ColorRate;
     public via.Color EmissiveColor;
     public float EmissiveRate;
+    // 以下语义来自 re4.exe（vtable 7a0c3a8，逐粒子 3d30b60）。字段名以文本解析器 3d29810 的引擎名为准。
+    // Flags：位 1 = 让 FrontAxis 对准飞行方向（3d313b0）；位 8-9 = 2 位渲染对象状态（语料 256 = 值 1）；
+    // 位 24 = 按顺序轮流取段而不是随机。
+    // MaxPartsNum = 网格序列长度（循环/结束的边界）。
     public uint MaxPartsNum;
-    public via.RangeI PartsStartNo;
-    public via.Range PlaySpeed;
-    public via.Range PlaySpeedCoef;
+    // 段号取 [r, s)：r = 起始段（含），s = 结束段（不含）；位 24 关时在其中随机取。
+    public MinMaxExclusiveI PartsStartNo;
+    // 在 [s, r] 内均匀取值（不是 s±r），单位：段/帧；PlaySpeedCoef 每帧 powf(coef, dt·60)。
+    public MinMax PlaySpeed;
+    public CenterSpread PlaySpeedCoef;
+    // 0 暂停、1 循环、2 播完粒子死亡、3 播完停在最后一段。
     public PlayType PlayType;
     public PlayOrder PlayOrder;
     public RotationOrder RotationOrder;
-    public via.Range RotationX;
-    public via.Range RotationY;
-    public via.Range RotationZ;
-    public via.Range ScaleX;
-    public via.Range ScaleY;
-    public via.Range ScaleZ;
-    public via.Range ScaleMultiplier;
+    // 弧度，出生时 s ± r 抽样。
+    public CenterSpread RotationX;
+    public CenterSpread RotationY;
+    public CenterSpread RotationZ;
+    // 各轴尺寸倍率（旧名 ScaleX/Y/Z）。
+    public CenterSpread SizeX;
+    public CenterSpread SizeY;
+    public CenterSpread SizeZ;
+    // 统一尺寸，写入粒子尺寸槽（ScaleAnim 作用于它；旧名 ScaleMultiplier）。
+    public CenterSpread SizeScalar;
+    // 0 X、1 Y、2 Z（默认 Z）；Flags 位 1 开启时对准飞行方向。
     public AxisXYZ FrontAxis;
     public uint cbSize;
     [RszVersion(EfxVersion.RE4)]
@@ -157,6 +168,9 @@ public partial class EFXAttributeTypeMeshV2 : EFXAttribute
             }
         }
         texPaths = pathlist.ToArray();
+        // The reader takes the entry count from this byte size; DefaultWrite does not recompute it, so a table that
+        // gained or lost entries would be read back with the old count.
+        propertiesDataSize = properties.Count * MdfProperty.GetSize(Version);
         return DefaultWrite(handler);
     }
 
@@ -201,68 +215,36 @@ public partial class EFXAttributeTypeMeshExpression : EFXAttribute, IExpressionA
 	[RszVersion(nameof(Version), ">=", EfxVersion.RE3, "&&", nameof(Version), "<", EfxVersion.RE4)]
     public int indicesCount;
 
-    // dd2, likely re4 TODO versioned bitset
-	// [RszClassInstance] public BitSet expressionBits = new BitSet(25) { BitNameDict = new () {
-    //     [1] = nameof(color1),
-    //     [2] = nameof(color1Rand),
-    //     [3] = nameof(alpha),
-    //     [4] = nameof(alphaRand),
-
-    //     [16] = "scale",
-    //     [17] = "scaleRand",
-    //     [18] = "sizeX",
-    //     [19] = "sizeXRange",
-    //     [20] = "sizeY",
-    //     [21] = "sizeYRange",
-    //     [22] = "sizeY",
-    //     [23] = "sizeYRange",
-	// }};
-    // re7, dmc5:
-	[RszClassInstance] public BitSet expressionBits = new BitSet(25) { BitNameDict = new () {
-		[1] = nameof(color1),
-		[2] = nameof(color1Rand),
-		[3] = nameof(alpha),
-		[4] = nameof(alphaRand),
-		[6] = "speed",
-		[7] = "speedRand",
-
-        [14] = "scale",
-        [15] = "scaleRand",
-		[16] = "sizeX",
-        [17] = "sizeXRange",
-		[18] = "sizeY",
-		[19] = "sizeYRange",
-		[20] = "sizeY",
-		[21] = "sizeYRange",
-	}};
-    public ExpressionAssignType color1;
-    public ExpressionAssignType color1Rand;
-    public ExpressionAssignType alpha;
-    public ExpressionAssignType alphaRand;
-    public ExpressionAssignType unkn5;
-    public ExpressionAssignType unkn6;
-    public ExpressionAssignType unkn7;
-    public ExpressionAssignType unkn8;
-    public ExpressionAssignType unkn9;
-    public ExpressionAssignType unkn10;
-    public ExpressionAssignType unkn11;
-    public ExpressionAssignType unkn12;
-    public ExpressionAssignType unkn13;
-    public ExpressionAssignType unkn14;
-    public ExpressionAssignType unkn15;
-    public ExpressionAssignType unkn16;
-    public ExpressionAssignType unkn17;
-    public ExpressionAssignType unkn18;
-    public ExpressionAssignType unkn19;
-    public ExpressionAssignType unkn20;
-    public ExpressionAssignType unkn21;
-	[RszVersion(">", EfxVersion.RE3, EndAt = nameof(unkn22))]
-    public ExpressionAssignType unkn22;
+	// re4.exe 槽位名（B 类：引擎按名字登记槽位，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；旋转槽按角度。 引擎别名：ColorRate = ColorRate/EmissionRate/ContrastRate/InnerIntensity/MultiplyColorRate，Intensity = BackIntensity/OuterIntensity/MultiplyBlackRate；*Range 在引擎里有的写作 *_Random。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(25) { BitNames = [ nameof(Color), nameof(ColorRange), nameof(Alpha), nameof(AlphaRange), nameof(ColorRate), nameof(PlaySpeed), nameof(PlaySpeedRange), nameof(PlaySpeedCoef), nameof(PlaySpeedCoefRange), nameof(RotationX), nameof(RotationXRange), nameof(RotationY), nameof(RotationYRange), nameof(RotationZ), nameof(RotationZRange), nameof(SizeScalar), nameof(SizeScalarRange), nameof(SizeX), nameof(SizeXRange), nameof(SizeY), nameof(SizeYRange), nameof(SizeZ), nameof(SizeZRange), nameof(PartStartNo), nameof(PartStartNoRange) ] };
+    public ExpressionAssignType Color;
+    public ExpressionAssignType ColorRange;
+    public ExpressionAssignType Alpha;
+    public ExpressionAssignType AlphaRange;
+    public ExpressionAssignType ColorRate;
+    public ExpressionAssignType PlaySpeed;
+    public ExpressionAssignType PlaySpeedRange;
+    public ExpressionAssignType PlaySpeedCoef;
+    public ExpressionAssignType PlaySpeedCoefRange;
+    public ExpressionAssignType RotationX;
+    public ExpressionAssignType RotationXRange;
+    public ExpressionAssignType RotationY;
+    public ExpressionAssignType RotationYRange;
+    public ExpressionAssignType RotationZ;
+    public ExpressionAssignType RotationZRange;
+    public ExpressionAssignType SizeScalar;
+    public ExpressionAssignType SizeScalarRange;
+    public ExpressionAssignType SizeX;
+    public ExpressionAssignType SizeXRange;
+    public ExpressionAssignType SizeY;
+    public ExpressionAssignType SizeYRange;
+	[RszVersion(">", EfxVersion.RE3, EndAt = nameof(SizeZ))]
+    public ExpressionAssignType SizeZ;
 	[RszVersion(EfxVersion.RE8)]
-    public ExpressionAssignType unkn23;
-	[RszVersion(EfxVersion.RE4, EndAt = nameof(unkn25))]
-    public ExpressionAssignType unkn24;
-    public ExpressionAssignType unkn25;
+    public ExpressionAssignType SizeZRange;
+	[RszVersion(EfxVersion.RE4, EndAt = nameof(PartStartNoRange))]
+    public ExpressionAssignType PartStartNo;
+    public ExpressionAssignType PartStartNoRange;
 
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 
@@ -361,11 +343,16 @@ public partial class EFXAttributeTypeGpuMesh : EFXAttribute
 {
     public EFXAttributeTypeGpuMesh() : base(EfxAttributeType.TypeGpuMesh) { }
     //TODO Fix this for older games
+    // re4.exe（vtable 7a15d20，加载器 3dbb1a0，常量缓冲 3dbc5f0）：GPU 类型，CPU 只把范围交给计算着色器。
+    // 字段名以文本解析器 3dba660 为准（RotationX/Y/Z、SizeX/Y/Z、SizeScalar、PlaySpeed、PlaySpeedCoef、Color、ColorRange）。
+    // Flags：位 2-3 = 与 Mesh 位 8-9 相同的 2 位渲染状态（语料 0x08000004 = 位 2 + 位 27）。
     public uint Flags;
     public uint ParticleNum;
 	[RszVersion(EfxVersion.MHWilds, EndAt = nameof(uknWilds1))]
     public float uknWilds0;
     public uint uknWilds1;
+    // cbSize 与 unkn3 传给渲染网格构造函数的位置，正好对应 Mesh 里 cbSize 和 Flags 位 14-23 的角色，
+    // 两者名字疑似互换（推测，未改名）。
     public uint cbSize;
 	[RszVersion('<', EfxVersion.DD2)]
     public uint unkn3;
@@ -385,10 +372,11 @@ public partial class EFXAttributeTypeGpuMesh : EFXAttribute
     public via.Range RotationX;
     public via.Range RotationY;
     public via.Range RotationZ;
-    public via.Range ScaleX;
-    public via.Range ScaleY;
-    public via.Range ScaleZ;
-    public via.Range ScaleMultiplier;
+    // 引擎名 SizeX/Y/Z、SizeScalar（旧名 ScaleX/Y/Z、ScaleMultiplier）；SizeScalar 可选乘发射器缩放。
+    public via.Range SizeX;
+    public via.Range SizeY;
+    public via.Range SizeZ;
+    public via.Range SizeScalar;
 	[RszVersion(EfxVersion.RE4)]
     public AxisXYZ OrientDirectionUpVector;
     [RszVersion(EfxVersion.DD2)]

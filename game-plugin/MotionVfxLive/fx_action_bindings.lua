@@ -3,6 +3,29 @@
 -- pre LockScene. Call restore_all and wait before a full REFramework reset.
 if _G.MotionVfxActionBindings then return _G.MotionVfxActionBindings end
 local M = { version = "1.3.0" }
+-- Game profile (fx_game_profile.lua): per-game type/method names. Loaded the same way
+-- as the other optional modules: require, then the autorun path, then this file's directory.
+local function load_game_profile()
+    local loaded = rawget(_G, "MotionVfxGameProfile") or package.loaded["MotionVfxLive.fx_game_profile"]
+    if type(loaded) ~= "table" then
+        local ok, result = pcall(require, "MotionVfxLive.fx_game_profile")
+        if ok and type(result) == "table" then loaded = result else
+            local loader = loadfile("reframework/autorun/MotionVfxLive/fx_game_profile.lua")
+            if not loader then
+                -- Offline tests load modules by absolute path: try this file's own directory.
+                local info = debug and debug.getinfo and debug.getinfo(1, "S")
+                local dir = info and type(info.source) == "string" and info.source:match("^@(.*)[/\\][^/\\]+$")
+                loader = dir and loadfile(dir .. "/fx_game_profile.lua")
+            end
+            loaded = loader and loader()
+        end
+    end
+    assert(type(loaded) == "table", "MotionVfx game profile (fx_game_profile.lua) is not installed")
+    package.loaded["MotionVfxLive.fx_game_profile"] = loaded
+    return loaded
+end
+local game_profile = load_game_profile()
+local game = game_profile.current()
 local capture, command, transaction
 local records, aliases, retained, original_flags = {}, {}, {}, {}
 local expired_records = {}
@@ -21,7 +44,7 @@ local function copy(v)
 end
 local function logical(path)
     if type(path) ~= "string" or path == "" or path:find("%z") then fail("EFX路径为空或无效") end
-    path=path:gsub("\\", "/"):gsub("%.5571972$", "")
+    path=game_profile.strip_efx_suffix((path:gsub("\\", "/")), game)
     path=path:gsub("^@/?", "")
     local lower=path:lower()
     if lower:sub(1,12)=="natives/stm/" then path=path:sub(13)
@@ -54,16 +77,15 @@ local function current_scene()
 end
 local function identity()
     local scene=current_scene()
-    local pm=sdk.get_managed_singleton("app.PlayerManager")
-    local master=pm and pm:call("getMasterPlayer")
-    local character=master and master:call("get_Character")
-    local weapon=character and character:call("get_Weapon")
+    -- The player chain comes from the game profile (verified against each game's TDB). The IDs
+    -- also detect changing equipment while reusing the same weapon component.
+    local host=game_profile.host(function(o, m, ...) if o == nil then return nil end return o:call(m, ...) end, function() return sdk end)
+    local character=game.player.character(host)
+    local weapon=game.player.weapon(host,character)
     if not scene or not character or not weapon then fail("角色、场景或装备尚未就绪") end
-    -- These getters were verified against the running Wilds TDB. The IDs also
-    -- detect changing equipment while reusing the same Weapon component.
-    local weapon_id=character:call("get_WeaponID")
-    local model_id=character:call("get_WeaponModelID")
-    local weapon_type=character:call("get_WeaponType")
+    local weapon_id=game.player.weapon_id(host,character)
+    local model_id=game.player.weapon_model_id(host,character)
+    local weapon_type=game.player.weapon_type(host,character)
     if weapon_id == nil or model_id == nil or weapon_type == nil then fail("无法确认装备身份") end
     local result={scene=scene,sceneAddress=address(scene),characterAddress=address(character),weaponAddress=address(weapon),
         weaponId=tostring(weapon_id),modelId=tostring(model_id),weaponType=tostring(weapon_type)}
@@ -136,7 +158,7 @@ end
 local function cache_fields(provider)
     local td=provider:get_type_definition()
     local values={}
-    for _,name in ipairs({"IgnoreEffectCache","EffectCache"}) do
+    for _,name in ipairs(game.resource_cache_flags) do
         if td and td:get_field(name) then
             local value=provider:get_field(name)
             if type(value) ~= "boolean" then fail("缓存标记不是布尔字段: " .. name) end
@@ -146,7 +168,7 @@ local function cache_fields(provider)
     return values
 end
 local function write_flags(provider, values)
-    for _,name in ipairs({"IgnoreEffectCache","EffectCache"}) do
+    for _,name in ipairs(game.resource_cache_flags) do
         if values[name] ~= nil then
             provider:set_field(name,values[name])
             if provider:get_field(name) ~= values[name] then fail("缓存标记回读失败: " .. name) end

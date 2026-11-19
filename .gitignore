@@ -5,6 +5,7 @@
 **/build-cache/
 **/published/
 **/test-output/
+LiveEditorOutput/
 **/fixtures/
 **/live-ui-fixtures/
 **/node_modules/
@@ -35,3 +36,6 @@ last-replay.json
 .env
 .env.*
 
+
+# tools/EfxNames intermediate data (exe caches, corpus dumps)
+tools/EfxNames/out/

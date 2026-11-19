@@ -258,15 +258,15 @@ namespace ReeLib.via
     }
 
 
-    // Size=8
+    // Size=8. Field order as in the engine's type database (re4.exe: s at +0, r at +4), the same as Range.
     public struct RangeI
     {
-        public int r;
         public int s;
+        public int r;
 
         public readonly override string ToString()
         {
-            return $"Range({r}, {s})";
+            return $"RangeI({s}, {r})";
         }
 
         public int this[int index]
@@ -274,13 +274,13 @@ namespace ReeLib.via
             readonly get
             {
                 ValueTypeUtils.CheckIndex(index, 2);
-                return index == 0 ? r : s;
+                return index == 0 ? s : r;
             }
             set
             {
                 ValueTypeUtils.CheckIndex(index, 2);
-                if (index == 0) r = value;
-                else s = value;
+                if (index == 0) s = value;
+                else r = value;
             }
         }
     }

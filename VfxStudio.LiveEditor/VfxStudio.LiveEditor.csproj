@@ -9,5 +9,6 @@
   <ItemGroup>
     <Compile Include="../tools/DesktopBridge/AuthorLinks.cs" Link="AuthorLinks.cs" />
     <ProjectReference Include="..\VfxStudio.Core\VfxStudio.Core.csproj" />
+    <EmbeddedResource Include="FieldSemantics.re4.json" LogicalName="VfxStudio.LiveEditor.FieldSemantics.re4.json" />
   </ItemGroup>
 </Project>

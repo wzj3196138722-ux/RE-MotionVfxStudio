@@ -3,8 +3,9 @@ using System.Text.Json.Nodes;
 
 namespace VfxStudio.Mcp;
 
-internal sealed class McpServer(IEditorBridge bridge)
+internal sealed class McpServer(IEditorBridge bridge, IToolSet? toolSet = null)
 {
+    private readonly IToolSet tools = toolSet ?? ToolCatalog.Live;
     public const string Version = "0.1.3";
     public const string ProtocolVersion = "2025-11-25";
     private static readonly string[] SupportedVersions = [ProtocolVersion, "2025-06-18", "2024-11-05"];
@@ -54,21 +55,21 @@ internal sealed class McpServer(IEditorBridge bridge)
                     {
                         ["protocolVersion"] = negotiatedVersion,
                         ["capabilities"] = new JsonObject { ["tools"] = new JsonObject { ["listChanged"] = false } },
-                        ["serverInfo"] = new JsonObject { ["name"] = "motionvfx-live", ["version"] = Version },
-                        ["instructions"] = "Control MotionVfx Live through its Lua AI bridge only. Workflow: status, capture/list_effects, open_effect using the full captured path, inspect, edit with expectedRevision, inspect to verify, save_copy, apply, ask the user to perform the action and inspect status, then restore. Group labels are Chinese-capable editor-only notes: use set_group_note, which stores separate JSON and never changes native EFX group names, hashes, revision, dirty state, or Undo/Redo. rename_group is a compatibility alias for the same note operation. Clear a note with an empty string; restore it by setting its prior value, not Undo. Apply acceptance is not visual confirmation. Never automatically retry mutations after an uncertain timeout. UI drafts and pending operations take precedence. This server implements MCP 2025-11-25 stdio with explicitly supported older versions; it does not implement server/discover."
+                        ["serverInfo"] = new JsonObject { ["name"] = tools.ServerName, ["version"] = Version },
+                        ["instructions"] = tools.Instructions
                     });
                     break;
                 case "ping": response = Result(id, new JsonObject()); break;
                 case "tools/list":
                     RequireReady();
                     if (parameters["cursor"] != null) throw new ArgumentException("This server returns all tools in one page; cursor is unsupported.");
-                    response = Result(id, new JsonObject { ["tools"] = ToolCatalog.Describe(negotiatedVersion == "2024-11-05") });
+                    response = Result(id, new JsonObject { ["tools"] = ToolCatalog.Describe(negotiatedVersion == "2024-11-05", tools) });
                     break;
                 case "tools/call":
                     RequireReady();
-                    var definition = ToolCatalog.Find(MailboxBridge.String(parameters, "name") ?? throw new ArgumentException("Tool name is required."));
+                    var definition = ToolCatalog.Find(MailboxBridge.String(parameters, "name") ?? throw new ArgumentException("Tool name is required."), tools);
                     var arguments = parameters["arguments"] == null ? new JsonObject() : parameters["arguments"] as JsonObject ?? throw new ArgumentException("Tool arguments must be an object.");
-                    ToolCatalog.Validate(definition, arguments);
+                    tools.Validate(definition, arguments);
                     // Older Lua versions interpreted rename_group as a native EFX
                     // mutation. Always canonicalize the compatibility tool here so
                     // connecting to an old bridge fails closed instead of renaming.
@@ -93,8 +94,17 @@ internal sealed class McpServer(IEditorBridge bridge)
                         outcome = new JsonObject { ["protocol"] = 1, ["id"] = bridgeId, ["ok"] = false,
                             ["error"] = new JsonObject { ["code"] = "bridge_io_error", ["message"] = error.Message + " Check editor state before retrying a mutation.", ["requestId"] = bridgeId, ["uncertain"] = true } };
                     }
-                    var result = new JsonObject { ["content"] = new JsonArray(new JsonObject { ["type"] = "text", ["text"] = outcome.ToJsonString() }),
-                        ["isError"] = outcome["ok"]?.GetValue<bool>() != true };
+                    var content = new JsonArray();
+                    // An image result (base64 "data" plus "mimeType") becomes an image block; the
+                    // text and structured copies keep its metadata without the payload.
+                    if (outcome["result"] is JsonObject image && MailboxBridge.String(image, "mimeType") is string mime && mime.StartsWith("image/", StringComparison.Ordinal) &&
+                        MailboxBridge.String(image, "data") is string data)
+                    {
+                        image.Remove("data");
+                        content.Add(new JsonObject { ["type"] = "image", ["data"] = data, ["mimeType"] = mime });
+                    }
+                    content.Insert(0, new JsonObject { ["type"] = "text", ["text"] = outcome.ToJsonString() });
+                    var result = new JsonObject { ["content"] = content, ["isError"] = outcome["ok"]?.GetValue<bool>() != true };
                     if (negotiatedVersion != "2024-11-05") result["structuredContent"] = outcome;
                     response = Result(id, result);
                     break;

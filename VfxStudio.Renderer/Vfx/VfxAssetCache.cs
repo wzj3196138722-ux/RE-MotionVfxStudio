@@ -368,8 +368,8 @@ public class VfxAssetCache : IDisposable
         {
             meshPath = tm2.MeshPath;
             mdfPath = tm2.MaterialPath;
-            partsMin = tm2.PartsStartNo.r;
-            partsMax = tm2.PartsStartNo.s;
+            partsMin = tm2.PartsStartNo.min;
+            partsMax = tm2.PartsStartNo.maxExclusive;
             if (tm2.Color.A > 0)
             {
                 baseTint = new Vector4(tm2.Color.R / 255f, tm2.Color.G / 255f, tm2.Color.B / 255f, tm2.Color.A / 255f);
@@ -417,8 +417,8 @@ public class VfxAssetCache : IDisposable
                 {
                     meshPath = gm.MeshPath;
                     mdfPath = gm.MaterialPath;
-                    partsMin = gm.PartsStartNo.r;
-                    partsMax = gm.PartsStartNo.s;
+                    partsMin = gm.PartsStartNo.s;
+                    partsMax = gm.PartsStartNo.r;
                     if (gm.Color.A > 0)
                     {
                         baseTint = new Vector4(gm.Color.R / 255f, gm.Color.G / 255f, gm.Color.B / 255f, gm.Color.A / 255f);
@@ -518,7 +518,7 @@ public class VfxAssetCache : IDisposable
                 {
                     if (attr is EFXAttributeUVSequence uvsAttr && !string.IsNullOrWhiteSpace(uvsAttr.UVSPath))
                     {
-                        GetUvsTexture(uvsAttr.UVSPath, uvsAttr.SequenceNo.r);
+                        GetUvsTexture(uvsAttr.UVSPath, uvsAttr.SequenceNo.min);
                     }
                     else if (attr is EFXAttributeTextureUnit tuAttr)
                     {

@@ -60,9 +60,8 @@ internal sealed class ActionSlotWorkspace
         motionPath = EditorEngine.Text(proof, "bankPath"); pfbPath = prefab["path"]!.GetValue<string>();
         motionId = proof["motionId"]!.GetValue<int>(); dataContainerId = prefab["dataContainerId"]!.GetValue<int>();
         externalIndex=prefab["externalIndex"]!.GetValue<int>();
-        string schema=Path.Combine(options.Assets,"Lists","rsz_pfb_classes.json");
-        if (!File.Exists(schema)) schema=Path.Combine(AppContext.BaseDirectory,"formats","rsz_pfb_classes.json");
-        rsz = new RszFileOption(GameName.mhwilds, RszParser.GetInstance(schema));
+        string schema=options.RszSchemaPath();
+        rsz = options.RszOption(schema);
         var reader = new GameInstallResourceReader(options);
         var motionSource = reader.ReadActionResource(motionPath, "motlist");
         var pfbSource = reader.ReadActionResource(pfbPath, "pfb");
@@ -86,13 +85,13 @@ internal sealed class ActionSlotWorkspace
 
     private MotlistFile ReadMotion(byte[] bytes)
     {
-        var value = new MotlistFile(new FileHandler(new MemoryStream(bytes), motionPath + ".992"));
+        var value = new MotlistFile(new FileHandler(new MemoryStream(bytes), options.Game.Versioned(motionPath, "motlist")));
         if (!value.Read() || value.Header.version != MotlistVersion.MHWILDS) { value.Dispose(); throw new InvalidDataException("动作表格式不受支持。"); }
         return value;
     }
     private PfbFile ReadPfb(byte[] bytes)
     {
-        var value = new PfbFile(rsz, new FileHandler(new MemoryStream(bytes), pfbPath + ".18"));
+        var value = new PfbFile(rsz, new FileHandler(new MemoryStream(bytes), options.Game.Versioned(pfbPath, "pfb")));
         try
         {
             if (!value.Read()) throw new InvalidDataException("PFB 解析失败。");
@@ -192,7 +191,7 @@ internal sealed class ActionSlotWorkspace
                 throw new InvalidOperationException("所选骨骼不属于此挂载对象，请从当前骨骼列表选择。");
         }
         var efxSource = new GameInstallResourceReader(options).ReadActionResource(resource,"efx");
-        var efx = new EfxEditorService().Load(efxSource.Content,resource+".5571972");
+        var efx = new EfxEditorService().Load(efxSource.Content,options.Game.Versioned(resource, "efx"));
         try
         {
             if (group.Length>0 && !efx.EffectGroups.Any(g=>g.groupName==group))
@@ -202,7 +201,7 @@ internal sealed class ActionSlotWorkspace
         using var pfb = ReadPfb(pfbBytes);
         byte[] motionBefore = motionBytes;
         pfb.RebuildInfoTables();
-        byte[] pfbBefore = Serialize(pfb, pfbPath + ".18");
+        byte[] pfbBefore = Serialize(pfb, options.Game.Versioned(pfbPath, "pfb"));
         var choices = Providers(pfb).SelectMany(p => Elements(p.Component).Cast<RszInstance>()
             .Select(e => (Provider:p, Element:e))).Where(t => t.Provider.Path + "#" + Id(t.Element) == templateKey).ToArray();
         if (choices.Length != 1) throw new InvalidOperationException("请选择当前已核实 PFB 中唯一的挂接模板。");
@@ -251,32 +250,32 @@ internal sealed class ActionSlotWorkspace
             .Where(c => c.ClipEntry.Tracks.Any(t => t.Name == "via.effect.script.VFXRangeTrack"))
             .Select(c => c.category).Distinct().ToArray();
         if (categories.Length != 1) throw new InvalidDataException("无法从当前动作表唯一核实原生特效轨道类别，未添加槽位。");
-        var clip = new MotClip { category = categories[0] }; clip.ClipEntry.Version = ClipVersion.MHWilds; clip.ClipEntry.FrameCount = motion.Header.frameCount; clip.ClipEntry.Guid = Guid.NewGuid();
+        var clip = new MotClip { category = categories[0] }; clip.ClipEntry.Version = options.Game.ClipVersion; clip.ClipEntry.FrameCount = motion.Header.frameCount; clip.ClipEntry.Guid = Guid.NewGuid();
         // The first track is the native hierarchy root, not an executable
         // motion event. A lone VFX track was being serialized as that root,
         // with no child event and no MotClip TrackData entry for the engine.
-        clip.ClipEntry.Tracks.Add(new ClipTrack(ClipVersion.MHWilds) { Name = "Root" });
-        using var shell = new MotFile(new FileHandler(new MemoryStream(), "slot.mot.932")); shell.Clips.Add(clip);
+        clip.ClipEntry.Tracks.Add(new ClipTrack(options.Game.ClipVersion) { Name = "Root" });
+        using var shell = new MotFile(new FileHandler(new MemoryStream(), options.Game.Versioned("slot.mot", "mot"))); shell.Clips.Add(clip);
         var slot = new VfxSlot { EffectId = effectId, ContainerId = dataContainerId, ElementId = nextId, StartFrame = start, EndFrame = end, JointName = joint };
         new MotionVfxSlotManager().AddSlot(shell, slot);
-        var endType=new Property(ClipVersion.MHWilds) { Info={FunctionName="EndType",DataType=PropertyType.S32,KeyType=3,startFrame=start,endFrame=end},
-            Keys=[new NoHermiteKey(ClipVersion.MHWilds) {PropertyType=PropertyType.S32,frame=start,Value=trackEndType}] };
+        var endType=new Property(options.Game.ClipVersion) { Info={FunctionName="EndType",DataType=PropertyType.S32,KeyType=3,startFrame=start,endFrame=end},
+            Keys=[new NoHermiteKey(options.Game.ClipVersion) {PropertyType=PropertyType.S32,frame=start,Value=trackEndType}] };
         clip.ClipEntry.Tracks.Single(t => t.Name == "via.effect.script.VFXRangeTrack").Properties.Add(endType);
         if(independent)clip.ClipEntry.Tracks.Single(t=>t.Name=="via.effect.script.VFXRangeTrack").Properties.Add(
-            new Property(ClipVersion.MHWilds){Info={FunctionName="IsRequestEndOfMotion",DataType=PropertyType.Bool,KeyType=1,startFrame=start,endFrame=end},
-                Keys=[new BoolKey(ClipVersion.MHWilds){PropertyType=PropertyType.Bool,frame=start,value=0}]});
-        clip.TrackData.Add(new TracksData { Version = ClipVersion.MHWilds });
+            new Property(options.Game.ClipVersion){Info={FunctionName="IsRequestEndOfMotion",DataType=PropertyType.Bool,KeyType=1,startFrame=start,endFrame=end},
+                Keys=[new BoolKey(options.Game.ClipVersion){PropertyType=PropertyType.Bool,frame=start,value=0}]});
+        clip.TrackData.Add(new TracksData { Version = options.Game.ClipVersion });
         // Also sets the version of the trailing property data. Leaving it at
         // zero writes a 16-byte older header where Wilds expects 24 bytes.
-        clip.ChangeVersion(ClipVersion.MHWilds);
+        clip.ChangeVersion(options.Game.ClipVersion);
         if (selected.OverrideClips.Count >= 255) throw new InvalidOperationException("动作追加轨道已达格式上限。");
-        byte[] nextMotion = AppendOverrideClip(motionBytes, selected, clip), nextPfb = Serialize(pfb, pfbPath + ".18");
+        byte[] nextMotion = AppendOverrideClip(motionBytes, selected, clip, options.Game.Versioned("action.motlist", "motlist")), nextPfb = Serialize(pfb, options.Game.Versioned(pfbPath, "pfb"));
         using var checkMotion = ReadMotion(nextMotion); using var checkPfb = ReadPfb(nextPfb);
         var newClip = Select(checkMotion).OverrideClips.Last();
         var track = newClip.ClipEntry.Tracks.Single(t => t.Name == "via.effect.script.VFXRangeTrack");
         if (newClip.category != categories[0] || newClip.ClipEntry.Tracks.Count != 2 || newClip.ClipEntry.Tracks[0].Name != "Root" ||
             !newClip.ClipEntry.Tracks[0].ChildTracks.Contains(track) || newClip.TrackData.Count != 1 ||
-            newClip.TrackData[0].Version != ClipVersion.MHWilds || newClip.ClipEntry.ExtraPropertyData.Version != ClipVersion.MHWilds)
+            newClip.TrackData[0].Version != options.Game.ClipVersion || newClip.ClipEntry.ExtraPropertyData.Version != options.Game.ClipVersion)
             throw new InvalidDataException("新增动作槽位的根轨道、子轨道或版本结构无效，修改已取消。");
         var effect = track.Properties.Single(p => p.Info.FunctionName == "EffectId");
         var selector = track.Properties.Single(p => p.Info.FunctionName == "DataContainerId");
@@ -305,13 +304,13 @@ internal sealed class ActionSlotWorkspace
         Array.Copy(motionBefore, selected.Start, motionRestored, selected.Start, 8);
         motionRestored[checked((int)selected.Start + 23)] = motionBefore[checked((int)selected.Start + 23)];
         bool motionSame = motionBefore.AsSpan().SequenceEqual(motionRestored);
-        bool pfbSame = pfbBefore.AsSpan().SequenceEqual(Serialize(checkPfb, pfbPath + ".18"));
+        bool pfbSame = pfbBefore.AsSpan().SequenceEqual(Serialize(checkPfb, options.Game.Versioned(pfbPath, "pfb")));
         if (!motionSame || !pfbSame)
         {
             if (auditOutput != null)
             {
-                File.WriteAllBytes(Path.Combine(auditOutput,"motion-before.motlist.992"),motionBefore);
-                File.WriteAllBytes(Path.Combine(auditOutput,"motion-restored.motlist.992"),motionRestored);
+                File.WriteAllBytes(Path.Combine(auditOutput,options.Game.Versioned("motion-before.motlist", "motlist")),motionBefore);
+                File.WriteAllBytes(Path.Combine(auditOutput,options.Game.Versioned("motion-restored.motlist", "motlist")),motionRestored);
             }
             throw new InvalidDataException($"移除新增内容后的文件与原文件不一致（动作={motionSame}, PFB={pfbSame}），修改已取消，未导出部分结果。");
         }
@@ -353,13 +352,13 @@ internal sealed class ActionSlotWorkspace
         {
             using var list=ReadMotion(files[edit.MotionKey]);
             var selected=list.Motions.Single(m=>m.motNumber==edit.MotionId);
-            files[edit.MotionKey]=AppendOverrideClip(files[edit.MotionKey],selected,edit.Clip);
+            files[edit.MotionKey]=AppendOverrideClip(files[edit.MotionKey],selected,edit.Clip,options.Game.Versioned("action.motlist", "motlist"));
             using var pfb=ReadPfb(files[edit.PfbKey]);
             var provider=Providers(pfb).Single(p=>p.Path==edit.ProviderPath);
             if(Elements(provider.Component).Cast<RszInstance>().Any(e=>Id(e)==edit.ElementId))
                 throw new InvalidDataException("保留槽位编号与原始 PFB 冲突，删除已取消。");
             Elements(provider.Component).Add(edit.Element.Clone());pfb.RebuildInfoTables();
-            files[edit.PfbKey]=Serialize(pfb,edit.PfbPath+".18");
+            files[edit.PfbKey]=Serialize(pfb,options.Game.Versioned(edit.PfbPath, "pfb"));
             using var checkMotion=ReadMotion(files[edit.MotionKey]);
             using var checkPfb=ReadPfb(files[edit.PfbKey]);
             if(checkMotion.Motions.Single(m=>m.motNumber==edit.MotionId).OverrideClips.Count!=selected.OverrideClips.Count+1 ||
@@ -412,7 +411,7 @@ internal sealed class ActionSlotWorkspace
     {
         Refresh();
         if (!working.PreviewProviders.ContainsKey(motionKey)) throw new InvalidOperationException("还没有添加动作特效槽位。");
-        var outputs=new List<Output>{new("motion",Path.GetFileName(motionPath)+".992","动作文件",motionBytes.ToArray())};
+        var outputs=new List<Output>{new("motion",options.Game.Versioned(Path.GetFileName(motionPath), "motlist"),"动作文件",motionBytes.ToArray())};
         // One bank can reference additions in both character and weapon PFBs.
         // Offer each modified dependency its own destination dialog.
         var providers=working.PreviewProviders[motionKey].Values.DistinctBy(p=>p.Key,StringComparer.OrdinalIgnoreCase)
@@ -420,12 +419,12 @@ internal sealed class ActionSlotWorkspace
         for(int i=0;i<providers.Length;i++)
         {
             var provider=providers[i];
-            outputs.Add(new(providers.Length==1?"pfb":"pfb_"+i,Path.GetFileName(provider.Path)+".18",
+            outputs.Add(new(providers.Length==1?"pfb":"pfb_"+i,options.Game.Versioned(Path.GetFileName(provider.Path), "pfb"),
                 "对应 PFB · "+Path.GetFileName(provider.Path),working.Files[provider.Key].ToArray()));
         }
         return outputs.ToArray();
     }
-    private static byte[] AppendOverrideClip(byte[] original, MotIndex selected, MotClip clip)
+    private static byte[] AppendOverrideClip(byte[] original, MotIndex selected, MotClip clip, string motlistPath)
     {
         // Re-encoding MOT transforms introduces quantization drift. Preserve the
         // whole existing file and update only this MOTLIST row's pointer/count.
@@ -436,7 +435,7 @@ internal sealed class ActionSlotWorkspace
         long oldArray = BitConverter.ToInt64(original, row);
         if (count > 0 && (oldArray < 0 || oldArray + count * 8L > original.Length)) throw new InvalidDataException("原动作轨道指针超出文件范围。");
         using var stream = new MemoryStream(); stream.Write(original);
-        using var handler = new FileHandler(stream, "action.motlist.992");
+        using var handler = new FileHandler(stream, motlistPath);
         handler.Seek(original.Length); handler.Align(16);
         long array = handler.Tell();
         for (int i = 0; i < count; i++) handler.Write(BitConverter.ToInt64(original, checked((int)oldArray + i * 8)));

@@ -46,6 +46,8 @@ end
 local capture, capture_error = load_action_module("MotionVfxActionCapture", "MotionVfxLive.fx_action_capture", "fx_action_capture.lua")
 local bindings, bindings_error = load_action_module("MotionVfxActionBindings", "MotionVfxLive.fx_action_bindings", "fx_action_bindings.lua")
 local parameters = load_action_module("MotionVfxParameterUI", "MotionVfxLive.fx_parameter_ui", "fx_parameter_ui.lua")
+local game_profile_module = load_action_module("MotionVfxGameProfile", "MotionVfxLive.fx_game_profile", "fx_game_profile.lua")
+local game = game_profile_module and game_profile_module.current() or nil
 if bindings and type(bindings.configure) == "function" then
     local ok, result, err = pcall(bindings.configure, { capture = capture })
     if not ok or result == false then bindings_error = tostring(ok and err or result) end
@@ -381,7 +383,8 @@ end
 local source_identity_fields = { "sourceKind", "sourceId", "eventId", "sceneEpoch", "actualPath",
     "actualHolderIdentity", "playerIdentity", "sharedTargetPath", "localConfirmed", "availability" }
 local function valid_capture_source(source)
-    if type(source) ~= "table" or source.sourceKind ~= "actual_effect_player_holder" or
+    -- provider_resource_holder: ProviderData slot holder of a local creation whose EffectPlayer is unreadable (RE4).
+    if type(source) ~= "table" or (source.sourceKind ~= "actual_effect_player_holder" and source.sourceKind ~= "provider_resource_holder") or
         source.localConfirmed ~= true or source.availability ~= "retained_observation" or
         type(source.sceneEpoch) ~= "number" or source.sceneEpoch < 1 or source.sceneEpoch % 1 ~= 0 then return false end
     for _, name in ipairs({ "sourceId", "eventId", "actualPath", "actualHolderIdentity", "playerIdentity", "sharedTargetPath" }) do
@@ -513,8 +516,14 @@ local function load_json(path)
     if not ok then return nil, tostring(result) end
     return type(result) == "table" and result or nil
 end
+-- The backend reports which game profile it runs (status.game); older backends omit it.
+local function backend_game_mismatch()
+    local reported = state.status and state.status.game
+    return game ~= nil and type(reported) == "string" and reported ~= game.id
+end
 local function is_ready()
     if not state.status or state.status.ready ~= true or state.status.protocol ~= 1 then return false end
+    if backend_game_mismatch() then return false end
     local heartbeat = state.status.heartbeatUnixSeconds
     if heartbeat == nil then return true end -- Protocol 1 backends predating heartbeat support.
     if type(heartbeat) ~= "number" then return false end
@@ -812,11 +821,16 @@ local function poll()
         end
         if state.status and state.status.protocol ~= 1 then
             state.status_error = "后台协议不兼容；需要 protocol 1，收到 " .. tostring(state.status.protocol)
+        elseif backend_game_mismatch() then
+            state.status_error = "后台配置的游戏是 " .. tostring(state.status.game) .. "，当前游戏是 " .. game.id .. "；请用对应游戏的启动入口重新启动后台。"
         elseif state.status and state.status.ready == true and not is_ready() then
             state.status_error = "后台心跳已过期或无效；请检查后台进程，当前不能提交编辑。"
         end
         if is_ready() and state.message == backend_unavailable_message then
             state.message = "文件编辑服务已连接，请重试刚才的打开操作。动作记录仍保留。"
+        elseif is_ready() and state.message == "等待后台就绪；所有编辑、播放和暂停均由按钮触发。" then
+            -- The startup text must not keep claiming the backend is pending once it is connected.
+            state.message = "后台已连接；所有编辑、播放和暂停均由按钮触发。"
         end
     end
     if not state.pending then return end
@@ -2761,7 +2775,8 @@ local function ai_execute(action, arguments, done)
         done(true, { resources = resources, recording = state.capture_snapshot.recording, sceneEpoch = state.capture_snapshot.sceneEpoch }); return
     end
     local supported = { open_effect = true, inspect = true, set_field = true, set_color = true, rename_group = true, set_group_note = true,
-        undo = true, redo = true, save_copy = true, apply = true, restore = true, scene_time = true, capture_start = true, capture_stop = true }
+        undo = true, redo = true, save_copy = true, apply = true, restore = true, scene_time = true, capture_start = true, capture_stop = true,
+        preview_effect = true, stop_preview = true }
     if not supported[action] then return reject("unknown_action", "This action is not available; arbitrary Lua and SDK execution are not supported") end
     refresh_action_state()
     if state.reloading or not M.active then return reject("editor_reloading", "The editor is reloading") end
@@ -2859,6 +2874,32 @@ local function ai_execute(action, arguments, done)
                 reject("scene_interrupted", "The scene command was replaced; inspect current status", true)
             elseif not latest.ok then reject("scene_failed", state.scene_message)
             else done(true, { scene = state.scene_actual, message = state.scene_message }) end
+        end
+    elseif action == "preview_effect" or action == "stop_preview" then
+        -- Lets an AI client re-trigger the applied revision without the user repeating the action.
+        if not client then return reject("preview_unavailable", "The shared preview runtime is not loaded: " .. tostring(runtime_error)) end
+        local finished
+        local function on_result(result) finished = result; preview_result(result) end
+        local id, err
+        if action == "preview_effect" then
+            local path = state.published_path
+            if type(path) ~= "string" or path == "" then return reject("not_applied", "Apply the document first; preview plays the last applied revision") end
+            local attachment = arguments.attachment == nil and "weapon" or arguments.attachment
+            if attachment ~= "weapon" and attachment ~= "player" and attachment ~= "world" then return reject("invalid_arguments", "attachment must be weapon, player or world") end
+            local scale = arguments.scale == nil and 1 or arguments.scale
+            if type(scale) ~= "number" or scale ~= scale or scale < 0.01 or scale > 100 then return reject("invalid_arguments", "scale must be a finite number from 0.01 to 100") end
+            if arguments.bone ~= nil and (type(arguments.bone) ~= "string" or #arguments.bone > 256) then return reject("invalid_arguments", "bone must be a joint name") end
+            local parent = attachment == "player" and runtime.get_player_transform or attachment == "weapon" and runtime.get_weapon_transform or nil
+            id, err = client:play("preview", { path = path, scale = scale, play_speed = 1, offset = { x = 0, y = 0, z = 0 },
+                resolve_parent = parent, bone_name = arguments.bone ~= "" and arguments.bone or nil }, on_result)
+        else
+            id, err = client:stop("preview", on_result)
+        end
+        if not id then return reject("preview_failed", tostring(err)) end
+        return function()
+            if not finished then return end
+            if not finished.ok then reject("preview_failed", tostring(finished.message)); return end
+            done(true, { operation = finished.operation, path = action == "preview_effect" and state.published_path or nil })
         end
     elseif action == "capture_start" or action == "capture_stop" then
         local operation = action == "capture_start" and "start" or "stop"

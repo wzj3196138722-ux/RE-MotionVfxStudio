@@ -19,15 +19,17 @@ public partial class EFXAttributeTypePolygon : EFXAttribute
 
     [RszVersion(EfxVersion.RE4, EndAt = nameof(Flags2))]
     public float AlphaRate;
+	// 世界朝向的四边形（re4.exe 3d6f5e0 用欧拉角 + RotationOrder 构造四元数），不朝相机。
+	// Flags2 0x40 = 朝向跟随运动方向（以 OrientDirectionUpVector 选上方向），0x80 = 锁定（中等置信）。
 	public uint Flags2;
     // [RszVersion("!=", EfxVersion.RE8, EndAt = nameof(RotationZ))]
 	public RotationOrder RotationOrder;
-    public via.Range RotationX;
-    public via.Range RotationY;
-    public via.Range RotationZ;
-    public via.Range SizeScalar;
-    public via.Range Width;
-    public via.Range Height;
+    public CenterSpread RotationX;
+    public CenterSpread RotationY;
+    public CenterSpread RotationZ;
+    public CenterSpread SizeScalar;
+    public CenterSpread Width;
+    public CenterSpread Height;
     public via.Range Offset;
     [RszVersion('<', EfxVersion.RE4)]
 	public float AlphaRateLegacy;
@@ -58,34 +60,28 @@ public partial class EFXAttributeTypePolygonExpression : ReeLib.Efx.EFXAttribute
 
     public EFXAttributeTypePolygonExpression() : base(EfxAttributeType.TypePolygonExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(19) { BitNameDict = new () {
-		[1] = nameof(color),
-		[2] = nameof(alpha),
-		[3] = nameof(emissive),
-		[4] = nameof(colorStrength),
-		[12] = nameof(scale),
-		[14] = nameof(size),
-	} };
-    public ExpressionAssignType color;
-    public ExpressionAssignType alpha;
-    public ExpressionAssignType emissive;
-    public ExpressionAssignType colorStrength;
-    public ExpressionAssignType unkn5; // rert DistortionRate
-    public ExpressionAssignType unkn6;
-    public ExpressionAssignType unkn7;
-    public ExpressionAssignType unkn8;
-    public ExpressionAssignType unkn9;
-    public ExpressionAssignType unkn10;
-    public ExpressionAssignType unkn11;
-    public ExpressionAssignType scale;
-    public ExpressionAssignType unkn13; // dd2: emit size / range
-    public ExpressionAssignType size; // dmc5: size / width
-    public ExpressionAssignType unkn15;
-    public ExpressionAssignType unkn16; // dmc5: (spect + 2) / length
-    public ExpressionAssignType unkn17;
-    public ExpressionAssignType unkn18;
+	// re4.exe 槽位名（B 类：引擎按名字登记槽位，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；旋转槽按角度。 引擎别名：ColorRate = ColorRate/EmissionRate/ContrastRate/InnerIntensity/MultiplyColorRate，Intensity = BackIntensity/OuterIntensity/MultiplyBlackRate；*Range 在引擎里有的写作 *_Random。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(19) { BitNames = [ nameof(Color), nameof(ColorAlpha), nameof(ColorRange), nameof(ColorRangeAlpha), nameof(ColorRate), nameof(Intensity), nameof(RotationX), nameof(RotationXRange), nameof(RotationY), nameof(RotationYRange), nameof(RotationZ), nameof(RotationZRange), nameof(SizeScalar), nameof(SizeScalarRange), nameof(Width), nameof(WidthRange), nameof(Height), nameof(HeightRange), nameof(AlphaRate) ] };
+    public ExpressionAssignType Color;
+    public ExpressionAssignType ColorAlpha;
+    public ExpressionAssignType ColorRange;
+    public ExpressionAssignType ColorRangeAlpha;
+    public ExpressionAssignType ColorRate;
+    public ExpressionAssignType Intensity;
+    public ExpressionAssignType RotationX;
+    public ExpressionAssignType RotationXRange;
+    public ExpressionAssignType RotationY;
+    public ExpressionAssignType RotationYRange;
+    public ExpressionAssignType RotationZ;
+    public ExpressionAssignType RotationZRange;
+    public ExpressionAssignType SizeScalar;
+    public ExpressionAssignType SizeScalarRange;
+    public ExpressionAssignType Width;
+    public ExpressionAssignType WidthRange;
+    public ExpressionAssignType Height;
+    public ExpressionAssignType HeightRange;
 	[RszVersion(EfxVersion.RE4)]
-	public ExpressionAssignType unkn19;
+	public ExpressionAssignType AlphaRate;
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 
@@ -124,15 +120,20 @@ public partial class EFXAttributeTypePolygonTrail : EFXAttribute
 	public float ColorRate;
 
 	public float Intensity;
-	public float EdgeBlendRate;
+	// 引擎名 EdgeBlendRange（旧名 EdgeBlendRate）。
+	public float EdgeBlendRange;
 	public float AlphaRate;
+	// re4.exe（加载器 3d73330 读 0x5c 字节，每帧 3d75aa0）：沿 Axis 伸出、长 Length 的线段随运动扫出的面（挥击残影）。
+	// 位 3 = 定长：路径按等弧长重采样，最长弧 ≈ Length × 缩放 × StretchDistance，不读 IntervalFrame；
+	// 位 3 关 = 每 IntervalFrame 帧压一个样本。0x60 = 用 HeadColor/Place1/Place2 给顶点上色。名字不是引擎名（旧名 re4_unkn）。
     [RszVersion(EfxVersion.RE4)]
-	public uint re4_unkn;
+	public uint TrailFlags;
+	// 传给头部着色器参数构造，解析器名 ShadowMultiplier（旧名 sb_unkn0）。
     [RszVersion(EfxVersion.RERT)]
-	public float sb_unkn0;
+	public float ShadowMultiplier;
 
 	public AxisType Axis;
-	public via.Range Length;
+	public CenterSpread Length;
 	public float StretchDistance;
 	public uint NumTrailDivision;
 	public uint NumVerticalDivision;
@@ -214,12 +215,17 @@ public partial class EFXAttributeTypeGpuPolygon : EFXAttribute
     public via.Color ColorRange;
     public float ColorRate;
     public float Intensity;
-    public float EdgeBlendRate;
+	// 引擎名 EdgeBlendRange（旧名 EdgeBlendRate）。
+    public float EdgeBlendRange;
     public float AlphaRate;
-    [RszVersion(EfxVersion.RE4)]
-    public uint Flags;
-    [RszVersion(EfxVersion.RE4)]
+	// re4.exe（加载器 3db8d20 读 0x5c 字节）：头部之后是三个标量再接 6 个范围，与 GpuBillboard 相同的顺序：
+	// ParticleNum（传给 GPU 初始化 3e1bbc0）、Flags（2 位写入发射器标志）、re4Ukn（也传给 GPU 初始化，含义未知）。
+	// 旧代码把前两个名字写反，并把 re4Ukn 当成 RotationX.s，之后所有范围错开半个、最后一个 float 被当成 OrientDirectionUpVector。
+	// RE4 起没有 OrientDirectionUpVector。
+    [RszVersion(EfxVersion.RE4, EndAt = nameof(re4Ukn))]
     public uint ParticleNum;
+    public uint Flags;
+    public uint re4Ukn;
 
     public via.Range RotationX;
     public via.Range RotationY;
@@ -227,7 +233,6 @@ public partial class EFXAttributeTypeGpuPolygon : EFXAttribute
     public via.Range SizeScalar;
     public via.Range Width;
     public via.Range Height;
-    [RszVersion(EfxVersion.RE4)] public AxisXYZ OrientDirectionUpVector;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.TypeGpuPolygonExpression, EfxVersion.DD2)]

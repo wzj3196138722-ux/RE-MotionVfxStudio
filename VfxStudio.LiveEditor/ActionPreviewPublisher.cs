@@ -27,7 +27,7 @@ internal static class ActionPreviewPublisher
         for(int i=0;i<files.Length;i++)
         {
             var item=files[i];string path=logical+"/resource_"+i+"."+item.Kind;
-            string native=Path.Combine(directory,"resource_"+i+"."+item.Kind+(item.Kind=="motlist"?".992":".18"));
+            string native=Path.Combine(directory,options.Game.Versioned("resource_"+i+"."+item.Kind,item.Kind));
             using(var stream=new FileStream(native,FileMode.CreateNew,FileAccess.Write,FileShare.None))
             {stream.Write(item.Content);stream.Flush(true);}
             string hash=Convert.ToHexString(SHA256.HashData(item.Content));

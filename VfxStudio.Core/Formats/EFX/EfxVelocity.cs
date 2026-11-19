@@ -10,29 +10,28 @@ public partial class EFXAttributeVelocity2D : EFXAttribute
 {
 	public EFXAttributeVelocity2D() : base(EfxAttributeType.Velocity2D) { }
 
+	// 字段名取自 MonsterHunterWilds.exe 的文本解析器（vtable e0fa910 槽 20），偏移由块构建器（槽 16）对回文件。
+	// Angle / Speed / SpeedCoef / GravityRate 在引擎里各是一对 float，采样方式没读，所以用 via.Range。
+	// 引擎的 Offset、Size 也各是两个 float；这里拆成 X / Y，与 Velocity2DExpression 的槽名一致。
 	[RszVersion(EfxVersion.RE4)]
 	public uint Flags;
 
-	public float unkn1_0;
-	public float unkn1_1;
-	public float unkn1_2;
-	public float unkn1_3;
-	public float unkn1_4;
+	public via.Range Angle;
+	public via.Range Speed;
+	public via.Range SpeedCoef;
 
-	public float unkn1_5;
 	public float unkn1_6;
     [RszVersion(EfxVersion.RE4)]
 	public uint re4_unkn0;
-	public float unkn1_7;
+	public float OffsetX;
     [RszVersion(EfxVersion.RE4)]
-	public float re4_unkn1;
+	public float OffsetY;
 
-	public float unkn2_0;
-	public float unkn2_1;
-	public uint unkn2_2;
-	public float unkn2_3;
-
-	public float unkn2_4;
+	public float SizeX;
+	public float SizeY;
+	// 解析器按枚举名 Direction / Normal / Radial 读入。
+	public uint VelocityType;
+	public via.Range GravityRate;
     [RszVersion(EfxVersion.RE4, EndAt = nameof(re4_unkn2_1))]
 	public uint re4_unkn2_0;
 	public uint re4_unkn2_1;
@@ -54,27 +53,22 @@ public partial class EFXAttributeVelocity2DExpression : EFXAttribute, IExpressio
 
 	public EFXAttributeVelocity2DExpression() : base(EfxAttributeType.Velocity2DExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(13) { BitNameDict = new () {
-		[1] = nameof(speed),
-		[2] = nameof(speedRand),
-		[4] = nameof(gravity),
-		[7] = nameof(angle),
-		[8] = nameof(angleRand),
-	}};
-    public ExpressionAssignType speed;
-    public ExpressionAssignType speedRand;
-    public ExpressionAssignType unkn3;
-    public ExpressionAssignType gravity;
-    public ExpressionAssignType unkn5;
-    public ExpressionAssignType unkn6;
-    public ExpressionAssignType angle;
-    public ExpressionAssignType angleRand;
-    [RszVersion(EfxVersion.RE4, EndAt = nameof(unkn13))]
-    public ExpressionAssignType unkn9;
-    public ExpressionAssignType unkn10;
-    public ExpressionAssignType unkn11;
-    public ExpressionAssignType unkn12;
-    public ExpressionAssignType unkn13;
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；Angle 槽按角度。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(13) { BitNames = [ nameof(Speed), nameof(SpeedRange), nameof(SpeedCoef), nameof(SpeedCoefRange), nameof(GravityRate), nameof(GravityRateRange), nameof(Angle), nameof(AngleRange), nameof(OffsetX), nameof(OffsetY), nameof(SizeX), nameof(SizeY), nameof(VelocityType) ] };
+    public ExpressionAssignType Speed;
+    public ExpressionAssignType SpeedRange;
+    public ExpressionAssignType SpeedCoef;
+    public ExpressionAssignType SpeedCoefRange;
+    public ExpressionAssignType GravityRate;
+    public ExpressionAssignType GravityRateRange;
+    public ExpressionAssignType Angle;
+    public ExpressionAssignType AngleRange;
+    [RszVersion(EfxVersion.RE4, EndAt = nameof(VelocityType))]
+    public ExpressionAssignType OffsetX;
+    public ExpressionAssignType OffsetY;
+    public ExpressionAssignType SizeX;
+    public ExpressionAssignType SizeY;
+    public ExpressionAssignType VelocityType;
 
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
@@ -85,26 +79,26 @@ public partial class EFXAttributeVelocity3D : EFXAttribute
 
 	[RszVersion(EfxVersion.RE2)]
 	public uint Flags;
-	public via.Range DirectionVectorX;
-    public via.Range DirectionVectorY;
-    public via.Range DirectionVectorZ;
-    public via.Range Speed;
-    public via.Range SpeedCoef;
+	public CenterSpread DirectionVectorX;
+    public CenterSpread DirectionVectorY;
+    public CenterSpread DirectionVectorZ;
+    public CenterSpread Speed;
+    public CenterSpread SpeedCoef;
     [RszVersion(EfxVersion.RE4)]
-    public via.RangeI SpeedDelayFrame;
+    public CenterSpreadI SpeedDelayFrame;
 
     public Vector3 Offset;
     public Vector3 Size;
     public VelocityType VelocityType;
-    public via.Range GravityRate;
+    public CenterSpread GravityRate;
     [RszVersion(EfxVersion.RE4)]
-    public via.RangeI GravityDelayFrame;
+    public CenterSpreadI GravityDelayFrame;
 
     [RszVersion(EfxVersion.RE2, EndAt = nameof(Spread))]
-    public via.Range InheritRate;
-    public via.Range InheritDistance;
+    public CenterSpread InheritRate;
+    public ClampRange InheritDistance;
     [RszVersion(EfxVersion.RE8)]
-    public via.Range Spread;
+    public MinExtra Spread;
 }
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.Velocity3DDelayFrame, EfxVersion.RE4)]
 public partial class EFXAttributeVelocity3DDelayFrame : EFXAttribute
@@ -130,42 +124,31 @@ public partial class EFXAttributeVelocity3DExpression : EFXAttribute, IExpressio
 	public Vector2 range2;
 	public Vector2 range3;
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(19){ BitNameDict = new () {
-		[1] = nameof(speed),
-		[2] = nameof(speedRand),
-		[7] = nameof(velocityX),
-		[8] = nameof(velocityXRandom),
-		[9] = nameof(velocityY),
-		[10] = nameof(velocityYRandom),
-		[11] = nameof(velocityZ),
-		[12] = nameof(velocityZRandom),
-		// [13] = nameof(vectorX), // direction?
-		// [14] = nameof(vectorY),
-		// [15] = nameof(vectorZ),
-	} };
-	public ExpressionAssignType speed;
-	public ExpressionAssignType speedRand;
-	public ExpressionAssignType unkn3;
-	public ExpressionAssignType unkn4;
-	public ExpressionAssignType unkn5;
-	public ExpressionAssignType unkn6;
-	public ExpressionAssignType velocityX;
-	public ExpressionAssignType velocityXRandom;
-	public ExpressionAssignType velocityY;
-	public ExpressionAssignType velocityYRandom;
-	public ExpressionAssignType velocityZ;
-	public ExpressionAssignType velocityZRandom;
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；
+	[RszClassInstance] public BitSet expressionBits = new BitSet(19) { BitNames = [ nameof(Speed), nameof(SpeedRange), nameof(SpeedCoef), nameof(SpeedCoefRange), nameof(GravityRate), nameof(GravityRateRange), nameof(DirX), nameof(DirXRange), nameof(DirY), nameof(DirYRange), nameof(DirZ), nameof(DirZRange), nameof(OffsetX), nameof(OffsetY), nameof(OffsetZ), nameof(SizeX), nameof(SizeY), nameof(SizeZ), nameof(VelocityType) ] };
+	public ExpressionAssignType Speed;
+	public ExpressionAssignType SpeedRange;
+	public ExpressionAssignType SpeedCoef;
+	public ExpressionAssignType SpeedCoefRange;
+	public ExpressionAssignType GravityRate;
+	public ExpressionAssignType GravityRateRange;
+	public ExpressionAssignType DirX;
+	public ExpressionAssignType DirXRange;
+	public ExpressionAssignType DirY;
+	public ExpressionAssignType DirYRange;
+	public ExpressionAssignType DirZ;
+	public ExpressionAssignType DirZRange;
 
-    [RszVersion(">", EfxVersion.RERT, EndAt = nameof(unkn14))]
-	public ExpressionAssignType unkn13;
-	public ExpressionAssignType unkn14;
+    [RszVersion(">", EfxVersion.RERT, EndAt = nameof(OffsetY))]
+	public ExpressionAssignType OffsetX;
+	public ExpressionAssignType OffsetY;
 
-    [RszVersion(EfxVersion.RE4, EndAt = nameof(unkn19))]
-	public ExpressionAssignType unkn15;
-	public ExpressionAssignType unkn16;
-	public ExpressionAssignType unkn17;
-	public ExpressionAssignType unkn18;
-	public ExpressionAssignType unkn19;
+    [RszVersion(EfxVersion.RE4, EndAt = nameof(VelocityType))]
+	public ExpressionAssignType OffsetZ;
+	public ExpressionAssignType SizeX;
+	public ExpressionAssignType SizeY;
+	public ExpressionAssignType SizeZ;
+	public ExpressionAssignType VelocityType;
 
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 
@@ -176,21 +159,17 @@ public partial class EFXAttributeAngularVelocity2D : EFXAttribute
 {
 	public EFXAttributeAngularVelocity2D() : base(EfxAttributeType.AngularVelocity2D) { }
 
+	// 名字取自 re4.exe 文本解析器（slot 18），文件偏移由原生标记实验（加载器 slot 5 → 构建器 slot 15）对上；
+	// 成对值的抽样方式没读，按 via.Range 声明。
 	public uint unkn0;
-	public float unkn1;
-	public float unkn2;
-	public float unkn3;
-	public float unkn4;
-	public float unkn5;
-	public float unkn6;
-	public float unkn7;
-	public float unkn8;
-	public float unkn9;
-	public float unkn10;
-	public float unkn11;
-	public float radians12;
-	public float radians13;
-	public float radians14;
+	public via.Range Radius;
+	public via.Range AddRadius;
+	public float AddRadiusCoef;
+	public via.Range Rotation;
+	public via.Range RotationScaleX;
+	public via.Range RotationScaleY;
+	public via.Range RotationSpeed;   // 弧度
+	public float RotationSpeedCoef;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.AngularVelocity2DDelayFrame, EfxVersion.DMC5, EfxVersion.RE4)]
@@ -235,9 +214,9 @@ public partial class EFXAttributePtVelocity2D : EFXAttribute
 {
 	public EFXAttributePtVelocity2D() : base(EfxAttributeType.PtVelocity2D) { }
 
-    public float ukn0;
-    public float ukn1;
-    public float ukn2;
+	// 字段名取自 MonsterHunterWilds.exe 文本解析器（vtable e100ca0）。
+	public Vector2 Direction;
+	public float Speed;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.PtVelocity2DClip, EfxVersion.RERT)]
@@ -256,10 +235,9 @@ public partial class EFXAttributePtVelocity3D : EFXAttribute
 {
 	public EFXAttributePtVelocity3D() : base(EfxAttributeType.PtVelocity3D) { }
 
-	public float unkn1_0;
-	public float unkn1_1;
-	public float unkn1_2;
-	public float unkn1_3;
+	// 字段名取自 MonsterHunterWilds.exe 文本解析器（vtable e100a70）。
+	public Vector3 Direction;
+	public float Speed;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.PtVelocity3DClip, EfxVersion.DMC5, EfxVersion.RE4)]
@@ -280,14 +258,15 @@ public partial class EFXAttributePtAngularVelocity3D : EFXAttribute
 {
 	public EFXAttributePtAngularVelocity3D() : base(EfxAttributeType.PtAngularVelocity3D) { }
 
+	// 0x04 起的字段名取自 MonsterHunterWilds.exe 文本解析器（vtable e104c40）；解析器不写第一个 dword。
 	public UndeterminedFieldType unkn1;
-	public float unkn2;
-	public float unkn3;
-	public UndeterminedFieldType unkn4;
-	public UndeterminedFieldType unkn5;
-	public UndeterminedFieldType unkn6;
-	public float unkn7;
-	public float unkn8;
+	public float AddRadius;
+	public float AddRadiusCoef;
+	public float AddRotationAxisX;
+	public float AddRotationAxisY;
+	public float AddRotationAxisZ;
+	public float AddRotationRate;
+	public float AddRotationCoef;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.PtAngularVelocity3DExpression, EfxVersion.DD2)]
@@ -314,12 +293,13 @@ public partial class EFXAttributePtAngularVelocity2D : EFXAttribute
 {
 	public EFXAttributePtAngularVelocity2D() : base(EfxAttributeType.PtAngularVelocity2D) { }
 
-	public float unkn1;
-	public float unkn2;
-	public float unkn3;
-	public float unkn4;
-	public float unkn5;
-	public float unkn6;
+	// 字段名取自 MonsterHunterWilds.exe 文本解析器（vtable e104f60）。
+	public float AddRadius;
+	public float AddRadiusCoef;
+	public float RotationScaleRateX;
+	public float RotationScaleRateY;
+	public float RotationSpeed;
+	public float RotationSpeedCoef;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.PtAngularVelocity2DExpression, EfxVersion.DD2)]

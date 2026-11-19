@@ -611,7 +611,7 @@ public enum PtLifeStatus
     PtLifeStatus_Keep = 2,
     PtLifeStatus_Vanish = 3,
     PtLifeStatus_Terminate = 4,
-    PtLifeStatus_Unknown = -1,
+    PtLifeStatus_Unknown = -1, // 实为"每帧"：引擎在无阶段变化的帧以 -1 调用触发函数
 }
 
 public enum Repeat

@@ -1,0 +1,1783 @@
+{
+  "source": "RE4 natives/stm *.efx.3539837: per type the sample (up to 1500) agreeing with the most per-field modes",
+  "types": {
+    "AlphaCorrection": {
+      "samples": 1500,
+      "fields": {
+        "Flags": "1",
+        "HiPass": "1",
+        "LoPass": "0.25"
+      }
+    },
+    "AngularVelocity2D": {
+      "samples": 8,
+      "fields": {
+        "unkn0": "2",
+        "Radius.s": "1",
+        "AddRadius.s": "0.2",
+        "AddRadiusCoef": "1",
+        "RotationScaleX.s": "0.5",
+        "RotationScaleY.s": "0.1",
+        "RotationSpeed.s": "0.017453292",
+        "RotationSpeedCoef": "1"
+      }
+    },
+    "AngularVelocity3D": {
+      "samples": 812,
+      "fields": {
+        "Flags": "3",
+        "RotationOrder": "RotationOrder_ZXY",
+        "AddRadius.s": "0.2",
+        "AddRadiusCoef": "1",
+        "AddRotationAxisY.s": "0.05235988",
+        "AddRotationAxisY.r": "0.017453292",
+        "AddRotationCoef": "1"
+      }
+    },
+    "AngularVelocity3DDelayFrame": {
+      "samples": 3,
+      "fields": {
+        "frameDelay": "10"
+      }
+    },
+    "AssignCSV": {
+      "samples": 7,
+      "fields": {
+        "UseTableRange": "true",
+        "mTableRange.r": "5",
+        "efcsvPostionListPath": "_Chainsaw/VFX/Mesh/MESH_Stage/MESH_st40/MESH_st40_200/mesh_0015_st40_200_glass_0000_00.efcsv"
+      }
+    },
+    "Attractor": {
+      "samples": 245,
+      "fields": {
+        "AttractPosition.X": "-8",
+        "AttractPosition.Y": "5",
+        "ForceScale": "15",
+        "ReversalForceScale": "1",
+        "ForceResist": "0.3"
+      }
+    },
+    "Blink": {
+      "samples": 1500,
+      "fields": {
+        "MinRate": "0.2",
+        "MaxRate": "1",
+        "LowFrequency.center": "1",
+        "LowFrequency.spread": "0.5",
+        "LowFrequencyWidth.center": "1",
+        "HighFrequencyWidth.center": "0.5"
+      }
+    },
+    "ContrastHighlighter": {
+      "samples": 2,
+      "fields": {
+        "Threshold": "0.2",
+        "PeakMultiplier": "20",
+        "EdgeLimiter": "0.5",
+        "LuminanceScale": "2",
+        "HighlightColor": "4294967295",
+        "HighlightIntensity": "1"
+      }
+    },
+    "DepthOcclusion": {
+      "samples": 78,
+      "fields": {
+        "Flags": "13"
+      }
+    },
+    "DepthOperator": {
+      "samples": 249,
+      "fields": {
+        "unkn0": "72",
+        "Distance": "0.2",
+        "YNormalRange": "53.99"
+      }
+    },
+    "Distortion": {
+      "samples": 1149,
+      "fields": {
+        "DistortionType": "Refract",
+        "Influence": "0.1",
+        "SpecularIntensity": "1",
+        "SpecularColor.rgba": "4294967295",
+        "SpecularColor.R": "255",
+        "SpecularColor.G": "255",
+        "SpecularColor.B": "255",
+        "SpecularColor.A": "255"
+      }
+    },
+    "EmitterColor": {
+      "samples": 330,
+      "fields": {
+        "ColorOperator": "EmitterColorOperator_Multiply",
+        "AlphaOperator": "EmitterColorOperator_Multiply",
+        "Color.rgba": "4294967295",
+        "Color.R": "255",
+        "Color.G": "255",
+        "Color.B": "255",
+        "Color.A": "255"
+      }
+    },
+    "EmitterColorClip": {
+      "samples": 306,
+      "fields": {
+        "clipBits.Bits[0]": "7",
+        "clipData.loopType": "NonLooping",
+        "clipData.clipDuration": "100"
+      }
+    },
+    "EmitterShape2D": {
+      "samples": 90,
+      "fields": {
+        "RangeY.r": "2"
+      }
+    },
+    "EmitterShape2DExpression": {
+      "samples": 6,
+      "fields": {
+        "expressionBits.Bits[0]": "4",
+        "RangeX": "Multiply",
+        "RangeXRange": "Multiply",
+        "RangeY": "Assign",
+        "RangeYRange": "Multiply",
+        "RangeDivideNum": "Multiply"
+      }
+    },
+    "EmitterShape3D": {
+      "samples": 1500,
+      "fields": {
+        "RangeX.outer": "0.5",
+        "RangeZ.outer": "0.5",
+        "ShapeType": "Shape3DType_Cylinder",
+        "RotationOrder": "RotationOrder_ZXY",
+        "ScaleHorizontal.span": "6.2831855",
+        "ScaleVertical.start": "1"
+      }
+    },
+    "EmitterShape3DExpression": {
+      "samples": 11,
+      "fields": {
+        "expressionBits.Bits[0]": "51",
+        "RangeX": "Assign",
+        "RangeXRange": "Assign",
+        "RangeY": "Assign",
+        "RangeYRange": "Assign",
+        "RangeZ": "Assign",
+        "RangeZRange": "Assign",
+        "RangeDivideNum": "Multiply",
+        "RangeDivideHorizontalNum": "Multiply",
+        "RangeDivideVerticalNum": "Multiply"
+      }
+    },
+    "FadeByAngle": {
+      "samples": 1500,
+      "fields": {
+        "Flags": "2",
+        "Cone": "0.17453292",
+        "Spread": "0.5235988",
+        "ConeDir.Y": "1"
+      }
+    },
+    "FadeByAngleExpression": {
+      "samples": 2,
+      "fields": {
+        "expressionBits.Bits[0]": "3",
+        "Cone": "Assign",
+        "Spread": "Assign"
+      }
+    },
+    "FadeByDepth": {
+      "samples": 1500,
+      "fields": {
+        "NearStart": "1",
+        "NearEnd": "2",
+        "FarStart": "20",
+        "FarEnd": "30"
+      }
+    },
+    "FadeByOcclusion": {
+      "samples": 19,
+      "fields": {
+        "CullingRadius": "1",
+        "MinSize": "0.2"
+      }
+    },
+    "FixRandomGenerator": {
+      "samples": 1500,
+      "fields": {
+        "useRandomSeedTableCount": "1",
+        "randomSeedTable0": "2",
+        "randomSeedTable1": "-1",
+        "randomSeedTable2": "-1",
+        "randomSeedTable3": "-1",
+        "randomSeedTable4": "-1",
+        "randomSeedTable5": "-1",
+        "randomSeedTable6": "-1",
+        "randomSeedTable7": "-1",
+        "tableSelectionGroup": "-1"
+      }
+    },
+    "FluidSimulator2D": {
+      "samples": 13,
+      "fields": {
+        "unkn0_1": "40",
+        "unkn0_2": "10",
+        "unkn0_3": "2",
+        "unkn0_4": "15",
+        "unkn1": "32",
+        "unkn2": "32",
+        "unkn3": "5",
+        "unkn4": "4",
+        "unkn5": "0.01",
+        "unkn6": "0.05",
+        "PostEdgeDropoff": "0.85",
+        "unkn8": "0.25",
+        "unkn12": "63",
+        "unkn13": "1",
+        "unkn14": "1",
+        "DensityColorMax": "1",
+        "DensityAlphaMin": "0.1",
+        "DensityAlphaMax": "5",
+        "unkn22": "63",
+        "re4_unkn1": "0.5",
+        "re4_unkn2": "0.5",
+        "unkn1_23": "0.008",
+        "unkn1_24": "0.1",
+        "unkn1_25": "0.0075",
+        "InternalInherit": "1",
+        "unkn1_27": "0.1",
+        "FlowStrength": "0.5",
+        "ProjectionAdjustment": "1",
+        "ProjectionTimeScale": "0.2",
+        "unkn1_35": "0.1",
+        "re4_unk2_0": "0.1",
+        "re4_unk2_3": "3",
+        "re4_unk2_8": "1",
+        "re4_unk2_9": "1",
+        "re4_unk2_10": "1",
+        "unkn1_37": "1",
+        "unkn1_40": "0.01",
+        "unkn1_42_re8": "1",
+        "unkn2_1": "1",
+        "unkn2_2": "1",
+        "path1Size": "154",
+        "path2Size": "154",
+        "path3Size": "218",
+        "path4Size": "210",
+        "path5Size": "2",
+        "uvsPath1": "RE_ENGINE_LIBRARY/VFX_Library/Texture/TEX_Smoke/tex_capcom_smoke_00_0011.uvs",
+        "uvsPath2": "RE_ENGINE_LIBRARY/VFX_Library/Texture/TEX_Smoke/tex_capcom_smoke_00_0007.uvs",
+        "uvsPath3": "RE_ENGINE_LIBRARY/VFX_Library/Texture/TEX_Fluid2D/tex_capcom_2dfluid_projectiondiffusemap_smoke_0000_ALB.tex",
+        "uvsPath4": "RE_ENGINE_LIBRARY/VFX_Library/Texture/TEX_Fluid2D/tex_capcom_2dfluid_projectiondiffusemap_smoke_0001.uvs"
+      }
+    },
+    "Life": {
+      "samples": 1500,
+      "fields": {
+        "KeepFrame.min": "100",
+        "KeepFrame.max": "100"
+      }
+    },
+    "LifeExpression": {
+      "samples": 14,
+      "fields": {
+        "expressionBits.Bits[0]": "7",
+        "AppearFrame": "Multiply",
+        "KeepFrame": "Multiply",
+        "VanishFrame": "Multiply"
+      }
+    },
+    "LuminanceBleed": {
+      "samples": 141,
+      "fields": {
+        "BleedType": "LuminanceBleedType_Transparent",
+        "Bleed": "100",
+        "Slide": "0.75",
+        "ColorScaler": "0.2",
+        "ColorBias": "0.8",
+        "TexelScaler": "0.7"
+      }
+    },
+    "MeshEmitter": {
+      "samples": 22,
+      "fields": {
+        "YNormalRange": "45",
+        "RotationOrder": "RotationOrder_ZXY",
+        "LocalScale.X": "1",
+        "LocalScale.Y": "1",
+        "LocalScale.Z": "1",
+        "ColorUTilingCount": "1",
+        "ColorVTilingCount": "1",
+        "MaskUTilingCount": "1",
+        "MaskVTilingCount": "1",
+        "EmissionVertexColorChannel": "3",
+        "ParticleNum": "5000",
+        "TriangleFilter": "0.001",
+        "MeshPath": "_AnotherOrder/VFX/Mesh/MESH_SetModel/MESH_sm61_304/mesh_0015_sm61_304_0000.mesh"
+      }
+    },
+    "Noise": {
+      "samples": 48,
+      "fields": {
+        "LowFrequency.center": "0.6",
+        "LowFrequency.spread": "0.1",
+        "LowFrequencyWidth.center": "0.3",
+        "LowFrequencyWidth.spread": "0.1",
+        "HighFrequency.center": "0.5",
+        "HighFrequency.spread": "0.2",
+        "HighFrequencyWidth.center": "0.1",
+        "HighFrequencyWidth.spread": "0.05"
+      }
+    },
+    "NoiseExpression": {
+      "samples": 2,
+      "fields": {
+        "LowFrequency": "Multiply",
+        "LowFrequencyRange": "Multiply",
+        "LowFrequencyWidth": "Multiply",
+        "LowFrequencyWidthRange": "Multiply",
+        "HighFrequency": "Multiply",
+        "HighFrequencyRange": "Multiply",
+        "HighFrequencyWidth": "Multiply",
+        "HighFrequencyWidthRange": "Multiply"
+      }
+    },
+    "ParentOptions": {
+      "samples": 1500,
+      "fields": {
+        "RelationPos.x": "1",
+        "RelationPos.y": "1",
+        "RelationPos.z": "1",
+        "RelationRot.x": "1",
+        "RelationRot.y": "1",
+        "RelationRot.z": "1",
+        "RelationScl.x": "1",
+        "RelationScl.y": "1",
+        "RelationScl.z": "1",
+        "ConstInheritRate.center": "1"
+      }
+    },
+    "PlaneCollider": {
+      "samples": 87,
+      "fields": {
+        "Flags": "137",
+        "BounceNum.s": "1",
+        "BounceNum.r": "2",
+        "BounceRate.s": "0.3",
+        "BounceRate.r": "0.3"
+      }
+    },
+    "PlayEfx": {
+      "samples": 61,
+      "fields": {
+        "efxPath": "_Chainsaw/VFX/EffectEditor/EFD_SetModel/EFD_sm82_703_00/efd_0015_sm82_703_00_1020.efx"
+      }
+    },
+    "ProceduralDistortion": {
+      "samples": 148,
+      "fields": {
+        "UScale": "1",
+        "VScale": "1",
+        "WaveFrequency": "1",
+        "WaveAmplitude": "0.03",
+        "WaveAmplitudeCoef": "1",
+        "WaveOffset": "1",
+        "WaveTimer": "0.03",
+        "SpinInit": "1"
+      }
+    },
+    "ProceduralDistortionDelayFrame": {
+      "samples": 2,
+      "fields": {
+        "frameDelay": "40"
+      }
+    },
+    "PtColliderAction": {
+      "samples": 216,
+      "fields": {
+        "Flags": "13",
+        "Radius.min": "0.1",
+        "Radius.max": "0.1"
+      }
+    },
+    "PtCollision": {
+      "samples": 774,
+      "fields": {
+        "Flags": "1033",
+        "Radius.min": "0.1",
+        "Radius.max": "0.1",
+        "BounceNum.min": "2",
+        "BounceNum.maxExclusive": "2",
+        "BounceRate.min": "1",
+        "BounceRate.max": "1",
+        "VerticalBounce": "1",
+        "HorizontalBounce": "1",
+        "FinishType": "Finish_Freeze",
+        "ProjectionDist": "1"
+      }
+    },
+    "PtColor": {
+      "samples": 32,
+      "fields": {
+        "ColorOperator": "PtColorOperator_Multiply",
+        "AlphaOperator": "PtColorOperator_Multiply",
+        "ElementColor.rgba": "4294967295",
+        "ElementColor.R": "255",
+        "ElementColor.G": "255",
+        "ElementColor.B": "255",
+        "ElementColor.A": "255"
+      }
+    },
+    "PtColorClip": {
+      "samples": 29,
+      "fields": {
+        "clipBits.Bits[0]": "7",
+        "clipData.loopType": "Looping",
+        "clipData.clipDuration": "25"
+      }
+    },
+    "PtLife": {
+      "samples": 579,
+      "fields": {
+        "Flags": "12"
+      }
+    },
+    "PtPathTranslate": {
+      "samples": 6,
+      "fields": {
+        "unkn2": "3",
+        "unkn3": "5.47178",
+        "dataSize": "3",
+        "unkn4": "5",
+        "unkn6": "1",
+        "scale.X": "1",
+        "scale.Y": "1",
+        "scale.Z": "1"
+      }
+    },
+    "PtTransform2D": {
+      "samples": 2,
+      "fields": {
+        "LocalScale.X": "1",
+        "LocalScale.Y": "1"
+      }
+    },
+    "PtTransform3D": {
+      "samples": 2,
+      "fields": {
+        "LocalScale.X": "1",
+        "LocalScale.Y": "1",
+        "LocalScale.Z": "1"
+      }
+    },
+    "PtTransform3DClip": {
+      "samples": 2,
+      "fields": {
+        "clipBits.Bits[0]": "2",
+        "clipData.loopType": "Looping",
+        "clipData.clipDuration": "2000"
+      }
+    },
+    "PtUvSequence": {
+      "samples": 10,
+      "fields": {
+        "Flags": "2"
+      }
+    },
+    "PtUvSequenceClip": {
+      "samples": 10,
+      "fields": {
+        "clipBits.Bits[0]": "2",
+        "clipData.loopType": "Looping",
+        "clipData.clipDuration": "19"
+      }
+    },
+    "PtVelocity3D": {
+      "samples": 1500,
+      "fields": {
+        "Direction.X": "1",
+        "Direction.Z": "1",
+        "Speed": "0.120000005"
+      }
+    },
+    "PtVortexelWind": {
+      "samples": 1500,
+      "fields": {
+        "TransitionRate.s": "0.01",
+        "TransitionThreshold": "3",
+        "MaxSpeed": "100",
+        "IsMergeGravity": "true"
+      }
+    },
+    "RenderTarget": {
+      "samples": 15,
+      "fields": {
+        "rtexPath": "_Chainsaw/VFX/Texture/TEX_Stage/TEX_st60/TEX_st60_000/TEX_0015_st60_100_nami_0000_RT.rtex"
+      }
+    },
+    "RgbCommon": {
+      "samples": 122,
+      "fields": {
+        "GreenChColor.rgba": "4282749439",
+        "GreenChColor.R": "255",
+        "GreenChColor.G": "145",
+        "GreenChColor.B": "69",
+        "GreenChColor.A": "255",
+        "GreenChColorRange.rgba": "4294967295",
+        "GreenChColorRange.R": "255",
+        "GreenChColorRange.G": "255",
+        "GreenChColorRange.B": "255",
+        "GreenChColorRange.A": "255",
+        "GreenChIntensity": "1",
+        "GreenChSaturate": "1",
+        "GreenChCurve": "1",
+        "RedChColor.rgba": "4282547451",
+        "RedChColor.R": "251",
+        "RedChColor.G": "124",
+        "RedChColor.B": "66",
+        "RedChColor.A": "255",
+        "RedChColorRange.rgba": "4294967295",
+        "RedChColorRange.R": "255",
+        "RedChColorRange.G": "255",
+        "RedChColorRange.B": "255",
+        "RedChColorRange.A": "255",
+        "RedChIntensity": "0.5",
+        "Alpha": "1",
+        "GreenChLighting": "true",
+        "RedChLighting": "true"
+      }
+    },
+    "RgbWater": {
+      "samples": 351,
+      "fields": {
+        "SpecularColor.rgba": "4283960075",
+        "SpecularColor.R": "11",
+        "SpecularColor.G": "11",
+        "SpecularColor.B": "88",
+        "SpecularColor.A": "255",
+        "SpecularIntensity": "1",
+        "SheetColor.rgba": "4289927716",
+        "SheetColor.R": "36",
+        "SheetColor.G": "26",
+        "SheetColor.B": "179",
+        "SheetColor.A": "255",
+        "SheetIntensity": "16",
+        "GtoB": "1",
+        "Alpha": "0.9000001"
+      }
+    },
+    "RotateAnim": {
+      "samples": 1500,
+      "fields": {
+        "RotationCoefX.center": "1",
+        "RotationCoefY.center": "1",
+        "RotationCoefZ.center": "1"
+      }
+    },
+    "RotateAnimDelayFrame": {
+      "samples": 30,
+      "fields": {
+        "frameDelay": "1"
+      }
+    },
+    "RotateAnimExpression": {
+      "samples": 1,
+      "fields": {
+        "RotationAddX": "Multiply",
+        "RotationAddXRange": "Multiply",
+        "RotationAddY": "Multiply",
+        "RotationAddYRange": "Multiply",
+        "RotationAddZ": "Multiply",
+        "RotationAddZRange": "Multiply",
+        "RotationCoefX": "Multiply",
+        "RotationCoefXRange": "Multiply",
+        "RotationCoefY": "Multiply",
+        "RotationCoefYRange": "Multiply",
+        "RotationCoefZ": "Multiply",
+        "RotationCoefZRange": "Multiply"
+      }
+    },
+    "ScaleAnim": {
+      "samples": 1500,
+      "fields": {
+        "SizeScalarCoef.center": "1",
+        "SizeXAddCoef.center": "1",
+        "SizeYAddCoef.center": "1"
+      }
+    },
+    "ScaleAnimDelayFrame": {
+      "samples": 42,
+      "fields": {
+        "frameDelay": "2"
+      }
+    },
+    "ScaleByDepth": {
+      "samples": 44,
+      "fields": {
+        "NearStart": "0.01",
+        "NearEnd": "5",
+        "FarStart": "100",
+        "FarEnd": "120",
+        "FarScale": "1"
+      }
+    },
+    "ScreenSpaceEmitter": {
+      "samples": 1,
+      "fields": {
+        "unkn1": "1"
+      }
+    },
+    "ShaderSettings": {
+      "samples": 1500,
+      "fields": {
+        "SoftParticleDistance": "0.2",
+        "ParticleLighting": "2",
+        "Flags": "3588",
+        "ShadowColor.rgba": "4278190080",
+        "ShadowColor.A": "255",
+        "RayleighCoeff": "0.15",
+        "MieCoeff": "0.15",
+        "MieDropoff": "1",
+        "AlphaScale": "1",
+        "DensityScale": "1",
+        "DensityMax": "100",
+        "LightShadowRatio": "0.2",
+        "BackfaceLightRatio": "0.125",
+        "MieShadowRatio": "0.2",
+        "DetonemapRatio": "1",
+        "DeinterlaceDistance": "5",
+        "AlphaCoverage": "1",
+        "StencilTarget": "255",
+        "ParticleShadingRate": "255",
+        "LightingShadingRate": "255",
+        "ShadowShadingRate": "255",
+        "ZPrepassShadingRate": "255",
+        "StochasticShadingRate": "255"
+      }
+    },
+    "Spawn": {
+      "samples": 1500,
+      "fields": {
+        "MaxParticles": "1",
+        "ParticleInterval": "1",
+        "SpawnNum.min": "1",
+        "SpawnNum.max": "1",
+        "LoopNum.min": "1",
+        "DistancePerSpawn": "1"
+      }
+    },
+    "SpawnExpression": {
+      "samples": 39,
+      "fields": {
+        "expressionBits.Bits[0]": "3",
+        "SpawnNum": "Assign",
+        "SpawnNumRange": "Assign",
+        "IntervalFrame": "Multiply",
+        "IntervalFrameRange": "Multiply",
+        "EmitterDelayFrame": "Multiply",
+        "EmitterDelayFrameRange": "Multiply",
+        "LoopNumRatio": "Assign"
+      }
+    },
+    "StretchBlur": {
+      "samples": 52,
+      "fields": {
+        "Flags": "36",
+        "TargetStencil": "2",
+        "StrengthBlur": "1",
+        "ScreenFadeRange.X": "-1",
+        "SamplingSize.X": "1",
+        "SamplingSize.Y": "1",
+        "AlphaIntensity": "1",
+        "AdjustRotationBySpeed": "1"
+      }
+    },
+    "TexelChannelOperator": {
+      "samples": 1500,
+      "fields": {
+        "HueShift": "1",
+        "HueIntensity": "33",
+        "ShadeColor.rgba": "4294967295",
+        "ShadeColor.R": "255",
+        "ShadeColor.G": "255",
+        "ShadeColor.B": "255",
+        "ShadeColor.A": "255",
+        "EmissiveRate": "4",
+        "EmissionPower": "2",
+        "Opacity": "1",
+        "HueIntensityCurve": "1",
+        "Keep.s": "100",
+        "Keep.r": "100"
+      }
+    },
+    "TextureFilter": {
+      "samples": 658,
+      "fields": {
+        "TexelAlphaRate": "1",
+        "TexelAlphaHPThreshold": "1"
+      }
+    },
+    "TextureUnit": {
+      "samples": 19,
+      "fields": {
+        "unkn1": "218403",
+        "uvs0Path": "RE_ENGINE_LIBRARY/VFX_Library/Texture/TEX_Light/tex_capcom_light_glow_0009.uvs",
+        "uvs1Path": "RE_ENGINE_LIBRARY/VFX_Library/Texture/TEX_Light/tex_capcom_light_glow_0002.uvs"
+      }
+    },
+    "Transform2D": {
+      "samples": 135,
+      "fields": {
+        "LocalPosition.X": "128",
+        "LocalPosition.Y": "128",
+        "LocalScale.X": "1",
+        "LocalScale.Y": "1"
+      }
+    },
+    "Transform2DExpression": {
+      "samples": 31,
+      "fields": {
+        "expressionBits.Bits[0]": "31",
+        "LocalPositionX": "Assign",
+        "LocalPositionY": "Assign",
+        "LocalRotation": "Assign",
+        "LocalScaleX": "Assign",
+        "LocalScaleY": "Assign"
+      }
+    },
+    "Transform3D": {
+      "samples": 1500,
+      "fields": {
+        "LocalScale.X": "1",
+        "LocalScale.Y": "1",
+        "LocalScale.Z": "1",
+        "RotationOrder": "RotationOrder_ZXY"
+      }
+    },
+    "Transform3DClip": {
+      "samples": 281,
+      "fields": {
+        "clipBits.Bits[0]": "63",
+        "clipData.loopType": "NonLooping",
+        "clipData.clipDuration": "1000"
+      }
+    },
+    "Transform3DExpression": {
+      "samples": 259,
+      "fields": {
+        "expressionBits.Bits[0]": "16",
+        "LocalPositionX": "Multiply",
+        "LocalPositionY": "Multiply",
+        "LocalPositionZ": "Multiply",
+        "LocalRotationX": "Multiply",
+        "LocalRotationY": "Assign",
+        "LocalRotationZ": "Multiply",
+        "LocalScaleX": "Multiply",
+        "LocalScaleY": "Multiply",
+        "LocalScaleZ": "Multiply"
+      }
+    },
+    "Transform3DModifier": {
+      "samples": 141,
+      "fields": {
+        "Flags": "128",
+        "RotationStartZ.spread": "6.2831855"
+      }
+    },
+    "TypeBillboard2D": {
+      "samples": 135,
+      "fields": {
+        "Color.rgba": "4294967295",
+        "Color.R": "255",
+        "Color.G": "255",
+        "Color.B": "255",
+        "Color.A": "255",
+        "ColorRange.rgba": "4294967295",
+        "ColorRange.R": "255",
+        "ColorRange.G": "255",
+        "ColorRange.B": "255",
+        "ColorRange.A": "255",
+        "ColorRate": "1",
+        "SizeScalar.center": "1",
+        "SizeX.center": "256",
+        "SizeY.center": "256"
+      }
+    },
+    "TypeBillboard2DExpression": {
+      "samples": 26,
+      "fields": {
+        "expressionBits.Bits[0]": "3",
+        "Color": "Assign",
+        "ColorAlpha": "Multiply",
+        "ColorRange": "Multiply",
+        "ColorRangeAlpha": "Multiply",
+        "ColorRate": "Multiply",
+        "Intensity": "Multiply",
+        "SizeScalar": "Multiply",
+        "SizeScalarRange": "Multiply",
+        "AlphaRate": "Multiply",
+        "SizeX": "Multiply",
+        "SizeXRange": "Multiply",
+        "SizeY": "Multiply",
+        "SizeYRange": "Multiply"
+      }
+    },
+    "TypeBillboard3D": {
+      "samples": 1500,
+      "fields": {
+        "Color.rgba": "3426311808",
+        "Color.R": "128",
+        "Color.G": "94",
+        "Color.B": "57",
+        "Color.A": "204",
+        "ColorRange.rgba": "4294967295",
+        "ColorRange.R": "255",
+        "ColorRange.G": "255",
+        "ColorRange.B": "255",
+        "ColorRange.A": "255",
+        "ColorRate": "1",
+        "Rotation.spread": "3.1415927",
+        "SizeScalar.center": "2",
+        "SizeScalar.spread": "0.2",
+        "SizeX.center": "1",
+        "SizeY.center": "1",
+        "ShadowMultiplier": "1"
+      }
+    },
+    "TypeBillboard3DExpression": {
+      "samples": 52,
+      "fields": {
+        "expressionBits.Bits[0]": "1",
+        "Color": "Assign",
+        "ColorAlpha": "Multiply",
+        "ColorRange": "Multiply",
+        "ColorRangeAlpha": "Multiply",
+        "ColorRate": "Multiply",
+        "Intensity": "Multiply",
+        "SizeScalar": "Multiply",
+        "SizeScalarRange": "Multiply",
+        "AlphaRate": "Multiply",
+        "SizeX": "Multiply",
+        "SizeXRange": "Multiply",
+        "SizeY": "Multiply",
+        "SizeYRange": "Multiply"
+      }
+    },
+    "TypeGpuBillboard": {
+      "samples": 1500,
+      "fields": {
+        "Color.rgba": "4294967295",
+        "Color.R": "255",
+        "Color.G": "255",
+        "Color.B": "255",
+        "Color.A": "255",
+        "ColorRange.rgba": "4294967295",
+        "ColorRange.R": "255",
+        "ColorRange.G": "255",
+        "ColorRange.B": "255",
+        "ColorRange.A": "255",
+        "ColorRate": "30",
+        "ParticleNum": "1024",
+        "re4Ukn": "1",
+        "Rotation.r": "3.1415927",
+        "SizeScalar.s": "0.016",
+        "SizeScalar.r": "0.005",
+        "SizeX.s": "1",
+        "SizeY.s": "1"
+      }
+    },
+    "TypeGpuBillboardExpression": {
+      "samples": 9,
+      "fields": {
+        "expressionBits.Bits[0]": "1",
+        "Color": "Assign",
+        "ColorAlpha": "Multiply",
+        "ColorRange": "Multiply",
+        "ColorRangeAlpha": "Multiply",
+        "ColorRate": "Multiply",
+        "Intensity": "Multiply",
+        "SizeScalar": "Multiply",
+        "SizeScalarRange": "Multiply",
+        "SizeX": "Multiply",
+        "SizeXRange": "Multiply",
+        "SizeY": "Multiply",
+        "SizeYRange": "Multiply",
+        "OffsetX": "Multiply",
+        "OffsetY": "Multiply"
+      }
+    },
+    "TypeGpuMesh": {
+      "samples": 506,
+      "fields": {
+        "Flags": "134217732",
+        "ParticleNum": "1",
+        "cbSize": "32",
+        "unkn3": "64",
+        "Color.rgba": "4294967295",
+        "Color.R": "255",
+        "Color.G": "255",
+        "Color.B": "255",
+        "Color.A": "255",
+        "ColorRange.rgba": "4294967295",
+        "ColorRange.R": "255",
+        "ColorRange.G": "255",
+        "ColorRange.B": "255",
+        "ColorRange.A": "255",
+        "ColorRate": "1",
+        "MaxPartsNum": "3",
+        "PartsStartNo.r": "4",
+        "PlaySpeed.s": "1",
+        "PlaySpeed.r": "1",
+        "PlaySpeedCoef.s": "1",
+        "RotationOrder": "RotationOrder_ZXY",
+        "RotationX.r": "3.1415927",
+        "RotationY.r": "3.1415927",
+        "RotationZ.r": "3.1415927",
+        "SizeX.s": "1",
+        "SizeY.s": "1",
+        "SizeZ.s": "1",
+        "SizeScalar.s": "0.5",
+        "SizeScalar.r": "0.15",
+        "OrientDirectionUpVector": "AxisXYZ_Y",
+        "MeshPath": "RE_ENGINE_LIBRARY/VFX_Library/Mesh/MESH_Debris/stone02/mesh_capcom_debris_stone02_00.mesh",
+        "MaterialPath": "RE_ENGINE_LIBRARY/VFX_Library/Mesh/MESH_Debris/stone02/mesh_capcom_debris_stone02_00.mdf2"
+      }
+    },
+    "TypeGpuPolygon": {
+      "samples": 13,
+      "fields": {
+        "Color.rgba": "4294967295",
+        "Color.R": "255",
+        "Color.G": "255",
+        "Color.B": "255",
+        "Color.A": "255",
+        "ColorRange.rgba": "4294967295",
+        "ColorRange.R": "255",
+        "ColorRange.G": "255",
+        "ColorRange.B": "255",
+        "ColorRange.A": "255",
+        "ColorRate": "1",
+        "ParticleNum": "300",
+        "RotationX.s": "1.5707964",
+        "RotationY.r": "3.1415927",
+        "SizeScalar.s": "0.15",
+        "SizeScalar.r": "0.05",
+        "Width.s": "1",
+        "Height.s": "1"
+      }
+    },
+    "TypeGpuRibbonFollow": {
+      "samples": 353,
+      "fields": {
+        "BlendFlags": "2",
+        "Color.rgba": "3015880616",
+        "Color.R": "168",
+        "Color.G": "175",
+        "Color.B": "194",
+        "Color.A": "179",
+        "ColorRange.rgba": "4294967295",
+        "ColorRange.R": "255",
+        "ColorRange.G": "255",
+        "ColorRange.B": "255",
+        "ColorRange.A": "255",
+        "ColorRate": "2",
+        "ParticleNum": "1",
+        "SegmentNum": "5000",
+        "ControlPointNum": "1",
+        "re4_unkn5": "2",
+        "SizeScalar.s": "0.015",
+        "SizeScalar.r": "0.005",
+        "StretchDistance.X": "0.3",
+        "StretchDistance.Y": "0.1"
+      }
+    },
+    "TypeGpuRibbonFollowExpression": {
+      "samples": 1,
+      "fields": {
+        "expressionBits.Bits[0]": "2",
+        "Color": "Multiply",
+        "ColorAlpha": "Assign",
+        "ColorRange": "Multiply",
+        "ColorRangeAlpha": "Multiply",
+        "ColorRate": "Multiply",
+        "Intensity": "Multiply",
+        "AlphaRate": "Multiply",
+        "SizeScalar": "Multiply",
+        "SizeScalarRange": "Multiply"
+      }
+    },
+    "TypeGpuRibbonLength": {
+      "samples": 72,
+      "fields": {
+        "BlendFlags": "2",
+        "Color.rgba": "4290949778",
+        "Color.R": "146",
+        "Color.G": "178",
+        "Color.B": "194",
+        "Color.A": "255",
+        "ColorRange.rgba": "4294967295",
+        "ColorRange.R": "255",
+        "ColorRange.G": "255",
+        "ColorRange.B": "255",
+        "ColorRange.A": "255",
+        "ColorRate": "1",
+        "Flags": "8",
+        "unkn_re4": "1",
+        "SizeScalar.s": "0.05",
+        "SizeScalar.r": "0.001",
+        "WidthSize.s": "0.05",
+        "TextureRepeatNum": "1",
+        "ParticleNum": "1400",
+        "Length.s": "3",
+        "ShapeDivision": "2",
+        "BasingPoint.s": "0.5",
+        "BasingPoint.r": "1",
+        "DirY.s": "1"
+      }
+    },
+    "TypeMesh": {
+      "samples": 1500,
+      "fields": {
+        "Flags": "256",
+        "Flags2": "2",
+        "Color.rgba": "4281946993",
+        "Color.R": "113",
+        "Color.G": "83",
+        "Color.B": "57",
+        "Color.A": "255",
+        "ColorRange.rgba": "4294967295",
+        "ColorRange.R": "255",
+        "ColorRange.G": "255",
+        "ColorRange.B": "255",
+        "ColorRange.A": "255",
+        "ColorRate": "1",
+        "EmissiveColor.rgba": "4294967295",
+        "EmissiveColor.R": "255",
+        "EmissiveColor.G": "255",
+        "EmissiveColor.B": "255",
+        "EmissiveColor.A": "255",
+        "EmissiveRate": "1",
+        "MaxPartsNum": "3",
+        "PartsStartNo.maxExclusive": "1",
+        "PlaySpeed.min": "1",
+        "PlaySpeed.max": "1",
+        "PlaySpeedCoef.center": "1",
+        "RotationOrder": "RotationOrder_ZXY",
+        "SizeX.center": "1",
+        "SizeY.center": "1",
+        "SizeZ.center": "1",
+        "SizeScalar.center": "4",
+        "FrontAxis": "AxisXYZ_Z",
+        "cbSize": "64",
+        "re4_unkn1": "1",
+        "MeshPath": "RE_ENGINE_LIBRARY/VFX_Library/Mesh/MESH_Debris/stone02/mesh_capcom_debris_stone02_00.mesh",
+        "MaterialPath": "RE_ENGINE_LIBRARY/VFX_Library/Mesh/MESH_Debris/stone02/mesh_capcom_debris_stone02_00.mdf2"
+      }
+    },
+    "TypeMeshClip": {
+      "samples": 1,
+      "fields": {
+        "clipBits.Bits[0]": "7"
+      }
+    },
+    "TypeMeshExpression": {
+      "samples": 308,
+      "fields": {
+        "Color": "Multiply",
+        "ColorRange": "Multiply",
+        "Alpha": "Multiply",
+        "AlphaRange": "Multiply",
+        "ColorRate": "Multiply",
+        "PlaySpeed": "Multiply",
+        "PlaySpeedRange": "Multiply",
+        "PlaySpeedCoef": "Multiply",
+        "PlaySpeedCoefRange": "Multiply",
+        "RotationX": "Multiply",
+        "RotationXRange": "Multiply",
+        "RotationY": "Multiply",
+        "RotationYRange": "Multiply",
+        "RotationZ": "Multiply",
+        "RotationZRange": "Multiply",
+        "SizeScalar": "Multiply",
+        "SizeScalarRange": "Multiply",
+        "SizeX": "Multiply",
+        "SizeXRange": "Multiply",
+        "SizeY": "Multiply",
+        "SizeYRange": "Multiply",
+        "SizeZ": "Multiply",
+        "SizeZRange": "Multiply",
+        "PartStartNo": "Multiply",
+        "PartStartNoRange": "Multiply"
+      }
+    },
+    "TypeNoDraw": {
+      "samples": 1500,
+      "fields": {
+        "Color.rgba": "4294967295",
+        "Color.R": "255",
+        "Color.G": "255",
+        "Color.B": "255",
+        "Color.A": "255",
+        "ColorRange.rgba": "4294967295",
+        "ColorRange.R": "255",
+        "ColorRange.G": "255",
+        "ColorRange.B": "255",
+        "ColorRange.A": "255",
+        "RotationOrder": "RotationOrder_ZXY",
+        "SizeX.center": "1",
+        "SizeY.center": "1",
+        "SizeZ.center": "1"
+      }
+    },
+    "TypeNoDrawExpression": {
+      "samples": 5,
+      "fields": {
+        "expressionBits.Bits[0]": "4",
+        "color": "Multiply",
+        "colorRand": "Multiply",
+        "alpha": "Assign",
+        "alphaRand": "Multiply",
+        "unkn5": "Multiply",
+        "unkn6": "Multiply",
+        "unkn7": "Multiply",
+        "unkn8": "Multiply",
+        "unkn9": "Multiply",
+        "unkn10": "Multiply",
+        "unkn11": "Multiply",
+        "unkn12": "Multiply",
+        "unkn13": "Multiply",
+        "unkn14": "Multiply",
+        "unkn15": "Multiply",
+        "unkn16": "Multiply"
+      }
+    },
+    "TypePolygon": {
+      "samples": 1500,
+      "fields": {
+        "Color.rgba": "4294967295",
+        "Color.R": "255",
+        "Color.G": "255",
+        "Color.B": "255",
+        "Color.A": "255",
+        "ColorRange.rgba": "4294967295",
+        "ColorRange.R": "255",
+        "ColorRange.G": "255",
+        "ColorRange.B": "255",
+        "ColorRange.A": "255",
+        "ColorRate": "1",
+        "RotationOrder": "RotationOrder_ZXY",
+        "RotationX.center": "1.5707964",
+        "SizeScalar.center": "1",
+        "Width.center": "1",
+        "Height.center": "1",
+        "ShadowMultiplier": "1",
+        "OrientDirectionUpVector": "AxisXYZ_Y"
+      }
+    },
+    "TypePolygonExpression": {
+      "samples": 1,
+      "fields": {
+        "expressionBits.Bits[0]": "2",
+        "Color": "Multiply",
+        "ColorAlpha": "Multiply",
+        "ColorRange": "Multiply",
+        "ColorRangeAlpha": "Multiply",
+        "ColorRate": "Multiply",
+        "Intensity": "Multiply",
+        "RotationX": "Multiply",
+        "RotationXRange": "Multiply",
+        "RotationY": "Multiply",
+        "RotationYRange": "Multiply",
+        "RotationZ": "Multiply",
+        "RotationZRange": "Multiply",
+        "SizeScalar": "Multiply",
+        "SizeScalarRange": "Multiply",
+        "Width": "Multiply",
+        "WidthRange": "Multiply",
+        "Height": "Multiply",
+        "HeightRange": "Multiply",
+        "AlphaRate": "Multiply"
+      }
+    },
+    "TypePolygonTrail": {
+      "samples": 22,
+      "fields": {
+        "Color.rgba": "3439329279",
+        "Color.R": "255",
+        "Color.G": "255",
+        "Color.B": "255",
+        "Color.A": "204",
+        "ColorRange.rgba": "4294967295",
+        "ColorRange.R": "255",
+        "ColorRange.G": "255",
+        "ColorRange.B": "255",
+        "ColorRange.A": "255",
+        "ColorRate": "1",
+        "TrailFlags": "9",
+        "ShadowMultiplier": "1",
+        "Axis": "AxisType_PositiveY",
+        "Length.center": "0.8",
+        "StretchDistance": "5",
+        "NumTrailDivision": "10",
+        "NumVerticalDivision": "1",
+        "NumSplineDivision": "10",
+        "IntervalFrame": "1",
+        "HeadColor.rgba": "4294967295",
+        "HeadColor.R": "255",
+        "HeadColor.G": "255",
+        "HeadColor.B": "255",
+        "HeadColor.A": "255",
+        "Place1.rgba": "4294967295",
+        "Place1.R": "255",
+        "Place1.G": "255",
+        "Place1.B": "255",
+        "Place1.A": "255",
+        "Place2.rgba": "4294967295",
+        "Place2.R": "255",
+        "Place2.G": "255",
+        "Place2.B": "255",
+        "Place2.A": "255",
+        "Place1Ratio": "0.5",
+        "Place2Ratio": "1"
+      }
+    },
+    "TypeRibbonChain": {
+      "samples": 323,
+      "fields": {
+        "Color.rgba": "1303366095",
+        "Color.R": "207",
+        "Color.G": "201",
+        "Color.B": "175",
+        "Color.A": "77",
+        "ColorRange.rgba": "4294967295",
+        "ColorRange.R": "255",
+        "ColorRange.G": "255",
+        "ColorRange.B": "255",
+        "ColorRange.A": "255",
+        "ColorRate": "1",
+        "Flags": "2",
+        "SizeScalar.center": "0.5",
+        "WidthSize.center": "1",
+        "WidthSize.spread": "0.20000005",
+        "TextureRepeatNum": "1",
+        "ShadowMultiplier": "1",
+        "Length.center": "0.2",
+        "Acceleration.center": "0.15",
+        "FrameInfluence.center": "0.5",
+        "VertexInfluence.center": "0.1",
+        "ShapeDivision": "10",
+        "BasingPoint.width": "0.5",
+        "DirX.center": "1",
+        "BlendDirY.center": "1",
+        "AxisBlendRate.center": "1",
+        "HeadColor.rgba": "4294967295",
+        "HeadColor.R": "255",
+        "HeadColor.G": "255",
+        "HeadColor.B": "255",
+        "HeadColor.A": "255",
+        "ColorPlace1.rgba": "4294967295",
+        "ColorPlace1.R": "255",
+        "ColorPlace1.G": "255",
+        "ColorPlace1.B": "255",
+        "ColorPlace1.A": "255",
+        "ColorPlace2.rgba": "4294967295",
+        "ColorPlace2.R": "255",
+        "ColorPlace2.G": "255",
+        "ColorPlace2.B": "255",
+        "ColorPlace2.A": "255",
+        "ColorPlace1Ratio": "0.5",
+        "ColorPlace2Ratio": "1",
+        "HeadScale": "1",
+        "ScalePlace1": "1",
+        "ScalePlace2": "1",
+        "ScalePlace1Ratio": "0.5",
+        "ScalePlace2Ratio": "1",
+        "unkn2_43": "1",
+        "unkn2_44": "1",
+        "unkn2_45": "1",
+        "unkn2_46": "0.5",
+        "unkn2_47": "1",
+        "FadeByTwistMin": "0.95",
+        "FadeByTwistMax": "1"
+      }
+    },
+    "TypeRibbonFixEnd": {
+      "samples": 183,
+      "fields": {
+        "Color.rgba": "4288135850",
+        "Color.R": "170",
+        "Color.G": "194",
+        "Color.B": "151",
+        "Color.A": "255",
+        "ColorRange.rgba": "4294967295",
+        "ColorRange.R": "255",
+        "ColorRange.G": "255",
+        "ColorRange.B": "255",
+        "ColorRange.A": "255",
+        "ColorRate": "1",
+        "SizeScalar.center": "2",
+        "SizeScalar.spread": "0.5",
+        "WidthSize.center": "1",
+        "TextureRepeatNum": "1",
+        "ShadowMultiplier": "1",
+        "BasingPoint.s": "0.5",
+        "BasingPoint.r": "1",
+        "ReleaseFrame.min": "10",
+        "ReleaseFrame.max": "10",
+        "ShapeDivision": "2",
+        "ReleaseInterpolation": "0.001",
+        "HeadColor.rgba": "4281174150",
+        "HeadColor.R": "134",
+        "HeadColor.G": "136",
+        "HeadColor.B": "45",
+        "HeadColor.A": "255",
+        "ColorPlace1.rgba": "4280956470",
+        "ColorPlace1.R": "54",
+        "ColorPlace1.G": "54",
+        "ColorPlace1.B": "42",
+        "ColorPlace1.A": "255",
+        "ColorPlace2.rgba": "4280956470",
+        "ColorPlace2.R": "54",
+        "ColorPlace2.G": "54",
+        "ColorPlace2.B": "42",
+        "ColorPlace2.A": "255",
+        "ColorPlace1Ratio": "0.7",
+        "ColorPlace2Ratio": "1",
+        "HeadScale": "1",
+        "ScalePlace1": "1",
+        "ScalePlace2": "1",
+        "ScalePlace1Ratio": "0.5",
+        "ScalePlace2Ratio": "1",
+        "FadeByTwistMin": "1",
+        "FadeByTwistMax": "1"
+      }
+    },
+    "TypeRibbonFixEndExpression": {
+      "samples": 1,
+      "fields": {
+        "expressionBits.Bits[0]": "2",
+        "color": "Multiply",
+        "alpha": "Assign",
+        "unkn3": "Multiply",
+        "unkn4": "Multiply",
+        "unkn5": "Multiply",
+        "unkn6": "Multiply",
+        "unkn7": "Multiply",
+        "unkn8": "Multiply",
+        "unkn9": "Multiply",
+        "unkn10": "Multiply",
+        "unkn11": "Multiply",
+        "color2": "Multiply",
+        "unkn13": "Multiply",
+        "color3": "Multiply",
+        "unkn15": "Multiply",
+        "unkn16": "Multiply",
+        "unkn17": "Multiply"
+      }
+    },
+    "TypeRibbonFollow": {
+      "samples": 1126,
+      "fields": {
+        "BlendFlags": "1",
+        "Color.rgba": "4294967295",
+        "Color.R": "255",
+        "Color.G": "255",
+        "Color.B": "255",
+        "Color.A": "255",
+        "ColorRange.rgba": "4294967295",
+        "ColorRange.R": "255",
+        "ColorRange.G": "255",
+        "ColorRange.B": "255",
+        "ColorRange.A": "255",
+        "ColorRate": "1",
+        "AlphaRate": "10",
+        "SizeScalar.center": "0.4",
+        "WidthSize.center": "0.1",
+        "TextureRepeatNum": "1",
+        "ShadowMultiplier": "1",
+        "StretchDistance.center": "1",
+        "ShapeDivision": "2",
+        "HeadColor.rgba": "4294967295",
+        "HeadColor.R": "255",
+        "HeadColor.G": "255",
+        "HeadColor.B": "255",
+        "HeadColor.A": "255",
+        "ColorPlace1.rgba": "4294967295",
+        "ColorPlace1.R": "255",
+        "ColorPlace1.G": "255",
+        "ColorPlace1.B": "255",
+        "ColorPlace1.A": "255",
+        "ColorPlace2.rgba": "4294967295",
+        "ColorPlace2.R": "255",
+        "ColorPlace2.G": "255",
+        "ColorPlace2.B": "255",
+        "ColorPlace2.A": "255",
+        "ColorPlace1Ratio": "0.5",
+        "ColorPlace2Ratio": "1",
+        "HeadScale": "1",
+        "ScalePlace1": "1",
+        "ScalePlace2": "1",
+        "ScalePlace1Ratio": "0.5",
+        "ScalePlace2Ratio": "1",
+        "FadeByTwistMin": "1",
+        "FadeByTwistMax": "1",
+        "GhostStretch.min": "1"
+      }
+    },
+    "TypeRibbonLength": {
+      "samples": 1500,
+      "fields": {
+        "Color.rgba": "4294967295",
+        "Color.R": "255",
+        "Color.G": "255",
+        "Color.B": "255",
+        "Color.A": "255",
+        "ColorRange.rgba": "4294967295",
+        "ColorRange.R": "255",
+        "ColorRange.G": "255",
+        "ColorRange.B": "255",
+        "ColorRange.A": "255",
+        "ColorRate": "1",
+        "SizeScalar.center": "1",
+        "WidthSize.center": "0.5",
+        "TextureRepeatNum": "1",
+        "ShadowMultiplier": "1",
+        "Length.center": "2",
+        "ShapeDivision": "2",
+        "BasingPoint.width": "0.5",
+        "BasingPoint.length": "1",
+        "DirY.center": "1",
+        "HeadColor.rgba": "4294967295",
+        "HeadColor.R": "255",
+        "HeadColor.G": "255",
+        "HeadColor.B": "255",
+        "HeadColor.A": "255",
+        "ColorPlace1.rgba": "4294967295",
+        "ColorPlace1.R": "255",
+        "ColorPlace1.G": "255",
+        "ColorPlace1.B": "255",
+        "ColorPlace1.A": "255",
+        "ColorPlace2.rgba": "4294967295",
+        "ColorPlace2.R": "255",
+        "ColorPlace2.G": "255",
+        "ColorPlace2.B": "255",
+        "ColorPlace2.A": "255",
+        "ColorPlace1Ratio": "0.5",
+        "ColorPlace2Ratio": "1",
+        "HeadScale": "1",
+        "ScalePlace1": "1",
+        "ScalePlace2": "1",
+        "ScalePlace1Ratio": "0.5",
+        "ScalePlace2Ratio": "1",
+        "GhostStretch.s": "1"
+      }
+    },
+    "TypeRibbonLengthExpression": {
+      "samples": 26,
+      "fields": {
+        "expressionBits.Bits[0]": "64",
+        "Color": "Multiply",
+        "ColorAlpha": "Multiply",
+        "ColorRange": "Multiply",
+        "ColorRangeAlpha": "Multiply",
+        "ColorRate": "Multiply",
+        "Intensity": "Multiply",
+        "SizeScalar": "Assign",
+        "SizeScalarRange": "Multiply",
+        "AlphaRate": "Multiply",
+        "Width": "Multiply",
+        "WidthRange": "Multiply",
+        "HeadColor": "Multiply",
+        "HeadAlpha": "Multiply",
+        "Place1Color": "Multiply",
+        "Place1Alpha": "Multiply",
+        "Place2Color": "Multiply",
+        "Place2Alpha": "Multiply",
+        "Length": "Multiply",
+        "LengthRange": "Multiply"
+      }
+    },
+    "TypeRibbonTrail": {
+      "samples": 52,
+      "fields": {
+        "FlagsRe4": "1",
+        "Color.rgba": "4294967295",
+        "Color.R": "255",
+        "Color.G": "255",
+        "Color.B": "255",
+        "Color.A": "255",
+        "ColorRange.rgba": "4294967295",
+        "ColorRange.R": "255",
+        "ColorRange.G": "255",
+        "ColorRange.B": "255",
+        "ColorRange.A": "255",
+        "ColorRate": "3.2",
+        "AlphaRate": "10",
+        "WidthSize.center": "0.1",
+        "WidthSize.spread": "0.05",
+        "ShadowMultiplier": "1",
+        "Division": "3",
+        "IntervalFrame": "1"
+      }
+    },
+    "TypeStrainRibbon": {
+      "samples": 164,
+      "fields": {
+        "SegmentNum": "1",
+        "Width.center": "0.23",
+        "Width.spread": "0.05",
+        "unkn3_4": "1",
+        "SagAxis": "4",
+        "HeadColor.rgba": "4294967295",
+        "HeadColor.R": "255",
+        "HeadColor.G": "255",
+        "HeadColor.B": "255",
+        "HeadColor.A": "255",
+        "ColorPlace1.rgba": "4294967295",
+        "ColorPlace1.R": "255",
+        "ColorPlace1.G": "255",
+        "ColorPlace1.B": "255",
+        "ColorPlace1.A": "255",
+        "ColorPlace2.rgba": "4294967295",
+        "ColorPlace2.R": "255",
+        "ColorPlace2.G": "255",
+        "ColorPlace2.B": "255",
+        "ColorPlace2.A": "255",
+        "ColorPlace1Ratio": "0.5",
+        "ColorPlace2Ratio": "1",
+        "FadeByTwistMin": "1",
+        "FadeByTwistMax": "1",
+        "CutoffRatio.s": "0.5",
+        "CutoffGravity.s": "10",
+        "CutoffBendScaleCoef.s": "0.99",
+        "CutoffBendSmooth.s": "0.9",
+        "LengthUVScale": "1",
+        "ShapeRangeX.inner": "0.5",
+        "ShapeRangeX.outer": "1",
+        "ShapeRangeY.inner": "0.5",
+        "ShapeRangeY.outer": "1",
+        "ShapeRangeZ.inner": "0.5",
+        "ShapeRangeZ.outer": "1",
+        "ShapeRotationOrder": "2",
+        "ShapeScaleHorizontal.start": "1",
+        "ShapeScaleVertical.start": "1",
+        "boneName": "_002",
+        "BlendFlags": "17",
+        "Color.rgba": "4282855424",
+        "Color.G": "48",
+        "Color.B": "71",
+        "Color.A": "255",
+        "ColorRange.rgba": "1295919360",
+        "ColorRange.G": "41",
+        "ColorRange.B": "62",
+        "ColorRange.A": "77",
+        "ColorRate": "2",
+        "ParentBone": "_002"
+      }
+    },
+    "UVScroll": {
+      "samples": 159,
+      "fields": {
+        "vScrollAdd.s": "0.3",
+        "uScrollAddCoef.s": "1",
+        "vScrollAddCoef.s": "1",
+        "vScrollOffset.r": "0.5"
+      }
+    },
+    "UVSequence": {
+      "samples": 1500,
+      "fields": {
+        "SequenceNo.maxExclusive": "1",
+        "PatternNo.maxExclusive": "64",
+        "PlaySpeed.min": "1",
+        "PlaySpeed.max": "1",
+        "Flags": "41",
+        "UVSPath": "RE_ENGINE_LIBRARY/VFX_Library/Texture/TEX_Smoke/tex_capcom_smoke_00_0050.uvs"
+      }
+    },
+    "UVSequenceExpression": {
+      "samples": 1,
+      "fields": {
+        "expressionBits.Bits[0]": "16",
+        "PlaySpeed": "Multiply",
+        "PlaySpeedRange": "Multiply",
+        "SequenceNo": "Multiply",
+        "SequenceNoRange": "Multiply",
+        "PatternNo": "Assign",
+        "PatternNoRange": "Multiply"
+      }
+    },
+    "UVSequenceModifier": {
+      "samples": 1500,
+      "fields": {
+        "Flags": "3",
+        "PlaySpeedInit.min": "1",
+        "PlaySpeedInit.max": "1",
+        "PlaySpeedFinal.min": "0.5",
+        "PlaySpeedFinal.max": "0.5",
+        "PlaySpeedChangeTimeCoef.min": "0.98",
+        "PlaySpeedChangeTimeCoef.max": "0.98"
+      }
+    },
+    "UnitCulling": {
+      "samples": 1005,
+      "fields": {
+        "Flags": "34",
+        "Size.X": "2",
+        "Size.Y": "2",
+        "Size.Z": "2",
+        "Distance": "-1"
+      }
+    },
+    "UnknownRE4_197": {
+      "samples": 11,
+      "fields": {
+        "unkn2": "1",
+        "unkn3": "2",
+        "unkn6": "1",
+        "Speed": "30",
+        "unkn8": "1",
+        "unkn11": "10",
+        "unkn12": "50",
+        "unkn13": "1",
+        "unkn14": "1",
+        "unkn15": "1",
+        "unkn16": "1",
+        "unkn17": "1",
+        "unkn18": "1",
+        "unkn19": "1"
+      }
+    },
+    "VanishArea3D": {
+      "samples": 40,
+      "fields": {
+        "Flags": "1",
+        "AreaScale.X": "0.28",
+        "AreaScale.Y": "0.28",
+        "AreaScale.Z": "1"
+      }
+    },
+    "VectorFieldParameter": {
+      "samples": 736,
+      "fields": {
+        "Parameter.X": "5",
+        "Parameter.Y": "1",
+        "Lacunarity": "3",
+        "Gain": "0.5",
+        "VelocityBlend": "0.5",
+        "OscillationRange": "3",
+        "OscillationTime": "10",
+        "Scale.X": "1",
+        "Scale.Y": "1",
+        "Scale.Z": "1",
+        "Coefficient.s": "1",
+        "Flags": "37"
+      }
+    },
+    "VectorFieldParameterExpression": {
+      "samples": 2,
+      "fields": {
+        "expressionBits.Bits[0]": "14336",
+        "Frequency": "Multiply",
+        "Amplitude": "Multiply",
+        "Lacunarity": "Multiply",
+        "Gain": "Multiply",
+        "VelocityBlend": "Multiply",
+        "OscillationRange": "Multiply",
+        "OscillationTime": "Multiply",
+        "Coefficient": "Multiply",
+        "CoefficientRange": "Multiply",
+        "Range": "Multiply",
+        "Detail": "Multiply",
+        "ScaleX": "Multiply",
+        "ScaleY": "Multiply",
+        "ScaleZ": "Multiply",
+        "EdgeOffset": "Multiply",
+        "Falloff": "Multiply",
+        "SmoothBlend": "Multiply"
+      }
+    },
+    "Velocity2D": {
+      "samples": 78,
+      "fields": {
+        "Speed.s": "1",
+        "SpeedCoef.s": "0.95",
+        "SizeX": "1",
+        "SizeY": "1"
+      }
+    },
+    "Velocity2DExpression": {
+      "samples": 10,
+      "fields": {
+        "expressionBits.Bits[0]": "1",
+        "Speed": "Multiply",
+        "SpeedRange": "Multiply",
+        "SpeedCoef": "Multiply",
+        "SpeedCoefRange": "Multiply",
+        "GravityRate": "Multiply",
+        "GravityRateRange": "Multiply",
+        "Angle": "Multiply",
+        "AngleRange": "Multiply",
+        "OffsetX": "Multiply",
+        "OffsetY": "Multiply",
+        "SizeX": "Multiply",
+        "SizeY": "Multiply",
+        "VelocityType": "Multiply"
+      }
+    },
+    "Velocity3D": {
+      "samples": 1500,
+      "fields": {
+        "DirectionVectorY.center": "1",
+        "Speed.center": "1",
+        "SpeedCoef.center": "1",
+        "Size.X": "1",
+        "Size.Y": "1",
+        "Size.Z": "1",
+        "InheritDistance.max": "1"
+      }
+    },
+    "Velocity3DDelayFrame": {
+      "samples": 36,
+      "fields": {
+        "frameDelay": "80"
+      }
+    },
+    "Velocity3DExpression": {
+      "samples": 28,
+      "fields": {
+        "rert_unkn0": "1",
+        "rert_unkn1": "2",
+        "expressionBits.Bits[0]": "1",
+        "Speed": "Assign",
+        "SpeedRange": "Multiply",
+        "SpeedCoef": "Multiply",
+        "SpeedCoefRange": "Multiply",
+        "GravityRate": "Multiply",
+        "GravityRateRange": "Multiply",
+        "DirX": "Multiply",
+        "DirXRange": "Multiply",
+        "DirY": "Multiply",
+        "DirYRange": "Multiply",
+        "DirZ": "Multiply",
+        "DirZRange": "Multiply",
+        "OffsetX": "Multiply",
+        "OffsetY": "Multiply",
+        "OffsetZ": "Multiply",
+        "SizeX": "Multiply",
+        "SizeY": "Multiply",
+        "SizeZ": "Multiply",
+        "VelocityType": "Multiply"
+      }
+    },
+    "WindInfluence3D": {
+      "samples": 2,
+      "fields": {
+        "InfluenceRate.s": "0.2",
+        "InfluenceCoef.s": "0.995",
+        "InfluenceFrame.s": "20"
+      }
+    }
+  }
+}

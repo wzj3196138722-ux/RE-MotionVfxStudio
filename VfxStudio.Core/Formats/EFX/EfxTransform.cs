@@ -83,12 +83,13 @@ public partial class EFXAttributeTransform2DExpression : EFXAttribute, IExpressi
 
 	public EFXAttributeTransform2DExpression() : base(EfxAttributeType.Transform2DExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(5) { BitNames = [nameof(posX), nameof(posY), nameof(rot), nameof(scaleX), nameof(scaleY)] };
-	public ExpressionAssignType posX;
-	public ExpressionAssignType posY;
-	public ExpressionAssignType rot;
-	public ExpressionAssignType scaleX;
-	public ExpressionAssignType scaleY;
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；旋转槽按角度。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(5) { BitNames = [ nameof(LocalPositionX), nameof(LocalPositionY), nameof(LocalRotation), nameof(LocalScaleX), nameof(LocalScaleY) ] };
+	public ExpressionAssignType LocalPositionX;
+	public ExpressionAssignType LocalPositionY;
+	public ExpressionAssignType LocalRotation;
+	public ExpressionAssignType LocalScaleX;
+	public ExpressionAssignType LocalScaleY;
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 
@@ -126,27 +127,18 @@ public partial class EFXAttributeTransform3DExpression : EFXAttribute, IExpressi
 	/// <summary>
 	/// Up to 9 bits, in order: pos X/Y/Z, rot X/Y/Z, scale X/Y/Z
 	/// </summary>
-	[RszClassInstance] public BitSet expressionBits = new BitSet(9) { BitNameDict = new () {
-		[1] = nameof(translationX),
-		[2] = nameof(translationY),
-		[3] = nameof(translationZ),
-		[4] = nameof(rotationX),
-		[5] = nameof(rotationY),
-		[6] = nameof(rotationZ),
-		[7] = nameof(scaleX),
-		[8] = nameof(scaleY),
-		[9] = nameof(scaleZ),
-	} };
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；旋转槽按角度。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(9) { BitNames = [ nameof(LocalPositionX), nameof(LocalPositionY), nameof(LocalPositionZ), nameof(LocalRotationX), nameof(LocalRotationY), nameof(LocalRotationZ), nameof(LocalScaleX), nameof(LocalScaleY), nameof(LocalScaleZ) ] };
 
-	public ExpressionAssignType translationX;
-	public ExpressionAssignType translationY;
-	public ExpressionAssignType translationZ;
-	public ExpressionAssignType rotationX;
-	public ExpressionAssignType rotationY;
-	public ExpressionAssignType rotationZ;
-	public ExpressionAssignType scaleX;
-	public ExpressionAssignType scaleY;
-	public ExpressionAssignType scaleZ;
+	public ExpressionAssignType LocalPositionX;
+	public ExpressionAssignType LocalPositionY;
+	public ExpressionAssignType LocalPositionZ;
+	public ExpressionAssignType LocalRotationX;
+	public ExpressionAssignType LocalRotationY;
+	public ExpressionAssignType LocalRotationZ;
+	public ExpressionAssignType LocalScaleX;
+	public ExpressionAssignType LocalScaleY;
+	public ExpressionAssignType LocalScaleZ;
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 
@@ -178,61 +170,43 @@ public partial class EFXAttributeTransform3DModifier : ReeLib.Efx.EFXAttribute
 {
     public EFXAttributeTransform3DModifier() : base(EfxAttributeType.Transform3DModifier) { }
 
-    public uint unkn0;
-    public float unkn1;
-    public float unkn2;
-    public float unkn3;
-    public float unkn4;
-    public float unkn5;
-    public float unkn6;
-    public float unkn7;
-    public float unkn8;
-    public float unkn9;
-    public float unkn10;
-    public float unkn11;
-    public float unkn12;
-    public float unkn13;
-    public float unkn14;
-    public float unkn15;
-    public float unkn16;
-    public float unkn17;
-    public float unkn18;
-    public float unkn19;
-    public float unkn20;
-    public float unkn21;
-    public UndeterminedFieldType unkn22;
-    public float unkn23;
-    public float unkn24;
-    public float unkn25;
-    public UndeterminedFieldType unkn26;
-    public float unkn27;
-    public float unkn28;
-    public float unkn29;
-    public float unkn30;
-    public float unkn31;
-    public float unkn32;
-    public float unkn33;
-    public UndeterminedFieldType unkn34;
-    public float unkn35;
-    public float unkn36;
-    public float unkn37;
-    public float unkn38;
-    public float unkn39;
-    public float unkn40;
-    public float unkn41;
-    public float unkn42;
-    public float unkn43;
-    public float unkn44;
-    public float unkn45;
-    public UndeterminedFieldType unkn46;
-    public float unkn47;
-    public UndeterminedFieldType unkn48;
-    public float unkn49;
-    public UndeterminedFieldType unkn50;
-    public float unkn51;
-    public float unkn52;
-    public float unkn53;
-    public UndeterminedFieldType unkn54;
+    // re4.exe：vtable 7a14100，加载器 3d9a850 读 UniqueID + 0xdc 字节，每帧 3d9b300。解析器是空壳，没有引擎名，
+    // 名字按作用起（旧名 unkn0..unkn54）。发射器级：每帧改写同一 entry 的 Transform3D。字节布局只在 RE4 上核对过。
+    // 所有区间对都是 center + (2u−1)·spread；旋转是弧度。
+    // Flags：bit0-2 = 平移/旋转/缩放启用速度，bit3-5 = 速度随机正负号（需 bit0-2），
+    // bit6-8 = 用 *Start 替换 Transform3D 的平移/旋转/缩放（三个轴一起替换）。
+    public uint Flags;
+
+    // 起始值：对应组的 bit6-8 置位时替换 Transform3D 的值。
+    public CenterSpread TranslationStartX;
+    public CenterSpread TranslationStartY;
+    public CenterSpread TranslationStartZ;
+    public CenterSpread RotationStartX;
+    public CenterSpread RotationStartY;
+    public CenterSpread RotationStartZ;
+    public CenterSpread ScaleStartX;
+    public CenterSpread ScaleStartY;
+    public CenterSpread ScaleStartZ;
+
+    // 每轴 {速度, 系数}：每 1/60 秒一帧 值 += n·v，然后 v *= Coef^n（n = dt·60）。速度单位是每帧，不是每秒；缩放不夹到 0。
+    public CenterSpread TranslationVelocityX;
+    public CenterSpread TranslationVelocityXCoef;
+    public CenterSpread TranslationVelocityY;
+    public CenterSpread TranslationVelocityYCoef;
+    public CenterSpread TranslationVelocityZ;
+    public CenterSpread TranslationVelocityZCoef;
+    public CenterSpread RotationVelocityX;
+    public CenterSpread RotationVelocityXCoef;
+    public CenterSpread RotationVelocityY;
+    public CenterSpread RotationVelocityYCoef;
+    public CenterSpread RotationVelocityZ;
+    public CenterSpread RotationVelocityZCoef;
+    public CenterSpread ScaleVelocityX;
+    public CenterSpread ScaleVelocityXCoef;
+    public CenterSpread ScaleVelocityY;
+    public CenterSpread ScaleVelocityYCoef;
+    public CenterSpread ScaleVelocityZ;
+    public CenterSpread ScaleVelocityZCoef;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.PtTransform2D, EfxVersion.DMC5, EfxVersion.RE8)]
@@ -240,11 +214,10 @@ public partial class EFXAttributePtTransform2D : ReeLib.Efx.EFXAttribute
 {
     public EFXAttributePtTransform2D() : base(EfxAttributeType.PtTransform2D) { }
 
-    public float unkn0;
-    public float unkn1;
-    public UndeterminedFieldType unkn2;
-    public float unkn3;
-    public float unkn4;
+    // 字段名取自 MonsterHunterWilds.exe 文本解析器（vtable e100830），布局与 Transform2D 相同。
+    public Vector2 LocalPosition;
+    public float LocalRotation;
+    public Vector2 LocalScale;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.PtTransform2DClip, EfxVersion.RE8)]
@@ -265,9 +238,10 @@ public partial class EFXAttributePtTransform3D : EFXAttribute
 {
 	public EFXAttributePtTransform3D() : base(EfxAttributeType.PtTransform3D) { }
 
-	public Vector3 position;
-	public Vector3 rotation;
-	public Vector3 scale;
+	// 名字取自 MonsterHunterWilds.exe 文本解析器（vtable e1004c0）。
+	public Vector3 LocalPosition;
+	public Vector3 LocalRotation;
+	public Vector3 LocalScale;
 }
 
 [RszGenerate, RszAutoReadWrite, RszVersionedObject(typeof(EfxVersion)), EfxStruct(EfxAttributeType.PtTransform3DClip, EfxVersion.RE7, EfxVersion.RE2, EfxVersion.DMC5, EfxVersion.RE3, EfxVersion.RE8, EfxVersion.RERT, EfxVersion.RE4)]
@@ -319,13 +293,18 @@ public partial class EFXAttributeRotateAnim : EFXAttribute
 {
 	public EFXAttributeRotateAnim() : base(EfxAttributeType.RotateAnim) { }
 
+	// re4.exe（vtable 7a0b3a0，加载器 3d1c8e0，逐帧 3d1cb60）。字段名与文本解析器一致。
+	// 出生时每轴抽一次：v = Add.s ± Add.r（弧度/帧，1/60 秒一帧），c = Coef.s ± Coef.r。
+	// 每帧（n = dt·60）：角度 += n·v，再 v *= c^n；**c 为 0 或 1 时都不衰减**（3d1cc71 显式跳过 0）。
+	// Billboard3D 的滚转角 = X + Y（Z 不起作用）；Mesh 用三轴欧拉角。
+	// Flags 只用位 0：每轴各自 50% 概率把 Add 取反（随机方向）；其余位忽略。
 	public uint Flags;
-    public via.Range RotationAddX;
-    public via.Range RotationAddY;
-    public via.Range RotationAddZ;
-    public via.Range RotationCoefX;
-    public via.Range RotationCoefY;
-    public via.Range RotationCoefZ;
+    public CenterSpread RotationAddX;
+    public CenterSpread RotationAddY;
+    public CenterSpread RotationAddZ;
+    public CenterSpread RotationCoefX;
+    public CenterSpread RotationCoefY;
+    public CenterSpread RotationCoefZ;
     [RszVersion(EfxVersion.DD2, EndAt = nameof(RotationDelayFrame))]
 	public via.RangeI RotationDelayFrame;
 }
@@ -347,26 +326,20 @@ public partial class EFXAttributeRotateAnimExpression : EFXAttribute, IExpressio
 
 	public EFXAttributeRotateAnimExpression() : base(EfxAttributeType.RotateAnimExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(12){ BitNameDict = new () {
-		[1] = nameof(rotateSpeedX),
-		[2] = nameof(rotateSpeedXRand),
-		[3] = nameof(rotateSpeedY),
-		[4] = nameof(rotateSpeedYRand),
-		[5] = nameof(rotateSpeedZ),
-		[6] = nameof(rotateSpeedZRand),
-	} };
-	public ExpressionAssignType rotateSpeedX;
-	public ExpressionAssignType rotateSpeedXRand;
-	public ExpressionAssignType rotateSpeedY;
-	public ExpressionAssignType rotateSpeedYRand;
-	public ExpressionAssignType rotateSpeedZ;
-	public ExpressionAssignType rotateSpeedZRand;
-	public ExpressionAssignType ukn1_7;
-	public ExpressionAssignType ukn1_8;
-	public ExpressionAssignType ukn1_9;
-	public ExpressionAssignType ukn1_10;
-	public ExpressionAssignType ukn1_11;
-	public ExpressionAssignType ukn1_12;
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；RotationAdd 槽按角度（每帧）。
+	[RszClassInstance] public BitSet expressionBits = new BitSet(12) { BitNames = [ nameof(RotationAddX), nameof(RotationAddXRange), nameof(RotationAddY), nameof(RotationAddYRange), nameof(RotationAddZ), nameof(RotationAddZRange), nameof(RotationCoefX), nameof(RotationCoefXRange), nameof(RotationCoefY), nameof(RotationCoefYRange), nameof(RotationCoefZ), nameof(RotationCoefZRange) ] };
+	public ExpressionAssignType RotationAddX;
+	public ExpressionAssignType RotationAddXRange;
+	public ExpressionAssignType RotationAddY;
+	public ExpressionAssignType RotationAddYRange;
+	public ExpressionAssignType RotationAddZ;
+	public ExpressionAssignType RotationAddZRange;
+	public ExpressionAssignType RotationCoefX;
+	public ExpressionAssignType RotationCoefXRange;
+	public ExpressionAssignType RotationCoefY;
+	public ExpressionAssignType RotationCoefYRange;
+	public ExpressionAssignType RotationCoefZ;
+	public ExpressionAssignType RotationCoefZRange;
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 
@@ -375,14 +348,20 @@ public partial class EFXAttributeScaleAnim : EFXAttribute
 {
 	public EFXAttributeScaleAnim() : base(EfxAttributeType.ScaleAnim) { }
 
-    public via.Range SizeScalarAdd;
-    public via.Range SizeScalarCoef;
-    public via.Range SizeXAdd;
-    public via.Range SizeXAddCoef;
-    public via.Range SizeYAdd;
-    public via.Range SizeYAddCoef;
-    public via.Range SizeZAdd;
-    public via.Range SizeZAddCoef;
+	// re4.exe（vtable 7a0b508，加载器 3d1d520，逐帧 3d1d830）。字段名与文本解析器一致。
+	// 出生时每个范围抽一次 s ± r；以 Type 初始化后的尺寸为基准（统一尺寸 +0x80、X/Y/Z +0x84/+0x88/+0x8c）。
+	// 每帧按粒子年龄 t（帧，dt·60 累加）重算：Coef == 1 时 尺寸 = 基准 + Add·t；
+	// 否则 尺寸 = 基准 + Add·Coef·(1 − Coef^t)/(1 − Coef)，Coef < 1 时总增量收敛到 Add·Coef/(1 − Coef)。结果夹在 ≥ 0。
+	// **Coef = 0 时该通道冻结、Add 不起作用**（与 RotateAnim 不同）。统一尺寸与各轴在渲染时相乘。
+	// TypeRibbonLength 的 Y 槽就是条带长度，SizeYAdd 会拉长条带。
+    public CenterSpread SizeScalarAdd;
+    public CenterSpread SizeScalarCoef;
+    public CenterSpread SizeXAdd;
+    public CenterSpread SizeXAddCoef;
+    public CenterSpread SizeYAdd;
+    public CenterSpread SizeYAddCoef;
+    public CenterSpread SizeZAdd;
+    public CenterSpread SizeZAddCoef;
     [RszVersion(EfxVersion.DD2, EndAt = nameof(SizeDelayFrame))]
     public via.RangeI SizeDelayFrame;
 }
@@ -403,19 +382,17 @@ public partial class EFXAttributeScaleAnimExpression : EFXAttribute, IExpression
 
 	public EFXAttributeScaleAnimExpression() : base(EfxAttributeType.ScaleAnimExpression) { }
 
-	[RszClassInstance] public BitSet expressionBits = new BitSet(8) { BitNameDict = new () {
-		[1] = nameof(scale),
-		[2] = nameof(scaleRand),
-	} };
-	public ExpressionAssignType scale;
-	public ExpressionAssignType scaleRand;
-    [RszVersion(EfxVersion.RERT, EndAt = nameof(unkn8))]
-	public ExpressionAssignType unkn3;
-	public ExpressionAssignType unkn4;
-	public ExpressionAssignType unkn5;
-	public ExpressionAssignType unkn6;
-	public ExpressionAssignType unkn7;
-	public ExpressionAssignType unkn8;
+	// re4.exe 槽位（A 类：引擎没有槽位名，按 applier 写回的宿主字段命名，bit i = 槽位 i）。运算 = op(文件原值, 表达式)，每帧重算；
+	[RszClassInstance] public BitSet expressionBits = new BitSet(8) { BitNames = [ nameof(SizeScalarAdd), nameof(SizeScalarAddRange), nameof(SizeXAdd), nameof(SizeXAddRange), nameof(SizeYAdd), nameof(SizeYAddRange), nameof(SizeZAdd), nameof(SizeZAddRange) ] };
+	public ExpressionAssignType SizeScalarAdd;
+	public ExpressionAssignType SizeScalarAddRange;
+    [RszVersion(EfxVersion.RERT, EndAt = nameof(SizeZAddRange))]
+	public ExpressionAssignType SizeXAdd;
+	public ExpressionAssignType SizeXAddRange;
+	public ExpressionAssignType SizeYAdd;
+	public ExpressionAssignType SizeYAddRange;
+	public ExpressionAssignType SizeZAdd;
+	public ExpressionAssignType SizeZAddRange;
 	[RszClassInstance, RszConstructorParams(nameof(Version))] public EFXExpressionList? expressions;
 }
 

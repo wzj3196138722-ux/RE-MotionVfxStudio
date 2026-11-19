@@ -533,7 +533,12 @@ public class ReeLibGenerator : IIncrementalGenerator
                 } else if (field.IsReadonly()) {
                     ctx.Indent().AppendLine($"handler.WriteArray({name});");
                 } else {
-                    ctx.Indent().AppendLine($"handler.WriteArray({name} ??= []);");
+                    // MHWs-EFX-Editor 本地补丁：size 留空 + 非 readonly 时，Read 分支（见下）会先
+                    // 读一个 int 当元素个数再读数组，Write 这边原来只写数组本体、不写这个长度前缀，
+                    // 导致我们自己写出的文件下次读回来时把后续字节当成了长度。两边必须对称。
+                    ctx.Indent().AppendLine($"{name} ??= [];");
+                    ctx.Indent().AppendLine($"handler.Write<int>({name}.Length);");
+                    ctx.Indent().AppendLine($"handler.WriteArray({name});");
                 }
             } else if (handle == HandleType.Read) {
                 if (string.IsNullOrEmpty(size)) size = "handler.Read<int>()";
