@@ -49,22 +49,31 @@ internal static class PreviewStructureMenu
     }
 
     /// <summary>Items for one entry. <paramref name="clipboard"/> is the backend's copy buffer (kind, attributeType).</summary>
-    public static PreviewStructureRequest? EntryItems(int entry, string? clipboardKind, string? clipboardType, bool editable)
+    /// <param name="owner">An embedded entry, when the items are for one; null for the top-level entry at <paramref name="entry"/>.</param>
+    public static PreviewStructureRequest? EntryItems(int entry, string? clipboardKind, string? clipboardType, bool editable, PreviewEditTarget? owner = null)
     {
         PreviewStructureRequest? chosen = null;
         if (clipboardKind == "attribute")
         {
-            if (ImGui.MenuItem("粘贴属性 " + clipboardType, (string?)null, false, editable)) chosen = new("paste_attribute", entry);
+            if (ImGui.MenuItem("粘贴属性 " + clipboardType, (string?)null, false, editable)) chosen = new("paste_attribute", entry, Target: owner);
             if (!editable && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) ImGui.SetTooltip("这个节点不能在面板中编辑");
         }
-        if (ImGui.MenuItem("复制 entry（可粘贴到其他文件）")) chosen = new("copy_entry", entry);
-        if (ImGui.MenuItem("创建副本")) chosen = new("duplicate_entry", entry);
-        if (ImGui.MenuItem("删除 entry…")) chosen = new("remove_entry", entry);
+        if (ImGui.MenuItem("复制 entry（可粘贴到其他文件）")) chosen = new("copy_entry", entry, Target: owner);
+        if (ImGui.MenuItem("创建副本")) chosen = new("duplicate_entry", entry, Target: owner);
+        if (ImGui.MenuItem("删除 entry…")) chosen = new("remove_entry", entry, Target: owner);
         return chosen;
     }
 
     /// <summary>Items that create entries: a submenu of Types, and paste when an entry is copied.</summary>
-    public static PreviewStructureRequest? FileItems(string? clipboardKind, string? clipboardName)
+    /// <param name="into">An embedded entry whose file receives the new entry; null for the open file.</param>
+    public static PreviewStructureRequest? FileItems(string? clipboardKind, string? clipboardName, PreviewEditTarget? into = null)
+    {
+        var file = into == null ? null : new PreviewEditTarget("entry", -1, into.Path);
+        var chosen = FileItemsCore(clipboardKind, clipboardName);
+        return chosen == null || file == null ? chosen : chosen with { Target = file };
+    }
+
+    private static PreviewStructureRequest? FileItemsCore(string? clipboardKind, string? clipboardName)
     {
         PreviewStructureRequest? chosen = null;
         if (ImGui.BeginMenu("新建 entry"))

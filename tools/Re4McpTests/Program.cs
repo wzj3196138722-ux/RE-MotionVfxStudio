@@ -441,6 +441,23 @@ try
         Check(error, "select_entry refuses entryPosition together with actionIndex", outcome.ToJsonString());
         (error, outcome, _) = await Tool("select_entry", new JsonObject { ["entryPosition"] = 0 });
         Check(!error && outcome["result"]?["document"]?["editTarget"] == null, "select_entry returns from the Action to the top-level entry", outcome.ToJsonString());
+
+        // Entry tools inside the embedded file: add selects the new embedded entry, duplicate and remove use that file's
+        // positions, and the top-level entries do not change.
+        (error, outcome, _) = await Tool("status");
+        int embeddedCount = outcome["result"]?["preview"]?["embeddedEntries"]?.AsArray().Count ?? 0;
+        int topCount = outcome["result"]?["preview"]?["entries"]?.AsArray().Count ?? 0;
+        long entryOpsBefore = Revision(outcome);
+        (error, outcome, _) = await Tool("add_entry", new JsonObject { ["type"] = "TypeBillboard3D", ["embeddedPath"] = embeddedEntry?["embeddedPath"]?.DeepClone(), ["expectedRevision"] = entryOpsBefore });
+        Check(!error && Revision(outcome) == entryOpsBefore + 1 && outcome["result"]?["document"]?["editTarget"]?["index"]?.GetValue<int>() == embeddedCount &&
+            outcome["result"]?["preview"]?["embeddedEntries"]?.AsArray().Count == embeddedCount + 1 && outcome["result"]?["preview"]?["entries"]?.AsArray().Count == topCount,
+            "add_entry with embeddedPath appends to the embedded file and selects the new entry", outcome.ToJsonString());
+        (error, outcome, _) = await Tool("duplicate_entry", new JsonObject { ["entryPosition"] = 0, ["embeddedPath"] = embeddedEntry?["embeddedPath"]?.DeepClone(), ["expectedRevision"] = entryOpsBefore + 1 });
+        Check(!error && outcome["result"]?["preview"]?["embeddedEntries"]?.AsArray().Count == embeddedCount + 2, "duplicate_entry with embeddedPath copies inside the embedded file", outcome.ToJsonString());
+        (error, outcome, _) = await Tool("select_entry", new JsonObject { ["entryPosition"] = 0 });
+        (error, outcome, _) = await Tool("remove_entry", new JsonObject { ["entryPosition"] = embeddedCount, ["embeddedPath"] = embeddedEntry?["embeddedPath"]?.DeepClone(), ["expectedRevision"] = entryOpsBefore + 2 });
+        Check(!error && outcome["result"]?["preview"]?["embeddedEntries"]?.AsArray().Count == embeddedCount + 1 && outcome["result"]?["preview"]?["entries"]?.AsArray().Count == topCount,
+            "remove_entry with embeddedPath removes from the embedded file only", outcome.ToJsonString());
     }
 
     (error, outcome, _) = await Tool("close", new JsonObject { ["discardUnsaved"] = true });

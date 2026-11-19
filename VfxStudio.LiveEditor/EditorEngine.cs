@@ -79,7 +79,9 @@ internal sealed partial class EditorEngine : IDisposable
         try
         {
             string action = Text(request, "action").ToLowerInvariant();
-            if (action is "duplicate_entry" or "remove_entry" or "restore_entry" or "add_entry" or "rename_group" or "set_group_note") RejectEmbeddedRootOperation(request);
+            // add_entry, duplicate_entry and remove_entry take an optional top-level "embeddedPath" (EntryFileTarget);
+            // restoring an entry and group notes stay top-level only.
+            if (action is "restore_entry" or "rename_group" or "set_group_note") RejectEmbeddedRootOperation(request);
             RejectUnsupportedFeature(action);
             if (!action.StartsWith("pfb_", StringComparison.Ordinal) && action is not ("catalog" or "resolve_resource" or "open" or "open_motion" or "open_cached_resource" or "open_game_resource" or "status" or "inspect" or "shutdown" or
                 "cache_list" or "cache_import" or "cache_reload" or "cache_rename" or "cache_materialize" or "desktop_start" or "desktop_stop" or "file_browse" or "file_stat" or "open_action" or "action_effect_groups" or "add_action_slot" or "remove_action_slot" or "reset_action_slots" or "publish_action_preview" or "begin_export" or "prepare_export" or "finish_export")) CheckRevision(request);
@@ -227,20 +229,26 @@ internal sealed partial class EditorEngine : IDisposable
                     SetGroupNote(Int(request, "groupIndex"), Text(request, "note")); NoteSaved(response); break;
                 case "curve_key": EditCurve(Target.From(request), Text(request, "path"), request); break;
                 case "duplicate_entry":
+                {
+                    var at = EntryFileTarget(request);
+                    var file = ResolveTargetFile(at);
+                    int position = Int(request, "index");
+                    if (position < 0 || position >= file.Entries.Count) throw new ArgumentOutOfRangeException("index", "Entry index is invalid.");
                     Mutate(() =>
                     {
-                        var original = Entry(Int(request, "index"));
                         int nextId = NextAttributeId();
-                        var clone = service.DeepCloneEntry(Require(), original);
-                        clone.index = AllocateEntryId();
+                        var clone = service.DeepCloneEntry(file, file.Entries[position]);
+                        clone.index = NextEntryId(file);
                         foreach (var attribute in clone.Attributes) attribute.UniqueID = checked(nextId++);
                     });
+                    response["selection"] = Selection(at, file.Entries.Count - 1);
                     break;
+                }
                 case "copy_efx": CopyEfx(Target.From(request)); response["message"] = "已复制，请选择目标后粘贴。"; break;
                 case "paste_efx": PasteEfx(request, response); break;
                 case "clear_efx_clipboard": efxClipboard = null; break;
                 case "remove_entry":
-                    RemoveEntry(Int(request, "index"), response);
+                    RemoveEntry(EntryFileTarget(request), Int(request, "index"), response);
                     break;
                 case "restore_entry":
                     RestoreEntry(Int(request, "index"));
@@ -250,7 +258,9 @@ internal sealed partial class EditorEngine : IDisposable
                 {
                     // Optional "attributes": [{type, fields?, behavior?}] are created and checked before the entry is added,
                     // so the entry and its attributes are one revision.
-                    var version = Require().Header.Version;
+                    var at = EntryFileTarget(request);
+                    var file = ResolveTargetFile(at);
+                    var version = file.Header.Version;
                     var entry = new EFXEntry { Version = version, name = OptionalText(request, "name") ?? "New effect", entryAssignment = EfxEntryEnum.NoAssignment };
                     if (request["attributes"] is JsonArray initial)
                         foreach (var item in initial)
@@ -260,8 +270,8 @@ internal sealed partial class EditorEngine : IDisposable
                                 throw new InvalidOperationException("Attribute cannot be added to the new entry: " + Text(spec, "type"));
                         }
                     else if (request["attributes"] != null) throw new ArgumentException("attributes must be an array.");
-                    Mutate(() => { service.AddEntry(Require(), entry); entry.index = AllocateEntryId(); });
-                    response["selection"] = new JsonObject { ["kind"] = "entry", ["index"] = Require().Entries.Count - 1 };
+                    Mutate(() => { service.AddEntry(file, entry); entry.index = NextEntryId(file); });
+                    response["selection"] = Selection(at, file.Entries.Count - 1);
                     break;
                 }
                 case "add_attribute":
@@ -515,10 +525,37 @@ internal sealed partial class EditorEngine : IDisposable
         return attribute;
     }
 
-    private void RemoveEntry(int index, JsonObject response)
+    /// <summary>The file an entry-level request works in: the open document, or the embedded file that the request's
+    /// top-level "embeddedPath" leads to.</summary>
+    private static Target EntryFileTarget(JsonObject request)
     {
-        var file = Require();
+        // These requests address an entry by "index" and ignore "target"; a path given there would otherwise fall
+        // through to the root entry with the same index.
+        if (request["target"]?["embeddedPath"] is JsonArray { Count: > 0 })
+            throw new NotSupportedException("Entry operations take embeddedPath at the top level of the request, not inside target; nothing was changed.");
+        return Target.From(new JsonObject { ["target"] = new JsonObject { ["kind"] = "document", ["index"] = 0, ["embeddedPath"] = request["embeddedPath"]?.DeepClone() } });
+    }
+
+    /// <summary>A new entry id: the session's high-water mark in the open document (the preview follows entries by id),
+    /// one past the largest id in an embedded file.</summary>
+    private int NextEntryId(EfxFile file) => ReferenceEquals(file, Require())
+        ? AllocateEntryId() : checked(file.Entries.Select(e => e.index).DefaultIfEmpty(-1).Max() + 1);
+
+    private static JsonNode? Selection(Target at, int position)
+    {
+        var selection = new JsonObject { ["kind"] = "entry", ["index"] = position };
+        if (at.EmbeddedPath is { Length: > 0 } path)
+            selection["embeddedPath"] = JsonSerializer.SerializeToNode(path, Host.Json);
+        return selection;
+    }
+
+    private void RemoveEntry(Target at, int index, JsonObject response)
+    {
+        var file = ResolveTargetFile(at);
         if (index < 0 || index >= file.Entries.Count) throw new ArgumentOutOfRangeException(nameof(index));
+        // An embedded file without entries would leave a PlayEmitter that plays nothing; remove the PlayEmitter instead.
+        if (!ReferenceEquals(file, Require()) && file.Entries.Count == 1)
+            throw new InvalidOperationException("这是内嵌 EFX 里唯一的 entry，不能删除；要去掉整个子特效，请删除 Action 的 PlayEmitter。");
         var remaining = file.Entries.Where((_, i) => i != index).Select(e => e.index).ToArray();
         string expectedGroups = string.Join('|', file.EffectGroups.Select(g => g.groupName + ":" + string.Join(',',
             (g.efxEntryIndexes ?? []).Where(i => i != index).Select(i => i > index ? i - 1 : i))));
@@ -527,7 +564,8 @@ internal sealed partial class EditorEngine : IDisposable
         Mutate(() => { if (!service.RemoveEntry(file, index)) throw new InvalidOperationException("Entry was not found."); }, reopened =>
         {
             VerifyCompact(reopened);
-            if (!reopened.Entries.Select(e => e.index).SequenceEqual(remaining) || GroupsFingerprint(reopened) != expectedGroups)
+            var local = ResolveTargetFile(at, reopened);
+            if (!local.Entries.Select(e => e.index).SequenceEqual(remaining) || GroupsFingerprint(local) != expectedGroups)
                 throw new InvalidDataException("Entry deletion changed surviving IDs or ordered group references; rolled back.");
         });
         response["deletion"] = new JsonObject { ["kind"] = "entry", ["removedGroupReferences"] = references,

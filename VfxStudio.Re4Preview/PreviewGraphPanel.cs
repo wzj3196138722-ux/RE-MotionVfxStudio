@@ -329,11 +329,19 @@ internal sealed class PreviewGraphPanel : IDisposable
             ImGui.Separator();
         }
         ImGui.TextDisabled(node.Title);
+        if (owner.Kind == "action")
+        {
+            if (ClipboardKind == "attribute" && ImGui.MenuItem("粘贴属性 " + ClipboardName)) chosen = new("paste_attribute", owner.Index, Target: owner);
+            ImGui.TextDisabled("Action 的新建、副本、删除还不支持");
+            return chosen;
+        }
         if (!owner.IsRoot)
         {
-            // The backend edits attributes inside embedded EFX; adding, copying or removing embedded entries is not offered yet.
-            if (ClipboardKind == "attribute" && ImGui.MenuItem("粘贴属性 " + ClipboardName)) chosen = new("paste_attribute", owner.Index, Target: owner);
-            ImGui.TextDisabled(owner.Kind == "action" ? "Action 的新建、副本、删除还不支持" : "内嵌 entry 的新建、副本、删除还不支持");
+            // An embedded entry: entry items act in its embedded file, and new entries go into that file.
+            chosen ??= PreviewStructureMenu.EntryItems(owner.Index, ClipboardKind, ClipboardName, node.Editable, owner);
+            ImGui.Separator();
+            ImGui.TextDisabled("内嵌文件（" + string.Join(" › ", owner.Path.Select(h => (h.Kind == "action" ? "Action " : "[") + h.Index + (h.Kind == "action" ? "" : "]"))) + "）");
+            chosen ??= PreviewStructureMenu.FileItems(ClipboardKind, ClipboardName, owner);
             return chosen;
         }
         int entry = owner.Index;

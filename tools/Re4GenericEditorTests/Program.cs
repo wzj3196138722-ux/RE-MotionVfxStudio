@@ -419,6 +419,52 @@ try
         es=await ee.SelectTargetAsync(nested);
         Check(nested.Equals(es.EditTarget),"The embedded entry is reachable again after undo");
         Console.WriteLine($"PASS Action: {action.Label} select/inspect{(playNumber==null?"":"/set "+playNumber.Path)}, catalogue, PlayEmitter → PlayEfx and undo");
+
+        // Entry operations inside the embedded file: add, duplicate, copy/paste and remove change only that file, the
+        // selection carries the path, a path inside target is refused, the last embedded entry stays, and undo restores.
+        {
+            var path=new JsonArray(new JsonObject{["kind"]=hop.Kind,["index"]=hop.Index,["attributeIndex"]=hop.AttributeIndex});
+            JsonArray Path()=>(JsonArray)path.DeepClone();
+            async Task<(JsonNode Tree,JsonArray Embedded)> Tree()
+            {
+                var t=(await ee.SendRawAsync("status",new())).Reply["document"]!;
+                return (t,(JsonArray)new PreviewEditTarget("entry",0,[hop]).Find(t)!.Parent!);
+            }
+            var (tree0,embedded0)=await Tree();
+            int count0=embedded0.Count;string rootTree=tree0["entries"]!.ToJsonString();
+            long r2=ee.State!.Revision;
+            var reply=(await ee.SendRawAsync("add_entry",new(){["embeddedPath"]=Path(),["name"]="New_embedded",["attributes"]=new JsonArray(new JsonObject{["type"]="Life"})},r2)).Reply;
+            Check(reply["selection"]?["index"]?.GetValue<int>()==count0 && reply["selection"]?["embeddedPath"]?.AsArray().Count==1,"Embedded add_entry reports the new entry with its path");
+            var added=PreviewEditTarget.Parse("entry",count0,reply["selection"]!["embeddedPath"]);
+            es=await ee.SelectTargetAsync(added);
+            Check(added.Equals(es.EditTarget) && es.Attributes!.Any(a=>a.Type=="Life"),"The new embedded entry can be selected");
+            reply=(await ee.SendRawAsync("duplicate_entry",new(){["embeddedPath"]=Path(),["index"]=0},ee.State!.Revision)).Reply;
+            Check(reply["selection"]?["index"]?.GetValue<int>()==count0+1,"Embedded duplicate_entry reports the copy");
+            await ee.SendRawAsync("copy_efx",new(){["target"]=new PreviewEditTarget("entry",1,[hop]).ToJson()});
+            reply=(await ee.SendRawAsync("paste_efx",new(){["target"]=new JsonObject{["kind"]="document",["index"]=0,["embeddedPath"]=Path()},
+                ["clipboardId"]=(await ee.SendRawAsync("status",new())).Reply["copyBuffer"]?["id"]?.GetValue<string>()},ee.State!.Revision)).Reply;
+            Check(reply["selection"]?["index"]?.GetValue<int>()==count0+2 && reply["selection"]?["embeddedPath"]?.AsArray().Count==1,"Pasting an entry into the embedded file reports its path");
+            var (tree1,embedded1)=await Tree();
+            Check(embedded1.Count==count0+3 && tree1["entries"]!.ToJsonString()==rootTree,"Embedded entry operations change only the embedded file");
+            await Reject(()=>ee.SendRawAsync("duplicate_entry",new(){["index"]=0,["target"]=new PreviewEditTarget("entry",0,[hop]).ToJson()},ee.State!.Revision),"embeddedPath inside target for an entry operation");
+            // Embedded positions shift on removal and the session does not follow embedded entries by id, so the window
+            // leaves an embedded target in the same file before removing (as here).
+            es=await ee.SelectEntryAsync(top);
+            long r3=ee.State!.Revision;
+            es=(await ee.SendRawAsync("remove_entry",new(){["embeddedPath"]=Path(),["index"]=count0},r3)).State;
+            Check(es.Revision==r3+1 && es.EditTarget!.IsRoot,"Embedded remove_entry is one revision");
+            var (_,embedded2)=await Tree();
+            Check(embedded2.Count==count0+2 && embedded2.All(e=>e!["name"]?.GetValue<string>()!="New_embedded"),"Embedded remove_entry removes that entry");
+            for(int i=0;i<4;i++) es=await ee.CommandAsync("undo");
+            var (tree3,embedded3)=await Tree();
+            Check(es.Revision==r3+5 && embedded3.Count==count0 && tree3["entries"]!.ToJsonString()==rootTree,"Undo restores the embedded file");
+            // The last entry of an embedded file stays (remove the PlayEmitter instead).
+            long r4=ee.State!.Revision;
+            for(int i=count0-1;i>0;i--) await ee.SendRawAsync("remove_entry",new(){["embeddedPath"]=Path(),["index"]=i},ee.State!.Revision);
+            await Reject(()=>ee.SendRawAsync("remove_entry",new(){["embeddedPath"]=Path(),["index"]=0},ee.State!.Revision),"removing the last embedded entry");
+            while(ee.State!.Revision<r4+2*(count0-1)) await ee.CommandAsync("undo");
+            Console.WriteLine($"PASS embedded entry operations: add/select/duplicate/paste/remove in {nested.Label[..nested.Label.LastIndexOf('›')].Trim()}, root untouched, undo, last entry kept");
+        }
     }
 }
 catch(Exception ex) {Console.Error.WriteLine(ex);Environment.ExitCode=1;}
