@@ -58,7 +58,7 @@ try
     await server.StandardInput.WriteLineAsync(new JsonObject { ["jsonrpc"] = "2.0", ["method"] = "notifications/initialized" }.ToJsonString());
     var list = await Rpc("tools/list");
     var names = list["result"]!["tools"]!.AsArray().Select(t => t!["name"]!.GetValue<string>()).ToArray();
-    Check(names.Length == 26 && names.All(n => n.StartsWith("re4preview_")), "tools/list returns the 26 preview tools", string.Join(",", names));
+    Check(names.Length == 31 && names.All(n => n.StartsWith("re4preview_")), "tools/list returns the 31 preview tools", string.Join(",", names));
 
     var (error, outcome, _) = await Tool("status");
     Check(error && Code(outcome) == "preview_not_running", "status without a window reports preview_not_running", outcome.ToJsonString());
@@ -458,6 +458,25 @@ try
         (error, outcome, _) = await Tool("remove_entry", new JsonObject { ["entryPosition"] = embeddedCount, ["embeddedPath"] = embeddedEntry?["embeddedPath"]?.DeepClone(), ["expectedRevision"] = entryOpsBefore + 2 });
         Check(!error && outcome["result"]?["preview"]?["embeddedEntries"]?.AsArray().Count == embeddedCount + 1 && outcome["result"]?["preview"]?["entries"]?.AsArray().Count == topCount,
             "remove_entry with embeddedPath removes from the embedded file only", outcome.ToJsonString());
+
+        // Action tools: add, copy/paste and remove; removal is refused while a trigger starts the Action.
+        (error, outcome, _) = await Tool("status");
+        int actionCount = outcome["result"]?["preview"]?["actions"]?.AsArray().Count ?? 0;
+        long actionOpsBefore = Revision(outcome);
+        (error, outcome, _) = await Tool("add_action", new JsonObject { ["expectedRevision"] = actionOpsBefore });
+        Check(!error && outcome["result"]?["document"]?["editTarget"]?["kind"]?.GetValue<string>() == "action" &&
+            outcome["result"]?["document"]?["editTarget"]?["index"]?.GetValue<int>() == actionCount &&
+            outcome["result"]?["preview"]?["actions"]?.AsArray().Count == actionCount + 1, "add_action appends a PlayEfx Action and selects it", outcome.ToJsonString());
+        (error, outcome, _) = await Tool("copy_action", new JsonObject { ["actionIndex"] = 0 });
+        string? actionClip = outcome["result"]?["copyBuffer"]?["id"]?.GetValue<string>();
+        Check(!error && outcome["result"]?["copyBuffer"]?["kind"]?.GetValue<string>() == "action", "copy_action fills the copy buffer", outcome.ToJsonString());
+        (error, outcome, _) = await Tool("paste_action", new JsonObject { ["clipboardId"] = actionClip ?? "", ["expectedRevision"] = actionOpsBefore + 1 });
+        Check(!error && outcome["result"]?["preview"]?["actions"]?.AsArray().Count == actionCount + 2, "paste_action appends the copied Action", outcome.ToJsonString());
+        (error, outcome, _) = await Tool("remove_action", new JsonObject { ["actionIndex"] = 0, ["expectedRevision"] = actionOpsBefore + 2 });
+        Check(error && (outcome["error"]?["message"]?.GetValue<string>() ?? "").Contains("clearTriggers"), "remove_action refuses a triggered Action without clearTriggers", outcome.ToJsonString());
+        (error, outcome, _) = await Tool("remove_action", new JsonObject { ["actionIndex"] = actionCount, ["expectedRevision"] = actionOpsBefore + 2 });
+        Check(!error && outcome["result"]?["preview"]?["actions"]?.AsArray().Count == actionCount + 1 && outcome["result"]?["document"]?["editTarget"] == null,
+            "remove_action removes an untriggered Action and returns to the top-level entry", outcome.ToJsonString());
     }
 
     (error, outcome, _) = await Tool("close", new JsonObject { ["discardUnsaved"] = true });

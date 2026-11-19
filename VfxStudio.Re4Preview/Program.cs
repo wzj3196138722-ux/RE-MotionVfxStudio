@@ -78,7 +78,7 @@ string? lastAttributeList = null;
 JsonObject? lastStructureReply = null;   // backend reply of the last structural edit (selection, document)
 string? openConfirmation = null;         // opened at the top level: popup ids depend on the window that opens them
 string? structureNote = null;        // a remark on the last structural edit (for example: new entry not previewable)
-PreviewStructureRequest? confirmRemoveEntry = null, confirmPaste = null, chooseScript = null;
+PreviewStructureRequest? confirmRemoveEntry = null, confirmPaste = null, chooseScript = null, confirmRemoveAction = null;
 bool dockCatalog = false;            // a saved layout from before the catalogue existed: dock it once next to the main panel
 // A file dropped on the window: waiting (pendingOpen), or waiting for the user to discard unsaved edits (dropConfirm).
 string? pendingOpen = null, dropConfirm = null;
@@ -296,8 +296,9 @@ async Task<PreviewEditorState> Structure(PreviewEditCommand command)
     var request=(PreviewStructureRequest)command.Tag!;
     int entry=request.EntryPosition;
     var owner=request.Owner;
-    if(owner.Kind=="action" && request.Op is not ("add_attribute" or "remove_attribute" or "copy_attribute" or "paste_attribute" or "material_parameter"))
-        throw new InvalidOperationException("Action 只支持属性的增删和复制粘贴。");
+    if(owner.Kind=="action" && request.Op is not ("add_attribute" or "remove_attribute" or "copy_attribute" or "paste_attribute" or "material_parameter"
+        or "add_action" or "duplicate_action" or "remove_action" or "copy_action" or "paste_action"))
+        throw new InvalidOperationException("这个操作不能用在 Action 上。");
     // Attribute operations address the owner; entry operations an entry of the file the owner's path leads to (the open
     // file when it is a top-level entry). File operations (add_entry, paste_entry) carry that path with index -1.
     JsonObject Target(int? attribute=null)=>owner.ToJson(attribute);
@@ -321,6 +322,7 @@ async Task<PreviewEditorState> Structure(PreviewEditCommand command)
         try
         {
             var path=selection?["embeddedPath"] as JsonArray;
+            if(selection?["kind"]?.GetValue<string>()=="action") return await editor.SelectTargetAsync(PreviewEditTarget.Parse("action",position,path));
             if(path is {Count:>0}) return await editor.SelectTargetAsync(PreviewEditTarget.Parse("entry",position,path));
             if(owner.Path.Count>0) throw new InvalidOperationException("后端没有给出新 entry 的位置。");
             return await editor.SelectEntryAsync(position);
@@ -332,7 +334,9 @@ async Task<PreviewEditorState> Structure(PreviewEditCommand command)
         "add_attribute"=>"添加 "+request.Type,"remove_attribute"=>"删除属性","copy_attribute"=>"复制属性","paste_attribute"=>"粘贴属性",
         "copy_entry"=>"复制 entry","paste_entry"=>"粘贴 entry","add_entry"=>"新建 entry","duplicate_entry"=>"创建副本","remove_entry"=>"删除 entry",
         "emitter_priority"=>request.AttributeIndex>=0?"关闭 EmitterPriority":"开启 EmitterPriority",
-        "material_parameter"=>request.Label??"修改材质参数",_=>request.Op
+        "material_parameter"=>request.Label??"修改材质参数",
+        "add_action"=>"新建 Action","duplicate_action"=>"创建 Action 副本","remove_action"=>"删除 Action","copy_action"=>"复制 Action","paste_action"=>"粘贴 Action",
+        _=>request.Op
     };
     try
     {
@@ -386,6 +390,27 @@ async Task<PreviewEditorState> Structure(PreviewEditCommand command)
             }
             case "duplicate_entry":
                 return await SelectNew(await Send("duplicate_entry",EntryBody(new(){["index"]=owner.Index})));
+            case "add_action":
+                return await SelectNew(await Send("add_action",EntryBody(new(){["name"]="New_action",
+                    ["attributes"]=new JsonArray(AddAttributeBody(null,request.Type??"PlayEfx",null))})));
+            case "duplicate_action":
+                return await SelectNew(await Send("duplicate_action",EntryBody(new(){["index"]=owner.Index})));
+            case "copy_action":
+                return await Send("copy_efx",new(){["target"]=Target()},mutation:false);
+            case "paste_action":
+            {
+                var into=new JsonObject{["kind"]="document",["index"]=0};
+                if(EmbeddedPath() is {} path) into["embeddedPath"]=path;
+                return await SelectNew(await Send("paste_efx",new(){["target"]=into,["clipboardId"]=copyBuffer?["id"]?.GetValue<string>()}));
+            }
+            case "remove_action":
+            {
+                // Action positions shift: an Action or embedded target in this file goes back to the preview's entry first.
+                if(editor.State?.Target is {} edited && (edited.Kind=="action" || edited.Path.Count>0))
+                    await editor.SelectEntryAsync(editor.State.Manifest!.EntryPosition);
+                // The confirmation listed the triggers; they stop firing.
+                return await Send("remove_action",EntryBody(new(){["index"]=owner.Index,["clearTriggers"]=request.Body?["clearTriggers"]?.GetValue<bool>()??true}));
+            }
             case "remove_entry":
             {
                 if(!owner.IsRoot)
@@ -415,6 +440,8 @@ void RequestStructure(PreviewStructureRequest request)
     {
         case "remove_entry" when confirmRemoveEntry==null:
             confirmRemoveEntry=request;openConfirmation="删除 entry";return;
+        case "remove_action" when confirmRemoveAction==null:
+            confirmRemoveAction=request;openConfirmation="删除 Action";return;
         case "paste_attribute" when request.AttributeIndex<0:
         {
             // The same type already there: ask before replacing it (the backend refuses otherwise).
@@ -467,6 +494,26 @@ void DrawStructureConfirmations()
         }
         ImGui.EndDisabled();ImGui.SameLine();
         if(ImGui.Button("取消")) {confirmRemoveEntry=null;ImGui.CloseCurrentPopup();}
+        ImGui.EndPopup();
+    }
+    if(ImGui.BeginPopupModal("删除 Action",ImGuiWindowFlags.AlwaysAutoResize))
+    {
+        var request=confirmRemoveAction;
+        ImGui.Text($"删除 {request?.Owner.Label ?? "Action"}？可以撤销。");
+        // Triggers that start it (graph links into the Action node; top-level Actions only).
+        var node=request==null||!request.Owner.IsRootAction()?null:scene?.Graph.Nodes.FirstOrDefault(n=>request.Owner.Equals(n.Target));
+        var triggers=node==null?[]:scene!.Graph.Links.Where(l=>l.ToNode==node.Id).Select(l=>scene.Graph.Find(l.FromNode)?.Title+(l.Label.Length>0?" · "+l.Label:"")).ToArray();
+        if(triggers.Length>0) ImGui.TextColored(new Vector4(1,.75f,.35f,1),"这些触发会改为不触发：\n  "+string.Join("\n  ",triggers));
+        ImGui.TextDisabled("后面的 Action 序号减一，指向它们的触发跟着改。");
+        if(ImGui.Button("删除"))
+        {
+            ImGui.CloseCurrentPopup();
+            if(request!=null && editorState!=null && editTask==null)
+                StartEditorCommand(new PreviewEditCommand("structure",editorState.Revision,Tag:request));
+            confirmRemoveAction=null;
+        }
+        ImGui.SameLine();
+        if(ImGui.Button("取消")) {confirmRemoveAction=null;ImGui.CloseCurrentPopup();}
         ImGui.EndPopup();
     }
     if(ImGui.BeginPopupModal("选择脚本类",ImGuiWindowFlags.AlwaysAutoResize))
@@ -594,13 +641,30 @@ bool Settled(out string? error)
     return true;
 }
 bool IsMutation(string action) => action is "set_fields" or "undo" or "redo" or "open" or "select_entry" or "add_attribute" or "remove_attribute" or "curve_key" or "paste_attribute"
-    or "add_entry" or "duplicate_entry" or "remove_entry" or "paste_entry";
+    or "add_entry" or "duplicate_entry" or "remove_entry" or "paste_entry" or "add_action" or "duplicate_action" or "remove_action" or "paste_action";
 // Entry-level AI actions run the same code as the window's menus.
 PreviewStructureRequest EntryRequest(PreviewControlRequest job)
 {
     var a=job.Arguments;
     long? revision=a["expectedRevision"]==null?null:PreviewControlReports.Long(a,"expectedRevision");
     int Position()=>PreviewControlReports.Int(a,"entryPosition",0,1<<20);
+    if(job.Action.EndsWith("_action",StringComparison.Ordinal))
+    {
+        // Action tools: actionIndex in the open file, or in the embedded file embeddedPath leads to.
+        bool file=job.Action is "add_action" or "paste_action";
+        var owner=PreviewEditTarget.Parse("action",file?0:PreviewControlReports.Int(a,"actionIndex",0,1<<20),a["embeddedPath"]);
+        if(file) owner=owner with {Index=-1};
+        return job.Action switch
+        {
+            "add_action"=>new("add_action",-1,Type:"PlayEfx",ExpectedRevision:revision,Target:owner),
+            "duplicate_action"=>new("duplicate_action",owner.Index,ExpectedRevision:revision,Target:owner),
+            "copy_action"=>new("copy_action",owner.Index,Target:owner),
+            "paste_action"=>new("paste_action",-1,ExpectedRevision:revision,Target:owner),
+            "remove_action"=>new("remove_action",owner.Index,ExpectedRevision:revision,Target:owner,
+                Body:new JsonObject{["clearTriggers"]=PreviewControlReports.Bool(a,"clearTriggers")}),
+            _=>throw new InvalidOperationException("内部错误：未知的 Action 操作。")
+        };
+    }
     // With embeddedPath the entry (or the new entry's file) is inside the embedded EFX the path leads to.
     PreviewEditTarget? Inside=a["embeddedPath"]==null?null:PreviewEditTarget.Parse("entry",job.Action is "add_entry" or "paste_entry"?0:Position(),a["embeddedPath"]);
     if(Inside!=null && job.Action is "add_entry" or "paste_entry") Inside=Inside with {Index=-1};
@@ -810,6 +874,16 @@ void BeginControl(PreviewControlRequest job)
             RequireNoDraft();AttributeTarget(0);
             job.Phase=1; return;
         }
+        case "add_action": case "duplicate_action": case "remove_action": case "copy_action": case "paste_action":
+        {
+            if(editorState?.Manifest==null) throw new InvalidOperationException("尚未打开文档。");
+            if(job.Action!="copy_action") {PreviewControlReports.Long(a,"expectedRevision");RequireNoDraft();}
+            if(a["embeddedPath"]!=null) PreviewEditTarget.Parse("action",0,a["embeddedPath"]);
+            if(job.Action is "duplicate_action" or "remove_action" or "copy_action") PreviewControlReports.Int(a,"actionIndex",0,1<<20);
+            if(job.Action=="paste_action" && (copyBuffer?["kind"]?.GetValue<string>()!="action" || copyBuffer["id"]?.GetValue<string>()!=PreviewControlReports.String(a,"clipboardId")))
+                throw new InvalidOperationException("复制缓冲区里不是这个 Action；先 copy_action，再用结果里的 copyBuffer.id。");
+            job.Phase=1; return;
+        }
         case "add_entry": case "duplicate_entry": case "remove_entry": case "copy_entry": case "paste_entry":
         {
             if(editorState?.Manifest==null) throw new InvalidOperationException("尚未打开文档。");
@@ -909,7 +983,8 @@ void ContinueControl(PreviewControlRequest job)
                 "copy_attribute"=>StartBackend(job,"copy_efx",new(){["target"]=AttributeTarget(PreviewControlReports.Int(a,"attributeIndex",0,4096))},null),
                 "paste_attribute"=>StartBackend(job,"paste_efx",PasteBody(a),PreviewControlReports.Long(a,"expectedRevision")),
                 "curve_key"=>StartBackend(job,"curve_key",CurveBody(a),PreviewControlReports.Long(a,"expectedRevision")),
-                "add_entry" or "duplicate_entry" or "remove_entry" or "copy_entry" or "paste_entry"=>StartEntryAction(job),
+                "add_entry" or "duplicate_entry" or "remove_entry" or "copy_entry" or "paste_entry"
+                    or "add_action" or "duplicate_action" or "remove_action" or "copy_action" or "paste_action"=>StartEntryAction(job),
                 "save_copy"=>Task.Run(()=>editor.CommandAsync("save",PreviewControlReports.String(a,"path"))),
                 "open"=>StartOpen(a),
                 _=>throw new InvalidOperationException("内部错误：未知的编辑操作。")
@@ -942,7 +1017,7 @@ void ContinueControl(PreviewControlRequest job)
             else if(job.Action=="attribute_types")
                 job.Succeed(new JsonObject{["types"]=job.BackendReply?["document"]?["attributeTypes"]?.DeepClone()??new JsonArray(),
                     ["catalog"]=PreviewControlReports.Catalog(state),["document"]=PreviewControlReports.Document(state)});
-            else if(job.Action is "copy_attribute" or "copy_entry")
+            else if(job.Action is "copy_attribute" or "copy_entry" or "copy_action")
                 job.Succeed(new JsonObject{["copyBuffer"]=job.BackendReply?["copyBuffer"]?.DeepClone(),["document"]=PreviewControlReports.Document(state)});
             else job.Phase=4;
             return;

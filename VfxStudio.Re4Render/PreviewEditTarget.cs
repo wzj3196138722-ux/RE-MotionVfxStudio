@@ -16,6 +16,9 @@ public sealed record PreviewEditTarget(string Kind, int Index, IReadOnlyList<Pre
 
     public static PreviewEditTarget Root(int position) => new("entry", position, []);
 
+    /// <summary>An Action of the open file (not inside an embedded one).</summary>
+    public bool IsRootAction() => Kind == "action" && Path.Count == 0;
+
     /// <summary>A top-level entry: the one the preview manifest can point at.</summary>
     public bool IsRoot => Kind == "entry" && Path.Count == 0;
 

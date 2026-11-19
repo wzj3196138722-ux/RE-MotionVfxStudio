@@ -247,6 +247,9 @@ internal sealed partial class EditorEngine : IDisposable
                 case "copy_efx": CopyEfx(Target.From(request)); response["message"] = "已复制，请选择目标后粘贴。"; break;
                 case "paste_efx": PasteEfx(request, response); break;
                 case "clear_efx_clipboard": efxClipboard = null; break;
+                case "add_action": AddAction(request, response); break;
+                case "duplicate_action": DuplicateAction(request, response); break;
+                case "remove_action": RemoveAction(request, response); break;
                 case "remove_entry":
                     RemoveEntry(EntryFileTarget(request), Int(request, "index"), response);
                     break;
@@ -538,8 +541,7 @@ internal sealed partial class EditorEngine : IDisposable
 
     /// <summary>A new entry id: the session's high-water mark in the open document (the preview follows entries by id),
     /// one past the largest id in an embedded file.</summary>
-    private int NextEntryId(EfxFile file) => ReferenceEquals(file, Require())
-        ? AllocateEntryId() : checked(file.Entries.Select(e => e.index).DefaultIfEmpty(-1).Max() + 1);
+    private int NextEntryId(EfxFile file) => ReferenceEquals(file, Require()) ? AllocateEntryId() : NextNodeId(file);
 
     private static JsonNode? Selection(Target at, int position)
     {

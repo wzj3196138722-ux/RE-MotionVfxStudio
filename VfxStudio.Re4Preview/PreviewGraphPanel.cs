@@ -332,7 +332,9 @@ internal sealed class PreviewGraphPanel : IDisposable
         if (owner.Kind == "action")
         {
             if (ClipboardKind == "attribute" && ImGui.MenuItem("粘贴属性 " + ClipboardName)) chosen = new("paste_attribute", owner.Index, Target: owner);
-            ImGui.TextDisabled("Action 的新建、副本、删除还不支持");
+            chosen ??= PreviewStructureMenu.ActionItems(owner);
+            ImGui.Separator();
+            chosen ??= PreviewStructureMenu.FileItems(ClipboardKind, ClipboardName);
             return chosen;
         }
         if (!owner.IsRoot)

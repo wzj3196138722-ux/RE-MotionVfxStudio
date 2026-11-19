@@ -465,6 +465,59 @@ try
             while(ee.State!.Revision<r4+2*(count0-1)) await ee.CommandAsync("undo");
             Console.WriteLine($"PASS embedded entry operations: add/select/duplicate/paste/remove in {nested.Label[..nested.Label.LastIndexOf('›')].Trim()}, root untouched, undo, last entry kept");
         }
+
+        // Action operations: add (PlayEfx), duplicate and copy/paste append and select the new Action; ids stay unique;
+        // removing an Action re-points later triggers and is refused while triggers still start it.
+        {
+            es=await ee.SelectEntryAsync(top);
+            long a0=ee.State!.Revision;
+            async Task<ReeLib.EfxFile> SavedFile()
+            {
+                var saved=await ee.CommandAsync("save",Path.Combine(root,"actions-"+Guid.NewGuid().ToString("N")+".efx.3539837"));
+                var f=new ReeLib.EfxFile(new ReeLib.FileHandler(new MemoryStream(File.ReadAllBytes(saved.SavedPath!),false),saved.SavedPath!));f.Read();return f;
+            }
+            int Life(ReeLib.EfxFile f)=>f.Entries[top].Attributes.OfType<ReeLib.Efx.Structs.Pt.EFXAttributePtLife>().Single().ActionIndex;
+            var f0=await SavedFile();
+            int actions0=f0.Actions.Count,life0=Life(f0);
+            var playEfxFields=new JsonArray(PreviewAttributeCatalog.Re4.Defaults("PlayEfx").Select(f=>(JsonNode?)new JsonObject{["path"]=f.Key,["value"]=f.Value}).ToArray());
+            var reply=(await ee.SendRawAsync("add_action",new(){["name"]="New_action",["attributes"]=new JsonArray(new JsonObject{["type"]="PlayEfx",["fields"]=playEfxFields})},a0)).Reply;
+            Check(reply["selection"]?["kind"]?.GetValue<string>()=="action" && reply["selection"]?["index"]?.GetValue<int>()==actions0,"add_action reports the new Action");
+            es=await ee.SelectTargetAsync(new("action",actions0,[]));
+            Check(es.Attributes!.Single().Type=="PlayEfx","The new Action holds a PlayEfx");
+            reply=(await ee.SendRawAsync("duplicate_action",new(){["index"]=0},ee.State!.Revision)).Reply;
+            Check(reply["selection"]?["index"]?.GetValue<int>()==actions0+1,"duplicate_action reports the copy");
+            await ee.SendRawAsync("copy_efx",new(){["target"]=new PreviewEditTarget("action",0,[]).ToJson()});
+            var buffer=(await ee.SendRawAsync("status",new())).Reply["copyBuffer"];
+            Check(buffer?["kind"]?.GetValue<string>()=="action","copy_efx copies a whole Action");
+            reply=(await ee.SendRawAsync("paste_efx",new(){["target"]=new JsonObject{["kind"]="document",["index"]=0},["clipboardId"]=buffer!["id"]!.GetValue<string>()},ee.State!.Revision)).Reply;
+            Check(reply["selection"]?["kind"]?.GetValue<string>()=="action" && reply["selection"]?["index"]?.GetValue<int>()==actions0+2,"paste_efx appends the Action");
+            var f1=await SavedFile();
+            var ids=f1.Actions.Select(a=>a.actionUnkn0).ToArray();
+            var uniqueIds=f1.Entries.Cast<ReeLib.Efx.EFXEntryBase>().Concat(f1.Actions).SelectMany(e=>e.Attributes)
+                .SelectMany(a=>a is ReeLib.Efx.Structs.Basic.EFXAttributePlayEmitter {efxrData:{} child}
+                    ? child.Entries.Cast<ReeLib.Efx.EFXEntryBase>().Concat(child.Actions).SelectMany(e=>e.Attributes).Prepend(a) : [a]).Select(a=>a.UniqueID).ToArray();
+            Check(f1.Actions.Count==actions0+3 && ids.Distinct().Count()==ids.Length && ids.All(i=>f1.Entries.All(e=>e.index!=i)) &&
+                uniqueIds.Distinct().Count()==uniqueIds.Length,"New Actions get unique node ids and attribute ids");
+            Check(f1.Actions[actions0+1].Attributes[0] is ReeLib.Efx.Structs.Basic.EFXAttributePlayEmitter {efxrData:{} copied} &&
+                copied.Entries.Count==((ReeLib.Efx.Structs.Basic.EFXAttributePlayEmitter)f1.Actions[0].Attributes[0]).efxrData!.Entries.Count,"The duplicate carries the embedded EFX");
+            // Point the trigger at the pasted copy, remove Action 0: the trigger follows the copy down one index.
+            es=await ee.SelectEntryAsync(top);
+            int ptLifeIndex=es.Attributes!.Single(a=>a.Type=="PtLife").Index;
+            es=await ee.InspectAsync(es.Manifest!.DocumentId,es.Revision,ptLifeIndex);
+            es=await ee.ApplyFieldsAsync(new(es.Inspection!,[new("ActionIndex",(actions0+2).ToString(CultureInfo.InvariantCulture))]));
+            reply=(await ee.SendRawAsync("remove_action",new(){["index"]=0},ee.State!.Revision)).Reply;
+            var f2=await SavedFile();
+            Check(f2.Actions.Count==actions0+2 && Life(f2)==actions0+1 && reply["deletion"]?["clearedTriggers"]?.GetValue<int>()==0,"Removing an earlier Action re-points the trigger");
+            await Reject(()=>ee.SendRawAsync("remove_action",new(){["index"]=actions0+1},ee.State!.Revision),"removing a triggered Action without clearTriggers");
+            reply=(await ee.SendRawAsync("remove_action",new(){["index"]=actions0+1,["clearTriggers"]=true},ee.State!.Revision)).Reply;
+            var f3=await SavedFile();
+            Check(f3.Actions.Count==actions0+1 && Life(f3)==-1 && reply["deletion"]?["clearedTriggers"]?.GetValue<int>()==1,"clearTriggers removes a triggered Action and its triggers start nothing");
+            for(int i=0;i<6;i++) es=await ee.CommandAsync("undo");
+            var f4=await SavedFile();
+            Check(f4.Actions.Count==actions0 && Life(f4)==life0,"Undo restores the Actions and the trigger");
+            foreach(var f in new[]{f0,f1,f2,f3,f4}) f.FileHandler.Dispose();
+            Console.WriteLine($"PASS Action operations: add PlayEfx, duplicate with embedded EFX, copy/paste, unique ids, trigger re-pointing, clearTriggers, undo");
+        }
     }
 }
 catch(Exception ex) {Console.Error.WriteLine(ex);Environment.ExitCode=1;}

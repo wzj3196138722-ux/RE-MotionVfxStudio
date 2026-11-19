@@ -5,7 +5,8 @@ namespace VfxStudio.Re4Preview;
 
 /// <summary>A structural edit asked for in the window (property panel, node graph menus, entry buttons).</summary>
 /// <param name="Op">add_attribute, remove_attribute, copy_attribute, paste_attribute, copy_entry, paste_entry,
-/// add_entry, duplicate_entry, remove_entry or material_parameter.</param>
+/// add_entry, duplicate_entry, remove_entry, material_parameter, or the Action operations add_action, duplicate_action,
+/// remove_action, copy_action, paste_action (Target is the Action, or for add / paste any target in the receiving file).</param>
 /// <param name="Type">The attribute type (add_attribute) or the new entry's Type attribute (add_entry).</param>
 /// <param name="ExpectedRevision">For AI requests: the revision the change must apply to (stale ones are refused);
 /// the window uses the current revision.</param>
@@ -34,6 +35,17 @@ internal static class PreviewStructureMenu
         if (PreviewAttributeCatalog.IsTypeAttribute(type)) return "删除 Type 后这个 entry 无法预览；要换类型请新建 entry";
         var dependents = PreviewAttributeCatalog.Re4.Dependents(type, existing);
         return dependents.Count > 0 ? "先删除依赖它的 " + string.Join("、", dependents) : null;
+    }
+
+    /// <summary>Items for one Action.</summary>
+    public static PreviewStructureRequest? ActionItems(PreviewEditTarget action)
+    {
+        PreviewStructureRequest? chosen = null;
+        if (ImGui.MenuItem("复制 Action（可粘贴到其他文件）")) chosen = new("copy_action", action.Index, Target: action);
+        if (ImGui.MenuItem("创建副本")) chosen = new("duplicate_action", action.Index, Target: action);
+        if (ImGui.IsItemHovered()) ImGui.SetTooltip("副本加在 Action 列表末尾，还没有 entry 触发它。");
+        if (ImGui.MenuItem("删除 Action…")) chosen = new("remove_action", action.Index, Target: action);
+        return chosen;
     }
 
     /// <summary>Items for one attribute row. Returns the chosen request or null.</summary>
@@ -92,6 +104,11 @@ internal static class PreviewStructureMenu
             ImGui.EndMenu();
         }
         if (clipboardKind == "entry" && ImGui.MenuItem("粘贴 entry " + clipboardName)) chosen = new("paste_entry", -1);
+        ImGui.Separator();
+        if (ImGui.MenuItem("新建 Action（PlayEfx）")) chosen = new("add_action", -1, Type: "PlayEfx");
+        if (ImGui.IsItemHovered()) ImGui.SetTooltip("Action 加在列表末尾，还没有 entry 触发它：在某个 entry 的 PtLife 或 PtColliderAction 里填它的序号。\n" +
+            "要内嵌粒子的 Action（PlayEmitter），复制一个现有的再粘贴更省事。");
+        if (clipboardKind == "action" && ImGui.MenuItem("粘贴 Action " + clipboardName)) chosen = new("paste_action", -1);
         return chosen;
     }
 }

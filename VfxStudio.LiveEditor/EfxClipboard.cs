@@ -22,13 +22,14 @@ internal sealed partial class EditorEngine
     private void CopyEfx(Target target)
     {
         var value = Resolve(target);
-        if (value is not EFXEntry && value is not EFXAttribute)
-            throw new InvalidOperationException("请选择一个特效块或属性再复制；整个 Action 不作为特效块复制。");
+        if (value is not EFXEntryBase && value is not EFXAttribute)
+            throw new InvalidOperationException("请选择一个特效块、Action 或属性再复制。");
         if (bytes!.Length > 128 * 1024 * 1024)
             throw new InvalidOperationException("此文件超过复制缓冲区的 128 MiB 上限，未替换已复制内容。");
         var attribute = value as EFXAttribute;
         efxClipboard = new(Guid.NewGuid().ToString("N"), bytes.ToArray(), source!, target,
-            attribute == null ? "entry" : "attribute", attribute?.type.ToString() ?? ((EFXEntry)value).name ?? "未命名特效块",
+            attribute != null ? "attribute" : value is EFXAction ? "action" : "entry",
+            attribute?.type.ToString() ?? ((EFXEntryBase)value).name ?? (value is EFXAction ? "未命名 Action" : "未命名特效块"),
             attribute?.type.ToString(), ResolveTargetFile(target).Header.Version);
     }
 
@@ -51,7 +52,19 @@ internal sealed partial class EditorEngine
             string expected = ClipboardFingerprint(payload, copy.Version);
             Mutate(() =>
             {
-                if (copy.Kind == "entry")
+                if (copy.Kind == "action")
+                {
+                    // Appended to the destination file; triggers there are not changed (none points past the old list).
+                    if (payload is not EFXAction action) throw new InvalidDataException("复制内容不是 Action。");
+                    if (target.Kind != "document" || target.Index != 0 || target.AttributeIndex != null)
+                        throw new InvalidOperationException("Action 只能粘贴到文件（target.kind 为 document，内嵌文件带 embeddedPath）。");
+                    action.name = UniqueActionName(destination, action.name ?? "Action");
+                    action.actionUnkn0 = NextNodeId(destination);
+                    foreach (var attribute in action.Attributes) PrepareClipboardAttribute(attribute, sourceFile, destination);
+                    destination.Actions.Add(action);
+                    inserted = new("action", destination.Actions.Count - 1, null, target.EmbeddedPath);
+                }
+                else if (copy.Kind == "entry")
                 {
                     if (payload is not EFXEntry entry) throw new InvalidDataException("复制内容不是特效块。");
                     var memberships = new List<int>();
@@ -118,7 +131,12 @@ internal sealed partial class EditorEngine
                     throw new InvalidDataException("粘贴后的参数回读不一致，已撤回本次粘贴。");
             });
             response["selection"] = JsonSerializer.SerializeToNode(inserted, Host.Json);
-            response["message"] = copy.Kind == "entry" ? "已粘贴新特效块并选中，可立即编辑；可用撤销恢复。" : "属性已粘贴并选中，可立即编辑；可用撤销恢复。";
+            response["message"] = copy.Kind switch
+            {
+                "entry" => "已粘贴新特效块并选中，可立即编辑；可用撤销恢复。",
+                "action" => "已粘贴新 Action。它还没有被任何 entry 触发，请在 PtLife 或 PtColliderAction 里指向它。",
+                _ => "属性已粘贴并选中，可立即编辑；可用撤销恢复。"
+            };
         }
         finally { DisposeFile(snapshot); }
     }
@@ -157,7 +175,7 @@ internal sealed partial class EditorEngine
 
     private static string ClipboardFingerprint(object value, EfxVersion version)
     {
-        IEnumerable<EFXAttribute> attributes = value is EFXEntry entry ? entry.Attributes : [(EFXAttribute)value];
+        IEnumerable<EFXAttribute> attributes = value is EFXEntryBase owner ? owner.Attributes : [(EFXAttribute)value];
         return string.Join("\n", attributes.Select(a => a.type + ":" + string.Join("|", ContentInspector.Describe(a, version)
             .Where(f => f.Description.Path != "UniqueID" && !f.Description.Path.EndsWith(".UniqueID", StringComparison.Ordinal))
             .Select(f => f.Description.Path + "=" + f.Description.Value))));
